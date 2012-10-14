@@ -1,0 +1,29 @@
+﻿## Interface: 50005
+## Title: GladiusEx
+## Notes: Arena enemy unit frames
+## SavedVariables: GladiusExDB
+## OptionalDeps: Ace3, DRData-1.0, LibStub, LibSharedMedia-3.0
+
+embeds.xml
+
+Gladius.lua
+
+localization\deDE.lua
+localization\enUS.lua
+
+options.lua
+
+modules\healthbar.lua
+modules\powerbar.lua
+modules\castbar.lua
+modules\auras.lua
+modules\classicon.lua
+modules\trinket.lua
+modules\highlight.lua
+modules\clicks.lua
+modules\targetbar.lua
+modules\tags.lua
+modules\announcements.lua
+modules\drtracker.lua
+modules\layout.lua
+modules\cooldowns.lua
