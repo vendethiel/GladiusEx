@@ -6,7 +6,7 @@ local L = Gladius.L
 local LSM
 
 -- global functions
-local strfind = string.find
+local tinsert = table.insert
 local pairs = pairs
 
 -- http://www.wowwiki.com/Specialization_IDs
@@ -18,7 +18,7 @@ local SpellData = {
 		cooldown = 24,
 	},
 
-	-- Priest/all
+	-- Priest/baseline
 	-- Hymn of Hope
 	[64901] = {
 		class = "PRIEST",
@@ -28,7 +28,7 @@ local SpellData = {
 	-- Psychic Scream
 	[8122] = {
 		class = "PRIEST",
-		duration = 10,
+		duration = 8,
 		cooldown = 27,
 	},
 	-- Shadowfiend
@@ -47,8 +47,13 @@ local SpellData = {
 		class = "PRIEST",
 		cooldown = 360,
 	},
+	-- Mass Dispel
+	[32375] = {
+		class = "PRIEST",
+		cooldown = 15
+	},
 
-	-- Priest/Talents
+	-- Priest/talents
 	-- Void Tendrils
 	[108920] = {
 		class = "PRIEST",
@@ -59,6 +64,7 @@ local SpellData = {
 	[108921] = {
 		class = "PRIEST",
 		talent = true,
+		duration = 10,
 		cooldown =  45
 	},
 	-- Phantasm
@@ -72,7 +78,8 @@ local SpellData = {
 		class = "PRIEST",
 		talent = true,
 		replaces = 34433,
-		cooldown =  60
+		duration = 15,
+		cooldown = 60
 	},
 	-- Desperate Prayer
 	[19236] = {
@@ -84,6 +91,7 @@ local SpellData = {
 	[112833] = {
 		class = "PRIEST",
 		talent = true,
+		duration = 10,
 		cooldown =  30
 	},
 	-- Angelic Bulwark
@@ -96,6 +104,7 @@ local SpellData = {
 	[10060] = {
 		class = "PRIEST",
 		talent = true,
+		duration = 20,
 		cooldown =  120
 	},
 	-- Cascade
@@ -118,17 +127,10 @@ local SpellData = {
 	},
 
 	-- Priest/Discipline
-	-- Glyph of Inner Focus
-	[96267] = {
-		class = "PRIEST",
-		specID = 256,
-		duration = 5, -- Glyph
-		cooldown = 45,
-	},
 	-- Inner Focus
 	[89485] = {
 		class = "PRIEST",
-		specID = 256,
+		specID = { [256] = true },
 		cooldown_starts_after_cast = {
 			2061, -- Flash Heal
 			2060, -- Greater Heal
@@ -136,23 +138,34 @@ local SpellData = {
 		},
 		cooldown = 45,
 	},
+	-- Glyph of Inner Focus
+	[96267] = {
+		class = "PRIEST",
+		specID = { [256] = true },
+		glyph = true,
+		replaces = 89485,
+		duration = 5,
+		cooldown = 45,
+	},
 	-- Pain Suppression
 	[33206] = {
 		class = "PRIEST",
-		specID = 256,
-		duration = 10,
+		specID = { [256] = true },
+		duration = 8,
 		cooldown = 180,
 	},
 	-- Power Word: Barrier
 	[62618] = {
 		class = "PRIEST",
-		specID = 256,
+		specID = { [256] = true },
+		duration = 10,
 		cooldown = 180,
 	},
 	-- Spirit Shell
 	[109964] = {
 		class = "PRIEST",
-		specID = 256,
+		specID = { [256] = true },
+		duration = 15,
 		cooldown = 60,
 	},
 	
@@ -160,28 +173,27 @@ local SpellData = {
 	-- Guardian Spirit
 	[47788] = {
 		class = "PRIEST",
-		specID = 257,
+		specID = { [257] = true },
 		duration = 10,
 		cooldown = 180,
 	},
 	-- Lightwell
 	[724] = {
 		class = "PRIEST",
-		specID = 257,
-		duration = 180,
+		specID = { [257] = true },
 		cooldown = 180,
 	},
 	-- Divine Hymn
 	[64843] = {
 		class = "PRIEST",
-		specID = 257,
+		specID = { [257] = true },
 		duration = 8,
 		cooldown = 18
 	},
 	-- Holy Word: Chastise
 	[88625] = {
 		class = "PRIEST",
-		specID = 257,
+		specID = { [257] = true },
 		duration = 3,
 		cooldown = 30
 	},
@@ -190,26 +202,235 @@ local SpellData = {
 	-- Dispersion
 	[47585] = {
 		class = "PRIEST",
-		specID = 258,
+		specID = { [258] = true },
 		duration = 6,
 		cooldown = 105, -- 120
 	},
 	-- Silence
 	[15487] = {
 		class = "PRIEST",
-		specID = 258,
+		specID = { [258] = true },
 		duration = 10,
 		cooldown = 45,
 	},
 
-	-- Items
-	-- PvP Trinket
-	[42292] = {
-		item = true,
-		icon_alliance = [[Interface\Icons\INV_Jewelry_TrinketPVP_01]],
-		icon_horde = [[Interface\Icons\INV_Jewelry_TrinketPVP_02]],
-		cooldown = 120,
+	-- Warrior/baseline
+	-- Berserker Rage
+	[18499] = {
+		class = "WARRIOR",
+		duration = 6,
+		cooldown = 30
 	},
+	-- Charge
+	[100] = {
+		class = "WARRIOR",
+		cooldown = 20
+	},
+	-- Deadly Calm
+	[85730] = {
+		class = "WARRIOR",
+		cooldown = 60
+	},
+	-- Disarm
+	[676] = {
+		class = "WARRIOR",
+		duration = 10,
+		cooldown = 60
+	},
+	-- Heroic Leap
+	[6544] = {
+		class = "WARRIOR",
+		cooldown = 45
+	},
+	-- Heroic Throw
+	[57755] = {
+		class = "WARRIOR",
+		cooldown = 30
+	},
+	-- Intervene
+	[3411] = {
+		class = "WARRIOR",
+		cooldown = 30
+	},
+	-- Intimidating Shout
+	[5246] = {
+		class = "WARRIOR",
+		duration = 8,
+		cooldown = 60
+	},
+	-- Pummel
+	[6552] = {
+		class = "WARRIOR",
+		cooldown = 15
+	},
+	-- Rallying Cry
+	[97462] = {
+		class = "WARRIOR",
+		duration = 10,
+		cooldown = 180
+	},
+	-- Recklessness
+	[1719] = {
+		class = "WARRIOR",
+		duration = 12,
+		cooldown = 300
+	},
+	-- Shattering Throw
+	[64382] = {
+		class = "WARRIOR",
+		cooldown = 300
+	},
+	-- Shield Wall
+	[871] = {
+		class = "WARRIOR",
+		duration = 12,
+		cooldown = 300
+	},
+	-- Skull Banner
+	[114207] = {
+		class = "WARRIOR",
+		duration = 10,
+		cooldown = 180
+	},
+	-- Spell Reflection
+	[23920] = {
+		class = "WARRIOR",
+		duration = 5,
+		cooldown = 25
+	},
+	-- Warrior/talents
+	-- Enraged Regeneration
+	[55694] = {
+		class = "WARRIOR",
+		talent = true,
+		duration = 5,
+		cooldown = 60
+	},
+	-- Impending Victory
+	[103840] = {
+		class = "WARRIOR",
+		talent = true,
+		cooldown = 30
+	},
+	-- Staggering Shout
+	[107566] = {
+		class = "WARRIOR",
+		talent = true,
+		duration = 5,
+		cooldown = 40
+	},
+	-- Disrupting Shout
+	[102060] = {
+		class = "WARRIOR",
+		talent = true,
+		cooldown = 40
+	},
+	-- Shockwave
+	[46968] = {
+		class = "WARRIOR",
+		talent = true,
+		duration = 4,
+		cooldown = 20
+	},
+	-- Bladestorm
+	[46924] = {
+		class = "WARRIOR",
+		talent = true,
+		duration = 6,
+		cooldown = 90
+	},
+	-- Dragon Roar
+	[118000] = {
+		class = "WARRIOR",
+		talent = true,
+		duration = 0.5,
+		cooldown= 60
+	},
+	-- Vigilance
+	[114030] = {
+		class = "WARRIOR",
+		talent = true,
+		duration = 12,
+		cooldown = 120
+	},
+	-- Safeguard
+	[114029] = {
+		class = "WARRIOR",
+		talent = true,
+		duration = 6,
+		cooldown = 30
+	},
+	-- Mass Spell Reflection
+	[114028] = {
+		class = "WARRIOR",
+		talent = true,
+		duration = 5,
+		cooldown = 60
+	},
+	-- Avatar
+	[107574] = {
+		class = "WARRIOR",
+		talent = true,
+		duration = 20,
+		cooldown = 180
+	},
+	-- Storm Bolt
+	[107570] = {
+		class = "WARRIOR",
+		talent = true,
+		duration = 3,
+		cooldown = 30
+	},
+	-- Bloodbath
+	[12292] = {
+		class = "WARRIOR",
+		talent = true,
+		duration = 12,
+		cooldown = 60
+	},
+
+	-- Warrior/Arms 71 - Arms 
+	-- Colossus Smash
+	[86346] = {
+		class = "WARRIOR",
+		specID = { [71] = true, [72] = true },
+		duration = 6,
+		cooldown = 20
+	},
+	-- Die by the Sword
+	[118038] = {
+		class = "WARRIOR",
+		specID = { [71] = true },
+		duration = 8,
+		cooldown = 120
+	},
+
+    -- Warrior/Fury 72 - Furry 
+	-- Colossus Smash
+
+    -- Warrior/Protection 73 - Protection 
+    -- Demoralizing Shout
+    [1160] = {
+    	class = "WARRIOR",
+    	specID = { [73] = true },
+    	duration = 10,
+    	cooldown = 60
+    },
+    -- Last Stand
+    [12975] = {
+    	class = "WARRIOR",
+    	specID = { [73] = true },
+    	duration = 20,
+    	cooldown = 180
+    },
+    -- Shield Barrier
+    [112048] = {
+    	class = "WARRIOR",
+    	specID = { [73] = true },
+    	duration = 6,
+    	cooldown = 90
+    },
+
 
 	-- Racials
 	-- Every Man for Himself (Human)
@@ -308,9 +529,21 @@ local SpellData = {
 		cooldown = 180
 	},
 
+	-- Items
+	-- PvP Trinket
+	[42292] = {
+		item = true,
+		icon_alliance = [[Interface\Icons\INV_Jewelry_TrinketPVP_01]],
+		icon_horde = [[Interface\Icons\INV_Jewelry_TrinketPVP_02]],
+		cooldown = 120,
+	},
 
 	-- Dispels
 }
+
+local guid_to_unitid = {} -- [guid] = unitid
+local tracked_players = {} -- [unit][spellid] = cd start time
+
 
 local Cooldowns = Gladius:NewGladiusModule("Cooldowns", false, {
 	cooldownsAttachTo = "CastBarIcon",
@@ -330,7 +563,8 @@ local Cooldowns = Gladius:NewGladiusModule("Cooldowns", false, {
 
 function Cooldowns:OnEnable()
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-	self:RegisterEvent("SPELL_CAST_SUCCESS")
+	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+	self:RegisterMessage("GLADIUS_SPEC_UPDATE")
 
 	LSM = Gladius.LSM
 
@@ -359,16 +593,231 @@ function Cooldowns:GetAttachFrame(unit, point)
 	return self.frame[unit]
 end
 
-function Cooldowns:SPELL_CAST_SUCCESS(event, unit)
+
+function Cooldowns:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, rank, lineaID, spellId)
+	self:CooldownUsed(unit, spellId)
 end
 
-function Cooldowns:COMBAT_LOG_EVENT_UNFILTERED(_, timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
-	if event == "SPELL_CAST_SUCCESS" then
-		local spellId = ...
-		local spelldata = SpellData[spellId]
-		if spelldata then
-			print(sourceName, "cast", GetSpellInfo(spellId), "cooldown:", spelldata.cooldown)
+function Cooldowns:COMBAT_LOG_EVENT_UNFILTERED(_, timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellId, spellName, spellSchool)
+	if not guid_to_unitid[sourceGUID] then return end
+
+	if event == "SPELL_CAST_SUCCESS" or
+		event == "SPELL_AURA_APPLIED" then
+		self:CooldownUsed(guid_to_unitid[sourceGUID], spellId)
+	end
+end
+
+function Cooldowns:GLADIUS_SPEC_UPDATE(event, unit)
+	self:UpdateIcons(unit)
+end
+
+function Cooldowns:CooldownUsed(unit, spellId)
+	local spelldata = SpellData[spellId]
+	if not spelldata then return end
+
+	if type(spelldata) == "number" then
+		spelldata = SpellData[spelldata]
+	end
+
+	local now = GetTime()
+
+	if self.frame[unit] then
+		if not tracked_players[unit] then
+			tracked_players[unit] = {}
 		end
+
+		-- check if spell cast was detected less than 5 seconds ago
+		-- if so, we assume that the first detection time is more accurate and ignore this one
+		if tracked_players[unit][spellId] then
+			if tracked_players[unit][spellId] + 5 > now then
+				return
+			end
+		end
+
+		print(UnitName(unit), "used", GetSpellInfo(spellId), "cooldown:", spelldata.cooldown)
+		tracked_players[unit][spellId] = now
+
+		self:UpdateIcons(unit)
+	end
+end
+
+local function CooldownFrame_OnUpdate(frame)
+	if frame.start then
+		local now = GetTime()
+		local spelldata = frame.spelldata
+		local start = frame.start
+		if spelldata.cooldown >= (now - start) then
+			if frame.state == 0 then
+				frame.cooldown:Show()
+				frame.border:Show()
+			end
+			if spelldata.duration and spelldata.duration >= (now - start) then
+				if frame.state == 0 then
+					frame.cooldown:SetReverse(true)
+					frame.cooldown:SetCooldown(start, spelldata.duration)
+					frame.border:SetVertexColor(1, 0, 0, 1)
+					frame.state = 1
+				end
+			elseif frame.state ~= 2 then
+				frame.cooldown:SetReverse(false)
+				frame.cooldown:SetCooldown(start, spelldata.cooldown)
+				frame.border:SetVertexColor(1, 1, 1, 1)
+				frame.state = 2
+			end
+		else
+		 	-- tracked_players[unit][spellid] = nil
+		 	frame.start = nil
+		 	frame.state = 0
+			frame.cooldown:Hide()
+			frame.border:Hide()
+			frame:SetScript("OnUpdate", nil)
+		end
+	end
+end
+
+function Cooldowns:UpdateIcons(unit)
+	if not self.frame[unit] then return end
+	if not tracked_players[unit] then tracked_players[unit] = {} end
+
+	local specID, class, race, faction
+	if Gladius:IsTesting() and not UnitExists(unit) then
+		specID = Gladius.testing[unit].specID
+		class = Gladius.testing[unit].unitClass
+		race = Gladius.testing[unit].unitRace
+		faction = UnitFactionGroup("player") == "Alliance" and "Horde" or "Alliance"
+	else
+		specID = Gladius.buttons[unit].specID
+		class = Gladius.buttons[unit].class
+		race = select(2, UnitRace(unit))
+		faction = UnitFactionGroup(unit)
+	end
+
+	-- generate list of cooldowns available for this unit
+	local spell_list = {}
+
+	local function add_spell(spellid, spelldata)
+		if not spelldata.glyph and not spelldata.talent or tracked_players[unit][spellid] then
+			if spelldata.replaces then
+				spell_list[spelldata.replaces] = false
+			end
+			if spell_list[spellid] == nil then
+				spell_list[spellid] = spelldata.replaces or true
+			end
+		end
+	end
+
+	for spellid, spelldata in pairs(SpellData) do
+		-- ignore references to other spells
+		if type(spelldata) ~= "number" then
+			if class == spelldata.class then
+				if spelldata.specID and spelldata.specID[specID] then
+					-- add spec
+					add_spell(spellid, spelldata)
+				elseif not spelldata.specID then
+					-- add base
+					add_spell(spellid, spelldata)
+				end
+			end
+
+			if race == spelldata.race then
+				-- add racial
+				add_spell(spellid, spelldata)
+			end
+
+			if spelldata.item then
+				-- add item
+				add_spell(spellid, spelldata)
+			end
+		end
+	end
+
+	-- sort spells
+	local sorted_spells = {}
+	for spellid, valid in pairs(spell_list) do	
+		if valid then
+			tinsert(sorted_spells, spellid)
+		end
+	end
+
+
+	local function sortscore(spellid)
+		local spelldata = SpellData[spellid]
+
+		if spelldata.replaces then
+			spellid = spelldata.replaces
+			spelldata = SpellData[spelldata.replaces]
+		end
+
+		local score = 0
+		local value = 2^30
+		local name = GetSpellInfo(spellid)
+
+		-- todo: loop
+		if spelldata.item then score = score + value end
+		value = value / 2
+		if spelldata.race then score = score + value end
+		value = value / 2
+		if spelldata.specID then score = score + value end
+		value = value / 2
+		if not spelldata.talent and not spelldata.glyph then score = score + value end
+		value = value / 2
+
+		score = score + ((0xffff - (name:byte(1) * 0xff + name:byte(2))) / 0xffff)
+
+		return score
+	end
+
+	table.sort(sorted_spells,
+		function(a, b)
+			return sortscore(a) > sortscore(b)
+		end)
+
+	-- update icons
+	local sidx = 1
+	for i = 1, #sorted_spells do
+		local spellid = sorted_spells[i]
+		local frame = self.frame[unit][sidx]
+
+		local spelldata = SpellData[spellid]
+		local icon
+		local start = tracked_players[unit][spellid]
+
+		if spelldata.icon_alliance and faction == "Alliance" then
+			icon = spelldata.icon_alliance
+		elseif spelldata.icon_horde and faction == "Horde" then
+			icon = spelldata.icon_horde
+		else
+			icon = select(3, GetSpellInfo(spellid))
+		end
+
+		frame.icon:SetTexture(icon)
+
+		frame.spellid = spellid
+		frame.spelldata = spelldata
+	 	frame.state = 0
+		frame.start = start
+
+		-- refresh
+		if start then 
+			frame:SetScript("OnUpdate", CooldownFrame_OnUpdate)
+			CooldownFrame_OnUpdate(frame)
+		else
+			frame.cooldown:Hide()
+			frame.border:Hide()
+		end
+
+		frame:Show()
+
+		sidx = sidx + 1
+	end
+
+	-- hide unused icons
+	for i = sidx, #self.frame[unit] do
+		local frame = self.frame[unit][i]
+		frame.start = nil
+		frame.spellid = nil
+		frame.spelldata = nil
+		frame:Hide()
 	end
 end
 
@@ -402,12 +851,22 @@ local function CreateCooldownFrame(name, parent)
 	frame.count:SetJustifyV("BOTTOM")
 	frame.count:SetJustifyH("RIGHT")
 
+	frame:EnableMouse(false)
+	frame:SetScript("OnEnter", function(self)
+		if self.spellid then
+			GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+			GameTooltip:SetSpellByID(self.spellid)
+		end
+	end)
+	frame:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
+
 	return frame
 end
 
 local function UpdateCooldownFrame(frame, size)
+	local border_size = 2
 	frame:SetSize(size, size)
-	frame.icon:SetSize(size - 1.5, size - 1.5)
+	frame.icon:SetSize(size - border_size - 0.5, size - border_size - 0.5)
 	frame.border:SetSize(size, size)
 end
 
@@ -422,6 +881,7 @@ function Cooldowns:CreateFrame(unit)
 
 		for i=1, 40 do
 			self.frame[unit][i] = CreateCooldownFrame("Gladius" .. self.name .. "frameIcon" .. i .. unit, self.frame[unit])
+			self.frame[unit][i]:SetScript("OnUpdate", CooldownFrame_OnUpdate)
 			self.frame[unit][i]:Hide()
 		end
 	end
@@ -493,11 +953,29 @@ function Cooldowns:UpdateCooldownGroup(
 	end
 end
 
+function Cooldowns:UpdateGUID(unit)
+	-- find and delete old reference to that unit
+	for guid, unitid in pairs(guid_to_unitid) do
+		if unitid == unit then
+			guid_to_unitid[guid] = nil
+			break
+		end
+	end
+
+	local guid = UnitGUID(unit)
+	if guid then
+		guid_to_unitid[guid] = unit
+	end
+end
+
 function Cooldowns:Update(unit)
 	-- create frame
 	if not self.frame[unit] then 
 		self:CreateFrame(unit)
 	end
+
+	-- update guid
+	self:UpdateGUID(unit)
 
 	-- update cooldown frame 
 	self:UpdateCooldownGroup(self.frame[unit], unit,
@@ -518,13 +996,16 @@ function Cooldowns:Update(unit)
 end
 
 function Cooldowns:Show(unit)
-	-- show buff frame
+	self:UpdateGUID(unit)
+
 	if self.frame[unit] then 
 		self.frame[unit]:Show()
 	end
 end
 
 function Cooldowns:Reset(unit) 
+	self:UpdateGUID(unit)
+
 	if self.frame[unit] then 
 		-- hide cooldown frame
 		self.frame[unit]:Hide()
@@ -536,13 +1017,7 @@ function Cooldowns:Reset(unit)
 end
 
 function Cooldowns:Test(unit)
-	-- test cooldown frame
-	if (self.frame[unit]) then
-		for i=1, Gladius.db.cooldownsMax do
-			self.frame[unit][i].icon:SetTexture(GetSpellTexture(2139))
-			self.frame[unit][i]:Show()
-		end
-	end
+	self:UpdateIcons(unit)
 end
 
 function Cooldowns:GetOptions()
@@ -751,9 +1226,10 @@ function Cooldowns:GetOptions()
 				end
 				if spelldata.specID then
 					-- spec
-					if not args[spelldata.class].args["spec" .. spelldata.specID] then
-						local _, name, description, icon, background, role, class = GetSpecializationInfoByID(spelldata.specID)
-						args[spelldata.class].args["spec" .. spelldata.specID] = {
+					local specID = next(spelldata.specID)
+					if not args[spelldata.class].args["spec" .. specID] then
+						local _, name, description, icon, background, role, class = GetSpecializationInfoByID(specID)
+						args[spelldata.class].args["spec" .. specID] = {
 							type="group",
 							name=name,
 							icon=icon,
@@ -761,7 +1237,7 @@ function Cooldowns:GetOptions()
 							args={}
 						}
 					end
-					args[spelldata.class].args["spec" .. spelldata.specID].args["spell"..spellid] = spellconfig
+					args[spelldata.class].args["spec" .. specID].args["spell"..spellid] = spellconfig
 				elseif spelldata.talent then
 					-- talent
 					if not args[spelldata.class].args.talents then
@@ -774,11 +1250,11 @@ function Cooldowns:GetOptions()
 					end
 					args[spelldata.class].args.talents.args["spell"..spellid] = spellconfig
 				else
-					-- base
+					-- baseline
 					if not args[spelldata.class].args.base then
 						args[spelldata.class].args.base = {
 							type="group",
-							name="Base",
+							name="Baseline",
 							order=1,
 							args={}
 						}
@@ -802,7 +1278,6 @@ function Cooldowns:GetOptions()
 			end
 		end
 	end
-
 
 	return options
 end
