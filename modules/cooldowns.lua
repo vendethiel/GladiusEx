@@ -11,13 +11,254 @@ local pairs = pairs
 
 -- http://www.wowwiki.com/Specialization_IDs
 local SpellData = {
-	-- Mage
+	-- Mage/baseline
+	-- Alter Time
+	[108978] = {
+		class = "MAGE",
+		defensive = true,
+		duration = 6,
+		cooldown = 180
+	},
+	-- Blink
+	[1953] = {
+		class = "MAGE",
+		defensive = true,
+		cooldown = 15
+	},
+	-- Cone of Cold
+	[120] = {
+		class = "MAGE",
+		offensive = true,
+		cooldown = 10
+	},
 	-- Counterspell
 	[2139] = {
 		class = "MAGE",
 		interrupt = true,
 		silence = true, -- with glyph
 		cooldown = 24,
+	},
+	-- Deep Freeze
+	[44572] = {
+		class = "MAGE",
+		stun = true,
+		duration = 5,
+		cooldown = 30
+	},
+	-- Evocation
+	[12051] = {
+		class = "MAGE",
+		defensive = true,
+		duration = 6,
+		cooldown = 120
+	},
+	-- Fire Blast
+	[2136] = {
+		class = "MAGE",
+		offensive = true,
+		cooldown = 8
+	},
+	-- Flamestrike
+	[2120] = {
+		class = "MAGE",
+		offensive = true,
+		duration = 8,
+		cooldown = 12
+	},
+	-- Frost Nova
+	[122] = {
+		class = "MAGE",
+		cc = true,
+		duration = 8,
+		cooldown = 25
+	},
+	-- Ice Block
+	[45438] = {
+		class = "MAGE",
+		defensive = true,
+		duration = 10,
+		cooldown = 300
+	},
+	-- Invisibility
+	[66] = {
+		class = "MAGE",
+		defensive = true,
+		duration = 23,
+		cooldown = 300
+	},
+	-- Mirror Image
+	[55342] = {
+		class = "MAGE",
+		offensive = true,
+		duration = 30,
+		cooldown = 180
+	},
+	-- Time Warp
+	[80353] = {
+		class = "MAGE",
+		offensive = true,
+		duration = 40,
+		cooldown = 300
+	},
+	-- Mage/talents
+	-- Blazing Speed
+	[108843] = {
+		class = "MAGE",
+		defensive = true,
+		duration = 1.5,
+		cooldown = 25
+	},
+	-- Cauterize
+	[86949] = {
+		class = "MAGE",
+		talent = true,
+		defensive = true,
+		duration = 6,
+		cooldown = 120
+	},
+	-- Cold Snap
+	[11958] = {
+		class = "MAGE",
+		talent = true,
+		resets = { 45438, 122, 120 },
+		cooldown = 180
+	},
+	-- Frost Bomb
+	[112948] = {
+		class = "MAGE",
+		talent = true,
+		offensive = true,
+		duration = 5,
+		cooldown = 10
+	},
+	-- Frostjaw
+	[102051] = {
+		class = "MAGE",
+		talent = true,
+		silence = true,
+		cc = true,
+		duration = 4,
+		cooldown = 20
+	},
+	-- Greater Invisibility
+	[110959] = {
+		class = "MAGE",
+		talent = true,
+		defensive = true,
+		replaces = 66,
+		duration = 20,
+		cooldown = 150
+	},
+	-- Ice Barrier
+	[11426] = {
+		class = "MAGE",
+		defensive = true,
+		talent = true,
+		cooldown = 25
+	},
+	-- Ice Floes
+	[108839] = {
+		class = "MAGE",
+		talent = true,
+		offensive = true,
+		cooldown = 60
+	},
+	-- Ice Ward
+	[111264] = {
+		class = "MAGE",
+		talent = true,
+		cc = true,
+		cooldown = 20
+	},
+	-- Incanter's Ward
+	[1463] = {
+		class = "MAGE",
+		talent = true,
+		defensive = true,
+		duration = 8,
+		cooldown = 25
+	},
+	-- Invocation
+	[114003] = {
+		class = "MAGE",
+		talent = true,
+		defensive = true,
+		replaces = 12051,
+		cooldown = 10
+	},
+	-- Presence of Mind
+	[12043] = {
+		class = "MAGE",
+		talent = true,
+		offensive = true,
+		cooldown = 90
+	},
+	-- Ring of Frost
+	[113724] = {
+		class = "MAGE",
+		talent = true,
+		cc = true,
+		duration = 10,
+		cooldown = 30
+	},
+	-- Temporal Shield
+	[115610] = {
+		class = "MAGE",
+		talent = true,
+		defensive = true,
+		duration = 4,
+		cooldown = 25
+	},
+	-- Mage/Arcane
+	-- Arcane Power
+	[12042] = {
+		class = "MAGE",
+		specID = { [62] = true },
+		offensive = true,
+		duration = 15,
+		cooldown = 90
+	},
+	-- Mage/Fire
+	-- Combustion
+	[11129] = {
+		class = "MAGE",
+		specID = { [63] = true },
+		stun = true,
+		offensive = true,
+		duration = 3,
+		cooldown = 45
+	},
+	-- Dragon's Breath
+	[31661] = {
+		class = "MAGE",
+		specID = { [63] = true },
+		cc = true,
+		duration = 4,
+		cooldown = 20
+	},
+	-- Mage/Frost
+	-- Frozen Orb
+	[84714] = {
+		class = "MAGE",
+		specID = { [64] = true },
+		offensive = true,
+		duration = 10,
+		cooldown = 60
+	},
+	-- Icy Veins
+	[12472] = {
+		class = "MAGE",
+		specID = { [64] = true },
+		offensive = true,
+		duration = 20,
+		cooldown = 180
+	},
+	-- Summon Water Elemental
+	[31687] = {
+		class = "MAGE",
+		specID = { [64] = true },
+		offensive = true,
+		cooldown = 60
 	},
 
 	-- Priest/baseline
@@ -60,7 +301,6 @@ local SpellData = {
 		dispel = true,
 		cooldown = 15
 	},
-
 	-- Priest/talents
 	-- Void Tendrils
 	[108920] = {
@@ -465,8 +705,7 @@ local SpellData = {
 		duration = 12,
 		cooldown = 60
 	},
-
-	-- Warrior/Arms 71 - Arms 
+	-- Warrior/Arms
 	-- Colossus Smash
 	[86346] = {
 		class = "WARRIOR",
@@ -475,19 +714,23 @@ local SpellData = {
 		duration = 6,
 		cooldown = 20
 	},
+	-- Mortal Strike
+	[12294] = {
+		class ="WARRIOR",
+		specID = { [71] = true },
+		offensive = true,
+		cooldown = 6
+	},
 	-- Die by the Sword
 	[118038] = {
 		class = "WARRIOR",
-		specID = { [71] = true },
+		specID = { [71] = true, [72] = true },
 		defensive = true,
 		duration = 8,
 		cooldown = 120
 	},
-
-    -- Warrior/Fury 72 - Furry 
-	-- Colossus Smash
-
-    -- Warrior/Protection 73 - Protection 
+    -- Warrior/Fury
+    -- Warrior/Protection
     -- Demoralizing Shout
     [1160] = {
     	class = "WARRIOR",
@@ -1498,18 +1741,19 @@ function Cooldowns:GetOptions()
 				end
 				if spelldata.specID then
 					-- spec
-					local specID = next(spelldata.specID)
-					if not args[spelldata.class].args["spec" .. specID] then
-						local _, name, description, icon, background, role, class = GetSpecializationInfoByID(specID)
-						args[spelldata.class].args["spec" .. specID] = {
-							type="group",
-							name=name,
-							icon=icon,
-							order=3 + specID,
-							args={}
-						}
+					for specID, _ in pairs(spelldata.specID) do
+						if not args[spelldata.class].args["spec" .. specID] then
+							local _, name, description, icon, background, role, class = GetSpecializationInfoByID(specID)
+							args[spelldata.class].args["spec" .. specID] = {
+								type="group",
+								name=name,
+								icon=icon,
+								order=3 + specID,
+								args={}
+							}
+						end
+						args[spelldata.class].args["spec" .. specID].args["spell"..spellid] = spellconfig
 					end
-					args[spelldata.class].args["spec" .. specID].args["spell"..spellid] = spellconfig
 				elseif spelldata.talent then
 					-- talent
 					if not args[spelldata.class].args.talents then

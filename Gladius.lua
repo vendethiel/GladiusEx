@@ -3,6 +3,11 @@ local type, pairs = type, pairs
 local strfind, max = string.find, math.max
 local UnitIsDeadOrGhost, UnitGUID = UnitIsDeadOrGhost, UnitGUID
 
+if Gladius then
+	DEFAULT_CHAT_FRAME:AddMessage("GladiusEx cannot be used while Gladius is enabled")
+	return
+end
+
 Gladius = LibStub("AceAddon-3.0"):NewAddon("Gladius", "AceEvent-3.0")
 
 Gladius.defaults = {}
@@ -159,7 +164,7 @@ function Gladius:OnInitialize()
 	-- test environment
 	self.test = false
 	self.testing = setmetatable({
-		["arena1"] = { health = 32000, maxHealth = 32000, power = 18000, maxPower = 18000, powerType = 0, unitClass = "PRIEST", unitRace = "Draenei", unitSpec = "Discipline", specID = 256 },
+		["arena1"] = { health = 32000, maxHealth = 32000, power = 18000, maxPower = 18000, powerType = 0, unitClass = "MAGE", unitRace = "Scourge", unitSpec = "Frost", specID = 64 },
 		["arena2"] = { health = 30000, maxHealth = 32000, power = 10000, maxPower = 12000, powerType = 2, unitClass = "HUNTER", unitRace = "NightElf", unitSpec = "Marksmanship", specID = 254 },
 		["arena3"] = { health = 24000, maxHealth = 35000, power = 90, maxPower = 120, powerType = 3, unitClass = "ROGUE", unitRace = "Human", unitSpec = "Combat", specID = 260 },
 		["arena4"] = { health = 20000, maxHealth = 40000, power = 80, maxPower = 130, powerType = 6, unitClass = "DEATHKNIGHT", unitRace = "Dwarf", unitSpec = "Unholy", specID = 252 },

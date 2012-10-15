@@ -2,7 +2,7 @@
 ## Title: GladiusEx
 ## Notes: Arena unit frames
 ## SavedVariables: GladiusExDB
-## OptionalDeps: Ace3, DRData-1.0, LibStub, LibSharedMedia-3.0
+## OptionalDeps: Ace3, DRData-1.0, LibStub, LibSharedMedia-3.0, Gladius
 
 embeds.xml
 
