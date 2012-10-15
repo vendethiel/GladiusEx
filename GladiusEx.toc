@@ -1,6 +1,6 @@
 ﻿## Interface: 50005
 ## Title: GladiusEx
-## Notes: Arena enemy unit frames
+## Notes: Arena unit frames
 ## SavedVariables: GladiusExDB
 ## OptionalDeps: Ace3, DRData-1.0, LibStub, LibSharedMedia-3.0
 

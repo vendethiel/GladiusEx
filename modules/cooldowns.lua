@@ -15,6 +15,8 @@ local SpellData = {
 	-- Counterspell
 	[2139] = {
 		class = "MAGE",
+		interrupt = true,
+		silence = true, -- with glyph
 		cooldown = 24,
 	},
 
@@ -22,34 +24,40 @@ local SpellData = {
 	-- Hymn of Hope
 	[64901] = {
 		class = "PRIEST",
+		defensive = true,
 		duration = 8,
 		cooldown = 360,
 	},
 	-- Psychic Scream
 	[8122] = {
 		class = "PRIEST",
+		cc = true,
 		duration = 8,
 		cooldown = 27,
 	},
 	-- Shadowfiend
 	[34433] = {
 		class = "PRIEST",
+		offensive = true,
 		duration = 12,
 		cooldown =  180,
 	},
 	-- Leap of Faith
 	[73325] = {
 		class = "PRIEST",
+		defensive = true,
 		cooldown = 90,
 	},
 	-- Void Shift
 	[108968] = {
 		class = "PRIEST",
+		defensive = true,
 		cooldown = 360,
 	},
 	-- Mass Dispel
 	[32375] = {
 		class = "PRIEST",
+		dispel = true,
 		cooldown = 15
 	},
 
@@ -58,6 +66,7 @@ local SpellData = {
 	[108920] = {
 		class = "PRIEST",
 		talent = true,
+		cc = true,
 		cooldown =  30
 	},
 	-- Psyfiend
@@ -65,12 +74,14 @@ local SpellData = {
 		class = "PRIEST",
 		talent = true,
 		duration = 10,
+		cc = true,
 		cooldown =  45
 	},
 	-- Phantasm
 	[108942] = {
 		class = "PRIEST",
 		talent = true,
+		defensive = true,
 		cooldown =  30
 	},
 	-- Mindbender
@@ -78,6 +89,7 @@ local SpellData = {
 		class = "PRIEST",
 		talent = true,
 		replaces = 34433,
+		offensive = true,
 		duration = 15,
 		cooldown = 60
 	},
@@ -85,12 +97,14 @@ local SpellData = {
 	[19236] = {
 		class = "PRIEST",
 		talent = true,
+		defensive = true,
 		cooldown =  120
 	},
 	-- Spectral Guise
 	[112833] = {
 		class = "PRIEST",
 		talent = true,
+		defensive = true,
 		duration = 10,
 		cooldown =  30
 	},
@@ -98,12 +112,14 @@ local SpellData = {
 	[108945] = {
 		class = "PRIEST",
 		talent = true,
+		defensive = true,
 		cooldown =  90
 	},
 	-- Power Infusion
 	[10060] = {
 		class = "PRIEST",
 		talent = true,
+		offensive = true,
 		duration = 20,
 		cooldown =  120
 	},
@@ -111,26 +127,41 @@ local SpellData = {
 	[121135] = {
 		class = "PRIEST",
 		talent = true,
+		offensive = true,
+		heal = true,
 		cooldown =  25
 	},
 	-- Divine Star
 	[110744] = {
 		class = "PRIEST",
 		talent = true,
+		offensive = true,
+		heal = true,
 		cooldown =  15
 	},
 	-- Halo
 	[120517] = {
 		class = "PRIEST",
 		talent = true,
+		offensive = true,
+		heal = true,
 		cooldown =  40
 	},
 
 	-- Priest/Discipline
+	-- Penance
+	[47540] = {
+		class = "PRIEST",
+		specID = { [256] = true },
+		heal = true,
+		duration = 2,
+		cooldown = 10,
+	},
 	-- Inner Focus
 	[89485] = {
 		class = "PRIEST",
 		specID = { [256] = true },
+		defensive = true,
 		cooldown_starts_after_cast = {
 			2061, -- Flash Heal
 			2060, -- Greater Heal
@@ -143,6 +174,7 @@ local SpellData = {
 		class = "PRIEST",
 		specID = { [256] = true },
 		glyph = true,
+		defensive = true,
 		replaces = 89485,
 		duration = 5,
 		cooldown = 45,
@@ -151,6 +183,7 @@ local SpellData = {
 	[33206] = {
 		class = "PRIEST",
 		specID = { [256] = true },
+		defensive = true,
 		duration = 8,
 		cooldown = 180,
 	},
@@ -158,6 +191,7 @@ local SpellData = {
 	[62618] = {
 		class = "PRIEST",
 		specID = { [256] = true },
+		defensive = true,
 		duration = 10,
 		cooldown = 180,
 	},
@@ -165,6 +199,7 @@ local SpellData = {
 	[109964] = {
 		class = "PRIEST",
 		specID = { [256] = true },
+		defensive = true,
 		duration = 15,
 		cooldown = 60,
 	},
@@ -174,6 +209,7 @@ local SpellData = {
 	[47788] = {
 		class = "PRIEST",
 		specID = { [257] = true },
+		defensive = true,
 		duration = 10,
 		cooldown = 180,
 	},
@@ -181,12 +217,14 @@ local SpellData = {
 	[724] = {
 		class = "PRIEST",
 		specID = { [257] = true },
+		heal = true,
 		cooldown = 180,
 	},
 	-- Divine Hymn
 	[64843] = {
 		class = "PRIEST",
 		specID = { [257] = true },
+		heal = true,
 		duration = 8,
 		cooldown = 18
 	},
@@ -194,6 +232,7 @@ local SpellData = {
 	[88625] = {
 		class = "PRIEST",
 		specID = { [257] = true },
+		cc = true,
 		duration = 3,
 		cooldown = 30
 	},
@@ -203,13 +242,23 @@ local SpellData = {
 	[47585] = {
 		class = "PRIEST",
 		specID = { [258] = true },
+		defensive = true,
 		duration = 6,
 		cooldown = 105, -- 120
+	},
+	-- Psychic Horror
+	[64044] = {
+		class = "PRIEST",
+		specID = { [258] = true },
+		cc = true,
+		duration = 10,
+		cooldown = 45
 	},
 	-- Silence
 	[15487] = {
 		class = "PRIEST",
 		specID = { [258] = true },
+		silence = true,
 		duration = 10,
 		cooldown = 45,
 	},
@@ -218,22 +267,26 @@ local SpellData = {
 	-- Berserker Rage
 	[18499] = {
 		class = "WARRIOR",
+		offensive = true,
 		duration = 6,
 		cooldown = 30
 	},
 	-- Charge
 	[100] = {
 		class = "WARRIOR",
+		stun = true,
 		cooldown = 20
 	},
 	-- Deadly Calm
 	[85730] = {
 		class = "WARRIOR",
+		offensive = true,
 		cooldown = 60
 	},
 	-- Disarm
 	[676] = {
 		class = "WARRIOR",
+		cc = true,
 		duration = 10,
 		cooldown = 60
 	},
@@ -245,56 +298,67 @@ local SpellData = {
 	-- Heroic Throw
 	[57755] = {
 		class = "WARRIOR",
+		silence = true,
 		cooldown = 30
 	},
 	-- Intervene
 	[3411] = {
 		class = "WARRIOR",
+		defensive = true,
 		cooldown = 30
 	},
 	-- Intimidating Shout
 	[5246] = {
 		class = "WARRIOR",
+		cc = true,
 		duration = 8,
 		cooldown = 60
 	},
 	-- Pummel
 	[6552] = {
 		class = "WARRIOR",
+		interrupt = true,
+		silence = true,
 		cooldown = 15
 	},
 	-- Rallying Cry
 	[97462] = {
 		class = "WARRIOR",
+		defensive = true,
 		duration = 10,
 		cooldown = 180
 	},
 	-- Recklessness
 	[1719] = {
 		class = "WARRIOR",
+		offensive = true,
 		duration = 12,
 		cooldown = 300
 	},
 	-- Shattering Throw
 	[64382] = {
 		class = "WARRIOR",
+		offensive = true,
 		cooldown = 300
 	},
 	-- Shield Wall
 	[871] = {
 		class = "WARRIOR",
+		defensive = true,
 		duration = 12,
 		cooldown = 300
 	},
 	-- Skull Banner
 	[114207] = {
 		class = "WARRIOR",
+		offensive = true,
 		duration = 10,
 		cooldown = 180
 	},
 	-- Spell Reflection
 	[23920] = {
 		class = "WARRIOR",
+		defensive = true,
 		duration = 5,
 		cooldown = 25
 	},
@@ -303,12 +367,14 @@ local SpellData = {
 	[55694] = {
 		class = "WARRIOR",
 		talent = true,
+		heal = true,
 		duration = 5,
 		cooldown = 60
 	},
 	-- Impending Victory
 	[103840] = {
 		class = "WARRIOR",
+		heal = true,
 		talent = true,
 		cooldown = 30
 	},
@@ -316,6 +382,7 @@ local SpellData = {
 	[107566] = {
 		class = "WARRIOR",
 		talent = true,
+		cc = true,
 		duration = 5,
 		cooldown = 40
 	},
@@ -323,12 +390,14 @@ local SpellData = {
 	[102060] = {
 		class = "WARRIOR",
 		talent = true,
+		interrupt = true,
 		cooldown = 40
 	},
 	-- Shockwave
 	[46968] = {
 		class = "WARRIOR",
 		talent = true,
+		stun = true,
 		duration = 4,
 		cooldown = 20
 	},
@@ -336,6 +405,7 @@ local SpellData = {
 	[46924] = {
 		class = "WARRIOR",
 		talent = true,
+		offensive = true,
 		duration = 6,
 		cooldown = 90
 	},
@@ -343,6 +413,7 @@ local SpellData = {
 	[118000] = {
 		class = "WARRIOR",
 		talent = true,
+		knockback = true,
 		duration = 0.5,
 		cooldown= 60
 	},
@@ -350,6 +421,7 @@ local SpellData = {
 	[114030] = {
 		class = "WARRIOR",
 		talent = true,
+		defensive = true,
 		duration = 12,
 		cooldown = 120
 	},
@@ -357,6 +429,7 @@ local SpellData = {
 	[114029] = {
 		class = "WARRIOR",
 		talent = true,
+		defensive = true,
 		duration = 6,
 		cooldown = 30
 	},
@@ -364,6 +437,7 @@ local SpellData = {
 	[114028] = {
 		class = "WARRIOR",
 		talent = true,
+		defensive = true,
 		duration = 5,
 		cooldown = 60
 	},
@@ -371,6 +445,7 @@ local SpellData = {
 	[107574] = {
 		class = "WARRIOR",
 		talent = true,
+		offensive = true,
 		duration = 20,
 		cooldown = 180
 	},
@@ -378,6 +453,7 @@ local SpellData = {
 	[107570] = {
 		class = "WARRIOR",
 		talent = true,
+		stun = true,
 		duration = 3,
 		cooldown = 30
 	},
@@ -385,6 +461,7 @@ local SpellData = {
 	[12292] = {
 		class = "WARRIOR",
 		talent = true,
+		offensive = true,
 		duration = 12,
 		cooldown = 60
 	},
@@ -394,6 +471,7 @@ local SpellData = {
 	[86346] = {
 		class = "WARRIOR",
 		specID = { [71] = true, [72] = true },
+		offensive = true,
 		duration = 6,
 		cooldown = 20
 	},
@@ -401,6 +479,7 @@ local SpellData = {
 	[118038] = {
 		class = "WARRIOR",
 		specID = { [71] = true },
+		defensive = true,
 		duration = 8,
 		cooldown = 120
 	},
@@ -413,6 +492,7 @@ local SpellData = {
     [1160] = {
     	class = "WARRIOR",
     	specID = { [73] = true },
+    	defensive = true,
     	duration = 10,
     	cooldown = 60
     },
@@ -420,6 +500,7 @@ local SpellData = {
     [12975] = {
     	class = "WARRIOR",
     	specID = { [73] = true },
+    	defensive = true,
     	duration = 20,
     	cooldown = 180
     },
@@ -427,6 +508,7 @@ local SpellData = {
     [112048] = {
     	class = "WARRIOR",
     	specID = { [73] = true },
+    	defensive = true,
     	duration = 6,
     	cooldown = 90
     },
@@ -438,19 +520,21 @@ local SpellData = {
 	-- Gift of the Naaru (Draenei)
 	[59544] = {
 		race = "Draenei",
+		heal = true,
 		duration = 15,
 		cooldown = 180,
 	},
-	[59545] = 59544,
+	[28880] = 59544,
+	[59542] = 59544,
 	[59543] = 59544,
+	[59545] = 59544,
+	[59547] = 59544,
 	[59548] = 59544,
 	[121093] = 59544,
-	[59542] = 59544,
-	[59547] = 59544,
-	[28880] = 59544,
 	-- Arcane Torrent (Blood Elf)
 	[28730] = {
-		race = "Blood Elf",
+		race = "BloodElf",
+		silence = true,
 		duration = 2,
 		cooldown = 120,
 	},
@@ -462,6 +546,7 @@ local SpellData = {
 	-- Blood Fury (Orc)
 	[20572] = {
 		race = "Orc",
+		offensive = true,
 		duration = 15,
 		cooldown = 120,
 	},
@@ -469,13 +554,13 @@ local SpellData = {
 	[33702] = 20572,
 	-- Cannibalize (Undead)
 	[20577] = {
-		race = "Undead",
+		race = "Scourge",
 		duration = 10,
 		cooldown = 120,
 	},
 	-- Will of the Forsaken (Undead)
 	[7744] = {
-		race = "Undead",
+		race = "Scourge",
 		cooldown = 120,
 	},
 	-- Darkflight (Worgen)
@@ -487,17 +572,20 @@ local SpellData = {
 	-- Escape Artist (Gnome)
 	[20589] = {
 		race = "Gnome",
+		defensive = true,
 		cooldown = 90,
 	},
 	-- Quaking Palm (Pandaren)
 	[107079] = {
 		race = "Pandaren",
+		cc = true,
 		duration = 4,
 		cooldown = 120,
 	},
 	-- Rocket Barrage (Goblin)
 	[69041] = {
 		race = "Goblin",
+		offensive = true,
 		cooldown = 120,
 	},
 	-- Rocket Jump (Goblin)
@@ -507,24 +595,28 @@ local SpellData = {
 	},
 	-- Shadowmeld (Night Elf)
 	[58984] = {
-		race = "Night Elf",
+		race = "NightElf",
+		defensive = true,
 		cooldown = 120,
 	},
 	-- Stoneform (Dwarf)
 	[20594] = {
 		race = "Dwarf",
+		defensive = true,
 		duration = 8,
 		cooldown = 120,
 	},
 	-- War Stomp (Tauren)
 	[20549] = {
 		race = "Tauren",
+		stun = true,
 		duration = 2,
 		cooldown = 120,
 	},
 	-- Berserking (Troll)
 	[26297] = {
 		race = "Troll",
+		offensive = true,
 		duration = 10,
 		cooldown = 180
 	},
@@ -533,6 +625,7 @@ local SpellData = {
 	-- PvP Trinket
 	[42292] = {
 		item = true,
+		pvp_trinket = true,
 		icon_alliance = [[Interface\Icons\INV_Jewelry_TrinketPVP_01]],
 		icon_horde = [[Interface\Icons\INV_Jewelry_TrinketPVP_02]],
 		cooldown = 120,
@@ -553,12 +646,36 @@ local Cooldowns = Gladius:NewGladiusModule("Cooldowns", false, {
 	cooldownsSpacingX = 0,
 	cooldownsSpacingY = 0,
 	cooldownsPerColumn = 8,
-	cooldownsMax = 16,
+	cooldownsMax = 40,
 	cooldownsSize = 23,
 	cooldownsOffsetX = 0,
 	cooldownsOffsetY = 0,
 	cooldownsGloss = false,
 	cooldownsGlossColor = { r = 1, g = 1, b = 1, a = 0.4 },
+	cooldownsSpells = { ["*"] = true },
+	cooldownsSpellPriority = {
+		"pvp_trinket",
+		"interrupt",
+		"silence",
+		"stun",
+		"knockback",
+		"cc",
+		"offensive",
+		"defensive",
+		"heal",
+		"dispel",
+	},
+	cooldownsSpellColors = {
+		["interrupt"] = { r = 1.0, g = 0.0, b = 1.0 },
+		["silence"] =   { r = 1.0, g = 0.0, b = 1.0 },
+		["stun"] =      { r = 0.0, g = 1.0, b = 1.0 },
+		["cc"] =        { r = 0.0, g = 1.0, b = 1.0 },
+		["heal"] =      { r = 0.0, g = 1.0, b = 0.0 },
+		["defensive"] = { r = 0.0, g = 1.0, b = 0.0 },
+		["offensive"] = { r = 1.0, g = 0.0, b = 0.0 },
+		["none"]      = { r = 1.0, g = 1.0, b = 1.0 },
+	},
+	cooldownsHideTalentsUntilDetected = true,
 })
 
 function Cooldowns:OnEnable()
@@ -616,6 +733,7 @@ function Cooldowns:CooldownUsed(unit, spellId)
 	if not spelldata then return end
 
 	if type(spelldata) == "number" then
+		spellId = spelldata
 		spelldata = SpellData[spelldata]
 	end
 
@@ -655,24 +773,27 @@ local function CooldownFrame_OnUpdate(frame)
 				if frame.state == 0 then
 					frame.cooldown:SetReverse(true)
 					frame.cooldown:SetCooldown(start, spelldata.duration)
-					frame.border:SetVertexColor(1, 0, 0, 1)
+					frame.border:SetVertexColor(frame.color.r, frame.color.g, frame.color.b, 1.0)
 					frame.state = 1
+					frame:SetAlpha(1)
 				end
 			elseif frame.state ~= 2 then
 				frame.cooldown:SetReverse(false)
 				frame.cooldown:SetCooldown(start, spelldata.cooldown)
-				frame.border:SetVertexColor(1, 1, 1, 1)
+				frame.border:SetVertexColor(frame.color.r, frame.color.g, frame.color.b, 0.5)
 				frame.state = 2
+				frame:SetAlpha(0.2)
 			end
-		else
-		 	-- tracked_players[unit][spellid] = nil
-		 	frame.start = nil
-		 	frame.state = 0
-			frame.cooldown:Hide()
-			frame.border:Hide()
-			frame:SetScript("OnUpdate", nil)
+			return
 		end
 	end
+
+ 	frame.start = nil
+	frame.cooldown:Hide()
+	frame.border:SetVertexColor(frame.color.r, frame.color.g, frame.color.b, 0.3)
+	frame.border:Show()
+	frame:SetAlpha(1)
+	frame:SetScript("OnUpdate", nil)
 end
 
 function Cooldowns:UpdateIcons(unit)
@@ -696,8 +817,13 @@ function Cooldowns:UpdateIcons(unit)
 	local spell_list = {}
 
 	local function add_spell(spellid, spelldata)
-		if not spelldata.glyph and not spelldata.talent or tracked_players[unit][spellid] then
+		if not Gladius.db.cooldownsSpells[spelldata.replaces and spelldata.replaces or spellid] then
+			return
+		end
+
+		if not spelldata.glyph and not spelldata.talent or tracked_players[unit][spellid] or not Gladius.db.cooldownsHideTalentsUntilDetected then
 			if spelldata.replaces then
+				-- remove original if found
 				spell_list[spelldata.replaces] = false
 			end
 			if spell_list[spellid] == nil then
@@ -709,8 +835,8 @@ function Cooldowns:UpdateIcons(unit)
 	for spellid, spelldata in pairs(SpellData) do
 		-- ignore references to other spells
 		if type(spelldata) ~= "number" then
-			if class == spelldata.class then
-				if spelldata.specID and spelldata.specID[specID] then
+			if class and class == spelldata.class then
+				if specID and spelldata.specID and spelldata.specID[specID] then
 					-- add spec
 					add_spell(spellid, spelldata)
 				elseif not spelldata.specID then
@@ -719,7 +845,7 @@ function Cooldowns:UpdateIcons(unit)
 				end
 			end
 
-			if race == spelldata.race then
+			if race and race == spelldata.race then
 				-- add racial
 				add_spell(spellid, spelldata)
 			end
@@ -739,6 +865,8 @@ function Cooldowns:UpdateIcons(unit)
 		end
 	end
 
+	local spell_priority = Gladius.db.cooldownsSpellPriority
+	local border_color = Gladius.db.cooldownsSpellColors
 
 	local function sortscore(spellid)
 		local spelldata = SpellData[spellid]
@@ -752,16 +880,15 @@ function Cooldowns:UpdateIcons(unit)
 		local value = 2^30
 		local name = GetSpellInfo(spellid)
 
-		-- todo: loop
-		if spelldata.item then score = score + value end
-		value = value / 2
-		if spelldata.race then score = score + value end
-		value = value / 2
-		if spelldata.specID then score = score + value end
-		value = value / 2
-		if not spelldata.talent and not spelldata.glyph then score = score + value end
-		value = value / 2
+		for i = 1, #spell_priority do
+			local key = spell_priority[i]
+			if spelldata[key] then
+				score = score + value
+			end
+			value = value / 2
+		end
 
+		-- use the decimal part to sort by name. will probably fail in some locales.
 		score = score + ((0xffff - (name:byte(1) * 0xff + name:byte(2))) / 0xffff)
 
 		return score
@@ -777,10 +904,9 @@ function Cooldowns:UpdateIcons(unit)
 	for i = 1, #sorted_spells do
 		local spellid = sorted_spells[i]
 		local frame = self.frame[unit][sidx]
-
 		local spelldata = SpellData[spellid]
-		local icon
 		local start = tracked_players[unit][spellid]
+		local icon
 
 		if spelldata.icon_alliance and faction == "Alliance" then
 			icon = spelldata.icon_alliance
@@ -790,25 +916,37 @@ function Cooldowns:UpdateIcons(unit)
 			icon = select(3, GetSpellInfo(spellid))
 		end
 
+		-- set border color
+		local c
+		for key, color in pairs(border_color) do
+			if spelldata[key] then
+				c = color
+				break
+			end
+		end
+
 		frame.icon:SetTexture(icon)
 
 		frame.spellid = spellid
 		frame.spelldata = spelldata
 	 	frame.state = 0
 		frame.start = start
+		frame.color = c or border_color["none"]
+
 
 		-- refresh
+		CooldownFrame_OnUpdate(frame)
+
 		if start then 
 			frame:SetScript("OnUpdate", CooldownFrame_OnUpdate)
-			CooldownFrame_OnUpdate(frame)
-		else
-			frame.cooldown:Hide()
-			frame.border:Hide()
 		end
 
 		frame:Show()
 
 		sidx = sidx + 1
+		if sidx > Gladius.db.cooldownsMax then
+			break
+		end
 	end
 
 	-- hide unused icons
@@ -818,6 +956,12 @@ function Cooldowns:UpdateIcons(unit)
 		frame.spellid = nil
 		frame.spelldata = nil
 		frame:Hide()
+	end
+end
+
+function Cooldowns:UpdateAllIcons()
+	for unitid, _ in pairs(self.frame) do
+		self:UpdateIcons(unitid)
 	end
 end
 
@@ -864,7 +1008,7 @@ local function CreateCooldownFrame(name, parent)
 end
 
 local function UpdateCooldownFrame(frame, size)
-	local border_size = 2
+	local border_size = 3
 	frame:SetSize(size, size)
 	frame.icon:SetSize(size - border_size - 0.5, size - border_size - 0.5)
 	frame.border:SetSize(size, size)
@@ -990,6 +1134,9 @@ function Cooldowns:Update(unit)
 		Gladius.db.cooldownsSpacingX,
 		Gladius.db.cooldownsSpacingY,
 		Gladius.db.cooldownsMax)
+
+	-- update icons
+	self:UpdateIcons(unit)
 
 	-- hide
 	self.frame[unit]:Hide()
@@ -1188,17 +1335,123 @@ function Cooldowns:GetOptions()
 							},
 					},
 				},
+				cooldown_options = {
+					type="group",
+					name=L["Cooldown options"],
+					order=2,
+					args = {
+						cooldownsHideTalentsUntilDetected = {
+							type="toggle",
+							name=L["Hide talents until detected"],
+							width="full",
+							order=1
+						},
+						priorities = {
+							type="group",
+							name=L["Cooldown sorting"],
+							order=2,
+							inline=true,
+							args={},
+						},
+					},
+				},
 				cooldowns = {  
 					type="group",
 					name=L["Cooldowns"],
-					order=2,
-					args = {},
+					order=3,
+					args = {
+						--[[
+						preclasssep = {
+							type="group",
+							name="CLASSES",
+							order=0,
+							args={}
+						},]]
+						preracesep = {
+							type="group",
+							name="",
+							order=2,
+							args={}
+						},
+						preitemsep = {
+							type="group",
+							name="",
+							order=4,
+							args={}
+						},
+					},
 				},
 			},
 		},
 	}
 
+	-- fill spell priority list
+	-- yeah, all of this sucks
+	local pargs = options.cooldowns.args.cooldown_options.args.priorities.args
+	for i = 1, #Gladius.db.cooldownsSpellPriority do
+		local cat = Gladius.db.cooldownsSpellPriority[i]
+		local option = {
+			type="group",
+			name=L[cat],
+			order=function()
+				for i = 1, #Gladius.db.cooldownsSpellPriority do
+					if Gladius.db.cooldownsSpellPriority[i] == cat then return i end
+				end
+			end,
+			inline=true,
+			args = {
+				moveup = {
+					type="execute",
+					name="Up",
+					func=function()
+						for i = 1, #Gladius.db.cooldownsSpellPriority do
+							if Gladius.db.cooldownsSpellPriority[i] == cat then 
+								if i ~= 1 then
+									local tmp = Gladius.db.cooldownsSpellPriority[i - 1]
+									Gladius.db.cooldownsSpellPriority[i - 1] = Gladius.db.cooldownsSpellPriority[i]
+									Gladius.db.cooldownsSpellPriority[i] = tmp
+									Cooldowns:UpdateAllIcons()
+								end
+								return
+							end
+						end
+					end,
+					order=1,
+				},
+				movedown = {
+					type="execute",
+					name="Down",
+					func=function()
+						for i = 1, #Gladius.db.cooldownsSpellPriority do
+							if Gladius.db.cooldownsSpellPriority[i] == cat then 
+								if i ~= #Gladius.db.cooldownsSpellPriority then
+									local tmp = Gladius.db.cooldownsSpellPriority[i + 1]
+									Gladius.db.cooldownsSpellPriority[i + 1] = Gladius.db.cooldownsSpellPriority[i]
+									Gladius.db.cooldownsSpellPriority[i] = tmp
+									Cooldowns:UpdateAllIcons()
+								end
+								return
+							end
+						end
+					end,
+					order=2,
+				},
+			}
+		}
+		pargs[cat] = option
+	end
+
+
 	-- fill spell data
+	local function getSpell(info)
+		return Gladius.db.cooldownsSpells[info.arg]
+	end
+
+	local function setSpell(info, value)
+		Gladius.db.cooldownsSpells[info.arg] = value
+		self:UpdateAllIcons()
+	end
+
 	local lclasses = {}
 	FillLocalizedClassList(lclasses)
 
@@ -1207,12 +1460,30 @@ function Cooldowns:GetOptions()
 		if type(spelldata) == "table" then
 			local name, rank, icon = GetSpellInfo(spellid)
 			local basecd = GetSpellBaseCooldown(spellid)
+			local cats = {}
+			if spelldata.cc then tinsert(cats, L["CC"]) end
+			if spelldata.offensive then tinsert(cats, L["Offensive"]) end
+			if spelldata.defensive then tinsert(cats, L["Defensive"]) end
+			if spelldata.silence then tinsert(cats, L["Silence"]) end
+			if spelldata.interrupt then tinsert(cats, L["Interrupt"]) end
+			if spelldata.dispel then tinsert(cats, L["Dispel"]) end
+			if spelldata.heal then tinsert(cats, L["Heal"]) end
+			if spelldata.knockback then tinsert(cats, L["Knockback"]) end
+			if spelldata.stun then tinsert(cats, L["Stun"]) end
+			local catstr
+			if #cats > 0 then
+				catstr = "|cff7f7f7f(" .. strjoin(", ", unpack(cats)) .. ")|r"
+			end
+
 			local spellconfig = {
 				type="toggle",
-				name=string.format(" |T%s:20|t %s [%ss/%ss]", icon, name, spelldata.cooldown, basecd and basecd/1000 or "??"),
+				name=string.format(" |T%s:20|t %s [%ss/%ss] %s", icon, name, spelldata.cooldown, basecd and basecd/1000 or "??", catstr or ""),
 				desc=GetSpellDescription(spellid),
 				descStyle="inline",
 				width="full",
+				arg=spellid,
+				get=getSpell,
+				set=setSpell,
 				order=name:byte(1)*0xff+name:byte(2),
 			}			
 			if spelldata.class then
@@ -1220,6 +1491,7 @@ function Cooldowns:GetOptions()
 					args[spelldata.class] = {
 						type="group",
 						name=lclasses[spelldata.class],
+						icon=[[Interface\ICONS\ClassIcon_]] .. spelldata.class,
 						order=1,
 						args={}
 					}
@@ -1233,7 +1505,7 @@ function Cooldowns:GetOptions()
 							type="group",
 							name=name,
 							icon=icon,
-							order=3,
+							order=3 + specID,
 							args={}
 						}
 					end
@@ -1267,12 +1539,24 @@ function Cooldowns:GetOptions()
 					args[spelldata.race] = {
 						type="group",
 						name=spelldata.race,
+						icon=function() return [[Interface\CHARACTERFRAME\TEMPORARYPORTRAIT]] .. (math.random(0, 1) == 0 and "-FEMALE-" or "-MALE-") .. spelldata.race end, -- because fuck you that's why
+						order=3,
 						args={}
 					}
 				end
 				args[spelldata.race].args["spell"..spellid] = spellconfig
 			elseif spelldata.item then
 				-- item
+				if not args.items then
+					args.items = {
+						type="group",
+						name=L["Items"],
+						icon=[[Interface\Icons\Trade_Engineering]],
+						order=5,
+						args={}
+					}
+				end
+				args.items.args["spell"..spellid] = spellconfig
 			else
 				print("Bad spelldata for", spellid, ": could not find type")
 			end
