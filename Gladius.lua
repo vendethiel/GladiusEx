@@ -29,6 +29,7 @@ local L
 local log_frame
 local logging = false
 local function log(...)
+	if not Gladius.db.debug then return end
 	if not log_frame then
 		log_frame = CreateFrame("ScrollingMessageFrame", "GladiusLogFrame")
 
