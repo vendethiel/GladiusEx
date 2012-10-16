@@ -9,1057 +9,7 @@ local LSM
 local tinsert = table.insert
 local pairs = pairs
 
--- http://www.wowwiki.com/Specialization_IDs
-local SpellData = {
-	-- Rogue/baseline
-	-- Blind
-	[2094] = {
-		class = "ROGUE",
-		cc = true,
-		cooldown = 180
-	},
-	-- Cloak of Shadows
-	[31224] = {
-		class = "ROGUE",
-		defensive = true,
-		duration = 5,
-		cooldown = 120
-	},
-	-- Dismantle
-	[51722] = {
-		class = "ROGUE",
-		cc = true,
-		duration = 10,
-		cooldown = 60
-	},
-	-- Evasion
-	[5277] = {
-		class = "ROGUE",
-		defensive = true,
-		duration = 15,
-		cooldown = 180
-	},
-	-- Gouge
-	[1776] = {
-		class = "ROGUE",
-		cc = true,
-		duration = 4,
-		cooldown = 10
-	},
-	-- Kick
-	[1766] = {
-		class = "ROGUE",
-		interrupt = true,
-		cooldown = 15
-	},
-	-- Kidney Shot
-	[408] = {
-		class = "ROGUE",
-		stun = true,
-		duration = 3,
-		cooldown = 20
-	},
-	-- Redirect
-	[73981] = {
-		class = "ROGUE",
-		offensive = true,
-		cooldown = 60
-	},
-	-- Shadow Blades
-	[121471] = {
-		class = "ROGUE",
-		offensive = true,
-		duration = 12,
-		cooldown = 180
-	},
-	-- Smoke Bomb
-	[76577] = {
-		class = "ROGUE",
-		defensive = true,
-		duration = 5,
-		cooldown = 180
-	},
-	-- Sprint
-	[2983] = {
-		class = "ROGUE",
-		duration = 8,
-		cooldown = 60
-	},
-	-- Tricks of the Trade
-	[57934] = {
-		class = "ROGUE",
-		offensive = true,
-		duration = 6,
-		cooldown = 30
-	},
-	-- Vanish
-	[1856] = {
-		class = "ROGUE",
-		defensive = true,
-		duration = 3,
-		cooldown = 180
-	},
-
-	-- Rogue/Assassination 259
-	-- Vendetta
-	[79140] = {
-		class = "ROGUE",
-		specID = { [259] = true },
-		offensive = true,
-		duration = 20,
-		cooldown = 120
-	},
-
-	-- Rogue/Combat 260
-	-- Adrenaline Rush
-	[13750] = {
-		class = "ROGUE",
-		specID = { [260] = true },
-		offensive = true,
-		duration = 15,
-		cooldown = 180
-	},
-	-- Killing Spree
-	[51690] = {
-		class = "ROGUE",
-		specID = { [260] = true },
-		offensive = true,
-		duration = 3,
-		cooldown = 120
-	},
-
-    -- Rogue/Subtlety 261
-    -- Premeditation
-    [14183] = {
-    	class = "ROGUE",
-    	specID = { [261] = true },
-    	offensive = true,
-    	duration = 0,
-    	cooldown = 20
-    },
-    -- Shadow Dance
-    [51713] = {
-    	class = "ROGUE",
-    	specID = { [261] = true },
-    	offensive = true,
-    	duration = 8,
-    	cooldown = 60
-    },
-
-    -- Rogue/talents
-	-- Cheat Death
-	[31230] = {
-		class = "ROGUE",
-		talent = true,
-		defensive = true,
-		duration = 3,
-		cooldown = 90
-	},
-	-- Combat Readiness
-	[74001] = {
-		class = "ROGUE",
-		talent = true,
-		defensive = true,
-		duration = 20,
-		cooldown = 120
-	},
-	-- Preparation
-	[14185] = {
-		class = "ROGUE",
-		talent = true,
-		defensive = true,
-		resets = { 2983, 1856, 31224, 5277, 51722 },
-		cooldown = 300
-	},
-	-- Shadowstep
-	[36554] = {
-		class = "ROGUE",
-		talent = true,
-		offensive = true,
-		duration = 2,
-		cooldown = 24
-	},
-
-	-- Mage/baseline
-	-- Alter Time
-	[108978] = {
-		class = "MAGE",
-		defensive = true,
-		duration = 6,
-		cooldown = 180
-	},
-	-- Blink
-	[1953] = {
-		class = "MAGE",
-		defensive = true,
-		cooldown = 15
-	},
-	-- Cone of Cold
-	[120] = {
-		class = "MAGE",
-		offensive = true,
-		cooldown = 10
-	},
-	-- Counterspell
-	[2139] = {
-		class = "MAGE",
-		interrupt = true,
-		silence = true, -- with glyph
-		cooldown = 24,
-	},
-	-- Deep Freeze
-	[44572] = {
-		class = "MAGE",
-		stun = true,
-		duration = 5,
-		cooldown = 30
-	},
-	-- Evocation
-	[12051] = {
-		class = "MAGE",
-		defensive = true,
-		duration = 6,
-		cooldown = 120
-	},
-	-- Fire Blast
-	[2136] = {
-		class = "MAGE",
-		offensive = true,
-		cooldown = 8
-	},
-	-- Flamestrike
-	[2120] = {
-		class = "MAGE",
-		offensive = true,
-		duration = 8,
-		cooldown = 12
-	},
-	-- Frost Nova
-	[122] = {
-		class = "MAGE",
-		cc = true,
-		duration = 8,
-		cooldown = 25
-	},
-	-- Ice Block
-	[45438] = {
-		class = "MAGE",
-		defensive = true,
-		duration = 10,
-		cooldown = 300
-	},
-	-- Invisibility
-	[66] = {
-		class = "MAGE",
-		defensive = true,
-		duration = 23,
-		cooldown = 300
-	},
-	-- Mirror Image
-	[55342] = {
-		class = "MAGE",
-		offensive = true,
-		duration = 30,
-		cooldown = 180
-	},
-	-- Time Warp
-	[80353] = {
-		class = "MAGE",
-		offensive = true,
-		duration = 40,
-		cooldown = 300
-	},
-	-- Mage/talents
-	-- Blazing Speed
-	[108843] = {
-		class = "MAGE",
-		defensive = true,
-		duration = 1.5,
-		cooldown = 25
-	},
-	-- Cauterize
-	[86949] = {
-		class = "MAGE",
-		talent = true,
-		defensive = true,
-		duration = 6,
-		cooldown = 120
-	},
-	-- Cold Snap
-	[11958] = {
-		class = "MAGE",
-		talent = true,
-		resets = { 45438, 122, 120 },
-		cooldown = 180
-	},
-	-- Frost Bomb
-	[112948] = {
-		class = "MAGE",
-		talent = true,
-		offensive = true,
-		duration = 5,
-		cooldown = 10
-	},
-	-- Frostjaw
-	[102051] = {
-		class = "MAGE",
-		talent = true,
-		silence = true,
-		cc = true,
-		duration = 4,
-		cooldown = 20
-	},
-	-- Greater Invisibility
-	[110959] = {
-		class = "MAGE",
-		talent = true,
-		defensive = true,
-		replaces = 66,
-		duration = 20,
-		cooldown = 150
-	},
-	-- Ice Barrier
-	[11426] = {
-		class = "MAGE",
-		defensive = true,
-		talent = true,
-		cooldown = 25
-	},
-	-- Ice Floes
-	[108839] = {
-		class = "MAGE",
-		talent = true,
-		offensive = true,
-		cooldown = 60
-	},
-	-- Ice Ward
-	[111264] = {
-		class = "MAGE",
-		talent = true,
-		cc = true,
-		cooldown = 20
-	},
-	-- Incanter's Ward
-	[1463] = {
-		class = "MAGE",
-		talent = true,
-		defensive = true,
-		duration = 8,
-		cooldown = 25
-	},
-	-- Invocation
-	[114003] = {
-		class = "MAGE",
-		talent = true,
-		defensive = true,
-		replaces = 12051,
-		cooldown = 10
-	},
-	-- Presence of Mind
-	[12043] = {
-		class = "MAGE",
-		talent = true,
-		offensive = true,
-		cooldown_starts_on_aura_fade = true,
-		cooldown = 90
-	},
-	-- Ring of Frost
-	[113724] = {
-		class = "MAGE",
-		talent = true,
-		cc = true,
-		duration = 10,
-		cooldown = 30
-	},
-	-- Temporal Shield
-	[115610] = {
-		class = "MAGE",
-		talent = true,
-		defensive = true,
-		duration = 4,
-		cooldown = 25
-	},
-	-- Mage/Arcane
-	-- Arcane Power
-	[12042] = {
-		class = "MAGE",
-		specID = { [62] = true },
-		offensive = true,
-		duration = 15,
-		cooldown = 90
-	},
-	-- Mage/Fire
-	-- Combustion
-	[11129] = {
-		class = "MAGE",
-		specID = { [63] = true },
-		stun = true,
-		offensive = true,
-		duration = 3,
-		cooldown = 45
-	},
-	-- Dragon's Breath
-	[31661] = {
-		class = "MAGE",
-		specID = { [63] = true },
-		cc = true,
-		duration = 4,
-		cooldown = 20
-	},
-	-- Mage/Frost
-	-- Frozen Orb
-	[84714] = {
-		class = "MAGE",
-		specID = { [64] = true },
-		offensive = true,
-		duration = 10,
-		cooldown = 60
-	},
-	-- Icy Veins
-	[12472] = {
-		class = "MAGE",
-		specID = { [64] = true },
-		offensive = true,
-		duration = 20,
-		cooldown = 180
-	},
-	-- Summon Water Elemental
-	[31687] = {
-		class = "MAGE",
-		specID = { [64] = true },
-		offensive = true,
-		cooldown = 60
-	},
-
-	-- Priest/baseline
-	-- Hymn of Hope
-	[64901] = {
-		class = "PRIEST",
-		defensive = true,
-		duration = 8,
-		cooldown = 360,
-	},
-	-- Psychic Scream
-	[8122] = {
-		class = "PRIEST",
-		cc = true,
-		duration = 8,
-		cooldown = 27,
-	},
-	-- Shadowfiend
-	[34433] = {
-		class = "PRIEST",
-		offensive = true,
-		duration = 12,
-		cooldown =  180,
-	},
-	-- Leap of Faith
-	[73325] = {
-		class = "PRIEST",
-		defensive = true,
-		cooldown = 90,
-	},
-	-- Void Shift
-	[108968] = {
-		class = "PRIEST",
-		defensive = true,
-		cooldown = 360,
-	},
-	-- Mass Dispel
-	[32375] = {
-		class = "PRIEST",
-		mass_dispel = true,
-		cooldown = 15
-	},
-	-- Priest/talents
-	-- Void Tendrils
-	[108920] = {
-		class = "PRIEST",
-		talent = true,
-		cc = true,
-		cooldown =  30
-	},
-	-- Psyfiend
-	[108921] = {
-		class = "PRIEST",
-		talent = true,
-		duration = 10,
-		cc = true,
-		cooldown =  45
-	},
-	-- Phantasm
-	[108942] = {
-		class = "PRIEST",
-		talent = true,
-		defensive = true,
-		cooldown =  30
-	},
-	-- Mindbender
-	[123040] = {
-		class = "PRIEST",
-		talent = true,
-		replaces = 34433,
-		offensive = true,
-		duration = 15,
-		cooldown = 60
-	},
-	-- Desperate Prayer
-	[19236] = {
-		class = "PRIEST",
-		talent = true,
-		defensive = true,
-		cooldown =  120
-	},
-	-- Spectral Guise
-	[112833] = {
-		class = "PRIEST",
-		talent = true,
-		defensive = true,
-		duration = 6,
-		cooldown =  30
-	},
-	-- Angelic Bulwark
-	[108945] = {
-		class = "PRIEST",
-		talent = true,
-		defensive = true,
-		cooldown =  90
-	},
-	-- Power Infusion
-	[10060] = {
-		class = "PRIEST",
-		talent = true,
-		offensive = true,
-		duration = 20,
-		cooldown =  120
-	},
-	-- Cascade
-	[121135] = {
-		class = "PRIEST",
-		talent = true,
-		offensive = true,
-		heal = true,
-		cooldown =  25
-	},
-	-- Divine Star
-	[110744] = {
-		class = "PRIEST",
-		talent = true,
-		offensive = true,
-		heal = true,
-		cooldown =  15
-	},
-	-- Halo
-	[120517] = {
-		class = "PRIEST",
-		talent = true,
-		offensive = true,
-		heal = true,
-		cooldown =  40
-	},
-
-	-- Priest/Discipline
-	-- Penance
-	[47540] = {
-		class = "PRIEST",
-		specID = { [256] = true },
-		heal = true,
-		duration = 2,
-		cooldown = 10,
-	},
-	-- Inner Focus
-	[89485] = {
-		class = "PRIEST",
-		specID = { [256] = true },
-		defensive = true,
-		cooldown_starts_on_aura_fade = true,
-		sets_cooldown = { spellid = 96267, cooldown = 45 },
-		cooldown = 45,
-	},
-	-- Glyph of Inner Focus
-	[96267] = {
-		class = "PRIEST",
-		specID = { [256] = true },
-		glyph = true,
-		defensive = true,
-		replaces = 89485,
-		active_until_cooldown_start = true,
-		duration = 5,
-	},
-	-- Pain Suppression
-	[33206] = {
-		class = "PRIEST",
-		specID = { [256] = true },
-		defensive = true,
-		duration = 8,
-		cooldown = 180,
-	},
-	-- Power Word: Barrier
-	[62618] = {
-		class = "PRIEST",
-		specID = { [256] = true },
-		defensive = true,
-		duration = 10,
-		cooldown = 180,
-	},
-	-- Spirit Shell
-	[109964] = {
-		class = "PRIEST",
-		specID = { [256] = true },
-		defensive = true,
-		duration = 15,
-		cooldown = 60,
-	},
-	-- Purify
-	[527] = {
-		class = "PRIEST",
-		specID = { [256] = true, [257] = true },
-		dispel = true,
-		cooldown_starts_on_dispel = true,
-		duration = 15,
-		cooldown = 60,
-	},
-	
-	-- Priest/Holy
-	-- Guardian Spirit
-	[47788] = {
-		class = "PRIEST",
-		specID = { [257] = true },
-		defensive = true,
-		duration = 10,
-		cooldown = 180,
-	},
-	-- Lightwell
-	[724] = {
-		class = "PRIEST",
-		specID = { [257] = true },
-		heal = true,
-		cooldown = 180,
-	},
-	-- Divine Hymn
-	[64843] = {
-		class = "PRIEST",
-		specID = { [257] = true },
-		heal = true,
-		duration = 8,
-		cooldown = 18
-	},
-	-- Holy Word: Chastise
-	[88625] = {
-		class = "PRIEST",
-		specID = { [257] = true },
-		cc = true,
-		duration = 3,
-		cooldown = 30
-	},
-	
-	-- Priest/Shadow
-	-- Dispersion
-	[47585] = {
-		class = "PRIEST",
-		specID = { [258] = true },
-		defensive = true,
-		duration = 6,
-		cooldown = 105, -- 120
-	},
-	-- Psychic Horror
-	[64044] = {
-		class = "PRIEST",
-		specID = { [258] = true },
-		cc = true,
-		duration = 10,
-		cooldown = 45
-	},
-	-- Silence
-	[15487] = {
-		class = "PRIEST",
-		specID = { [258] = true },
-		silence = true,
-		duration = 10,
-		cooldown = 45,
-	},
-
-	-- Warrior/baseline
-	-- Berserker Rage
-	[18499] = {
-		class = "WARRIOR",
-		offensive = true,
-		duration = 6,
-		cooldown = 30
-	},
-	-- Charge
-	[100] = {
-		class = "WARRIOR",
-		stun = true,
-		cooldown = 20
-	},
-	-- Deadly Calm
-	[85730] = {
-		class = "WARRIOR",
-		offensive = true,
-		cooldown = 60
-	},
-	-- Disarm
-	[676] = {
-		class = "WARRIOR",
-		cc = true,
-		duration = 10,
-		cooldown = 60
-	},
-	-- Heroic Leap
-	[6544] = {
-		class = "WARRIOR",
-		cooldown = 45
-	},
-	-- Heroic Throw
-	[57755] = {
-		class = "WARRIOR",
-		silence = true,
-		cooldown = 30
-	},
-	-- Intervene
-	[3411] = {
-		class = "WARRIOR",
-		defensive = true,
-		cooldown = 30
-	},
-	-- Intimidating Shout
-	[5246] = {
-		class = "WARRIOR",
-		cc = true,
-		duration = 8,
-		cooldown = 60
-	},
-	-- Pummel
-	[6552] = {
-		class = "WARRIOR",
-		interrupt = true,
-		silence = true,
-		cooldown = 15
-	},
-	-- Rallying Cry
-	[97462] = {
-		class = "WARRIOR",
-		defensive = true,
-		duration = 10,
-		cooldown = 180
-	},
-	-- Recklessness
-	[1719] = {
-		class = "WARRIOR",
-		offensive = true,
-		duration = 12,
-		cooldown = 300
-	},
-	-- Shattering Throw
-	[64382] = {
-		class = "WARRIOR",
-		offensive = true,
-		cooldown = 300
-	},
-	-- Shield Wall
-	[871] = {
-		class = "WARRIOR",
-		defensive = true,
-		duration = 12,
-		cooldown = 300
-	},
-	-- Skull Banner
-	[114207] = {
-		class = "WARRIOR",
-		offensive = true,
-		duration = 10,
-		cooldown = 180
-	},
-	-- Spell Reflection
-	[23920] = {
-		class = "WARRIOR",
-		defensive = true,
-		duration = 5,
-		cooldown = 25
-	},
-	-- Warrior/talents
-	-- Enraged Regeneration
-	[55694] = {
-		class = "WARRIOR",
-		talent = true,
-		heal = true,
-		duration = 5,
-		cooldown = 60
-	},
-	-- Impending Victory
-	[103840] = {
-		class = "WARRIOR",
-		heal = true,
-		talent = true,
-		cooldown = 30
-	},
-	-- Staggering Shout
-	[107566] = {
-		class = "WARRIOR",
-		talent = true,
-		cc = true,
-		duration = 5,
-		cooldown = 40
-	},
-	-- Disrupting Shout
-	[102060] = {
-		class = "WARRIOR",
-		talent = true,
-		interrupt = true,
-		cooldown = 40
-	},
-	-- Shockwave
-	[46968] = {
-		class = "WARRIOR",
-		talent = true,
-		stun = true,
-		duration = 4,
-		cooldown = 20
-	},
-	-- Bladestorm
-	[46924] = {
-		class = "WARRIOR",
-		talent = true,
-		offensive = true,
-		duration = 6,
-		cooldown = 90
-	},
-	-- Dragon Roar
-	[118000] = {
-		class = "WARRIOR",
-		talent = true,
-		knockback = true,
-		duration = 0.5,
-		cooldown= 60
-	},
-	-- Vigilance
-	[114030] = {
-		class = "WARRIOR",
-		talent = true,
-		defensive = true,
-		duration = 12,
-		cooldown = 120
-	},
-	-- Safeguard
-	[114029] = {
-		class = "WARRIOR",
-		talent = true,
-		defensive = true,
-		duration = 6,
-		cooldown = 30
-	},
-	-- Mass Spell Reflection
-	[114028] = {
-		class = "WARRIOR",
-		talent = true,
-		defensive = true,
-		duration = 5,
-		cooldown = 60
-	},
-	-- Avatar
-	[107574] = {
-		class = "WARRIOR",
-		talent = true,
-		offensive = true,
-		duration = 20,
-		cooldown = 180
-	},
-	-- Storm Bolt
-	[107570] = {
-		class = "WARRIOR",
-		talent = true,
-		stun = true,
-		duration = 3,
-		cooldown = 30
-	},
-	-- Bloodbath
-	[12292] = {
-		class = "WARRIOR",
-		talent = true,
-		offensive = true,
-		duration = 12,
-		cooldown = 60
-	},
-	-- Warrior/Arms
-	-- Colossus Smash
-	[86346] = {
-		class = "WARRIOR",
-		specID = { [71] = true, [72] = true },
-		offensive = true,
-		duration = 6,
-		cooldown = 20
-	},
-	-- Mortal Strike
-	[12294] = {
-		class ="WARRIOR",
-		specID = { [71] = true },
-		offensive = true,
-		cooldown = 6
-	},
-	-- Die by the Sword
-	[118038] = {
-		class = "WARRIOR",
-		specID = { [71] = true, [72] = true },
-		defensive = true,
-		duration = 8,
-		cooldown = 120
-	},
-    -- Warrior/Fury
-    -- Warrior/Protection
-    -- Demoralizing Shout
-    [1160] = {
-    	class = "WARRIOR",
-    	specID = { [73] = true },
-    	defensive = true,
-    	duration = 10,
-    	cooldown = 60
-    },
-    -- Last Stand
-    [12975] = {
-    	class = "WARRIOR",
-    	specID = { [73] = true },
-    	defensive = true,
-    	duration = 20,
-    	cooldown = 180
-    },
-    -- Shield Barrier
-    [112048] = {
-    	class = "WARRIOR",
-    	specID = { [73] = true },
-    	defensive = true,
-    	duration = 6,
-    	cooldown = 90
-    },
-
-
-	-- Racials
-	-- Every Man for Himself (Human)
-	[59752] = 42292,
-	-- Gift of the Naaru (Draenei)
-	[59544] = {
-		race = "Draenei",
-		heal = true,
-		duration = 15,
-		cooldown = 180,
-	},
-	[28880] = 59544,
-	[59542] = 59544,
-	[59543] = 59544,
-	[59545] = 59544,
-	[59547] = 59544,
-	[59548] = 59544,
-	[121093] = 59544,
-	-- Arcane Torrent (Blood Elf)
-	[28730] = {
-		race = "BloodElf",
-		silence = true,
-		duration = 2,
-		cooldown = 120,
-	},
-	[50613] = 28730,
-	[80483] = 28730,
-	[129597] = 28730,
-	[25046] = 28730,
-	[69179] = 28730,
-	-- Blood Fury (Orc)
-	[20572] = {
-		race = "Orc",
-		offensive = true,
-		duration = 15,
-		cooldown = 120,
-	},
-	[33697] = 20572,
-	[33702] = 20572,
-	-- Cannibalize (Undead)
-	[20577] = {
-		race = "Scourge",
-		duration = 10,
-		cooldown = 120,
-	},
-	-- Will of the Forsaken (Undead)
-	[7744] = {
-		race = "Scourge",
-		cooldown = 120,
-	},
-	-- Darkflight (Worgen)
-	[68992] = {
-		race = "Worgen",
-		duration = 10,
-		cooldown = 120,
-	},
-	-- Escape Artist (Gnome)
-	[20589] = {
-		race = "Gnome",
-		defensive = true,
-		cooldown = 90,
-	},
-	-- Quaking Palm (Pandaren)
-	[107079] = {
-		race = "Pandaren",
-		cc = true,
-		duration = 4,
-		cooldown = 120,
-	},
-	-- Rocket Barrage (Goblin)
-	[69041] = {
-		race = "Goblin",
-		offensive = true,
-		cooldown = 120,
-	},
-	-- Rocket Jump (Goblin)
-	[69070] = {
-		race = "Goblin",
-		cooldown = 120,
-	},
-	-- Shadowmeld (Night Elf)
-	[58984] = {
-		race = "NightElf",
-		defensive = true,
-		cooldown = 120,
-	},
-	-- Stoneform (Dwarf)
-	[20594] = {
-		race = "Dwarf",
-		defensive = true,
-		duration = 8,
-		cooldown = 120,
-	},
-	-- War Stomp (Tauren)
-	[20549] = {
-		race = "Tauren",
-		stun = true,
-		duration = 2,
-		cooldown = 120,
-	},
-	-- Berserking (Troll)
-	[26297] = {
-		race = "Troll",
-		offensive = true,
-		duration = 10,
-		cooldown = 180
-	},
-
-	-- Items
-	-- PvP Trinket
-	[42292] = {
-		item = true,
-		pvp_trinket = true,
-		icon_alliance = [[Interface\Icons\INV_Jewelry_TrinketPVP_01]],
-		icon_horde = [[Interface\Icons\INV_Jewelry_TrinketPVP_02]],
-		cooldown = 120,
-	},
-}
-
--- 
-for spellid, spelldata in pairs(SpellData) do
-	if type(spelldata) == "table" then
-		local name, _, icon = GetSpellInfo(spellid)	
-		spelldata.name = name
-		spelldata.icon = icon
-	end
-end
-
+local SpellData = Gladius.CooldownsSpellData
 local guid_to_unitid = {} -- [guid] = unitid
 local tracked_players = {} -- [unit][spellid] = cd start time
 
@@ -1083,6 +33,7 @@ local Cooldowns = Gladius:NewGladiusModule("Cooldowns", false, {
 		"pvp_trinket",
 		"dispel",
 		"mass_dispel",
+		"immune",
 		"interrupt",
 		"silence",
 		"stun",
@@ -1093,15 +44,18 @@ local Cooldowns = Gladius:NewGladiusModule("Cooldowns", false, {
 		"heal",
 	},
 	cooldownsSpellColors = {
-		["interrupt"] =    { r = 1.0, g = 0.0, b = 1.0 },
-		["silence"] =      { r = 1.0, g = 0.0, b = 1.0 },
+		["pvp_trinket"] =  { r = 1.0, g = 1.0, b = 1.0 },
 		["dispel"] =       { r = 1.0, g = 1.0, b = 1.0 },
 		["mass_dispel"] =  { r = 1.0, g = 1.0, b = 1.0 },
+		["immune"] =       { r = 0.0, g = 0.0, b = 1.0 },
+		["interrupt"] =    { r = 1.0, g = 0.0, b = 1.0 },
+		["silence"] =      { r = 1.0, g = 0.0, b = 1.0 },
 		["stun"] =         { r = 0.0, g = 1.0, b = 1.0 },
+		["knockback"] =    { r = 0.0, g = 1.0, b = 1.0 },
 		["cc"] =           { r = 0.0, g = 1.0, b = 1.0 },
-		["heal"] =         { r = 0.0, g = 1.0, b = 0.0 },
 		["defensive"] =    { r = 0.0, g = 1.0, b = 0.0 },
 		["offensive"] =    { r = 1.0, g = 0.0, b = 0.0 },
+		["heal"] =         { r = 0.0, g = 1.0, b = 0.0 },
 		["none"]      =    { r = 1.0, g = 1.0, b = 1.0 },
 	},
 	cooldownsHideTalentsUntilDetected = true,
@@ -1180,7 +134,10 @@ function Cooldowns:CooldownUsed(event, unit, spellId)
 		-- check if the same spell cast was detected recently
 		-- if so, we assume that the first detection time is more accurate and ignore this one
 		if tracked_players[unit][spellId] then
-			if event == "SPELL_CAST_SUCCESS" and tracked_players[unit][spellId][event] and (tracked_players[unit][spellId][event] + 3) > now then
+			if (event == "SPELL_CAST_SUCCESS" or event == "SPELL_AURA_APPLIED") and (
+				(tracked_players[unit][spellId]["SPELL_AURA_APPLIED"] and (tracked_players[unit][spellId]["SPELL_AURA_APPLIED"] + 3) > now) or
+				(tracked_players[unit][spellId]["SPELL_CAST_SUCCESS"] and (tracked_players[unit][spellId]["SPELL_CAST_SUCCESS"] + 3) > now))
+				then
 				return
 			end
 		else
@@ -1212,10 +169,21 @@ function Cooldowns:CooldownUsed(event, unit, spellId)
 			end
 		end
 
-		-- print(UnitName(unit), "used", spelldata.name, "cooldown:", spelldata.cooldown)
+		-- print(UnitName(unit), "used", spelldata.name, "cooldown:", spelldata.cooldown, used_start, used_end, cooldown_start)
 		if used_start then
 			tracked_players[unit][spellId].used_start = now
 			tracked_players[unit][spellId].used_end = spelldata.duration and (now + spelldata.duration)
+
+			-- reset other cooldowns (Cold Snap, Preparation)
+			if spelldata.resets then
+				for i = 1, #spelldata.resets do
+					local rspellid = spelldata.resets[i]
+					if tracked_players[unit][rspellid] then
+						tracked_players[unit][rspellid].cooldown_start = 0
+						tracked_players[unit][rspellid].cooldown_end = 0
+					end
+				end
+			end
 		end
 		if used_end then
 			tracked_players[unit][spellId].used_end = now
@@ -1269,7 +237,7 @@ local function CooldownFrame_OnUpdate(frame)
 			end
 			return
 		end
-		if tracked.cooldown_end > now then
+		if tracked.cooldown_end and tracked.cooldown_end > now then
 			if frame.state ~= 3 then
 				frame.cooldown:SetReverse(false)
 				frame.cooldown:SetCooldown(tracked.cooldown_start, tracked.cooldown_end - tracked.cooldown_start)
@@ -1413,9 +381,9 @@ function Cooldowns:UpdateIcons(unit)
 
 		-- set border color
 		local c
-		for key, color in pairs(border_color) do
+		for _, key in ipairs(spell_priority) do
 			if spelldata[key] then
-				c = color
+				c = border_color[key]
 				break
 			end
 		end
@@ -1890,9 +858,25 @@ function Cooldowns:GetOptions()
 			end,
 			inline=true,
 			args = {
+				color = {
+					type="color",
+					name=L["Color"],
+					desc=L["Border color for spells in this category"],
+					width="full",
+					get=function()
+						local c = Gladius.db.cooldownsSpellColors[cat]
+						return c.r, c.g, c.b
+					end,
+					set=function(self, r, g, b)
+						Gladius.db.cooldownsSpellColors[cat] = { r = r, g = g, b = b }
+						Cooldowns:UpdateAllIcons()
+					end,
+					order = 0,
+				},
 				moveup = {
 					type="execute",
-					name="Up",
+					name=L["Up"],
+					desc=L["Increase the priority of spells in this category"],
 					func=function()
 						for i = 1, #Gladius.db.cooldownsSpellPriority do
 							if Gladius.db.cooldownsSpellPriority[i] == cat then 
@@ -1910,7 +894,8 @@ function Cooldowns:GetOptions()
 				},
 				movedown = {
 					type="execute",
-					name="Down",
+					name=L["Down"],
+					desc=L["Decrease the priority of spells in this category"],
 					func=function()
 						for i = 1, #Gladius.db.cooldownsSpellPriority do
 							if Gladius.db.cooldownsSpellPriority[i] == cat then 
@@ -1925,6 +910,38 @@ function Cooldowns:GetOptions()
 						end
 					end,
 					order=2,
+				},
+				enableall = {
+					type="execute",
+					name=L["Enable all"],
+					desc=L["Enable all the spells in this category"],
+					func=function()
+						for spellid, spelldata in pairs(SpellData) do
+							if type(spelldata) == "table" then
+								if spelldata[cat] then
+									Gladius.db.cooldownsSpells[spellid] = true
+								end
+							end
+						end
+						self:UpdateAllIcons()
+					end,
+					order=3,
+				},
+				disableall = {
+					type="execute",
+					name=L["Disable all"],
+					desc=L["Disable all the spells in this category"],
+					func=function()
+						for spellid, spelldata in pairs(SpellData) do
+							if type(spelldata) == "table" then
+								if spelldata[cat] then
+									Gladius.db.cooldownsSpells[spellid] = false
+								end
+							end
+						end
+						self:UpdateAllIcons()
+					end,
+					order=4,
 				},
 			}
 		}
@@ -1950,15 +967,18 @@ function Cooldowns:GetOptions()
 		if type(spelldata) == "table" then
 			local basecd = GetSpellBaseCooldown(spellid)
 			local cats = {}
-			if spelldata.cc then tinsert(cats, L["CC"]) end
-			if spelldata.offensive then tinsert(cats, L["Offensive"]) end
-			if spelldata.defensive then tinsert(cats, L["Defensive"]) end
-			if spelldata.silence then tinsert(cats, L["Silence"]) end
-			if spelldata.interrupt then tinsert(cats, L["Interrupt"]) end
-			if spelldata.dispel then tinsert(cats, L["Dispel"]) end
-			if spelldata.heal then tinsert(cats, L["Heal"]) end
-			if spelldata.knockback then tinsert(cats, L["Knockback"]) end
-			if spelldata.stun then tinsert(cats, L["Stun"]) end
+			if spelldata.pvp_trinket then tinsert(cats, L["pvp_trinket"]) end
+			if spelldata.cc then tinsert(cats, L["cc"]) end
+			if spelldata.offensive then tinsert(cats, L["offensive"]) end
+			if spelldata.defensive then tinsert(cats, L["defensive"]) end
+			if spelldata.silence then tinsert(cats, L["silence"]) end
+			if spelldata.interrupt then tinsert(cats, L["interrupt"]) end
+			if spelldata.dispel then tinsert(cats, L["dispel"]) end
+			if spelldata.mass_dispel then tinsert(cats, L["mass_dispel"]) end
+			if spelldata.heal then tinsert(cats, L["heal"]) end
+			if spelldata.knockback then tinsert(cats, L["knockback"]) end
+			if spelldata.stun then tinsert(cats, L["stun"]) end
+			if spelldata.immune then tinsert(cats, L["immune"]) end
 			local catstr
 			if #cats > 0 then
 				catstr = "|cff7f7f7f(" .. strjoin(", ", unpack(cats)) .. ")|r"

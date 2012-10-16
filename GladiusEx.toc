@@ -26,4 +26,5 @@ modules\tags.lua
 modules\announcements.lua
 modules\drtracker.lua
 modules\layout.lua
+modules\cooldowns_spelldata.lua
 modules\cooldowns.lua

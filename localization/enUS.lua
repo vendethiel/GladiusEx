@@ -551,6 +551,20 @@ do
          ["Timer Use OmniCC"] = "Timer Use OmniCC",
          ["The timer module will use OmniCC for text display"] = "The timer module will use OmniCC for text display",
 
+         -- cooldowns module
+         ["pvp_trinket"] = "PvP Trinket",
+         ["mass_dispel"] = "Mass Dispel",
+         ["cc"] = "CC",
+         ["offensive"] = "Offensive",
+         ["defensive"] = "Defensive",
+         ["silence"] = "Silence",
+         ["interrupt"] = "Interrupt",
+         ["dispel"] = "Dispel",
+         ["heal"] = "Heal",
+         ["knockback"] = "Knockback",
+         ["stun"] = "Stun",
+         ["immune"] = "Immune",
+
          ["maxhealthTag"] = "Max Health",
          ["maxpower:shortTag"] = "Max Power (Short)",
          ["powerTag"] = "Power",
