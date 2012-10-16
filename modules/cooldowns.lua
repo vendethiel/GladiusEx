@@ -11,6 +11,175 @@ local pairs = pairs
 
 -- http://www.wowwiki.com/Specialization_IDs
 local SpellData = {
+	-- Rogue/baseline
+	-- Blind
+	[2094] = {
+		class = "ROGUE",
+		cc = true,
+		cooldown = 180
+	},
+	-- Cloak of Shadows
+	[31224] = {
+		class = "ROGUE",
+		defensive = true,
+		duration = 5,
+		cooldown = 120
+	},
+	-- Dismantle
+	[51722] = {
+		class = "ROGUE",
+		cc = true,
+		duration = 10,
+		cooldown = 60
+	},
+	-- Evasion
+	[5277] = {
+		class = "ROGUE",
+		defensive = true,
+		duration = 15,
+		cooldown = 180
+	},
+	-- Gouge
+	[1776] = {
+		class = "ROGUE",
+		cc = true,
+		duration = 4,
+		cooldown = 10
+	},
+	-- Kick
+	[1766] = {
+		class = "ROGUE",
+		interrupt = true,
+		cooldown = 15
+	},
+	-- Kidney Shot
+	[408] = {
+		class = "ROGUE",
+		stun = true,
+		duration = 3,
+		cooldown = 20
+	},
+	-- Redirect
+	[73981] = {
+		class = "ROGUE",
+		offensive = true,
+		cooldown = 60
+	},
+	-- Shadow Blades
+	[121471] = {
+		class = "ROGUE",
+		offensive = true,
+		duration = 12,
+		cooldown = 180
+	},
+	-- Smoke Bomb
+	[76577] = {
+		class = "ROGUE",
+		defensive = true,
+		duration = 5,
+		cooldown = 180
+	},
+	-- Sprint
+	[2983] = {
+		class = "ROGUE",
+		duration = 8,
+		cooldown = 60
+	},
+	-- Tricks of the Trade
+	[57934] = {
+		class = "ROGUE",
+		offensive = true,
+		duration = 6,
+		cooldown = 30
+	},
+	-- Vanish
+	[1856] = {
+		class = "ROGUE",
+		defensive = true,
+		duration = 3,
+		cooldown = 180
+	},
+
+	-- Rogue/Assassination 259
+	-- Vendetta
+	[79140] = {
+		class = "ROGUE",
+		specID = { [259] = true },
+		offensive = true,
+		duration = 20,
+		cooldown = 120
+	},
+
+	-- Rogue/Combat 260
+	-- Adrenaline Rush
+	[13750] = {
+		class = "ROGUE",
+		specID = { [260] = true },
+		offensive = true,
+		duration = 15,
+		cooldown = 180
+	},
+	-- Killing Spree
+	[51690] = {
+		class = "ROGUE",
+		specID = { [260] = true },
+		offensive = true,
+		duration = 3,
+		cooldown = 120
+	},
+
+    -- Rogue/Subtlety 261
+    -- Premeditation
+    [14183] = {
+    	class = "ROGUE",
+    	specID = { [261] = true },
+    	offensive = true,
+    	duration = 0,
+    	cooldown = 20
+    },
+    -- Shadow Dance
+    [51713] = {
+    	class = "ROGUE",
+    	specID = { [261] = true },
+    	offensive = true,
+    	duration = 8,
+    	cooldown = 60
+    },
+
+    -- Rogue/talents
+	-- Cheat Death
+	[31230] = {
+		class = "ROGUE",
+		talent = true,
+		defensive = true,
+		duration = 3,
+		cooldown = 90
+	},
+	-- Combat Readiness
+	[74001] = {
+		class = "ROGUE",
+		talent = true,
+		defensive = true,
+		duration = 20,
+		cooldown = 120
+	},
+	-- Preparation
+	[14185] = {
+		class = "ROGUE",
+		talent = true,
+		defensive = true,
+		resets = { 2983, 1856, 31224, 5277, 51722 },
+		cooldown = 300
+	},
+	-- Shadowstep
+	[36554] = {
+		class = "ROGUE",
+		talent = true,
+		offensive = true,
+		duration = 2,
+		cooldown = 24
+	},
+
 	-- Mage/baseline
 	-- Alter Time
 	[108978] = {
@@ -191,6 +360,7 @@ local SpellData = {
 		class = "MAGE",
 		talent = true,
 		offensive = true,
+		cooldown_starts_on_aura_fade = true,
 		cooldown = 90
 	},
 	-- Ring of Frost
@@ -298,7 +468,7 @@ local SpellData = {
 	-- Mass Dispel
 	[32375] = {
 		class = "PRIEST",
-		dispel = true,
+		mass_dispel = true,
 		cooldown = 15
 	},
 	-- Priest/talents
@@ -345,7 +515,7 @@ local SpellData = {
 		class = "PRIEST",
 		talent = true,
 		defensive = true,
-		duration = 10,
+		duration = 6,
 		cooldown =  30
 	},
 	-- Angelic Bulwark
@@ -402,11 +572,8 @@ local SpellData = {
 		class = "PRIEST",
 		specID = { [256] = true },
 		defensive = true,
-		cooldown_starts_after_cast = {
-			2061, -- Flash Heal
-			2060, -- Greater Heal
-			596, -- Prayer of Healing
-		},
+		cooldown_starts_on_aura_fade = true,
+		sets_cooldown = { spellid = 96267, cooldown = 45 },
 		cooldown = 45,
 	},
 	-- Glyph of Inner Focus
@@ -416,8 +583,8 @@ local SpellData = {
 		glyph = true,
 		defensive = true,
 		replaces = 89485,
+		active_until_cooldown_start = true,
 		duration = 5,
-		cooldown = 45,
 	},
 	-- Pain Suppression
 	[33206] = {
@@ -440,6 +607,15 @@ local SpellData = {
 		class = "PRIEST",
 		specID = { [256] = true },
 		defensive = true,
+		duration = 15,
+		cooldown = 60,
+	},
+	-- Purify
+	[527] = {
+		class = "PRIEST",
+		specID = { [256] = true, [257] = true },
+		dispel = true,
+		cooldown_starts_on_dispel = true,
 		duration = 15,
 		cooldown = 60,
 	},
@@ -873,9 +1049,16 @@ local SpellData = {
 		icon_horde = [[Interface\Icons\INV_Jewelry_TrinketPVP_02]],
 		cooldown = 120,
 	},
-
-	-- Dispels
 }
+
+-- 
+for spellid, spelldata in pairs(SpellData) do
+	if type(spelldata) == "table" then
+		local name, _, icon = GetSpellInfo(spellid)	
+		spelldata.name = name
+		spelldata.icon = icon
+	end
+end
 
 local guid_to_unitid = {} -- [guid] = unitid
 local tracked_players = {} -- [unit][spellid] = cd start time
@@ -898,6 +1081,8 @@ local Cooldowns = Gladius:NewGladiusModule("Cooldowns", false, {
 	cooldownsSpells = { ["*"] = true },
 	cooldownsSpellPriority = {
 		"pvp_trinket",
+		"dispel",
+		"mass_dispel",
 		"interrupt",
 		"silence",
 		"stun",
@@ -906,17 +1091,18 @@ local Cooldowns = Gladius:NewGladiusModule("Cooldowns", false, {
 		"offensive",
 		"defensive",
 		"heal",
-		"dispel",
 	},
 	cooldownsSpellColors = {
-		["interrupt"] = { r = 1.0, g = 0.0, b = 1.0 },
-		["silence"] =   { r = 1.0, g = 0.0, b = 1.0 },
-		["stun"] =      { r = 0.0, g = 1.0, b = 1.0 },
-		["cc"] =        { r = 0.0, g = 1.0, b = 1.0 },
-		["heal"] =      { r = 0.0, g = 1.0, b = 0.0 },
-		["defensive"] = { r = 0.0, g = 1.0, b = 0.0 },
-		["offensive"] = { r = 1.0, g = 0.0, b = 0.0 },
-		["none"]      = { r = 1.0, g = 1.0, b = 1.0 },
+		["interrupt"] =    { r = 1.0, g = 0.0, b = 1.0 },
+		["silence"] =      { r = 1.0, g = 0.0, b = 1.0 },
+		["dispel"] =       { r = 1.0, g = 1.0, b = 1.0 },
+		["mass_dispel"] =  { r = 1.0, g = 1.0, b = 1.0 },
+		["stun"] =         { r = 0.0, g = 1.0, b = 1.0 },
+		["cc"] =           { r = 0.0, g = 1.0, b = 1.0 },
+		["heal"] =         { r = 0.0, g = 1.0, b = 0.0 },
+		["defensive"] =    { r = 0.0, g = 1.0, b = 0.0 },
+		["offensive"] =    { r = 1.0, g = 0.0, b = 0.0 },
+		["none"]      =    { r = 1.0, g = 1.0, b = 1.0 },
 	},
 	cooldownsHideTalentsUntilDetected = true,
 })
@@ -955,15 +1141,19 @@ end
 
 
 function Cooldowns:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, rank, lineaID, spellId)
-	self:CooldownUsed(unit, spellId)
+	self:CooldownUsed("SPELL_CAST_SUCCESS", unit, spellId)
 end
 
 function Cooldowns:COMBAT_LOG_EVENT_UNFILTERED(_, timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellId, spellName, spellSchool)
 	if not guid_to_unitid[sourceGUID] then return end
+	local spelldata = SpellData[spellId]
+	if not spelldata then return end
 
-	if event == "SPELL_CAST_SUCCESS" or
-		event == "SPELL_AURA_APPLIED" then
-		self:CooldownUsed(guid_to_unitid[sourceGUID], spellId)
+	if event == "SPELL_DISPEL" or
+	   event == "SPELL_AURA_REMOVED" or
+	   event == "SPELL_AURA_APPLIED" or
+	   event == "SPELL_CAST_SUCCESS" then
+		self:CooldownUsed(event, guid_to_unitid[sourceGUID], spellId)
 	end
 end
 
@@ -971,7 +1161,7 @@ function Cooldowns:GLADIUS_SPEC_UPDATE(event, unit)
 	self:UpdateIcons(unit)
 end
 
-function Cooldowns:CooldownUsed(unit, spellId)
+function Cooldowns:CooldownUsed(event, unit, spellId)
 	local spelldata = SpellData[spellId]
 	if not spelldata then return end
 
@@ -980,61 +1170,121 @@ function Cooldowns:CooldownUsed(unit, spellId)
 		spelldata = SpellData[spelldata]
 	end
 
-	local now = GetTime()
-
 	if self.frame[unit] then
+		local now = GetTime()
+
 		if not tracked_players[unit] then
 			tracked_players[unit] = {}
 		end
 
-		-- check if spell cast was detected less than 5 seconds ago
+		-- check if the same spell cast was detected recently
 		-- if so, we assume that the first detection time is more accurate and ignore this one
 		if tracked_players[unit][spellId] then
-			if tracked_players[unit][spellId] + 5 > now then
+			if event == "SPELL_CAST_SUCCESS" and tracked_players[unit][spellId][event] and (tracked_players[unit][spellId][event] + 3) > now then
 				return
+			end
+		else
+			tracked_players[unit][spellId] = { detected = true }
+		end
+
+		tracked_players[unit][spellId][event] = now
+
+		-- find what actions are needed
+		local used_start, used_end, cooldown_start
+
+		if spelldata.cooldown_starts_on_dispel then
+			if event == "SPELL_DISPEL" then
+				used_start = true
+				cooldown_start = true
+			end
+		elseif spelldata.cooldown_starts_on_aura_fade then
+			if event == "SPELL_CAST_SUCCESS" or event == "SPELL_AURA_APPLIED" then
+				used_start = true
+			elseif event == "SPELL_AURA_REMOVED" then
+				cooldown_start = true
+			end
+		else
+			if event == "SPELL_CAST_SUCCESS" or event == "SPELL_AURA_APPLIED" then
+				used_start = true
+				cooldown_start = true
+			elseif event == "SPELL_AURA_REMOVED" then
+				used_end = true
 			end
 		end
 
-		print(UnitName(unit), "used", GetSpellInfo(spellId), "cooldown:", spelldata.cooldown)
-		tracked_players[unit][spellId] = now
+		-- print(UnitName(unit), "used", spelldata.name, "cooldown:", spelldata.cooldown)
+		if used_start then
+			tracked_players[unit][spellId].used_start = now
+			tracked_players[unit][spellId].used_end = spelldata.duration and (now + spelldata.duration)
+		end
+		if used_end then
+			tracked_players[unit][spellId].used_end = now
+		end
+
+		if cooldown_start then
+			tracked_players[unit][spellId].cooldown_start = spelldata.cooldown and now
+			tracked_players[unit][spellId].cooldown_end = spelldata.cooldown and (now + spelldata.cooldown)
+
+			if spelldata.sets_cooldown then
+				if tracked_players[unit][spelldata.sets_cooldown.spellid] then
+					tracked_players[unit][spelldata.sets_cooldown.spellid].cooldown_start = now
+					tracked_players[unit][spelldata.sets_cooldown.spellid].cooldown_end = now + spelldata.sets_cooldown.cooldown
+					tracked_players[unit][spelldata.sets_cooldown.spellid].used_start = tracked_players[unit][spelldata.sets_cooldown.spellid].used_start or 0
+					tracked_players[unit][spelldata.sets_cooldown.spellid].used_end = tracked_players[unit][spelldata.sets_cooldown.spellid].used_end or 0
+				end
+			end
+		end
 
 		self:UpdateIcons(unit)
 	end
 end
 
 local function CooldownFrame_OnUpdate(frame)
-	if frame.start then
-		local now = GetTime()
-		local spelldata = frame.spelldata
-		local start = frame.start
-		if spelldata.cooldown >= (now - start) then
+	local tracked = frame.tracked
+	local now = GetTime()
+
+	if tracked then
+		if tracked.used_start and ((not tracked.used_end and not tracked.cooldown_start) or (tracked.used_end and tracked.used_end > now)) then
 			if frame.state == 0 then
-				frame.cooldown:Show()
-				frame.border:Show()
-			end
-			if spelldata.duration and spelldata.duration >= (now - start) then
-				if frame.state == 0 then
+				if tracked.used_end then
 					frame.cooldown:SetReverse(true)
-					frame.cooldown:SetCooldown(start, spelldata.duration)
-					frame.border:SetVertexColor(frame.color.r, frame.color.g, frame.color.b, 1.0)
-					frame.state = 1
-					frame:SetAlpha(1)
+					frame.cooldown:SetCooldown(tracked.used_start, tracked.used_end - tracked.used_start)
+					frame.cooldown:Show()
+				else
+					frame.cooldown:Hide()
 				end
-			elseif frame.state ~= 2 then
-				frame.cooldown:SetReverse(false)
-				frame.cooldown:SetCooldown(start, spelldata.cooldown)
-				frame.border:SetVertexColor(frame.color.r, frame.color.g, frame.color.b, 0.5)
+
+				frame.border:SetVertexColor(frame.color.r, frame.color.g, frame.color.b, 1.0)
+				frame:SetAlpha(1)
+				frame.state = 1
+			end
+			return
+		end
+		if tracked.used_start and not tracked.cooldown_start and frame.spelldata.active_until_cooldown_start then
+			if frame.state ~= 2 then
+				frame.border:SetVertexColor(frame.color.r, frame.color.g, frame.color.b, 1.0)
+				frame:SetAlpha(1)
+				frame.cooldown:Hide()
 				frame.state = 2
+			end
+			return
+		end
+		if tracked.cooldown_end > now then
+			if frame.state ~= 3 then
+				frame.cooldown:SetReverse(false)
+				frame.cooldown:SetCooldown(tracked.cooldown_start, tracked.cooldown_end - tracked.cooldown_start)
+				frame.border:SetVertexColor(frame.color.r, frame.color.g, frame.color.b, 0.5)
 				frame:SetAlpha(0.2)
+				frame.cooldown:Show()
+				frame.state = 3
 			end
 			return
 		end
 	end
 
- 	frame.start = nil
+ 	frame.tracked = nil
 	frame.cooldown:Hide()
 	frame.border:SetVertexColor(frame.color.r, frame.color.g, frame.color.b, 0.3)
-	frame.border:Show()
 	frame:SetAlpha(1)
 	frame:SetScript("OnUpdate", nil)
 end
@@ -1042,6 +1292,8 @@ end
 function Cooldowns:UpdateIcons(unit)
 	if not self.frame[unit] then return end
 	if not tracked_players[unit] then tracked_players[unit] = {} end
+
+	local now = GetTime()
 
 	local specID, class, race, faction
 	if Gladius:IsTesting() and not UnitExists(unit) then
@@ -1060,17 +1312,18 @@ function Cooldowns:UpdateIcons(unit)
 	local spell_list = {}
 
 	local function add_spell(spellid, spelldata)
-		if not Gladius.db.cooldownsSpells[spelldata.replaces and spelldata.replaces or spellid] then
+		if not Gladius.db.cooldownsSpells[spellid] then
 			return
 		end
 
-		if not spelldata.glyph and not spelldata.talent or tracked_players[unit][spellid] or not Gladius.db.cooldownsHideTalentsUntilDetected then
+		if (not spelldata.glyph and not spelldata.talent) or (tracked_players[unit][spellid] and tracked_players[unit][spellid].detected) or not Gladius.db.cooldownsHideTalentsUntilDetected then
 			if spelldata.replaces then
-				-- remove original if found
+				-- remove replaced spell if detected
 				spell_list[spelldata.replaces] = false
 			end
+			-- do not overwrite if this spell has been replaced
 			if spell_list[spellid] == nil then
-				spell_list[spellid] = spelldata.replaces or true
+				spell_list[spellid] = true
 			end
 		end
 	end
@@ -1121,7 +1374,6 @@ function Cooldowns:UpdateIcons(unit)
 
 		local score = 0
 		local value = 2^30
-		local name = GetSpellInfo(spellid)
 
 		for i = 1, #spell_priority do
 			local key = spell_priority[i]
@@ -1132,7 +1384,7 @@ function Cooldowns:UpdateIcons(unit)
 		end
 
 		-- use the decimal part to sort by name. will probably fail in some locales.
-		score = score + ((0xffff - (name:byte(1) * 0xff + name:byte(2))) / 0xffff)
+		score = score + ((0xffff - (spelldata.name:byte(1) * 0xff + spelldata.name:byte(2))) / 0xffff)
 
 		return score
 	end
@@ -1148,7 +1400,7 @@ function Cooldowns:UpdateIcons(unit)
 		local spellid = sorted_spells[i]
 		local frame = self.frame[unit][sidx]
 		local spelldata = SpellData[spellid]
-		local start = tracked_players[unit][spellid]
+		local tracked = tracked_players[unit][spellid]
 		local icon
 
 		if spelldata.icon_alliance and faction == "Alliance" then
@@ -1156,7 +1408,7 @@ function Cooldowns:UpdateIcons(unit)
 		elseif spelldata.icon_horde and faction == "Horde" then
 			icon = spelldata.icon_horde
 		else
-			icon = select(3, GetSpellInfo(spellid))
+			icon = spelldata.icon
 		end
 
 		-- set border color
@@ -1173,17 +1425,13 @@ function Cooldowns:UpdateIcons(unit)
 		frame.spellid = spellid
 		frame.spelldata = spelldata
 	 	frame.state = 0
-		frame.start = start
+		frame.tracked = tracked
 		frame.color = c or border_color["none"]
 
 
 		-- refresh
 		CooldownFrame_OnUpdate(frame)
-
-		if start then 
-			frame:SetScript("OnUpdate", CooldownFrame_OnUpdate)
-		end
-
+		frame:SetScript("OnUpdate", CooldownFrame_OnUpdate)
 		frame:Show()
 
 		sidx = sidx + 1
@@ -1218,7 +1466,6 @@ local function CreateCooldownFrame(name, parent)
 	frame.border = frame:CreateTexture(nil, "BACKGROUND") -- overlay
 	frame.border:SetPoint("CENTER")
 	frame.border:SetTexture(1, 1, 1, 1)
-	frame.border:Hide()
 	-- frame.border:SetTexture("Interface\\Buttons\\UI-Debuff-Overlays")
 	-- frame.border:SetTexCoord(0.296875, 0.5703125, 0, 0.515625)
 
@@ -1701,7 +1948,6 @@ function Cooldowns:GetOptions()
 	local args = options.cooldowns.args.cooldowns.args
 	for spellid, spelldata in pairs(SpellData) do
 		if type(spelldata) == "table" then
-			local name, rank, icon = GetSpellInfo(spellid)
 			local basecd = GetSpellBaseCooldown(spellid)
 			local cats = {}
 			if spelldata.cc then tinsert(cats, L["CC"]) end
@@ -1720,14 +1966,14 @@ function Cooldowns:GetOptions()
 
 			local spellconfig = {
 				type="toggle",
-				name=string.format(" |T%s:20|t %s [%ss/%ss] %s", icon, name, spelldata.cooldown, basecd and basecd/1000 or "??", catstr or ""),
+				name=string.format(" |T%s:20|t %s [%ss/%ss] %s", spelldata.icon, spelldata.name, spelldata.cooldown or "??", basecd and basecd/1000 or "??", catstr or ""),
 				desc=GetSpellDescription(spellid),
 				descStyle="inline",
 				width="full",
 				arg=spellid,
 				get=getSpell,
 				set=setSpell,
-				order=name:byte(1)*0xff+name:byte(2),
+				order=spelldata.name:byte(1) * 0xff + spelldata.name:byte(2),
 			}			
 			if spelldata.class then
 				if not args[spelldata.class] then
