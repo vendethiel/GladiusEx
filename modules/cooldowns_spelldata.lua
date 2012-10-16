@@ -14,6 +14,7 @@ local SpellData = {
 	[115450] = {
 		class = "MONK",
 	 	dispel = true,
+	 	cooldown_starts_on_dispel = true,
 		cooldown = 8,
 	},	
 	-- Expel Harm
@@ -518,6 +519,18 @@ local SpellData = {
 
 	-- ================ PRIEST ================
 	-- Priest/baseline
+	-- Fear Ward
+	[6346] = {
+		class = "PRIEST",
+		defensive = true,
+		cooldown = 180
+	},
+	-- Prayer of Mending
+	[33076] = {
+		class = "PRIEST",
+		heal = true,
+		cooldown = 10
+	},
 	-- Hymn of Hope
 	[64901] = {
 		class = "PRIEST",
@@ -536,7 +549,7 @@ local SpellData = {
 		class = "PRIEST",
 		offensive = true,
 		duration = 12,
-		cooldown =  180,
+		cooldown = 180,
 	},
 	-- Leap of Faith
 	[73325] = {
@@ -562,7 +575,7 @@ local SpellData = {
 		class = "PRIEST",
 		talent = true,
 		cc = true,
-		cooldown =  30
+		cooldown = 30
 	},
 	-- Psyfiend
 	[108921] = {
@@ -570,14 +583,15 @@ local SpellData = {
 		talent = true,
 		cc = true,
 		duration = 10,
-		cooldown =  45
+		cooldown = 45
 	},
 	-- Phantasm
-	[108942] = {
+	[114239] = {
 		class = "PRIEST",
 		talent = true,
 		defensive = true,
-		cooldown =  30
+		duration = 3,
+		cooldown = 30
 	},
 	-- Mindbender
 	[123040] = {
@@ -632,7 +646,7 @@ local SpellData = {
 		talent = true,
 		offensive = true,
 		heal = true,
-		cooldown =  15
+		cooldown = 15
 	},
 	-- Halo
 	[120517] = {
@@ -640,10 +654,25 @@ local SpellData = {
 		talent = true,
 		offensive = true,
 		heal = true,
-		cooldown =  40
+		cooldown = 40
 	},
 
 	-- Priest/Discipline
+	-- Holy Fire
+	[14914] = {
+		class = "PRIEST",
+		specID = { [256] = true, [257] = true },
+		offensive = true,
+		cooldown = 10
+	},
+	-- Archangel
+	[81700] = {
+		class = "PRIEST",
+		specID = { [256] = true },
+		heal = true,
+		duration = 18,
+		cooldown = 30
+	},
 	-- Penance
 	[47540] = {
 		class = "PRIEST",

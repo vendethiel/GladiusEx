@@ -29,7 +29,7 @@ local Cooldowns = Gladius:NewGladiusModule("Cooldowns", false, {
 	cooldownsGloss = false,
 	cooldownsGlossColor = { r = 1, g = 1, b = 1, a = 0.4 },
 	cooldownsSpells = { ["*"] = true },
-	cooldownsSpellPriority = {
+	cooldownsCatPriority = {
 		"pvp_trinket",
 		"dispel",
 		"mass_dispel",
@@ -43,7 +43,7 @@ local Cooldowns = Gladius:NewGladiusModule("Cooldowns", false, {
 		"defensive",
 		"heal",
 	},
-	cooldownsSpellColors = {
+	cooldownsCatColors = {
 		["pvp_trinket"] =  { r = 1.0, g = 1.0, b = 1.0 },
 		["dispel"] =       { r = 1.0, g = 1.0, b = 1.0 },
 		["mass_dispel"] =  { r = 1.0, g = 1.0, b = 1.0 },
@@ -53,10 +53,25 @@ local Cooldowns = Gladius:NewGladiusModule("Cooldowns", false, {
 		["stun"] =         { r = 0.0, g = 1.0, b = 1.0 },
 		["knockback"] =    { r = 0.0, g = 1.0, b = 1.0 },
 		["cc"] =           { r = 0.0, g = 1.0, b = 1.0 },
-		["defensive"] =    { r = 0.0, g = 1.0, b = 0.0 },
 		["offensive"] =    { r = 1.0, g = 0.0, b = 0.0 },
+		["defensive"] =    { r = 0.0, g = 1.0, b = 0.0 },
 		["heal"] =         { r = 0.0, g = 1.0, b = 0.0 },
 		["none"]      =    { r = 1.0, g = 1.0, b = 1.0 },
+	},
+	cooldownsCatGroups = {
+		["pvp_trinket"] =  1,
+		["dispel"] =       1,
+		["mass_dispel"] =  1,
+		["immune"] =       1,
+		["interrupt"] =    1,
+		["silence"] =      1,
+		["stun"] =         1,
+		["knockback"] =    1,
+		["cc"] =           1,
+		["offensive"] =    1,
+		["defensive"] =    1,
+		["heal"] =         1,
+		["none"]      =    1,
 	},
 	cooldownsHideTalentsUntilDetected = true,
 })
@@ -329,8 +344,7 @@ function Cooldowns:UpdateIcons(unit)
 		end
 	end
 
-	local spell_priority = Gladius.db.cooldownsSpellPriority
-	local border_color = Gladius.db.cooldownsSpellColors
+	local spell_priority = Gladius.db.cooldownsCatPriority
 
 	local function sortscore(spellid)
 		local spelldata = SpellData[spellid]
@@ -363,13 +377,40 @@ function Cooldowns:UpdateIcons(unit)
 		end)
 
 	-- update icons
+	local border_color = Gladius.db.cooldownsCatColors
+	local cat_groups = Gladius.db.cooldownsCatGroups
+	local cooldownsPerColumn = Gladius.db.cooldownsPerColumn
+
 	local sidx = 1
+	local shown = 0
+	local prev_group
 	for i = 1, #sorted_spells do
 		local spellid = sorted_spells[i]
-		local frame = self.frame[unit][sidx]
 		local spelldata = SpellData[spellid]
 		local tracked = tracked_players[unit][spellid]
 		local icon
+
+		local cat, group
+		for i = 1, #spell_priority do
+			local key = spell_priority[i]
+			if spelldata[key] then
+				cat = key
+				group = cat_groups[cat]
+				break
+			end
+		end
+
+		if prev_group and group ~= prev_group and sidx ~= 1 then
+			local skip = cooldownsPerColumn - ((sidx - 1) % cooldownsPerColumn)
+			for i = 1, skip do
+				self.frame[unit][sidx]:Hide()
+				sidx = sidx + 1
+				if sidx > 40 then return end
+			end
+		end
+		prev_group = group
+		local frame = self.frame[unit][sidx]
+		
 
 		if spelldata.icon_alliance and faction == "Alliance" then
 			icon = spelldata.icon_alliance
@@ -403,7 +444,8 @@ function Cooldowns:UpdateIcons(unit)
 		frame:Show()
 
 		sidx = sidx + 1
-		if sidx > Gladius.db.cooldownsMax then
+		shown = shown + 1
+		if sidx > 40 or shown > Gladius.db.cooldownsMax then
 			break
 		end
 	end
@@ -411,9 +453,6 @@ function Cooldowns:UpdateIcons(unit)
 	-- hide unused icons
 	for i = sidx, #self.frame[unit] do
 		local frame = self.frame[unit][i]
-		frame.start = nil
-		frame.spellid = nil
-		frame.spelldata = nil
 		frame:Hide()
 	end
 end
@@ -795,7 +834,7 @@ function Cooldowns:GetOptions()
 				},
 				cooldown_options = {
 					type="group",
-					name=L["Cooldown options"],
+					name=L["Category"],
 					order=2,
 					args = {
 						cooldownsHideTalentsUntilDetected = {
@@ -818,13 +857,6 @@ function Cooldowns:GetOptions()
 					name=L["Cooldowns"],
 					order=3,
 					args = {
-						--[[
-						preclasssep = {
-							type="group",
-							name="CLASSES",
-							order=0,
-							args={}
-						},]]
 						preracesep = {
 							type="group",
 							name="",
@@ -846,14 +878,14 @@ function Cooldowns:GetOptions()
 	-- fill spell priority list
 	-- yeah, all of this sucks
 	local pargs = options.cooldowns.args.cooldown_options.args.priorities.args
-	for i = 1, #Gladius.db.cooldownsSpellPriority do
-		local cat = Gladius.db.cooldownsSpellPriority[i]
+	for i = 1, #Gladius.db.cooldownsCatPriority do
+		local cat = Gladius.db.cooldownsCatPriority[i]
 		local option = {
 			type="group",
 			name=L[cat],
 			order=function()
-				for i = 1, #Gladius.db.cooldownsSpellPriority do
-					if Gladius.db.cooldownsSpellPriority[i] == cat then return i end
+				for i = 1, #Gladius.db.cooldownsCatPriority do
+					if Gladius.db.cooldownsCatPriority[i] == cat then return i end
 				end
 			end,
 			inline=true,
@@ -862,54 +894,67 @@ function Cooldowns:GetOptions()
 					type="color",
 					name=L["Color"],
 					desc=L["Border color for spells in this category"],
-					width="full",
 					get=function()
-						local c = Gladius.db.cooldownsSpellColors[cat]
+						local c = Gladius.db.cooldownsCatColors[cat]
 						return c.r, c.g, c.b
 					end,
 					set=function(self, r, g, b)
-						Gladius.db.cooldownsSpellColors[cat] = { r = r, g = g, b = b }
+						Gladius.db.cooldownsCatColors[cat] = { r = r, g = g, b = b }
 						Cooldowns:UpdateAllIcons()
 					end,
 					order = 0,
+				},
+				group = {
+					type="range",
+					min=1,
+					max=20,
+					step=1,
+					name=L["Group"],
+					desc=L["Spells in each group have their own row or column"],
+					get=function() return Gladius.db.cooldownsCatGroups[cat] end,
+					set=function(self, value)
+						Gladius.db.cooldownsCatGroups[cat] = value
+						Cooldowns:UpdateAllIcons()
+					end,
+					order = 1,
 				},
 				moveup = {
 					type="execute",
 					name=L["Up"],
 					desc=L["Increase the priority of spells in this category"],
 					func=function()
-						for i = 1, #Gladius.db.cooldownsSpellPriority do
-							if Gladius.db.cooldownsSpellPriority[i] == cat then 
+						for i = 1, #Gladius.db.cooldownsCatPriority do
+							if Gladius.db.cooldownsCatPriority[i] == cat then 
 								if i ~= 1 then
-									local tmp = Gladius.db.cooldownsSpellPriority[i - 1]
-									Gladius.db.cooldownsSpellPriority[i - 1] = Gladius.db.cooldownsSpellPriority[i]
-									Gladius.db.cooldownsSpellPriority[i] = tmp
+									local tmp = Gladius.db.cooldownsCatPriority[i - 1]
+									Gladius.db.cooldownsCatPriority[i - 1] = Gladius.db.cooldownsCatPriority[i]
+									Gladius.db.cooldownsCatPriority[i] = tmp
 									Cooldowns:UpdateAllIcons()
 								end
 								return
 							end
 						end
 					end,
-					order=1,
+					order=10,
 				},
 				movedown = {
 					type="execute",
 					name=L["Down"],
 					desc=L["Decrease the priority of spells in this category"],
 					func=function()
-						for i = 1, #Gladius.db.cooldownsSpellPriority do
-							if Gladius.db.cooldownsSpellPriority[i] == cat then 
-								if i ~= #Gladius.db.cooldownsSpellPriority then
-									local tmp = Gladius.db.cooldownsSpellPriority[i + 1]
-									Gladius.db.cooldownsSpellPriority[i + 1] = Gladius.db.cooldownsSpellPriority[i]
-									Gladius.db.cooldownsSpellPriority[i] = tmp
+						for i = 1, #Gladius.db.cooldownsCatPriority do
+							if Gladius.db.cooldownsCatPriority[i] == cat then 
+								if i ~= #Gladius.db.cooldownsCatPriority then
+									local tmp = Gladius.db.cooldownsCatPriority[i + 1]
+									Gladius.db.cooldownsCatPriority[i + 1] = Gladius.db.cooldownsCatPriority[i]
+									Gladius.db.cooldownsCatPriority[i] = tmp
 									Cooldowns:UpdateAllIcons()
 								end
 								return
 							end
 						end
 					end,
-					order=2,
+					order=11,
 				},
 				enableall = {
 					type="execute",
@@ -925,7 +970,7 @@ function Cooldowns:GetOptions()
 						end
 						self:UpdateAllIcons()
 					end,
-					order=3,
+					order=20,
 				},
 				disableall = {
 					type="execute",
@@ -941,7 +986,7 @@ function Cooldowns:GetOptions()
 						end
 						self:UpdateAllIcons()
 					end,
-					order=4,
+					order=21,
 				},
 			}
 		}
