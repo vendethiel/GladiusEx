@@ -145,7 +145,7 @@ local SpellData = {
 	-- Avert Harm
 	[115213] = {
 		class = "MONK",
-		specID = { [268] = true },
+		specID = 268,
 		defensive = true,
 		duration = 6,
 		cooldown = 180
@@ -153,13 +153,13 @@ local SpellData = {
 	-- Clash
 	[122057] = {
 		class = "MONK",
-		specID = { [268] = true },
+		specID = 268,
 		cooldown = 35
 	},
 	-- Elusive Brew
 	[115308] = {
 		class = "MONK",
-		specID = { [268] = true },
+		specID = 268,
 		defensive = true,
 		duration = 3,
 		cooldown = 9,
@@ -167,7 +167,7 @@ local SpellData = {
 	-- Guard
 	[115295] = {
 		class = "MONK",
-		specID = { [268] = true },
+		specID = 268,
 		defensive = true,
 		duration = 30,
 		cooldown = 30
@@ -175,14 +175,14 @@ local SpellData = {
 	-- Keg Smash
 	[121253] = {
 		class = "MONK",
-		specID = { [268] = true },
+		specID = 268,
 		offensive = true,
 		cooldown = 8
 	},	
 	-- Summon Black Ox
 	[115315] = {
 		class = "MONK",
-		specID = { [268] = true },
+		specID = 268,
 		cooldown = 30
 	},
 
@@ -190,7 +190,7 @@ local SpellData = {
 	-- Energizing Brew
 	[115288] = {
 		class = "MONK",
-		specID = { [269] = true },
+		specID = 269,
 		offensive = true,
 		duration = 6,
 		cooldown = 60,
@@ -198,7 +198,7 @@ local SpellData = {
 	-- Fists of Fury
 	[113656] = {
 		class = "MONK",
-		specID = { [269] = true },
+		specID = 269,
 		offensive = true,
 		duration = 4,
 		cooldown = 25,
@@ -206,14 +206,14 @@ local SpellData = {
 	-- Flying Serpent Kick
 	[101545] = {
 		class = "MONK",
-		specID = { [269] = true },
+		specID = 269,
 		cooldown = 25,
 
 	},
 	-- Rising Sun Kick
 	[107428] = {
 		class = "MONK",
-		specID = { [269] = true },
+		specID = 269,
 		offensive = true,
 		cooldown = 8,
 
@@ -221,7 +221,7 @@ local SpellData = {
 	-- Touch of Karma
 	[122470] = {
 		class = "MONK",
-		specID = { [269] = true },
+		specID = 269,
 		offensive = true,
 		defensive = true,
 		duration = 10,
@@ -232,7 +232,7 @@ local SpellData = {
 	-- Life Cocoon
 	[116849] = {
 		class = "MONK",
-		specID = { [270] = true },
+		specID = 270,
 	 	heal = true,
 		duration = 12,
 		cooldown = 120,
@@ -240,28 +240,28 @@ local SpellData = {
 	-- Renewing Misg
 	[115151] = {
 		class = "MONK",
-		specID = { [270] = true },
+		specID = 270,
 		heal = true,
 		cooldown = 8
 	},	
 	-- Revival
 	[115310] = {
 		class = "MONK",
-		specID = { [270] = true },
+		specID = 270,
 		mass_dispel = true,
 		cooldown = 180
 	},	
 	-- Summon Jade Serpent
 	[115313] = {
 		class = "MONK",
-		specID = { [270] = true },
+		specID = 270,
 		heal = true,
 		cooldown = 30
 	},	
 	-- Thunder Focus Tea
 	[116680] = {
 		class = "MONK",
-		specID = { [270] = true },
+		specID = 270,
 		heal = true,
 		duration = 30,
 		cooldown = 45
@@ -471,7 +471,7 @@ local SpellData = {
 	-- Arcane Power
 	[12042] = {
 		class = "MAGE",
-		specID = { [62] = true },
+		specID = 62,
 		offensive = true,
 		duration = 15,
 		cooldown = 90
@@ -480,7 +480,7 @@ local SpellData = {
 	-- Combustion
 	[11129] = {
 		class = "MAGE",
-		specID = { [63] = true },
+		specID = 63,
 		stun = true,
 		offensive = true,
 		cooldown = 45
@@ -488,7 +488,7 @@ local SpellData = {
 	-- Dragon's Breath
 	[31661] = {
 		class = "MAGE",
-		specID = { [63] = true },
+		specID = 63,
 		cc = true,
 		cooldown = 20
 	},
@@ -496,7 +496,7 @@ local SpellData = {
 	-- Frozen Orb
 	[84714] = {
 		class = "MAGE",
-		specID = { [64] = true },
+		specID = 64,
 		offensive = true,
 		duration = 10,
 		cooldown = 60
@@ -504,7 +504,7 @@ local SpellData = {
 	-- Icy Veins
 	[12472] = {
 		class = "MAGE",
-		specID = { [64] = true },
+		specID = 64,
 		offensive = true,
 		duration = 20,
 		cooldown = 180
@@ -512,7 +512,7 @@ local SpellData = {
 	-- Summon Water Elemental
 	[31687] = {
 		class = "MAGE",
-		specID = { [64] = true },
+		specID = 64,
 		offensive = true,
 		cooldown = 60
 	},
@@ -661,14 +661,14 @@ local SpellData = {
 	-- Holy Fire
 	[14914] = {
 		class = "PRIEST",
-		specID = { [256] = true, [257] = true },
+		specID = { 256, 257 },
 		offensive = true,
 		cooldown = 10
 	},
 	-- Archangel
 	[81700] = {
 		class = "PRIEST",
-		specID = { [256] = true },
+		specID = 256,
 		heal = true,
 		duration = 18,
 		cooldown = 30
@@ -676,7 +676,7 @@ local SpellData = {
 	-- Penance
 	[47540] = {
 		class = "PRIEST",
-		specID = { [256] = true },
+		specID = 256,
 		heal = true,
 		duration = 2,
 		cooldown = 10,
@@ -684,7 +684,7 @@ local SpellData = {
 	-- Inner Focus
 	[89485] = {
 		class = "PRIEST",
-		specID = { [256] = true },
+		specID = 256,
 		defensive = true,
 		cooldown_starts_on_aura_fade = true,
 		sets_cooldown = { spellid = 96267, cooldown = 45 },
@@ -693,7 +693,7 @@ local SpellData = {
 	-- Glyph of Inner Focus
 	[96267] = {
 		class = "PRIEST",
-		specID = { [256] = true },
+		specID = 256,
 		glyph = true,
 		defensive = true,
 		replaces = 89485,
@@ -703,7 +703,7 @@ local SpellData = {
 	-- Pain Suppression
 	[33206] = {
 		class = "PRIEST",
-		specID = { [256] = true },
+		specID = 256,
 		defensive = true,
 		duration = 8,
 		cooldown = 180,
@@ -711,7 +711,7 @@ local SpellData = {
 	-- Power Word: Barrier
 	[62618] = {
 		class = "PRIEST",
-		specID = { [256] = true },
+		specID = 256,
 		defensive = true,
 		duration = 10,
 		cooldown = 180,
@@ -719,7 +719,7 @@ local SpellData = {
 	-- Spirit Shell
 	[109964] = {
 		class = "PRIEST",
-		specID = { [256] = true },
+		specID = 256,
 		defensive = true,
 		duration = 15,
 		cooldown = 60,
@@ -727,7 +727,7 @@ local SpellData = {
 	-- Purify
 	[527] = {
 		class = "PRIEST",
-		specID = { [256] = true, [257] = true },
+		specID = { 256, 257 },
 		dispel = true,
 		cooldown_starts_on_dispel = true,
 		cooldown = 8,
@@ -737,7 +737,7 @@ local SpellData = {
 	-- Guardian Spirit
 	[47788] = {
 		class = "PRIEST",
-		specID = { [257] = true },
+		specID = 257,
 		defensive = true,
 		duration = 10,
 		cooldown = 180,
@@ -745,14 +745,14 @@ local SpellData = {
 	-- Lightwell
 	[724] = {
 		class = "PRIEST",
-		specID = { [257] = true },
+		specID = 257,
 		heal = true,
 		cooldown = 180,
 	},
 	-- Divine Hymn
 	[64843] = {
 		class = "PRIEST",
-		specID = { [257] = true },
+		specID = 257,
 		heal = true,
 		duration = 8,
 		cooldown = 18
@@ -760,7 +760,7 @@ local SpellData = {
 	-- Holy Word: Chastise
 	[88625] = {
 		class = "PRIEST",
-		specID = { [257] = true },
+		specID = 257,
 		cc = true,
 		cooldown = 30
 	},
@@ -769,7 +769,7 @@ local SpellData = {
 	-- Circle of Healing
 	[34861] = {
 		class = "PRIEST",
-		specID = { [257] = true },
+		specID = 257,
 		heal = true,
 		cooldown = 10
 	},
@@ -778,7 +778,7 @@ local SpellData = {
 	-- Dispersion
 	[47585] = {
 		class = "PRIEST",
-		specID = { [258] = true },
+		specID = 258,
 		defensive = true,
 		duration = 6,
 		cooldown = 105, -- 120
@@ -786,14 +786,14 @@ local SpellData = {
 	-- Psychic Horror
 	[64044] = {
 		class = "PRIEST",
-		specID = { [258] = true },
+		specID = 258,
 		cc = true,
 		cooldown = 45
 	},
 	-- Silence
 	[15487] = {
 		class = "PRIEST",
-		specID = { [258] = true },
+		specID = 258,
 		silence = true,
 		cooldown = 45,
 	},
@@ -897,7 +897,7 @@ local SpellData = {
 	-- Vendetta
 	[79140] = {
 		class = "ROGUE",
-		specID = { [259] = true },
+		specID = 259,
 		offensive = true,
 		duration = 20,
 		cooldown = 120
@@ -907,7 +907,7 @@ local SpellData = {
 	-- Adrenaline Rush
 	[13750] = {
 		class = "ROGUE",
-		specID = { [260] = true },
+		specID = 260,
 		offensive = true,
 		duration = 15,
 		cooldown = 180
@@ -915,7 +915,7 @@ local SpellData = {
 	-- Killing Spree
 	[51690] = {
 		class = "ROGUE",
-		specID = { [260] = true },
+		specID = 260,
 		offensive = true,
 		duration = 3,
 		cooldown = 120
@@ -925,14 +925,14 @@ local SpellData = {
     -- Premeditation
     [14183] = {
     	class = "ROGUE",
-    	specID = { [261] = true },
+    	specID = 261,
     	offensive = true,
     	cooldown = 20
     },
     -- Shadow Dance
     [51713] = {
     	class = "ROGUE",
-    	specID = { [261] = true },
+    	specID = 261,
     	offensive = true,
     	duration = 8,
     	cooldown = 60
@@ -1175,7 +1175,7 @@ local SpellData = {
 	-- Colossus Smash
 	[86346] = {
 		class = "WARRIOR",
-		specID = { [71] = true, [72] = true },
+		specID = { 71, 72 },
 		offensive = true,
 		duration = 6,
 		cooldown = 20
@@ -1183,14 +1183,14 @@ local SpellData = {
 	-- Mortal Strike
 	[12294] = {
 		class ="WARRIOR",
-		specID = { [71] = true },
+		specID = 71,
 		offensive = true,
 		cooldown = 6
 	},
 	-- Die by the Sword
 	[118038] = {
 		class = "WARRIOR",
-		specID = { [71] = true, [72] = true },
+		specID = { 71, 72 },
 		defensive = true,
 		duration = 8,
 		cooldown = 120
@@ -1200,7 +1200,7 @@ local SpellData = {
     -- Demoralizing Shout
     [1160] = {
     	class = "WARRIOR",
-    	specID = { [73] = true },
+    	specID = 73,
     	defensive = true,
     	duration = 10,
     	cooldown = 60
@@ -1208,7 +1208,7 @@ local SpellData = {
     -- Last Stand
     [12975] = {
     	class = "WARRIOR",
-    	specID = { [73] = true },
+    	specID = 73,
     	defensive = true,
     	duration = 20,
     	cooldown = 180
@@ -1216,7 +1216,7 @@ local SpellData = {
     -- Shield Barrier
     [112048] = {
     	class = "WARRIOR",
-    	specID = { [73] = true },
+    	specID = 73,
     	defensive = true,
     	duration = 6,
     	cooldown = 90
@@ -1262,12 +1262,14 @@ local SpellData = {
 	-- Cannibalize (Undead)
 	[20577] = {
 		race = "Scourge",
+		heal = true,
 		duration = 10,
 		cooldown = 120,
 	},
 	-- Will of the Forsaken (Undead)
 	[7744] = {
 		race = "Scourge",
+		sets_cooldown = { spellid = 42292, cooldown = 30 }, -- PvP trinket
 		cooldown = 120,
 	},
 	-- Darkflight (Worgen)
@@ -1334,6 +1336,7 @@ local SpellData = {
 		pvp_trinket = true,
 		icon_alliance = [[Interface\Icons\INV_Jewelry_TrinketPVP_01]],
 		icon_horde = [[Interface\Icons\INV_Jewelry_TrinketPVP_02]],
+		sets_cooldown = { spellid = 7744, cooldown = 30 }, -- WofF
 		cooldown = 120,
 	},
 }
@@ -1341,9 +1344,21 @@ local SpellData = {
 -- insert additional info
 for spellid, spelldata in pairs(SpellData) do
 	if type(spelldata) == "table" then
+		-- add name and icon
 		local name, _, icon = GetSpellInfo(spellid)	
 		spelldata.name = name
 		spelldata.icon = icon
+
+		-- convert specID into a more appropiate format for doing lookups
+		if type(spelldata.specID) == "number" then
+			spelldata.specID = { [spelldata.specID] = true }
+		elseif type(spelldata.specID) == "table" then
+			local specs = {}
+			for i=1, #spelldata.specID do
+				specs[spelldata.specID[i]] = true
+			end
+			spelldata.specID = specs
+		end
 	end
 end
 

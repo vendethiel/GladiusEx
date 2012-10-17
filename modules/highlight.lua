@@ -170,7 +170,7 @@ function Highlight:Update(unit)
    
    if (Gladius.db.highlightHover) then      
       -- set scripts
-      button:SetScript("OnEnter", function(f, motion)
+      local onenterhook = function(f, motion)
          if (motion and f:GetAlpha() > 0) then
             for _, m in pairs(Gladius.modules) do
                if (m:IsEnabled() and m.frame and m.frame[unit].highlight) then
@@ -183,9 +183,9 @@ function Highlight:Update(unit)
                end
             end
          end
-      end)
+      end
       
-      button:SetScript("OnLeave", function(f, motion)
+      local onleavehook = function(f, motion)
          if (motion) then
             for _, m in pairs(Gladius.modules) do
                if (m:IsEnabled() and m.frame and m.frame[unit].highlight) then
@@ -193,38 +193,13 @@ function Highlight:Update(unit)
                end
             end
          end
-      end)           
-      
-      secure:SetScript("OnEnter", function(f, motion)
-         if (motion and f:GetAlpha() > 0) then
-            for _, m in pairs(Gladius.modules) do
-               if (m:IsEnabled() and m.frame and m.frame[unit].highlight) then
-                  -- set color
-                  m.frame[unit].highlight:SetVertexColor(Gladius.db.highlightHoverColor.r, Gladius.db.highlightHoverColor.g,
-                     Gladius.db.highlightHoverColor.b, Gladius.db.highlightHoverColor.a)
-                     
-                  -- set alpha
-                  m.frame[unit].highlight:SetAlpha(0.5)
-               end
-            end
-         end
-      end)
-      
-      secure:SetScript("OnLeave", function(f, motion)
-         if (motion) then
-            for _, m in pairs(Gladius.modules) do
-               if (m:IsEnabled() and m.frame and m.frame[unit].highlight) then
-                  m.frame[unit].highlight:SetAlpha(0)
-               end
-            end
-         end
-      end)
-   else
-      button:SetScript("OnEnter", nil)      
-      button:SetScript("OnLeave", nil)     
-      
-      secure:SetScript("OnEnter", nil)      
-      secure:SetScript("OnLeave", nil)
+      end
+
+      button:HookScript("OnEnter", onenterhook)
+      button:HookScript("OnLeave", onleavehook)
+
+      secure:HookScript("OnEnter", onenterhook)
+      secure:HookScript("OnLeave", onleavehook)
    end
 
    -- hide

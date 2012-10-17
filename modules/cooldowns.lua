@@ -6,8 +6,12 @@ local L = Gladius.L
 local LSM
 
 -- global functions
-local tinsert = table.insert
-local pairs = pairs
+local tinsert, tsort = table.insert, table.sort
+local pairs, ipairs, select, type = pairs, ipairs, select, type
+local min, max = math.min, math.max
+local GetTime, UnitExists, UnitFactionGroup, UnitRace = GetTime, UnitExists, UnitFactionGroup, UnitRace
+local UnitGUID = UnitGUID
+ 
 
 local SpellData = Gladius.CooldownsSpellData
 local guid_to_unitid = {} -- [guid] = unitid
@@ -42,6 +46,7 @@ local Cooldowns = Gladius:NewGladiusModule("Cooldowns", false, {
 		"offensive",
 		"defensive",
 		"heal",
+		"uncat"
 	},
 	cooldownsCatColors = {
 		["pvp_trinket"] =  { r = 1.0, g = 1.0, b = 1.0 },
@@ -56,7 +61,7 @@ local Cooldowns = Gladius:NewGladiusModule("Cooldowns", false, {
 		["offensive"] =    { r = 1.0, g = 0.0, b = 0.0 },
 		["defensive"] =    { r = 0.0, g = 1.0, b = 0.0 },
 		["heal"] =         { r = 0.0, g = 1.0, b = 0.0 },
-		["none"]      =    { r = 1.0, g = 1.0, b = 1.0 },
+		["uncat"]      =    { r = 1.0, g = 1.0, b = 1.0 },
 	},
 	cooldownsCatGroups = {
 		["pvp_trinket"] =  1,
@@ -71,10 +76,12 @@ local Cooldowns = Gladius:NewGladiusModule("Cooldowns", false, {
 		["offensive"] =    1,
 		["defensive"] =    1,
 		["heal"] =         1,
-		["none"]      =    1,
+		["uncat"]      =    1,
 	},
 	cooldownsHideTalentsUntilDetected = true,
 })
+
+local MAX_ICONS = 40
 
 function Cooldowns:OnEnable()
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -146,20 +153,22 @@ function Cooldowns:CooldownUsed(event, unit, spellId)
 			tracked_players[unit] = {}
 		end
 
+		local tpu = tracked_players[unit]
+
 		-- check if the same spell cast was detected recently
 		-- if so, we assume that the first detection time is more accurate and ignore this one
-		if tracked_players[unit][spellId] then
+		if tpu[spellId] then
 			if (event == "SPELL_CAST_SUCCESS" or event == "SPELL_AURA_APPLIED") and (
-				(tracked_players[unit][spellId]["SPELL_AURA_APPLIED"] and (tracked_players[unit][spellId]["SPELL_AURA_APPLIED"] + 3) > now) or
-				(tracked_players[unit][spellId]["SPELL_CAST_SUCCESS"] and (tracked_players[unit][spellId]["SPELL_CAST_SUCCESS"] + 3) > now))
+				(tpu[spellId]["SPELL_AURA_APPLIED"] and (tpu[spellId]["SPELL_AURA_APPLIED"] + 3) > now) or
+				(tpu[spellId]["SPELL_CAST_SUCCESS"] and (tpu[spellId]["SPELL_CAST_SUCCESS"] + 3) > now))
 				then
 				return
 			end
 		else
-			tracked_players[unit][spellId] = { detected = true }
+			tpu[spellId] = { detected = true }
 		end
 
-		tracked_players[unit][spellId][event] = now
+		tpu[spellId][event] = now
 
 		-- find what actions are needed
 		local used_start, used_end, cooldown_start
@@ -186,34 +195,42 @@ function Cooldowns:CooldownUsed(event, unit, spellId)
 
 		-- print(UnitName(unit), "used", spelldata.name, "cooldown:", spelldata.cooldown, used_start, used_end, cooldown_start)
 		if used_start then
-			tracked_players[unit][spellId].used_start = now
-			tracked_players[unit][spellId].used_end = spelldata.duration and (now + spelldata.duration)
+			tpu[spellId].used_start = now
+			tpu[spellId].used_end = spelldata.duration and (now + spelldata.duration)
 
 			-- reset other cooldowns (Cold Snap, Preparation)
 			if spelldata.resets then
 				for i = 1, #spelldata.resets do
 					local rspellid = spelldata.resets[i]
-					if tracked_players[unit][rspellid] then
-						tracked_players[unit][rspellid].cooldown_start = 0
-						tracked_players[unit][rspellid].cooldown_end = 0
+					if tpu[rspellid] then
+						tpu[rspellid].cooldown_start = 0
+						tpu[rspellid].cooldown_end = 0
 					end
 				end
 			end
 		end
 		if used_end then
-			tracked_players[unit][spellId].used_end = now
+			tpu[spellId].used_end = now
 		end
 
 		if cooldown_start then
-			tracked_players[unit][spellId].cooldown_start = spelldata.cooldown and now
-			tracked_players[unit][spellId].cooldown_end = spelldata.cooldown and (now + spelldata.cooldown)
+			tpu[spellId].cooldown_start = spelldata.cooldown and now
+			tpu[spellId].cooldown_end = spelldata.cooldown and (now + spelldata.cooldown)
 
+			-- set other cooldowns
 			if spelldata.sets_cooldown then
-				if tracked_players[unit][spelldata.sets_cooldown.spellid] then
-					tracked_players[unit][spelldata.sets_cooldown.spellid].cooldown_start = now
-					tracked_players[unit][spelldata.sets_cooldown.spellid].cooldown_end = now + spelldata.sets_cooldown.cooldown
-					tracked_players[unit][spelldata.sets_cooldown.spellid].used_start = tracked_players[unit][spelldata.sets_cooldown.spellid].used_start or 0
-					tracked_players[unit][spelldata.sets_cooldown.spellid].used_end = tracked_players[unit][spelldata.sets_cooldown.spellid].used_end or 0
+				local cspellid = spelldata.sets_cooldown.spellid
+				local cspelldata = SpellData[cspellid]
+				if (tpu[cspellid] and tpu[cspellid].detected) or (not cspelldata.talent and not cspelldata.glyph) then
+					if not tpu[cspellid] then
+						tpu[cspellid] = {}
+					end
+					if not tpu[cspellid].cooldown_end or (tpu[cspellid].cooldown_end < (now + spelldata.sets_cooldown.cooldown)) then
+						tpu[cspellid].cooldown_start = now
+						tpu[cspellid].cooldown_end = now + spelldata.sets_cooldown.cooldown
+						tpu[cspellid].used_start = tpu[cspellid].used_start or 0
+						tpu[cspellid].used_end = tpu[cspellid].used_end or 0
+					end
 				end
 			end
 		end
@@ -272,9 +289,81 @@ local function CooldownFrame_OnUpdate(frame)
 	frame:SetScript("OnUpdate", nil)
 end
 
+local function SpellSortingChanged()
+	-- remove cached sorting info from spells
+	for spellid, spelldata in pairs(SpellData) do
+		if type(spelldata) == "table" then
+			spelldata.sortscore = nil
+		end
+	end
+end
+
+local function GetSpellSortScore(spellid)
+	local spelldata = SpellData[spellid]
+	
+	if spelldata.replaces then
+		spellid = spelldata.replaces
+		spelldata = SpellData[spelldata.replaces]
+	end
+
+	if spelldata.sortscore then
+		return spelldata.sortscore
+	end
+
+	local cat_priority = Gladius.db.cooldownsCatPriority
+
+	local score = 0
+	local value = 2^30
+	local uncat_score = 0
+
+	for i = 1, #cat_priority do
+		local key = cat_priority[i]
+		if key == "uncat" then
+			uncat_score = value
+		end
+		if spelldata[key] then
+			score = score + value
+		end
+		value = value / 2
+	end
+	if score == 0 then score = uncat_score end
+
+	-- use the decimal part to sort by name. will probably fail in some locales.
+	local len = min(4, spelldata.name:len())
+	local max = 256^len
+	local sum = 0
+	for i = 1, len do
+		sum = bit.bor(bit.lshift(sum, 8), spelldata.name:byte(i))
+	end
+	score = score + (max - sum) / max
+
+	spelldata.sortscore = score
+
+	return score
+end
+
+local function UpdateIcons_AddSpell(spell_list, unit, spellid, spelldata)
+	if not Gladius.db.cooldownsSpells[spellid] then
+		return
+	end
+
+	if (not spelldata.glyph and not spelldata.talent) or (tracked_players[unit][spellid] and tracked_players[unit][spellid].detected) or not Gladius.db.cooldownsHideTalentsUntilDetected then
+		if spelldata.replaces then
+			-- remove replaced spell if detected
+			spell_list[spelldata.replaces] = false
+		end
+		-- do not overwrite if this spell has been replaced
+		if spell_list[spellid] == nil then
+			spell_list[spellid] = true
+		end
+	end
+end
+
 function Cooldowns:UpdateIcons(unit)
 	if not self.frame[unit] then return end
 	if not tracked_players[unit] then tracked_players[unit] = {} end
+
+	local _debugstart = debugprofilestop()
 
 	local now = GetTime()
 
@@ -283,7 +372,7 @@ function Cooldowns:UpdateIcons(unit)
 		specID = Gladius.testing[unit].specID
 		class = Gladius.testing[unit].unitClass
 		race = Gladius.testing[unit].unitRace
-		faction = UnitFactionGroup("player") == "Alliance" and "Horde" or "Alliance"
+		faction = (UnitFactionGroup("player") == "Alliance" and Gladius:IsPartyUnit(unit)) and "Alliance" or "Horde"
 	else
 		specID = Gladius.buttons[unit].specID
 		class = Gladius.buttons[unit].class
@@ -294,44 +383,27 @@ function Cooldowns:UpdateIcons(unit)
 	-- generate list of cooldowns available for this unit
 	local spell_list = {}
 
-	local function add_spell(spellid, spelldata)
-		if not Gladius.db.cooldownsSpells[spellid] then
-			return
-		end
-
-		if (not spelldata.glyph and not spelldata.talent) or (tracked_players[unit][spellid] and tracked_players[unit][spellid].detected) or not Gladius.db.cooldownsHideTalentsUntilDetected then
-			if spelldata.replaces then
-				-- remove replaced spell if detected
-				spell_list[spelldata.replaces] = false
-			end
-			-- do not overwrite if this spell has been replaced
-			if spell_list[spellid] == nil then
-				spell_list[spellid] = true
-			end
-		end
-	end
-
 	for spellid, spelldata in pairs(SpellData) do
 		-- ignore references to other spells
 		if type(spelldata) ~= "number" then
 			if class and class == spelldata.class then
 				if specID and spelldata.specID and spelldata.specID[specID] then
 					-- add spec
-					add_spell(spellid, spelldata)
+					UpdateIcons_AddSpell(spell_list, unit, spellid, spelldata)
 				elseif not spelldata.specID then
 					-- add base
-					add_spell(spellid, spelldata)
+					UpdateIcons_AddSpell(spell_list, unit, spellid, spelldata)
 				end
 			end
 
 			if race and race == spelldata.race then
 				-- add racial
-				add_spell(spellid, spelldata)
+				UpdateIcons_AddSpell(spell_list, unit, spellid, spelldata)
 			end
 
 			if spelldata.item then
 				-- add item
-				add_spell(spellid, spelldata)
+				UpdateIcons_AddSpell(spell_list, unit, spellid, spelldata)
 			end
 		end
 	end
@@ -344,39 +416,13 @@ function Cooldowns:UpdateIcons(unit)
 		end
 	end
 
-	local spell_priority = Gladius.db.cooldownsCatPriority
-
-	local function sortscore(spellid)
-		local spelldata = SpellData[spellid]
-
-		if spelldata.replaces then
-			spellid = spelldata.replaces
-			spelldata = SpellData[spelldata.replaces]
-		end
-
-		local score = 0
-		local value = 2^30
-
-		for i = 1, #spell_priority do
-			local key = spell_priority[i]
-			if spelldata[key] then
-				score = score + value
-			end
-			value = value / 2
-		end
-
-		-- use the decimal part to sort by name. will probably fail in some locales.
-		score = score + ((0xffff - (spelldata.name:byte(1) * 0xff + spelldata.name:byte(2))) / 0xffff)
-
-		return score
-	end
-
-	table.sort(sorted_spells,
+	tsort(sorted_spells,
 		function(a, b)
-			return sortscore(a) > sortscore(b)
+			return GetSpellSortScore(a) > GetSpellSortScore(b)
 		end)
 
 	-- update icons
+	local cat_priority = Gladius.db.cooldownsCatPriority
 	local border_color = Gladius.db.cooldownsCatColors
 	local cat_groups = Gladius.db.cooldownsCatGroups
 	local cooldownsPerColumn = Gladius.db.cooldownsPerColumn
@@ -391,26 +437,31 @@ function Cooldowns:UpdateIcons(unit)
 		local icon
 
 		local cat, group
-		for i = 1, #spell_priority do
-			local key = spell_priority[i]
+		for i = 1, #cat_priority do
+			local key = cat_priority[i]
 			if spelldata[key] then
 				cat = key
 				group = cat_groups[cat]
 				break
 			end
 		end
+		if not cat and not group then
+			cat = "uncat"
+			group = cat_groups["uncat"]
+		end
 
 		if prev_group and group ~= prev_group and sidx ~= 1 then
 			local skip = cooldownsPerColumn - ((sidx - 1) % cooldownsPerColumn)
-			for i = 1, skip do
-				self.frame[unit][sidx]:Hide()
-				sidx = sidx + 1
-				if sidx > 40 then return end
+			if skip ~= cooldownsPerColumn then
+				for i = 1, skip do
+					self.frame[unit][sidx]:Hide()
+					sidx = sidx + 1
+					if sidx > #self.frame[unit] then return end
+				end
 			end
 		end
 		prev_group = group
 		local frame = self.frame[unit][sidx]
-		
 
 		if spelldata.icon_alliance and faction == "Alliance" then
 			icon = spelldata.icon_alliance
@@ -422,7 +473,7 @@ function Cooldowns:UpdateIcons(unit)
 
 		-- set border color
 		local c
-		for _, key in ipairs(spell_priority) do
+		for _, key in ipairs(cat_priority) do
 			if spelldata[key] then
 				c = border_color[key]
 				break
@@ -435,17 +486,16 @@ function Cooldowns:UpdateIcons(unit)
 		frame.spelldata = spelldata
 	 	frame.state = 0
 		frame.tracked = tracked
-		frame.color = c or border_color["none"]
+		frame.color = c or border_color["uncat"]
 
 
 		-- refresh
-		CooldownFrame_OnUpdate(frame)
 		frame:SetScript("OnUpdate", CooldownFrame_OnUpdate)
 		frame:Show()
 
 		sidx = sidx + 1
 		shown = shown + 1
-		if sidx > 40 or shown > Gladius.db.cooldownsMax then
+		if sidx > #self.frame[unit] or shown >= Gladius.db.cooldownsMax then
 			break
 		end
 	end
@@ -455,6 +505,9 @@ function Cooldowns:UpdateIcons(unit)
 		local frame = self.frame[unit][i]
 		frame:Hide()
 	end
+
+	local _debugstop = debugprofilestop()
+	-- print("UpdateIcons for", unit, "done in", _debugstop - _debugstart)
 end
 
 function Cooldowns:UpdateAllIcons()
@@ -466,15 +519,12 @@ end
 local function CreateCooldownFrame(name, parent)
 	local frame = CreateFrame("Frame", name, parent)
 	frame.icon = frame:CreateTexture(nil, "BORDER") -- bg
-	-- frame.icon:SetAllPoints()
 	frame.icon:SetPoint("CENTER")
 	frame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
 
 	frame.border = frame:CreateTexture(nil, "BACKGROUND") -- overlay
 	frame.border:SetPoint("CENTER")
 	frame.border:SetTexture(1, 1, 1, 1)
-	-- frame.border:SetTexture("Interface\\Buttons\\UI-Debuff-Overlays")
-	-- frame.border:SetTexCoord(0.296875, 0.5703125, 0, 0.515625)
 
 	frame.cooldown = CreateFrame("Cooldown", nil, frame)
 	frame.cooldown:SetAllPoints(frame.icon)
@@ -520,7 +570,7 @@ function Cooldowns:CreateFrame(unit)
 		self.frame[unit] = CreateFrame("Frame", "Gladius" .. self.name .. "frame" .. unit, button)
 		self.frame[unit]:EnableMouse(false)
 
-		for i=1, 40 do
+		for i=1, MAX_ICONS do
 			self.frame[unit][i] = CreateCooldownFrame("Gladius" .. self.name .. "frameIcon" .. i .. unit, self.frame[unit])
 			self.frame[unit][i]:SetScript("OnUpdate", CooldownFrame_OnUpdate)
 			self.frame[unit][i]:Hide()
@@ -569,14 +619,14 @@ function Cooldowns:UpdateCooldownGroup(
 		grow1, grow2, grow3, startRelPoint = "BOTTOMRIGHT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT"
 	end
 
-	for i=1, 40 do
+	for i=1, #cooldownFrame do
 		cooldownFrame[i]:ClearAllPoints()
 
 		if (cooldownMax >= i) then
 			if (start == 1) then
-			anchor, parent, relativePoint, offsetX, offsetY = grow1, startAnchor, startRelPoint, 0, strfind(cooldownGrow, "DOWN") and -cooldownSpacingY or cooldownSpacingY
+			anchor, parent, relativePoint, offsetX, offsetY = grow1, startAnchor, startRelPoint, 0, string.find(cooldownGrow, "DOWN") and -cooldownSpacingY or cooldownSpacingY
 			else
-			anchor, parent, relativePoint, offsetX, offsetY = grow1, cooldownFrame[i-1], grow3, strfind(cooldownGrow, "LEFT") and -cooldownSpacingX or cooldownSpacingX, 0
+			anchor, parent, relativePoint, offsetX, offsetY = grow1, cooldownFrame[i-1], grow3, string.find(cooldownGrow, "LEFT") and -cooldownSpacingX or cooldownSpacingX, 0
 
 			if (start == cooldownPerColumn) then
 				start = 0
@@ -654,7 +704,7 @@ function Cooldowns:Reset(unit)
 		-- hide cooldown frame
 		self.frame[unit]:Hide()
 
-		for i = 1, 40 do
+		for i = 1, #self.frame[unit] do
 			self.frame[unit][i]:Hide()
 		end
 	end
@@ -716,7 +766,7 @@ function Cooldowns:GetOptions()
 							type="range",
 							name=L["Cooldown Icons Max"],
 							desc=L["Number of max cooldowns"],
-							min=1, max=40, step=1,
+							min=1, max=MAX_ICONS, step=1,
 							disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
 							order=20,
 						},  
@@ -843,11 +893,39 @@ function Cooldowns:GetOptions()
 							width="full",
 							order=1
 						},
+						enableall = {
+							type="execute",
+							name=L["Enable all"],
+							desc=L["Enable all the spells"],
+							func=function()
+								for spellid, spelldata in pairs(SpellData) do
+									if type(spelldata) == "table" then
+										Gladius.db.cooldownsSpells[spellid] = true
+									end
+								end
+								self:UpdateAllIcons()
+							end,
+							order=2,
+						},
+						disableall = {
+							type="execute",
+							name=L["Disable all"],
+							desc=L["Disable all the spells"],
+							func=function()
+								for spellid, spelldata in pairs(SpellData) do
+									if type(spelldata) == "table" then
+										Gladius.db.cooldownsSpells[spellid] = false
+									end
+								end
+								self:UpdateAllIcons()
+							end,
+							order=3,
+						},
 						priorities = {
 							type="group",
-							name=L["Cooldown sorting"],
-							order=2,
+							name=L["Categories"],
 							inline=true,
+							order=4,
 							args={},
 						},
 					},
@@ -929,6 +1007,8 @@ function Cooldowns:GetOptions()
 									local tmp = Gladius.db.cooldownsCatPriority[i - 1]
 									Gladius.db.cooldownsCatPriority[i - 1] = Gladius.db.cooldownsCatPriority[i]
 									Gladius.db.cooldownsCatPriority[i] = tmp
+
+									SpellSortingChanged()
 									Cooldowns:UpdateAllIcons()
 								end
 								return
@@ -948,6 +1028,8 @@ function Cooldowns:GetOptions()
 									local tmp = Gladius.db.cooldownsCatPriority[i + 1]
 									Gladius.db.cooldownsCatPriority[i + 1] = Gladius.db.cooldownsCatPriority[i]
 									Gladius.db.cooldownsCatPriority[i] = tmp
+
+									SpellSortingChanged()
 									Cooldowns:UpdateAllIcons()
 								end
 								return

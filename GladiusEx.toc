@@ -2,7 +2,7 @@
 ## Title: GladiusEx
 ## Notes: Arena unit frames
 ## SavedVariables: GladiusExDB
-## OptionalDeps: Ace3, DRData-1.0, LibStub, LibSharedMedia-3.0, Gladius
+## OptionalDeps: Ace3, DRData-1.0, LibStub, LibSharedMedia-3.0, Clique, Gladius
 
 embeds.xml
 
@@ -18,7 +18,6 @@ modules\powerbar.lua
 modules\castbar.lua
 modules\auras.lua
 modules\classicon.lua
-modules\trinket.lua
 modules\highlight.lua
 modules\clicks.lua
 modules\targetbar.lua

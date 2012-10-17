@@ -119,9 +119,6 @@ function DRTracker:UpdateIcon(unit, drCat)
    tracked.texture:SetPoint("TOPLEFT", tracked, "TOPLEFT")
    tracked.texture:SetPoint("BOTTOMRIGHT", tracked, "BOTTOMRIGHT")
    tracked.texture:SetTexCoord(0.07, 0.93, 0.07, 0.93)
-   
-   tracked.normalTexture:SetVertexColor(Gladius.db.trinketGlossColor.r, Gladius.db.trinketGlossColor.g, 
-      Gladius.db.trinketGlossColor.b, Gladius.db.trinketGloss and Gladius.db.trinketGlossColor.a or 0)
 end
 
 function DRTracker:DRFaded(unit, spellID)

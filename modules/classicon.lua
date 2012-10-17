@@ -32,7 +32,7 @@ local ClassIcon = Gladius:NewGladiusModule("ClassIcon", false, {
 
 function ClassIcon:OnEnable()   
    self:RegisterEvent("UNIT_AURA")
-   self:RegisterEvent("GLADIUS_SPEC_UPDATE")
+   self:RegisterMessage("GLADIUS_SPEC_UPDATE")
    
    self.version = 1
    
@@ -48,6 +48,7 @@ end
 
 function ClassIcon:OnDisable()
    self:UnregisterAllEvents()
+   self:UnregisterAllMessages()
    
    for unit in pairs(self.frame) do
       self.frame[unit]:SetAlpha(0)
@@ -153,7 +154,6 @@ function ClassIcon:UpdateAura(unit)
    elseif (not aura and self.frame[unit].priority > 0) then
       -- reset
       self.frame[unit].priority = 0 
-      
       self:SetClassIcon(unit)
    elseif (not aura) then
       self:SetClassIcon(unit)
@@ -166,21 +166,31 @@ function ClassIcon:SetClassIcon(unit)
    -- Gladius:Call(Gladius.modules.Timer, "HideTimer", self.frame[unit])
 
    -- get unit class
-   local class
-   if not Gladius:IsTesting() then
+   local class, specID
+   if not Gladius:IsTesting() or UnitExists(unit) then
       class = select(2, UnitClass(unit))
       -- check for arena prep info
       if not class then
          class = Gladius.buttons[unit].class
       end
+      specID = Gladius.buttons[unit].specID
    else
       class = Gladius.testing[unit].unitClass
+      specID = Gladius.testing[unit].specID
    end
 
    if (class) then
-      self.frame[unit].texture:SetTexture("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes")
+      local left, right, top, bottom 
+
+      if Gladius.db.classIconSpecIcons and specID then
+         local icon = select(4, GetSpecializationInfoByID(specID))
+         self.frame[unit].texture:SetTexture(icon)
+         left, right, top, bottom  = 0, 1, 0, 1
+      else
+         self.frame[unit].texture:SetTexture("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes")
+         left, right, top, bottom = unpack(CLASS_BUTTONS[class])
+      end
       
-      local left, right, top, bottom = unpack(CLASS_BUTTONS[class])
    
       -- Crop class icon borders
       if (Gladius.db.classIconCrop) then
@@ -209,9 +219,6 @@ function ClassIcon:CreateFrame(unit)
 end
 
 function ClassIcon:Update(unit)
-   -- TODO: check why we need this >_<
-   self.frame = self.frame or {}
-
    -- create frame
    if (not self.frame[unit]) then 
       self:CreateFrame(unit)
@@ -318,6 +325,7 @@ function ClassIcon:Show(unit)
    self.frame[unit]:SetAlpha(1)
    
    -- set class icon
+   self:SetClassIcon(unit)
    self:UpdateAura(unit)
 end
 
@@ -419,14 +427,14 @@ function ClassIcon:GetOptions()
                args = {
                   classIconImportantAuras = {
                      type="toggle",
-                     name=L["Class Icon Important Auras"],
+                     name=L["Important Auras"],
                      desc=L["Show important auras instead of the class icon"],
                      disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
                      order=5,
                   },
                   classIconCrop = {
                      type="toggle",
-                     name=L["Class Icon Crop Borders"],
+                     name=L["Crop Borders"],
                      desc=L["Toggle if the class icon borders should be cropped or not."],
                      disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
                      hidden=function() return not Gladius.db.advancedOptions end,
@@ -434,7 +442,8 @@ function ClassIcon:GetOptions()
                   },
                   classIconSpecIcons = {
                      type="toggle",
-                     name=L["Show spec instead of class icons"],
+                     name=L["Spec Icons"],
+                     desc=L["When available, show specialization instead of class icons"],
                      disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
                      order=7,
                   },

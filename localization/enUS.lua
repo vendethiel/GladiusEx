@@ -564,6 +564,7 @@ do
          ["knockback"] = "Knockback",
          ["stun"] = "Stun",
          ["immune"] = "Immune",
+         ["uncat"] = "Uncategorized",
 
          ["maxhealthTag"] = "Max Health",
          ["maxpower:shortTag"] = "Max Power (Short)",

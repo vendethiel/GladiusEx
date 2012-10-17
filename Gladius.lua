@@ -490,6 +490,8 @@ function Gladius:PLAYER_SPECIALIZATION_CHANGED(event, unit)
 end
 
 function Gladius:CheckUnitSpecialization(unit)
+	log("CheckUnitSpecialization", unit)
+
 	if unit == "player" then
 		local spec = GetSpecialization()
 		specID = GetSpecializationInfo(spec)
@@ -555,7 +557,7 @@ function Gladius:TestUnit(unit)
 		end
 	end
 	
-	-- disable secure frame in test mode so we can move the frame
+	-- lower secure frame in test mode so we can move the frame
 	self.buttons[unit]:SetFrameStrata("LOW")     
 	self.buttons[unit].secure:SetFrameStrata("BACKGROUND")
 end
@@ -692,9 +694,10 @@ function Gladius:CreateUnit(unit)
 	end)
 	
 	-- secure button
-	button.secure = CreateFrame("Button", "GladiusButton" .. unit, button, "SecureActionButtonTemplate")
-	button.secure:RegisterForClicks("AnyUp")
+	button.secure = CreateFrame("Button", "GladiusSecureButton" .. unit, button, "SecureActionButtonTemplate")
 	button.secure:SetAttribute("unit", unit)
+	button.secure:RegisterForClicks("AnyUp")
+	button.secure:SetAttribute("*type1", "target")
 	
 	-- clique support
 	ClickCastFrames = ClickCastFrames or {}
