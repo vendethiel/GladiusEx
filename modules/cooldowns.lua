@@ -115,6 +115,14 @@ function Cooldowns:GetAttachFrame(unit, point)
 	return self.frame[unit]
 end
 
+function Cooldowns:PLAYER_ENTERING_WORLD()
+	local instanceType = select(2, IsInInstance())
+
+	-- reset cooldowns when joining an arena
+	if instanceType == "arena" then
+		tracked_players = {}
+	end
+end
 
 function Cooldowns:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, rank, lineaID, spellId)
 	self:CooldownUsed("SPELL_CAST_SUCCESS", unit, spellId)

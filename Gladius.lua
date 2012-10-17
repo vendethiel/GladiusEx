@@ -374,8 +374,13 @@ function Gladius:HideFrames()
 
 	-- hide frames instead of just setting alpha to 0
 	for unit, button in pairs(self.buttons) do
+		-- hide frames
 		self:HideUnit(unit)
 		button:Hide()
+		-- reset spec data
+		button.class = nil
+		button.spec = nil
+		button.specID = nil
 	end
 
 	self.arena_parent:Hide()
@@ -492,7 +497,7 @@ end
 function Gladius:PLAYER_SPECIALIZATION_CHANGED(event, unit)
 	log(event, unit)
 
-	self:CheckUnitSpecialization(unit)
+	self:CheckUnitSpecialization(unit or "player")
 end
 
 function Gladius:CheckUnitSpecialization(unit)
@@ -608,10 +613,6 @@ function Gladius:HideUnit(unit)
 
 	log("HideUnit", unit)
 	
-	-- self.buttons[unit].class = nil
-	-- self.buttons[unit].spec = nil
-	-- self.buttons[unit].specID = nil
-
 	for name, m in self:IterateModules() do
 		if (m:IsEnabled()) then
 			if m.Reset then
