@@ -281,8 +281,10 @@ function Gladius:UpdatePartyFrames()
 		local unit = "party" .. i
 		if group_members > i then
 			self:UpdateUnit(unit)
-			if self:IsTesting() or UnitExists(unit) then
-				self:ShowUnit(unit)
+			self:ShowUnit(unit)
+
+			if not self:IsTesting() and not UnitExists(unit) then
+				self:HideUnit(unit)
 			end
 
 			-- test environment
@@ -310,9 +312,13 @@ function Gladius:UpdateArenaFrames()
 		local unit = "arena" .. i
 		if numOpps >= i then
 			self:UpdateUnit(unit)
-			if self:IsTesting() or UnitGUID(unit) then
-				self:ShowUnit(unit)
+			self:ShowUnit(unit)
+
+			--[[
+			if not self:IsTesting() and not UnitGUID(unit) then
+				self:HideUnit(unit)
 			end
+			]]
 
 			-- test environment
 			if self:IsTesting() then
@@ -602,9 +608,9 @@ function Gladius:HideUnit(unit)
 
 	log("HideUnit", unit)
 	
-	self.buttons[unit].class = nil
-	self.buttons[unit].spec = nil
-	self.buttons[unit].specID = nil
+	-- self.buttons[unit].class = nil
+	-- self.buttons[unit].spec = nil
+	-- self.buttons[unit].specID = nil
 
 	for name, m in self:IterateModules() do
 		if (m:IsEnabled()) then

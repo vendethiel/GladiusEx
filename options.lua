@@ -27,6 +27,7 @@ Gladius.defaults = {
       globalFont = "Friz Quadrata TT",
       barWidth = 160,
       frameScale = 1,
+      log = {},
    },
 }
 

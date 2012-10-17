@@ -74,7 +74,9 @@ end
 
 function Announcements:GLADIUS_SPEC_UPDATE(event, unit)
    if (not strfind(unit, "arena") or strfind(unit, "pet") or not Gladius.db.announcements.spec) then return end
-   self:Send(string.format(L["SPEC DETECTED: %s (%s)"], UnitName(unit) or unit, Gladius.buttons[unit].spec), 2, unit)
+   if Gladius.buttons[unit].spec then
+      self:Send(string.format(L["SPEC DETECTED: %s (%s)"], UnitName(unit) or unit, Gladius.buttons[unit].spec), 2, unit)
+   end
 end
 
 function Announcements:UNIT_HEALTH(event, unit)
