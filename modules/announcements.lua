@@ -1,8 +1,9 @@
-local Gladius = _G.Gladius
-if not Gladius then
-  DEFAULT_CHAT_FRAME:AddMessage(format("Module %s requires Gladius", "Announcements"))
+local GladiusEx = _G.GladiusEx
+if not GladiusEx then
+   DEFAULT_CHAT_FRAME:AddMessage(format("Module %s requires Gladius", "Announcements"))
 end
-local L = Gladius.L
+
+local L = GladiusEx.L
 
 -- global functions
 local strfind = string.find
@@ -13,7 +14,7 @@ local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 local GetSpellInfo = GetSpellInfo
 local GetRealNumPartyMembers, GetRealNumRaidMembers, IsRaidLeader, IsRaidOfficer = GetRealNumPartyMembers, GetRealNumRaidMembers, IsRaidLeader, IsRaidOfficer
 
-local Announcements = Gladius:NewGladiusModule("Announcements", false, {
+local Announcements = GladiusEx:NewGladiusExModule("Announcements", false, {
    announcements = {
       drinks = true,
       enemies = true,
@@ -59,7 +60,7 @@ end
 
 function Announcements:UNIT_NAME_UPDATE(event, unit)
    if (not strfind(unit, "arena") or strfind(unit, "pet")) then return end
-   if (not Gladius.db.announcements.enemies or not UnitName(unit)) then return end
+   if (not GladiusEx.db.announcements.enemies or not UnitName(unit)) then return end
    
    local name = UnitName(unit)
    if (name == UNKNOWN or name == nil) then
@@ -73,24 +74,24 @@ function Announcements:UNIT_NAME_UPDATE(event, unit)
 end
 
 function Announcements:GLADIUS_SPEC_UPDATE(event, unit)
-   if (not strfind(unit, "arena") or strfind(unit, "pet") or not Gladius.db.announcements.spec) then return end
-   if Gladius.buttons[unit].spec then
-      self:Send(string.format(L["SPEC DETECTED: %s (%s)"], UnitName(unit) or unit, Gladius.buttons[unit].spec), 2, unit)
+   if (not strfind(unit, "arena") or strfind(unit, "pet") or not GladiusEx.db.announcements.spec) then return end
+   if GladiusEx.buttons[unit].spec then
+      self:Send(string.format(L["SPEC DETECTED: %s (%s)"], UnitName(unit) or unit, GladiusEx.buttons[unit].spec), 2, unit)
    end
 end
 
 function Announcements:UNIT_HEALTH(event, unit)
-   if (not strfind(unit, "arena") or strfind(unit, "pet") or not Gladius.db.announcements.health) then return end
+   if (not strfind(unit, "arena") or strfind(unit, "pet") or not GladiusEx.db.announcements.health) then return end
    
    local healthPercent = math.floor((UnitHealth(unit) / UnitHealthMax(unit)) * 100)
-   if (healthPercent < Gladius.db.announcements.healthThreshold) then
+   if (healthPercent < GladiusEx.db.announcements.healthThreshold) then
       self:Send(string.format(L["LOW HEALTH: %s (%s)"], UnitName(unit), UnitClass(unit)), 10, unit)
    end
 end
 
 local DRINK_SPELL = GetSpellInfo(57073)
 function Announcements:UNIT_AURA(event, unit)
-   if (not strfind(unit, "arena") or strfind(unit, "pet") or not Gladius.db.announcements.drinks) then return end
+   if (not strfind(unit, "arena") or strfind(unit, "pet") or not GladiusEx.db.announcements.drinks) then return end
    
    if (UnitAura(unit, DRINK_SPELL)) then
       self:Send(string.format(L["DRINKING: %s (%s)"], UnitName(unit), UnitClass(unit)), 2, unit)
@@ -104,7 +105,7 @@ local RES_SPELLS = {
 	[GetSpellInfo(7328)] = true -- Redemption
 }
 function Announcements:UNIT_SPELLCAST_START(event, unit, spell, rank)
-   if (not strfind(unit, "arena") or strfind(unit, "pet") or not Gladius.db.announcements.resurrect) then return end
+   if (not strfind(unit, "arena") or strfind(unit, "pet") or not GladiusEx.db.announcements.resurrect) then return end
    
    if (RES_SPELLS[spell]) then
       self:Send(string.format(L["RESURRECTING: %s (%s)"], UnitName(unit), UnitClass(unit)), 2, unit)
@@ -115,7 +116,7 @@ end
 -- Param unit is only used for class coloring of messages
 function Announcements:Send(msg, throttle, unit)
    local color = unit and RAID_CLASS_COLORS[UnitClass(unit)] or { r=0, g=1, b=0 }
-   local dest = Gladius.db.announcements.dest
+   local dest = GladiusEx.db.announcements.dest
    
    if (not self.throttled) then
       self.throttled = {}
@@ -172,11 +173,11 @@ function Announcements:Send(msg, throttle, unit)
 end
 
 local function getOption(info)
-   return Gladius.dbi.profile.announcements[info[#info]]
+   return GladiusEx.dbi.profile.announcements[info[#info]]
 end
 
 local function setOption(info, value)
-   Gladius.dbi.profile.announcements[info[#info]] = value
+   GladiusEx.dbi.profile.announcements[info[#info]] = value
 end
 
 function Announcements:GetOptions()
@@ -198,7 +199,7 @@ function Announcements:GetOptions()
          order=1,
          get=getOption,
          set=setOption,
-         disabled=function() return not Gladius.db.modules[self.name] end,
+         disabled=function() return not GladiusEx.db.modules[self.name] end,
          args = {
             options = {
                type="group",
@@ -217,7 +218,7 @@ function Announcements:GetOptions()
                      type="range",
                      name=L["Low health threshold"],
                      desc=L["Choose how low an enemy must be before low health is announced."],
-                     disabled=function() return not Gladius.db.announcements.health end,
+                     disabled=function() return not GladiusEx.db.announcements.health end,
                      min=1,
                      max=100,
                      step=1,

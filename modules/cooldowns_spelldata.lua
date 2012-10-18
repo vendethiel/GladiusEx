@@ -1362,4 +1362,4 @@ for spellid, spelldata in pairs(SpellData) do
 	end
 end
 
-Gladius.CooldownsSpellData = SpellData
+GladiusEx.CooldownsSpellData = SpellData

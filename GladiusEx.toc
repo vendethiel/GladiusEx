@@ -6,7 +6,7 @@
 
 embeds.xml
 
-Gladius.lua
+GladiusEx.lua
 
 localization\deDE.lua
 localization\enUS.lua

@@ -3,14 +3,9 @@ local type, pairs = type, pairs
 local strfind, max = string.find, math.max
 local UnitIsDeadOrGhost, UnitGUID = UnitIsDeadOrGhost, UnitGUID
 
-if Gladius then
-	DEFAULT_CHAT_FRAME:AddMessage("GladiusEx cannot be used while Gladius is enabled")
-	return
-end
+GladiusEx = LibStub("AceAddon-3.0"):NewAddon("GladiusEx", "AceEvent-3.0")
 
-Gladius = LibStub("AceAddon-3.0"):NewAddon("Gladius", "AceEvent-3.0")
-
-Gladius.defaults = {}
+GladiusEx.defaults = {}
 
 local arena_units = {
 	["arena1"] = true,
@@ -34,9 +29,9 @@ local L
 local log_frame
 local logging = false
 local function log(...)
-	if not Gladius.db.debug then return end
+	if not GladiusEx.db.debug then return end
 	if not log_frame then
-		log_frame = CreateFrame("ScrollingMessageFrame", "GladiusLogFrame")
+		log_frame = CreateFrame("ScrollingMessageFrame", "GladiusExLogFrame")
 
 		log_frame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 10, -50)
 
@@ -56,7 +51,7 @@ local function log(...)
 	end
 	local p = ...
 	if p == "ENABLE LOGGING" then
-		Gladius.db.log = {}
+		GladiusEx.db.log = {}
 		logging = true
 		log_frame.starttime = GetTime()
 	elseif p == "DISABLE LOGGING" then
@@ -66,22 +61,22 @@ local function log(...)
 	local msg = string.format("[%.1f] %s", GetTime() - log_frame.starttime, strjoin(" ", tostringall(...)))
 
 	if logging then
-		table.insert(Gladius.db.log, msg)
+		table.insert(GladiusEx.db.log, msg)
 	end
 
 	log_frame:AddMessage(msg)
 end
 
-function Gladius:Log(...)
+function GladiusEx:Log(...)
 	log(...)
 end
 
-function Gladius:Debug(...)
-	print("|cff33ff99Gladius|r:", ...)
+function GladiusEx:Debug(...)
+	print("|cff33ff99GladiusEx|r:", ...)
 end
 
-function Gladius:Print(...)
-	print("|cff33ff99Gladius|r:", ...)
+function GladiusEx:Print(...)
+	print("|cff33ff99GladiusEx|r:", ...)
 end
 
 local modulePrototype = {}
@@ -89,7 +84,7 @@ local modulePrototype = {}
 function modulePrototype:GetAttachPoints()
 	-- get module list for frame anchor
 	local t = { ["Frame"] = L["Frame"] }
-	for name, m in Gladius:IterateModules() do
+	for name, m in GladiusEx:IterateModules() do
 		if m ~= self and m:IsEnabled() then
 			local points = m.GetModuleAttachPoints and m:GetModuleAttachPoints()
 			if points then
@@ -103,10 +98,10 @@ function modulePrototype:GetAttachPoints()
 	return t
 end
 
-Gladius:SetDefaultModulePrototype(modulePrototype)
-Gladius:SetDefaultModuleLibraries("AceEvent-3.0")
+GladiusEx:SetDefaultModulePrototype(modulePrototype)
+GladiusEx:SetDefaultModuleLibraries("AceEvent-3.0")
 
-function Gladius:NewGladiusModule(name, isbar, defaults, ...)
+function GladiusEx:NewGladiusExModule(name, isbar, defaults, ...)
 	local module = self:NewModule(name, ...)
 	module.defaults = defaults
 	module.isBarOption = isbar
@@ -120,7 +115,7 @@ function Gladius:NewGladiusModule(name, isbar, defaults, ...)
 	return module
 end
 
-function Gladius:GetAttachFrame(unit, point)
+function GladiusEx:GetAttachFrame(unit, point)
 	-- get parent frame
 	if (point == "Frame") then
 		return self.buttons[unit]
@@ -139,7 +134,7 @@ function Gladius:GetAttachFrame(unit, point)
 	return nil
 end
 
-function Gladius:OnInitialize()
+function GladiusEx:OnInitialize()
 	-- setup db
 	self.dbi = LibStub("AceDB-3.0"):New("GladiusExDB", self.defaults)
 	self.dbi.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
@@ -186,7 +181,7 @@ function Gladius:OnInitialize()
 	self.buttons = {}
 end
 
-function Gladius:OnEnable()
+function GladiusEx:OnEnable()
 	-- register the appropriate events
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("ARENA_OPPONENT_UPDATE")
@@ -217,7 +212,7 @@ function Gladius:OnEnable()
 
 	-- display help message
 	if (not self.db.locked and not self.db.x["arena1"] and not self.db.y["arena1"] and not self.db.x["anchor_arena"] and not self.db.y["anchor_arena"]) then
-		self:Print(L["Welcome to Gladius!"])
+		self:Print(L["Welcome to GladiusEx!"])
 		self:Print(L["First run has been detected, displaying test frame."])
 		self:Print(L["Valid slash commands are:"])
 		self:Print(L["/gladius ui"])
@@ -231,24 +226,24 @@ function Gladius:OnEnable()
 	
 	-- see if we are already in arena
 	if IsLoggedIn() then
-		Gladius:PLAYER_ENTERING_WORLD()
+		GladiusEx:PLAYER_ENTERING_WORLD()
 	end
 end
 
-function Gladius:OnDisable()
+function GladiusEx:OnDisable()
 	self:HideFrames()
 	self:UnregisterAllEvents()
 end
 
-function Gladius:OnProfileChanged(event, database, newProfileKey)
+function GladiusEx:OnProfileChanged(event, database, newProfileKey)
 	-- update frame on profile change
 	self.db = self.dbi.profile
 
 	self:UpdateFrames()
 end
 
-function Gladius:SetTesting(count)
-	Gladius.test = count
+function GladiusEx:SetTesting(count)
+	self.test = count
 
 	if count then
 		self:ShowFrames()
@@ -257,11 +252,11 @@ function Gladius:SetTesting(count)
 	end
 end
 
-function Gladius:IsTesting()
-	return Gladius.test
+function GladiusEx:IsTesting()
+	return self.test
 end
 
-function Gladius:GetArenaSize()
+function GladiusEx:GetArenaSize()
 	-- try to guess the current arena size
 	local guess = max(2, GetNumArenaOpponents(), GetNumArenaOpponentSpecs(), GetNumGroupMembers())
 	
@@ -272,7 +267,7 @@ function Gladius:GetArenaSize()
 	return guess
 end
 
-function Gladius:UpdatePartyFrames()
+function GladiusEx:UpdatePartyFrames()
 	local group_members = self:IsTesting() or self:GetArenaSize()
 
 	log("UpdatePartyFrames", group_members)
@@ -303,7 +298,7 @@ function Gladius:UpdatePartyFrames()
 	self:UpdateBackground(group_members)
 end
 
-function Gladius:UpdateArenaFrames()
+function GladiusEx:UpdateArenaFrames()
 	local numOpps = self:IsTesting() or self:GetArenaSize()
 
 	log("UpdateArenaFrames:", numOpps, GetNumArenaOpponents(), GetNumArenaOpponentSpecs())
@@ -336,7 +331,7 @@ function Gladius:UpdateArenaFrames()
 	self:UpdateBackground(numOpps)
 end
 
-function Gladius:UpdateFrames()
+function GladiusEx:UpdateFrames()
 	log("UpdateFrames")
 
 	self:UpdateUnit("player")
@@ -346,7 +341,7 @@ function Gladius:UpdateFrames()
 	self:UpdateArenaFrames()
 end
 
-function Gladius:ShowFrames()
+function GladiusEx:ShowFrames()
 	log("ShowFrames")
 
 	-- background
@@ -369,7 +364,7 @@ function Gladius:ShowFrames()
 	end
 end
 
-function Gladius:HideFrames()
+function GladiusEx:HideFrames()
 	log("HideFrames")
 
 	-- hide frames instead of just setting alpha to 0
@@ -387,15 +382,15 @@ function Gladius:HideFrames()
 	self.party_parent:Hide()
 end
 
-function Gladius:IsPartyShown()
+function GladiusEx:IsPartyShown()
 	return self.party_parent:IsShown()
 end
 
-function Gladius:IsArenaShown()
+function GladiusEx:IsArenaShown()
 	return self.arena_parent:IsShown()
 end
 
-function Gladius:PLAYER_ENTERING_WORLD()
+function GladiusEx:PLAYER_ENTERING_WORLD()
 	local instanceType = select(2, IsInInstance())
 	log("PLAYER_ENTERING_WORLD", instanceType)
 
@@ -412,7 +407,7 @@ function Gladius:PLAYER_ENTERING_WORLD()
 	end
 end
 
-function Gladius:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
+function GladiusEx:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
 	local numOpps = GetNumArenaOpponentSpecs()
 
 	log("ARENA_PREP_OPPONENT_SPECIALIZATIONS", numOpps)
@@ -427,7 +422,7 @@ function Gladius:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
 	self:UpdateArenaFrames()
 end
 
-function Gladius:ARENA_OPPONENT_UPDATE(event, unit, type)
+function GladiusEx:ARENA_OPPONENT_UPDATE(event, unit, type)
 	log(event, unit, type)
 	if type == "seen" or type == "destroyed" then
 		self:UpdateShowUnit(unit)
@@ -445,19 +440,19 @@ function Gladius:ARENA_OPPONENT_UPDATE(event, unit, type)
 	end
 end
 
-function Gladius:GROUP_ROSTER_UPDATE()
+function GladiusEx:GROUP_ROSTER_UPDATE()
 	--if self:IsPartyShown() then
 	--   self:UpdatePartyFrames()
 	--end
 	self:UpdateFrames()
 end
 
-function Gladius:PLAYER_REGEN_ENABLED()
+function GladiusEx:PLAYER_REGEN_ENABLED()
 	log("PLAYER_REGEN_ENABLED")
 	self:UpdateFrames()
 end
 
-function Gladius:UNIT_NAME_UPDATE(event, unit)
+function GladiusEx:UNIT_NAME_UPDATE(event, unit)
 	if not self.buttons[unit] then return end
 
 	log("UNIT_NAME_UPDATE", unit)
@@ -465,7 +460,7 @@ function Gladius:UNIT_NAME_UPDATE(event, unit)
 	self:UpdateShowUnit(unit)
 end
 
-function Gladius:UNIT_HEALTH(event, unit)
+function GladiusEx:UNIT_HEALTH(event, unit)
 	if not self.buttons[unit] then return end
 	
 	if UnitIsDeadOrGhost(unit) then
@@ -474,7 +469,7 @@ function Gladius:UNIT_HEALTH(event, unit)
 end
 
 local last_inspect = {}
-function Gladius:INSPECT_READY(event, guid)
+function GladiusEx:INSPECT_READY(event, guid)
 	for u, _ in pairs(party_units) do
 		if UnitGUID(u) == guid then
 			log("INSPECT_READY", u)
@@ -494,13 +489,13 @@ function Gladius:INSPECT_READY(event, guid)
 	end
 end
 
-function Gladius:PLAYER_SPECIALIZATION_CHANGED(event, unit)
+function GladiusEx:PLAYER_SPECIALIZATION_CHANGED(event, unit)
 	log(event, unit)
 
 	self:CheckUnitSpecialization(unit or "player")
 end
 
-function Gladius:CheckUnitSpecialization(unit)
+function GladiusEx:CheckUnitSpecialization(unit)
 	log("CheckUnitSpecialization", unit)
 
 	if unit == "player" then
@@ -515,7 +510,7 @@ function Gladius:CheckUnitSpecialization(unit)
 	self:UpdateUnitSpecialization(unit, specID)
 end
 
-function Gladius:UpdateUnitSpecialization(unitid, specID)
+function GladiusEx:UpdateUnitSpecialization(unitid, specID)
 	log("UpdateUnitSpecialization", unitid, specID)
 
 	local _, class, spec
@@ -526,7 +521,7 @@ function Gladius:UpdateUnitSpecialization(unitid, specID)
 
 	specID = specID > 0 and specID or nil
 
-	if self.buttons[unitid].specID ~= specID then
+	if self.buttons[unitid] and self.buttons[unitid].specID ~= specID then
 		self.buttons[unitid].class = class
 		self.buttons[unitid].spec = spec
 		self.buttons[unitid].specID = specID
@@ -537,24 +532,24 @@ function Gladius:UpdateUnitSpecialization(unitid, specID)
 	end
 end
 
-function Gladius:IsHandledUnit(unit)
+function GladiusEx:IsHandledUnit(unit)
 	return arena_units[unit] or party_units[unit]
 end
 
-function Gladius:IsArenaUnit(unit)
+function GladiusEx:IsArenaUnit(unit)
 	return arena_units[unit]
 end
 
-function Gladius:IsPartyUnit(unit)
+function GladiusEx:IsPartyUnit(unit)
 	return party_units[unit]
 end
 
-function Gladius:InitializeUnit(unit)
+function GladiusEx:InitializeUnit(unit)
 	self:CreateUnit(unit)
 	self:UpdateUnit(unit)
 end
 
-function Gladius:TestUnit(unit)
+function GladiusEx:TestUnit(unit)
 	if not self:IsHandledUnit(unit) then return end
 
 	log("TestUnit", unit)
@@ -573,13 +568,13 @@ function Gladius:TestUnit(unit)
 	self.buttons[unit].secure:SetFrameStrata("BACKGROUND")
 end
 
-function Gladius:UpdateShowUnit(unit)
+function GladiusEx:UpdateShowUnit(unit)
 	if UnitGUID(unit) then
 		self:ShowUnit(unit)
 	end
 end
 
-function Gladius:ShowUnit(unit)
+function GladiusEx:ShowUnit(unit)
 	if (not self.buttons[unit]) then return end
 
 	log("ShowUnit", unit, self.buttons[unit]:GetAlpha(), self.buttons[unit]:IsShown())
@@ -608,7 +603,7 @@ function Gladius:ShowUnit(unit)
 	end
 end
 
-function Gladius:HideUnit(unit)
+function GladiusEx:HideUnit(unit)
 	if (not self.buttons[unit]) then return end
 
 	log("HideUnit", unit)
@@ -634,10 +629,10 @@ function Gladius:HideUnit(unit)
 	]]
 end
 
-function Gladius:CreateUnit(unit)
+function GladiusEx:CreateUnit(unit)
 	if not self.party_parent then
-		self.party_parent = CreateFrame("Frame", "GladiusPartyFrame", UIParent)
-		self.arena_parent = CreateFrame("Frame", "GladiusArenaFrame", UIParent)
+		self.party_parent = CreateFrame("Frame", "GladiusExPartyFrame", UIParent)
+		self.arena_parent = CreateFrame("Frame", "GladiusExArenaFrame", UIParent)
 
 		self.party_parent:SetSize(1, 1)
 		self.arena_parent:SetSize(1, 1)
@@ -657,7 +652,7 @@ function Gladius:CreateUnit(unit)
 		self.background_party = background
 	end
 
-	local button = CreateFrame("Frame", "GladiusButtonFrame" .. unit, self:IsArenaUnit(unit) and self.arena_parent or self.party_parent)
+	local button = CreateFrame("Frame", "GladiusExButtonFrame" .. unit, self:IsArenaUnit(unit) and self.arena_parent or self.party_parent)
 	self.buttons[unit] = button
 
 	-- hide
@@ -701,25 +696,26 @@ function Gladius:CreateUnit(unit)
 	end)
 	
 	-- secure button
-	button.secure = CreateFrame("Button", "GladiusSecureButton" .. unit, button, "SecureActionButtonTemplate")
+	button.secure = CreateFrame("Button", "GladiusExSecureButton" .. unit, button, "SecureActionButtonTemplate")
 	button.secure:SetAttribute("unit", unit)
 	button.secure:RegisterForClicks("AnyUp")
 	button.secure:SetAttribute("*type1", "target")
+	button.secure:SetAttribute("*type2", "focus")
 	
 	-- clique support
 	ClickCastFrames = ClickCastFrames or {}
 	ClickCastFrames[button.secure] = true
 end
 
-function Gladius:CreateAnchor(unit)
+function GladiusEx:CreateAnchor(unit)
 	-- background
-	local background = CreateFrame("Frame", "GladiusButtonBackground" .. unit, self:IsArenaUnit(unit) and self.arena_parent or self.party_parent)
+	local background = CreateFrame("Frame", "GladiusExButtonBackground" .. unit, self:IsArenaUnit(unit) and self.arena_parent or self.party_parent)
 	background:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16,})
 	background:SetBackdropColor(self.db.backgroundColor.r, self.db.backgroundColor.g, self.db.backgroundColor.b, self.db.backgroundColor.a)
 	
 	background:SetFrameStrata("BACKGROUND")
 
-	local anchor = CreateFrame("Frame", "GladiusButtonAnchor" .. unit, self:IsArenaUnit(unit) and self.arena_parent or self.party_parent)
+	local anchor = CreateFrame("Frame", "GladiusExButtonAnchor" .. unit, self:IsArenaUnit(unit) and self.arena_parent or self.party_parent)
 	anchor:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16,})
 	anchor:SetBackdropColor(0, 0, 0, 1)
 	anchor:SetFrameStrata("MEDIUM")
@@ -753,12 +749,12 @@ function Gladius:CreateAnchor(unit)
 		self.db.y[self:IsArenaUnit(unit) and "anchor_arena" or "anchor_party"] = f:GetTop() * scale
 	end)
 	
-	anchor.text = anchor:CreateFontString("GladiusButtonAnchorText", "OVERLAY")
+	anchor.text = anchor:CreateFontString("GladiusExButtonAnchorText", "OVERLAY")
 
 	return anchor, background
 end
 
-function Gladius:UpdateBackground(maxUnits)
+function GladiusEx:UpdateBackground(maxUnits)
 	-- update background size
 	if self.db.growDirection == "UP" or self.db.growDirection == "DOWN" then
 		-- vertical
@@ -774,7 +770,7 @@ function Gladius:UpdateBackground(maxUnits)
 	end
 end
 
-function Gladius:UpdateUnit(unit, module)
+function GladiusEx:UpdateUnit(unit, module)
 	if not self:IsHandledUnit(unit) then return end
 
 	log("UpdateUnit", unit)
@@ -887,13 +883,13 @@ function Gladius:UpdateUnit(unit, module)
 		end
 	  
 		anchor.text:SetPoint("CENTER", anchor, "CENTER")
-		anchor.text:SetFont(self.LSM:Fetch(self.LSM.MediaType.FONT, Gladius.db.globalFont), (Gladius.db.useGlobalFontSize and Gladius.db.globalFontSize or 11))
+		anchor.text:SetFont(self.LSM:Fetch(self.LSM.MediaType.FONT, self.db.globalFont), (self.db.useGlobalFontSize and self.db.globalFontSize or 11))
 		anchor.text:SetTextColor(1, 1, 1, 1)
 		
 		anchor.text:SetShadowOffset(1, -1)
 		anchor.text:SetShadowColor(0, 0, 0, 1)   
 		
-		anchor.text:SetText(unit == "player" and L["Gladius Party Anchor - click to move"] or L["Gladius Enemy Anchor - click to move"])
+		anchor.text:SetText(unit == "player" and L["GladiusEx Party Anchor - click to move"] or L["GladiusEx Enemy Anchor - click to move"])
 		
 		if (self.db.groupButtons and not self.db.locked) then
 			anchor:Show()
@@ -931,7 +927,7 @@ function Gladius:UpdateUnit(unit, module)
 	end
 end
 
-function Gladius:CenterUnitPosition(unit, numFrames)
+function GladiusEx:CenterUnitPosition(unit, numFrames)
 	if InCombatLockdown() then
 		log("CenterUnitPosition: aborting due to InCombatLockdown")
 		return

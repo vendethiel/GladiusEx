@@ -1,8 +1,8 @@
-local Gladius = _G.Gladius
-if not Gladius then
+local GladiusEx = _G.GladiusEx
+if not GladiusEx then
   DEFAULT_CHAT_FRAME:AddMessage(format("Module %s requires Gladius", "Cooldowns"))
 end
-local L = Gladius.L
+local L = GladiusEx.L
 local LSM
 
 -- global functions
@@ -13,12 +13,12 @@ local GetTime, UnitExists, UnitFactionGroup, UnitRace = GetTime, UnitExists, Uni
 local UnitGUID = UnitGUID
  
 
-local SpellData = Gladius.CooldownsSpellData
+local SpellData = GladiusEx.CooldownsSpellData
 local guid_to_unitid = {} -- [guid] = unitid
 local tracked_players = {} -- [unit][spellid] = cd start time
 
 
-local Cooldowns = Gladius:NewGladiusModule("Cooldowns", false, {
+local Cooldowns = GladiusEx:NewGladiusExModule("Cooldowns", false, {
 	cooldownsAttachTo = "CastBarIcon",
 	cooldownsAnchor = "TOPLEFT",
 	cooldownsRelativePoint = "BOTTOMLEFT",
@@ -88,7 +88,7 @@ function Cooldowns:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 	self:RegisterMessage("GLADIUS_SPEC_UPDATE")
 
-	LSM = Gladius.LSM
+	LSM = GladiusEx.LSM
 
 	self.frame = self.frame or {}
 end
@@ -99,7 +99,7 @@ function Cooldowns:OnDisable()
 end
 
 function Cooldowns:GetAttachTo()
-	return Gladius.db.cooldownsAttachTo
+	return GladiusEx.db.cooldownsAttachTo
 end
 
 function Cooldowns:GetModuleAttachPoints()
@@ -318,7 +318,7 @@ local function GetSpellSortScore(spellid)
 		return spelldata.sortscore
 	end
 
-	local cat_priority = Gladius.db.cooldownsCatPriority
+	local cat_priority = GladiusEx.db.cooldownsCatPriority
 
 	local score = 0
 	local value = 2^30
@@ -351,11 +351,11 @@ local function GetSpellSortScore(spellid)
 end
 
 local function UpdateIcons_AddSpell(spell_list, unit, spellid, spelldata)
-	if not Gladius.db.cooldownsSpells[spellid] then
+	if not GladiusEx.db.cooldownsSpells[spellid] then
 		return
 	end
 
-	if (not spelldata.glyph and not spelldata.talent) or (tracked_players[unit][spellid] and tracked_players[unit][spellid].detected) or not Gladius.db.cooldownsHideTalentsUntilDetected then
+	if (not spelldata.glyph and not spelldata.talent) or (tracked_players[unit][spellid] and tracked_players[unit][spellid].detected) or not GladiusEx.db.cooldownsHideTalentsUntilDetected then
 		if spelldata.replaces then
 			-- remove replaced spell if detected
 			spell_list[spelldata.replaces] = false
@@ -376,14 +376,14 @@ function Cooldowns:UpdateIcons(unit)
 	local now = GetTime()
 
 	local specID, class, race, faction
-	if Gladius:IsTesting() and not UnitExists(unit) then
-		specID = Gladius.testing[unit].specID
-		class = Gladius.testing[unit].unitClass
-		race = Gladius.testing[unit].unitRace
-		faction = (UnitFactionGroup("player") == "Alliance" and Gladius:IsPartyUnit(unit)) and "Alliance" or "Horde"
+	if GladiusEx:IsTesting() and not UnitExists(unit) then
+		specID = GladiusEx.testing[unit].specID
+		class = GladiusEx.testing[unit].unitClass
+		race = GladiusEx.testing[unit].unitRace
+		faction = (UnitFactionGroup("player") == "Alliance" and GladiusEx:IsPartyUnit(unit)) and "Alliance" or "Horde"
 	else
-		specID = Gladius.buttons[unit].specID
-		class = Gladius.buttons[unit].class
+		specID = GladiusEx.buttons[unit].specID
+		class = GladiusEx.buttons[unit].class
 		race = select(2, UnitRace(unit))
 		faction = UnitFactionGroup(unit)
 	end
@@ -430,10 +430,10 @@ function Cooldowns:UpdateIcons(unit)
 		end)
 
 	-- update icons
-	local cat_priority = Gladius.db.cooldownsCatPriority
-	local border_color = Gladius.db.cooldownsCatColors
-	local cat_groups = Gladius.db.cooldownsCatGroups
-	local cooldownsPerColumn = Gladius.db.cooldownsPerColumn
+	local cat_priority = GladiusEx.db.cooldownsCatPriority
+	local border_color = GladiusEx.db.cooldownsCatColors
+	local cat_groups = GladiusEx.db.cooldownsCatGroups
+	local cooldownsPerColumn = GladiusEx.db.cooldownsPerColumn
 
 	local sidx = 1
 	local shown = 0
@@ -503,7 +503,7 @@ function Cooldowns:UpdateIcons(unit)
 
 		sidx = sidx + 1
 		shown = shown + 1
-		if sidx > #self.frame[unit] or shown >= Gladius.db.cooldownsMax then
+		if sidx > #self.frame[unit] or shown >= GladiusEx.db.cooldownsMax then
 			break
 		end
 	end
@@ -540,7 +540,7 @@ local function CreateCooldownFrame(name, parent)
 	frame.cooldown:Hide()
 
 	frame.count = frame:CreateFontString(nil, "OVERLAY")
-	frame.count:SetFont(LSM:Fetch(LSM.MediaType.FONT, Gladius.db.globalFont), 10, "OUTLINE")
+	frame.count:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.globalFont), 10, "OUTLINE")
 	frame.count:SetTextColor(1, 1, 1, 1)
 	frame.count:SetShadowColor(0, 0, 0, 1.0)
 	frame.count:SetShadowOffset(0.50, -0.50)
@@ -570,7 +570,7 @@ local function UpdateCooldownFrame(frame, size)
 end
 
 function Cooldowns:CreateFrame(unit)
-	local button = Gladius.buttons[unit]
+	local button = GladiusEx.buttons[unit]
 	if (not button) then return end
 
 	-- create cooldown frame
@@ -604,7 +604,7 @@ function Cooldowns:UpdateCooldownGroup(
 	cooldownFrame:ClearAllPoints()
 
 	-- anchor point 
-	local parent = Gladius:GetAttachFrame(unit, cooldownAttachTo)
+	local parent = GladiusEx:GetAttachFrame(unit, cooldownAttachTo)
 	cooldownFrame:SetPoint(cooldownAnchor, parent, cooldownRelativePoint, cooldownOffsetX, cooldownOffsetY)
 
 	-- size
@@ -678,17 +678,17 @@ function Cooldowns:Update(unit)
 
 	-- update cooldown frame 
 	self:UpdateCooldownGroup(self.frame[unit], unit,
-		Gladius.db.cooldownsAttachTo,
-		Gladius.db.cooldownsAnchor,
-		Gladius.db.cooldownsRelativePoint,
-		Gladius.db.cooldownsOffsetX,
-		Gladius.db.cooldownsOffsetY,
-		Gladius.db.cooldownsPerColumn,
-		Gladius.db.cooldownsGrow,
-		Gladius.db.cooldownsSize,
-		Gladius.db.cooldownsSpacingX,
-		Gladius.db.cooldownsSpacingY,
-		Gladius.db.cooldownsMax)
+		GladiusEx.db.cooldownsAttachTo,
+		GladiusEx.db.cooldownsAnchor,
+		GladiusEx.db.cooldownsRelativePoint,
+		GladiusEx.db.cooldownsOffsetX,
+		GladiusEx.db.cooldownsOffsetY,
+		GladiusEx.db.cooldownsPerColumn,
+		GladiusEx.db.cooldownsGrow,
+		GladiusEx.db.cooldownsSize,
+		GladiusEx.db.cooldownsSpacingX,
+		GladiusEx.db.cooldownsSpacingY,
+		GladiusEx.db.cooldownsMax)
 
 	-- update icons
 	self:UpdateIcons(unit)
@@ -753,7 +753,7 @@ function Cooldowns:GetOptions()
 									["DOWNRIGHT"] = L["Down Right"],
 							}
 							end,
-							disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+							disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
 							order=10,
 						}, 
 						sep = {
@@ -767,7 +767,7 @@ function Cooldowns:GetOptions()
 							name=L["Cooldown Icons Per Column"],
 							desc=L["Number of cooldown icons per column"],
 							min=1, max=50, step=1,
-							disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+							disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
 							order=15,
 						},
 						cooldownsMax = {
@@ -775,7 +775,7 @@ function Cooldowns:GetOptions()
 							name=L["Cooldown Icons Max"],
 							desc=L["Number of max cooldowns"],
 							min=1, max=MAX_ICONS, step=1,
-							disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+							disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
 							order=20,
 						},  
 						sep2 = {
@@ -798,7 +798,7 @@ function Cooldowns:GetOptions()
 								name=L["Cooldown Icon Size"],
 								desc=L["Size of the cooldown icons"],
 								min=10, max=100, step=1,
-								disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+								disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
 								order=5,
 							},
 							sep = {
@@ -812,14 +812,14 @@ function Cooldowns:GetOptions()
 								name=L["Cooldowns Spacing Vertical"],
 								desc=L["Vertical spacing of the cooldowns"],
 								min=0, max=30, step=1,
-								disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+								disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
 								order=15,
 							},
 							cooldownsSpacingX = {
 								type="range",
 								name=L["Cooldowns Spacing Horizontal"],
 								desc=L["Horizontal spacing of the cooldowns"],
-								disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+								disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
 								min=0, max=30, step=1,
 								order=20,
 							},
@@ -830,7 +830,7 @@ function Cooldowns:GetOptions()
 						name=L["Position"],
 						desc=L["Position settings"],  
 						inline=true,
-						hidden=function() return not Gladius.db.advancedOptions end,
+						hidden=function() return not GladiusEx.db.advancedOptions end,
 						order=3,
 						args = {
 							cooldownsAttachTo = {
@@ -838,7 +838,7 @@ function Cooldowns:GetOptions()
 								name=L["Cooldowns Attach To"],
 								desc=L["Attach cooldowns to the given frame"],
 								values=function() return Cooldowns:GetAttachPoints() end,
-								disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+								disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
 								width="double",
 								order=5,
 							},
@@ -852,16 +852,16 @@ function Cooldowns:GetOptions()
 								type="select",
 								name=L["Cooldowns Anchor"],
 								desc=L["Anchor of the cooldowns"],
-								values=function() return Gladius:GetPositions() end,
-								disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+								values=function() return GladiusEx:GetPositions() end,
+								disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
 								order=10,
 							},
 							cooldownsRelativePoint = {
 								type="select",
 								name=L["Cooldowns Relative Point"],
 								desc=L["Relative point of the cooldowns"],
-								values=function() return Gladius:GetPositions() end,
-								disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+								values=function() return GladiusEx:GetPositions() end,
+								disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
 								order=15,
 							},
 							sep2 = {
@@ -875,14 +875,14 @@ function Cooldowns:GetOptions()
 								name=L["Cooldowns Offset X"],
 								desc=L["X offset of the cooldowns"],
 								min=-100, max=100, step=1,
-								disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+								disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
 								order=20,
 							},
 							cooldownsOffsetY = {
 								type="range",
 								name=L["Cooldowns Offset Y"],
 								desc=L["Y  offset of the cooldowns"],
-								disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+								disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
 								min=-50, max=50, step=1,
 								order=25,
 							},
@@ -908,7 +908,7 @@ function Cooldowns:GetOptions()
 							func=function()
 								for spellid, spelldata in pairs(SpellData) do
 									if type(spelldata) == "table" then
-										Gladius.db.cooldownsSpells[spellid] = true
+										GladiusEx.db.cooldownsSpells[spellid] = true
 									end
 								end
 								self:UpdateAllIcons()
@@ -922,7 +922,7 @@ function Cooldowns:GetOptions()
 							func=function()
 								for spellid, spelldata in pairs(SpellData) do
 									if type(spelldata) == "table" then
-										Gladius.db.cooldownsSpells[spellid] = false
+										GladiusEx.db.cooldownsSpells[spellid] = false
 									end
 								end
 								self:UpdateAllIcons()
@@ -964,14 +964,14 @@ function Cooldowns:GetOptions()
 	-- fill spell priority list
 	-- yeah, all of this sucks
 	local pargs = options.cooldowns.args.cooldown_options.args.priorities.args
-	for i = 1, #Gladius.db.cooldownsCatPriority do
-		local cat = Gladius.db.cooldownsCatPriority[i]
+	for i = 1, #GladiusEx.db.cooldownsCatPriority do
+		local cat = GladiusEx.db.cooldownsCatPriority[i]
 		local option = {
 			type="group",
 			name=L[cat],
 			order=function()
-				for i = 1, #Gladius.db.cooldownsCatPriority do
-					if Gladius.db.cooldownsCatPriority[i] == cat then return i end
+				for i = 1, #GladiusEx.db.cooldownsCatPriority do
+					if GladiusEx.db.cooldownsCatPriority[i] == cat then return i end
 				end
 			end,
 			inline=true,
@@ -981,11 +981,11 @@ function Cooldowns:GetOptions()
 					name=L["Color"],
 					desc=L["Border color for spells in this category"],
 					get=function()
-						local c = Gladius.db.cooldownsCatColors[cat]
+						local c = GladiusEx.db.cooldownsCatColors[cat]
 						return c.r, c.g, c.b
 					end,
 					set=function(self, r, g, b)
-						Gladius.db.cooldownsCatColors[cat] = { r = r, g = g, b = b }
+						GladiusEx.db.cooldownsCatColors[cat] = { r = r, g = g, b = b }
 						Cooldowns:UpdateAllIcons()
 					end,
 					order = 0,
@@ -997,9 +997,9 @@ function Cooldowns:GetOptions()
 					step=1,
 					name=L["Group"],
 					desc=L["Spells in each group have their own row or column"],
-					get=function() return Gladius.db.cooldownsCatGroups[cat] end,
+					get=function() return GladiusEx.db.cooldownsCatGroups[cat] end,
 					set=function(self, value)
-						Gladius.db.cooldownsCatGroups[cat] = value
+						GladiusEx.db.cooldownsCatGroups[cat] = value
 						Cooldowns:UpdateAllIcons()
 					end,
 					order = 1,
@@ -1009,12 +1009,12 @@ function Cooldowns:GetOptions()
 					name=L["Up"],
 					desc=L["Increase the priority of spells in this category"],
 					func=function()
-						for i = 1, #Gladius.db.cooldownsCatPriority do
-							if Gladius.db.cooldownsCatPriority[i] == cat then 
+						for i = 1, #GladiusEx.db.cooldownsCatPriority do
+							if GladiusEx.db.cooldownsCatPriority[i] == cat then 
 								if i ~= 1 then
-									local tmp = Gladius.db.cooldownsCatPriority[i - 1]
-									Gladius.db.cooldownsCatPriority[i - 1] = Gladius.db.cooldownsCatPriority[i]
-									Gladius.db.cooldownsCatPriority[i] = tmp
+									local tmp = GladiusEx.db.cooldownsCatPriority[i - 1]
+									GladiusEx.db.cooldownsCatPriority[i - 1] = GladiusEx.db.cooldownsCatPriority[i]
+									GladiusEx.db.cooldownsCatPriority[i] = tmp
 
 									SpellSortingChanged()
 									Cooldowns:UpdateAllIcons()
@@ -1030,12 +1030,12 @@ function Cooldowns:GetOptions()
 					name=L["Down"],
 					desc=L["Decrease the priority of spells in this category"],
 					func=function()
-						for i = 1, #Gladius.db.cooldownsCatPriority do
-							if Gladius.db.cooldownsCatPriority[i] == cat then 
-								if i ~= #Gladius.db.cooldownsCatPriority then
-									local tmp = Gladius.db.cooldownsCatPriority[i + 1]
-									Gladius.db.cooldownsCatPriority[i + 1] = Gladius.db.cooldownsCatPriority[i]
-									Gladius.db.cooldownsCatPriority[i] = tmp
+						for i = 1, #GladiusEx.db.cooldownsCatPriority do
+							if GladiusEx.db.cooldownsCatPriority[i] == cat then 
+								if i ~= #GladiusEx.db.cooldownsCatPriority then
+									local tmp = GladiusEx.db.cooldownsCatPriority[i + 1]
+									GladiusEx.db.cooldownsCatPriority[i + 1] = GladiusEx.db.cooldownsCatPriority[i]
+									GladiusEx.db.cooldownsCatPriority[i] = tmp
 
 									SpellSortingChanged()
 									Cooldowns:UpdateAllIcons()
@@ -1054,7 +1054,7 @@ function Cooldowns:GetOptions()
 						for spellid, spelldata in pairs(SpellData) do
 							if type(spelldata) == "table" then
 								if spelldata[cat] then
-									Gladius.db.cooldownsSpells[spellid] = true
+									GladiusEx.db.cooldownsSpells[spellid] = true
 								end
 							end
 						end
@@ -1070,7 +1070,7 @@ function Cooldowns:GetOptions()
 						for spellid, spelldata in pairs(SpellData) do
 							if type(spelldata) == "table" then
 								if spelldata[cat] then
-									Gladius.db.cooldownsSpells[spellid] = false
+									GladiusEx.db.cooldownsSpells[spellid] = false
 								end
 							end
 						end
@@ -1086,11 +1086,11 @@ function Cooldowns:GetOptions()
 
 	-- fill spell data
 	local function getSpell(info)
-		return Gladius.db.cooldownsSpells[info.arg]
+		return GladiusEx.db.cooldownsSpells[info.arg]
 	end
 
 	local function setSpell(info, value)
-		Gladius.db.cooldownsSpells[info.arg] = value
+		GladiusEx.db.cooldownsSpells[info.arg] = value
 		self:UpdateAllIcons()
 	end
 

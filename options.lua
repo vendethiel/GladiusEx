@@ -2,9 +2,9 @@
 local pairs = pairs
 local type = type
 
-local L = Gladius.L
+local L = GladiusEx.L
 
-Gladius.defaults = {
+GladiusEx.defaults = {
    profile = {
       x = {},
       y = {},
@@ -64,56 +64,56 @@ SlashCmdList["GLADIUS"] = function(msg)
          end
       end
       
-      Gladius:SetTesting(test)
+      GladiusEx:SetTesting(test)
    elseif (msg == "" or msg == "options" or msg == "config" or msg == "ui") then
       AceDialog = AceDialog or LibStub("AceConfigDialog-3.0")
       AceRegistry = AceRegistry or LibStub("AceConfigRegistry-3.0")
       
-      if (not Gladius.options) then
-         Gladius:SetupOptions()
+      if (not GladiusEx.options) then
+         GladiusEx:SetupOptions()
          AceDialog:SetDefaultSize("Gladius", 830, 530)
       end
       
       AceDialog:Open("Gladius")
    elseif msg == "hide" then
       -- hide buttons
-      Gladius:HideFrames()
+      GladiusEx:HideFrames()
    elseif (msg == "reset") then
       -- reset profile      
-      Gladius.dbi:ResetProfile()   
+      GladiusEx.dbi:ResetProfile()   
    end
 end
 
 local function getOption(info)
-   return (info.arg and Gladius.dbi.profile[info.arg] or Gladius.dbi.profile[info[#info]])
+   return (info.arg and GladiusEx.dbi.profile[info.arg] or GladiusEx.dbi.profile[info[#info]])
 end
 
 local function setOption(info, value)
    local key = info[#info]
-   Gladius.dbi.profile[key] = value
+   GladiusEx.dbi.profile[key] = value
    
    info = info.arg and info.arg or info[1]  
    
-   Gladius:HideFrames()
-   Gladius:UpdateFrames()
-   Gladius:ShowFrames()
+   GladiusEx:HideFrames()
+   GladiusEx:UpdateFrames()
+   GladiusEx:ShowFrames()
 end
 
-function Gladius:GetColorOption(info)
+function GladiusEx:GetColorOption(info)
    local key = info.arg or info[#info]
    return self.dbi.profile[key].r, self.dbi.profile[key].g, self.dbi.profile[key].b, self.dbi.profile[key].a
 end
 
-function Gladius:SetColorOption(info, r, g, b, a) 
+function GladiusEx:SetColorOption(info, r, g, b, a) 
    local key = info.arg or info[#info]
    self.dbi.profile[key].r, self.dbi.profile[key].g, self.dbi.profile[key].b, self.dbi.profile[key].a = r, g, b, a
    
-   Gladius:HideFrames()
-   Gladius:UpdateFrames()
-   Gladius:ShowFrames()
+   GladiusEx:HideFrames()
+   GladiusEx:UpdateFrames()
+   GladiusEx:ShowFrames()
 end
 
-function Gladius:GetPositions()
+function GladiusEx:GetPositions()
    return {
       ["TOPLEFT"] = L["Top Left"],
       ["TOPRIGHT"] = L["Top Right"],
@@ -124,7 +124,7 @@ function Gladius:GetPositions()
    }
 end
 
-function Gladius:SetupModule(key, module, order)
+function GladiusEx:SetupModule(key, module, order)
    self.options.args[key] = {
       type="group",
       name=L[key],
@@ -179,7 +179,7 @@ function Gladius:SetupModule(key, module, order)
    }
 end
 
-function Gladius:SetupOptions()
+function GladiusEx:SetupOptions()
    self.options = {
       type = "group",
       name = "Gladius",
@@ -257,8 +257,8 @@ function Gladius:SetupOptions()
                         name=L["Background Color"],
                         desc=L["Color of the frame background"],
                         hasAlpha=true,
-                        get=function(info) return Gladius:GetColorOption(info) end,
-                        set=function(info, r, g, b, a) return Gladius:SetColorOption(info, r, g, b, a) end,
+                        get=function(info) return GladiusEx:GetColorOption(info) end,
+                        set=function(info, r, g, b, a) return GladiusEx:SetColorOption(info, r, g, b, a) end,
                         disabled=function() return not self.dbi.profile.groupButtons end,
                         order=1,
                      },                     

@@ -1,8 +1,8 @@
-local Gladius = _G.Gladius
-if not Gladius then
+local GladiusEx = _G.GladiusEx
+if not GladiusEx then
   DEFAULT_CHAT_FRAME:AddMessage(format("Module %s requires Gladius", "Layout"))
 end
-local L = Gladius.L
+local L = GladiusEx.L
 local LSM
 
 -- global functions
@@ -11,11 +11,11 @@ local next = next
 local type = type
 local strformat = string.format
 
-local Layout = Gladius:NewGladiusModule("Layout", false, {
+local Layout = GladiusEx:NewGladiusExModule("Layout", false, {
 })
 
 function Layout:OnEnable()   
-   LSM = Gladius.LSM   
+   LSM = GladiusEx.LSM   
 end
 
 function Layout:OnDisable()
@@ -66,7 +66,7 @@ function Layout:GetOptions()
                      desc=L["Code of your layout."],
                      get=function() return self.layout end,
                      set=function(info, value) self.layout = value end,
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      multiline=true,
                      width="full",
                      order=5,
@@ -75,33 +75,33 @@ function Layout:GetOptions()
                      type="execute",
                      name=L["Import layout"],
                      desc=L["Import your layout code."],
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      func=function()
                         if (self.layout == nil or self.layout == "") then return end
                      
                         local err, layout = LibStub("AceSerializer-3.0"):Deserialize(self.layout)
 
                         if (not err) then
-                           Gladius:Print(strformat(L["Error while importing layout: %s"], layout))
+                           GladiusEx:Print(strformat(L["Error while importing layout: %s"], layout))
                            return
                         end
                         
-                        local currentLayout = Gladius.dbi:GetCurrentProfile()
-                        Gladius.dbi:SetProfile("Import Backup")
-                        Gladius.dbi:CopyProfile(currentLayout)
-                        Gladius.dbi:SetProfile(currentLayout)
-                        Gladius.dbi:ResetProfile()
+                        local currentLayout = GladiusEx.dbi:GetCurrentProfile()
+                        GladiusEx.dbi:SetProfile("Import Backup")
+                        GladiusEx.dbi:CopyProfile(currentLayout)
+                        GladiusEx.dbi:SetProfile(currentLayout)
+                        GladiusEx.dbi:ResetProfile()
                         
-                        Gladius.dbi.profile.modules["*"] = true
+                        GladiusEx.dbi.profile.modules["*"] = true
                         for key, data in pairs(layout) do
                            if (type(data) == "table") then
-                              Gladius.dbi.profile[key] = CopyTable(data)
+                              GladiusEx.dbi.profile[key] = CopyTable(data)
                            else
-                              Gladius.dbi.profile[key] = data
+                              GladiusEx.dbi.profile[key] = data
                            end
                         end
 							
-                        Gladius:UpdateFrame()
+                        GladiusEx:UpdateFrame()
                      end,
                      order=10,
                   },
@@ -109,10 +109,10 @@ function Layout:GetOptions()
                      type="execute",
                      name=L["Export layout"],
                      desc=L["Export your layout code."],
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      func=function()
-                        local t = CopyTable(Gladius.dbi.profile)
-                        self.layout = LibStub("AceSerializer-3.0"):Serialize(SerializeTable(t, Gladius.defaults.profile)   )
+                        local t = CopyTable(GladiusEx.dbi.profile)
+                        self.layout = LibStub("AceSerializer-3.0"):Serialize(SerializeTable(t, GladiusEx.defaults.profile)   )
                      end,
                      order=15,
                   },

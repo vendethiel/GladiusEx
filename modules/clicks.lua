@@ -1,14 +1,14 @@
-local Gladius = _G.Gladius
-if not Gladius then
+local GladiusEx = _G.GladiusEx
+if not GladiusEx then
   DEFAULT_CHAT_FRAME:AddMessage(format("Module %s requires Gladius", "Clicks"))
 end
-local L = Gladius.L
+local L = GladiusEx.L
 
 -- global functions
 local strfind = string.find
 local pairs = pairs
 
-local Clicks = Gladius:NewGladiusModule("Clicks", false, {
+local Clicks = GladiusEx:NewGladiusExModule("Clicks", false, {
    clickAttributes = {
       ["Left"] = { button = "1", modifier = "", action = "target", macro = ""},
       ["Right"] = { button = "2", modifier = "", action = "focus", macro = ""},
@@ -24,7 +24,7 @@ function Clicks:OnDisable()
    -- Iterate over all the secure frames and disable any attributes.
    for _,t in pairs(self.secureFrames) do
       for frame,_ in pairs(t) do
-         for _,attr in pairs(Gladius.dbi.profile.clickAttributes) do
+         for _,attr in pairs(GladiusEx.dbi.profile.clickAttributes) do
             frame:SetAttribute(attr.modifier .. "type" .. attr.button, nil)
          end
       end
@@ -48,11 +48,11 @@ end
 -- Uses [module:GetFrame()].secure to find the frames.
 function Clicks:GetSecureFrames(unit)
    -- Add the default secure frame
-   self:RegisterSecureFrame(unit, Gladius.buttons[unit].secure)
+   self:RegisterSecureFrame(unit, GladiusEx.buttons[unit].secure)
    
    -- Find secure frames in other modules
    for point, _ in pairs(self:GetAttachPoints()) do
-      local frame = Gladius:GetAttachFrame(unit, point)
+      local frame = GladiusEx:GetAttachFrame(unit, point)
       if (frame and frame.secure) then
          self:RegisterSecureFrame(unit, frame.secure)
       end
@@ -71,7 +71,7 @@ end
 
 -- Applies attributes to a specific frame
 function Clicks:ApplyAttributes(unit, frame)
-   for _, attr in pairs(Gladius.dbi.profile.clickAttributes) do
+   for _, attr in pairs(GladiusEx.dbi.profile.clickAttributes) do
       frame:SetAttribute(attr.modifier .. "type" .. attr.button, attr.action)
       if (attr.action == "macro" and attr.macro ~= "") then
          frame:SetAttribute(attr.modifier .. "macrotext" .. attr.button, string.gsub(attr.macro, "*unit", unit))
@@ -90,13 +90,13 @@ end
 
 local function getOption(info)
    local key = info[#info - 2]
-   return Gladius.dbi.profile.clickAttributes[key][info[#info]]
+   return GladiusEx.dbi.profile.clickAttributes[key][info[#info]]
 end
 
 local function setOption(info, value)
    local key = info[#info - 2]
-   Gladius.dbi.profile.clickAttributes[key][info[#info]] = value
-   Gladius:UpdateFrame()
+   GladiusEx.dbi.profile.clickAttributes[key][info[#info]] = value
+   GladiusEx:UpdateFrame()
 end
 
 local CLICK_BUTTONS = {["1"] = L["Left"], ["2"] = L["Right"], ["3"] = L["Middle"], ["4"] = L["Button 4"], ["5"] = L["Button 5"]}
@@ -125,7 +125,7 @@ function Clicks:GetOptions()
                      values=CLICK_BUTTONS,
                      get=function(info) return addAttrButton end,
                      set=function(info, value) addAttrButton = value end,
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      order=10,
                   },
                   modifier = {
@@ -135,7 +135,7 @@ function Clicks:GetOptions()
                      values=CLICK_MODIFIERS,
                      get=function(info) return addAttrMod end,
                      set=function(info, value) addAttrMod = value end,
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      order=20,
                   },
                   add = {
@@ -144,9 +144,9 @@ function Clicks:GetOptions()
                      func=function()
                         local attr = addAttrMod ~= "" and CLICK_MODIFIERS[addAttrMod] .. CLICK_BUTTONS[addAttrButton] or CLICK_BUTTONS[addAttrButton]
                         
-                        if (not Gladius.db.clickAttributes[attr]) then                           
+                        if (not GladiusEx.db.clickAttributes[attr]) then                           
                            -- add to db
-                           Gladius.db.clickAttributes[attr] = {
+                           GladiusEx.db.clickAttributes[attr] = {
                               button = addAttrButton, 
                               modifier = addAttrMod, 
                               action = "target", 
@@ -154,10 +154,10 @@ function Clicks:GetOptions()
                            }
                            
                            -- add to options
-                           Gladius.options.args[self.name].args.attributeList.args[attr] = self:GetAttributeOptionTable(attr, order)
+                           GladiusEx.options.args[self.name].args.attributeList.args[attr] = self:GetAttributeOptionTable(attr, order)
                            
                            -- update
-                           Gladius:UpdateFrame()
+                           GladiusEx:UpdateFrame()
                         end
                      end,
                      order=30,
@@ -170,7 +170,7 @@ function Clicks:GetOptions()
    
    -- attributes
    local order = 1
-   for attr, _ in pairs(Gladius.dbi.profile.clickAttributes) do 
+   for attr, _ in pairs(GladiusEx.dbi.profile.clickAttributes) do 
       options.attributeList.args[attr] = self:GetAttributeOptionTable(attr, order)      
       order = order + 1
    end   
@@ -184,20 +184,20 @@ function Clicks:GetAttributeOptionTable(attribute, order)
       name=attribute,
       childGroups="tree",
       order=order,
-      disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+      disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
       args = {
          delete = {
             type="execute",
             name=L["Delete Click Action"],
             func=function()
                -- remove from db
-               Gladius.db.clickAttributes[attribute] = nil
+               GladiusEx.db.clickAttributes[attribute] = nil
                
                -- remove from options
-               Gladius.options.args[self:GetName()].args.attributeList.args[attribute] = nil           
+               GladiusEx.options.args[self:GetName()].args.attributeList.args[attribute] = nil           
                
                -- update
-               Gladius:UpdateFrames()
+               GladiusEx:UpdateFrames()
             end,
             order=1,
          },

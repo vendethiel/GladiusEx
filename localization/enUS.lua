@@ -1,6 +1,6 @@
 do
-   if (not Gladius.L) then
-      Gladius.L = setmetatable({
+   if (not GladiusEx.L) then
+      GladiusEx.L = setmetatable({
          ["Frame"] = "Frame",
          ["Welcome to Gladius!"] = "Welcome to Gladius!",
          ["First run has been detected, displaying test frame."] = "First run has been detected, displaying test frame.",

@@ -1,8 +1,8 @@
-local Gladius = _G.Gladius
-if not Gladius then
+local GladiusEx = _G.GladiusEx
+if not GladiusEx then
   DEFAULT_CHAT_FRAME:AddMessage(format("Module %s requires Gladius", "Cast Bar"))
 end
-local L = Gladius.L
+local L = GladiusEx.L
 local LSM
 
 -- global functions
@@ -12,7 +12,7 @@ local min = math.min
 local GetTime = GetTime
 local GetSpellInfo, UnitCastingInfo, UnitChannelInfo = GetSpellInfo, UnitCastingInfo, UnitChannelInfo
 
-local CastBar = Gladius:NewGladiusModule("CastBar", true, {
+local CastBar = GladiusEx:NewGladiusExModule("CastBar", true, {
    castBarAttachTo = "ClassIcon",
    
    castBarHeight = 12,
@@ -58,10 +58,10 @@ function CastBar:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE", "UNIT_SPELLCAST_DELAYED")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP", "UNIT_SPELLCAST_STOP")
    
-   LSM = Gladius.LSM
+   LSM = GladiusEx.LSM
    
    --[[ set frame type
-   if (Gladius.db.castBarAttachTo == "Frame" or Gladius:GetModule(Gladius.db.castBarAttachTo).isBar) then
+   if (GladiusEx.db.castBarAttachTo == "Frame" or GladiusEx:GetModule(GladiusEx.db.castBarAttachTo).isBar) then
       self.isBar = true
    else
       self.isBar = false
@@ -82,7 +82,7 @@ function CastBar:OnDisable()
 end
 
 function CastBar:GetAttachTo()
-   return Gladius.db.castBarAttachTo
+   return GladiusEx.db.castBarAttachTo
 end
 
 function CastBar:GetModuleAttachPoints()
@@ -177,13 +177,13 @@ function CastBar:UNIT_SPELLCAST_DELAYED(event, unit)
 end
 
 local function CastUpdate(self)
-   -- if Gladius:IsTesting() then return end 
+   -- if GladiusEx:IsTesting() then return end 
 
    if self.isCasting or self.isChanneling then
       local currentTime = min(self.endTime, GetTime())
       local value = self.endTime - currentTime
 
-      if (self.isChanneling and not Gladius.db.castBarInverse) or (self.isCasting and Gladius.db.castBarInverse) then
+      if (self.isChanneling and not GladiusEx.db.castBarInverse) or (self.isCasting and GladiusEx.db.castBarInverse) then
          self:SetValue(value)
       else
          self:SetValue(self.endTime - self.startTime - value)
@@ -207,7 +207,7 @@ function CastBar:CastEnd(bar)
 end
 
 function CastBar:CreateBar(unit)
-   local button = Gladius.buttons[unit]
+   local button = GladiusEx.buttons[unit]
    if (not button) then return end      
    
    -- create bar + text
@@ -221,19 +221,19 @@ function CastBar:CreateBar(unit)
 end
 
 function CastBar:GetBarHeight()
-   return Gladius.db.castBarHeight
+   return GladiusEx.db.castBarHeight
 end
 
 function CastBar:Update(unit)
    -- check parent module
-   if (not Gladius:GetAttachFrame(unit, Gladius.db.castBarAttachTo)) then
+   if (not GladiusEx:GetAttachFrame(unit, GladiusEx.db.castBarAttachTo)) then
       if (self.frame[unit]) then
          self.frame[unit]:Hide()
       end
       return
    end
 
-   local testing = Gladius.test
+   local testing = GladiusEx.test
    
    -- create power bar
    if (not self.frame[unit]) then 
@@ -241,9 +241,9 @@ function CastBar:Update(unit)
    end
    
    -- set bar type 
-   local parent = Gladius:GetAttachFrame(unit, Gladius.db.castBarAttachTo)
+   local parent = GladiusEx:GetAttachFrame(unit, GladiusEx.db.castBarAttachTo)
      
-  --[[ if (Gladius.db.castBarAttachTo == "Frame" or Gladius:GetModule(Gladius.db.castBarAttachTo).isBar) then
+  --[[ if (GladiusEx.db.castBarAttachTo == "Frame" or GladiusEx:GetModule(GladiusEx.db.castBarAttachTo).isBar) then
       self.isBar = true
    else
       self.isBar = false
@@ -252,41 +252,41 @@ function CastBar:Update(unit)
    -- update power bar   
    self.frame[unit]:ClearAllPoints()
 
-   local width = Gladius.db.castBarAdjustWidth and Gladius.db.barWidth or Gladius.db.castBarWidth
-   if (Gladius.db.castIcon) then
-       width = width - Gladius.db.castBarHeight
+   local width = GladiusEx.db.castBarAdjustWidth and GladiusEx.db.barWidth or GladiusEx.db.castBarWidth
+   if (GladiusEx.db.castIcon) then
+       width = width - GladiusEx.db.castBarHeight
 	end
 	
 	-- add width of the widget if attached to an widget
-	if (Gladius.db.castBarAttachTo ~= "Frame" and not Gladius:GetModule(Gladius.db.castBarAttachTo).isBar and Gladius.db.castBarAdjustWidth) then
-      if (not Gladius:GetModule(Gladius.db.castBarAttachTo).frame or not Gladius:GetModule(Gladius.db.castBarAttachTo).frame[unit]) then
-         Gladius:GetModule(Gladius.db.castBarAttachTo):Update(unit)
+	if (GladiusEx.db.castBarAttachTo ~= "Frame" and not GladiusEx:GetModule(GladiusEx.db.castBarAttachTo).isBar and GladiusEx.db.castBarAdjustWidth) then
+      if (not GladiusEx:GetModule(GladiusEx.db.castBarAttachTo).frame or not GladiusEx:GetModule(GladiusEx.db.castBarAttachTo).frame[unit]) then
+         GladiusEx:GetModule(GladiusEx.db.castBarAttachTo):Update(unit)
       end
       
-      width = width + Gladius:GetModule(Gladius.db.castBarAttachTo).frame[unit]:GetWidth()
+      width = width + GladiusEx:GetModule(GladiusEx.db.castBarAttachTo).frame[unit]:GetWidth()
 
       -- hack: needed for whatever reason, must be a bug elsewhere
       width = width + 1
 	end
 		 
-	self.frame[unit]:SetHeight(Gladius.db.castBarHeight)   
+	self.frame[unit]:SetHeight(GladiusEx.db.castBarHeight)   
    self.frame[unit]:SetWidth(width)
 	
 	local offsetX
-   if (not strfind(Gladius.db.castBarAnchor, "RIGHT") and strfind(Gladius.db.castBarRelativePoint, "RIGHT")) then
-      offsetX = Gladius.db.castIcon and Gladius.db.castIconPosition == "LEFT" and self.frame[unit]:GetHeight() or 0      
-   elseif (not strfind(Gladius.db.castBarAnchor, "LEFT") and strfind(Gladius.db.castBarRelativePoint, "LEFT")) then
-      offsetX = Gladius.db.castIcon and Gladius.db.castIconPosition == "RIGHT" and -self.frame[unit]:GetHeight() or 0      
-   elseif (strfind(Gladius.db.castBarAnchor, "LEFT") and strfind(Gladius.db.castBarRelativePoint, "LEFT")) then
-      offsetX = Gladius.db.castIcon and Gladius.db.castIconPosition == "LEFT" and self.frame[unit]:GetHeight() or 0      
-   elseif (strfind(Gladius.db.castBarAnchor, "RIGHT") and strfind(Gladius.db.castBarRelativePoint, "RIGHT")) then
-      offsetX = Gladius.db.castIcon and Gladius.db.castIconPosition == "RIGHT" and -self.frame[unit]:GetHeight() or 0      
+   if (not strfind(GladiusEx.db.castBarAnchor, "RIGHT") and strfind(GladiusEx.db.castBarRelativePoint, "RIGHT")) then
+      offsetX = GladiusEx.db.castIcon and GladiusEx.db.castIconPosition == "LEFT" and self.frame[unit]:GetHeight() or 0      
+   elseif (not strfind(GladiusEx.db.castBarAnchor, "LEFT") and strfind(GladiusEx.db.castBarRelativePoint, "LEFT")) then
+      offsetX = GladiusEx.db.castIcon and GladiusEx.db.castIconPosition == "RIGHT" and -self.frame[unit]:GetHeight() or 0      
+   elseif (strfind(GladiusEx.db.castBarAnchor, "LEFT") and strfind(GladiusEx.db.castBarRelativePoint, "LEFT")) then
+      offsetX = GladiusEx.db.castIcon and GladiusEx.db.castIconPosition == "LEFT" and self.frame[unit]:GetHeight() or 0      
+   elseif (strfind(GladiusEx.db.castBarAnchor, "RIGHT") and strfind(GladiusEx.db.castBarRelativePoint, "RIGHT")) then
+      offsetX = GladiusEx.db.castIcon and GladiusEx.db.castIconPosition == "RIGHT" and -self.frame[unit]:GetHeight() or 0      
    end
 	
-	self.frame[unit]:SetPoint(Gladius.db.castBarAnchor, parent, Gladius.db.castBarRelativePoint, Gladius.db.castBarOffsetX + (offsetX or 0), Gladius.db.castBarOffsetY)	
+	self.frame[unit]:SetPoint(GladiusEx.db.castBarAnchor, parent, GladiusEx.db.castBarRelativePoint, GladiusEx.db.castBarOffsetX + (offsetX or 0), GladiusEx.db.castBarOffsetY)	
 	self.frame[unit]:SetMinMaxValues(0, 100)
 	self.frame[unit]:SetValue(0)
-	self.frame[unit]:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, Gladius.db.castBarTexture))
+	self.frame[unit]:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, GladiusEx.db.castBarTexture))
 	
 	-- updating
 	self.frame[unit]:SetScript("OnUpdate", CastUpdate)
@@ -296,34 +296,34 @@ function CastBar:Update(unit)
    self.frame[unit]:GetStatusBarTexture():SetVertTile(false)
    
 	-- set color
-   local color = Gladius.db.castBarColor
+   local color = GladiusEx.db.castBarColor
    self.frame[unit]:SetStatusBarColor(color.r, color.g, color.b, color.a)
    
    -- update cast text   
-	self.frame[unit].castText:SetFont(LSM:Fetch(LSM.MediaType.FONT, Gladius.db.globalFont), Gladius.db.castTextSize)
+	self.frame[unit].castText:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.globalFont), GladiusEx.db.castTextSize)
 	
-	local color = Gladius.db.castTextColor
+	local color = GladiusEx.db.castTextColor
 	self.frame[unit].castText:SetTextColor(color.r, color.g, color.b, color.a)
 	
 	self.frame[unit].castText:SetShadowOffset(1, -1)
 	self.frame[unit].castText:SetShadowColor(0, 0, 0, 1)
-	self.frame[unit].castText:SetJustifyH(Gladius.db.castTextAlign)
-	self.frame[unit].castText:SetPoint(Gladius.db.castTextAlign, Gladius.db.castTextOffsetX, Gladius.db.castTextOffsetY)
+	self.frame[unit].castText:SetJustifyH(GladiusEx.db.castTextAlign)
+	self.frame[unit].castText:SetPoint(GladiusEx.db.castTextAlign, GladiusEx.db.castTextOffsetX, GladiusEx.db.castTextOffsetY)
 	
 	-- update cast time text   
-	self.frame[unit].timeText:SetFont(LSM:Fetch(LSM.MediaType.FONT, Gladius.db.globalFont), Gladius.db.castTimeTextSize)
+	self.frame[unit].timeText:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.globalFont), GladiusEx.db.castTimeTextSize)
 	
-	local color = Gladius.db.castTimeTextColor
+	local color = GladiusEx.db.castTimeTextColor
 	self.frame[unit].timeText:SetTextColor(color.r, color.g, color.b, color.a)
 	
 	self.frame[unit].timeText:SetShadowOffset(1, -1)
 	self.frame[unit].timeText:SetShadowColor(0, 0, 0, 1)
-	self.frame[unit].timeText:SetJustifyH(Gladius.db.castTimeTextAlign)
-	self.frame[unit].timeText:SetPoint(Gladius.db.castTimeTextAlign, Gladius.db.castTimeTextOffsetX, Gladius.db.castTimeTextOffsetY)    
+	self.frame[unit].timeText:SetJustifyH(GladiusEx.db.castTimeTextAlign)
+	self.frame[unit].timeText:SetPoint(GladiusEx.db.castTimeTextAlign, GladiusEx.db.castTimeTextOffsetX, GladiusEx.db.castTimeTextOffsetY)    
 	
 	-- update icon
 	self.frame[unit].icon:ClearAllPoints()
-	self.frame[unit].icon:SetPoint(Gladius.db.castIconPosition == "LEFT" and "RIGHT" or "LEFT", self.frame[unit], Gladius.db.castIconPosition)
+	self.frame[unit].icon:SetPoint(GladiusEx.db.castIconPosition == "LEFT" and "RIGHT" or "LEFT", self.frame[unit], GladiusEx.db.castIconPosition)
 	
 	self.frame[unit].icon:SetWidth(self.frame[unit]:GetHeight())
 	self.frame[unit].icon:SetHeight(self.frame[unit]:GetHeight())
@@ -332,12 +332,12 @@ function CastBar:Update(unit)
 	
 	self.frame[unit].icon.bg:ClearAllPoints()
 	self.frame[unit].icon.bg:SetAllPoints(self.frame[unit].icon)	
-	self.frame[unit].icon.bg:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, Gladius.db.castBarTexture))
-	self.frame[unit].icon.bg:SetVertexColor(Gladius.db.castBarBackgroundColor.r, Gladius.db.castBarBackgroundColor.g,
-      Gladius.db.castBarBackgroundColor.b, Gladius.db.castBarBackgroundColor.a)
+	self.frame[unit].icon.bg:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, GladiusEx.db.castBarTexture))
+	self.frame[unit].icon.bg:SetVertexColor(GladiusEx.db.castBarBackgroundColor.r, GladiusEx.db.castBarBackgroundColor.g,
+      GladiusEx.db.castBarBackgroundColor.b, GladiusEx.db.castBarBackgroundColor.a)
 	
 	
-	if (not Gladius.db.castIcon) then
+	if (not GladiusEx.db.castIcon) then
       self.frame[unit].icon:SetAlpha(0)
    else
       self.frame[unit].icon:SetAlpha(1)
@@ -349,7 +349,7 @@ function CastBar:Update(unit)
 	
 	-- Maybe it looks better if the background covers the whole castbar
 	--[[
-	if (Gladius.db.castIcon) then
+	if (GladiusEx.db.castIcon) then
       self.frame[unit].background:SetWidth(self.frame[unit]:GetWidth() + self.frame[unit].icon:GetWidth())
 	else      
       self.frame[unit].background:SetWidth(self.frame[unit]:GetWidth())
@@ -358,10 +358,10 @@ function CastBar:Update(unit)
    
    self.frame[unit].background:SetHeight(self.frame[unit]:GetHeight())
 	
-	self.frame[unit].background:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, Gladius.db.castBarTexture))
+	self.frame[unit].background:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, GladiusEx.db.castBarTexture))
 	
-	self.frame[unit].background:SetVertexColor(Gladius.db.castBarBackgroundColor.r, Gladius.db.castBarBackgroundColor.g,
-      Gladius.db.castBarBackgroundColor.b, Gladius.db.castBarBackgroundColor.a)
+	self.frame[unit].background:SetVertexColor(GladiusEx.db.castBarBackgroundColor.r, GladiusEx.db.castBarBackgroundColor.g,
+      GladiusEx.db.castBarBackgroundColor.b, GladiusEx.db.castBarBackgroundColor.a)
 	
 	-- disable tileing
 	self.frame[unit].background:SetHorizTile(false)
@@ -406,7 +406,7 @@ function CastBar:Test(unit)
       self.frame[unit]:SetMinMaxValues(0, 100)
       self.frame[unit]:SetValue(70)
       
-      if (Gladius.db.castTimeText) then
+      if (GladiusEx.db.castTimeText) then
          self.frame[unit].timeText:SetFormattedText("+1.5 %.1f", 1.379)
       else
          self.frame[unit].timeText:SetText("")
@@ -415,7 +415,7 @@ function CastBar:Test(unit)
       local texture = select(3, GetSpellInfo(1))
       self.frame[unit].icon:SetTexture(texture)
       
-      if (Gladius.db.castText) then
+      if (GladiusEx.db.castText) then
          self.frame[unit].castText:SetText(L["Example Spell Name"])
       else
          self.frame[unit].castText:SetText("")
@@ -442,9 +442,9 @@ function CastBar:GetOptions()
                      name=L["Cast Bar Color"],
                      desc=L["Color of the cast bar"],
                      hasAlpha=true,
-                     get=function(info) return Gladius:GetColorOption(info) end,
-                     set=function(info, r, g, b, a) return Gladius:SetColorOption(info, r, g, b, a) end,
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     get=function(info) return GladiusEx:GetColorOption(info) end,
+                     set=function(info, r, g, b, a) return GladiusEx:SetColorOption(info, r, g, b, a) end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      order=5,
                   },    
                   castBarBackgroundColor = {
@@ -452,25 +452,25 @@ function CastBar:GetOptions()
                      name=L["Cast Bar Background Color"],
                      desc=L["Color of the cast bar background"],
                      hasAlpha=true,
-                     get=function(info) return Gladius:GetColorOption(info) end,
-                     set=function(info, r, g, b, a) return Gladius:SetColorOption(info, r, g, b, a) end,
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
-                     hidden=function() return not Gladius.db.advancedOptions end,
+                     get=function(info) return GladiusEx:GetColorOption(info) end,
+                     set=function(info, r, g, b, a) return GladiusEx:SetColorOption(info, r, g, b, a) end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     hidden=function() return not GladiusEx.db.advancedOptions end,
                      order=10,
                   },
                   sep = {                     
                      type = "description",
                      name="",
                      width="full",
-                     hidden=function() return not Gladius.db.advancedOptions end,
+                     hidden=function() return not GladiusEx.db.advancedOptions end,
                      order=13,
                   },               
                   castBarInverse = {
                      type="toggle",
                      name=L["Cast Bar Inverse"],
                      desc=L["Inverse the cast bar"],
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
-                     hidden=function() return not Gladius.db.advancedOptions end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     hidden=function() return not GladiusEx.db.advancedOptions end,
                      order=15,
                   },
                   castBarTexture = {
@@ -479,7 +479,7 @@ function CastBar:GetOptions()
                      desc=L["Texture of the cast bar"],
                      dialogControl = "LSM30_Statusbar",
                      values = AceGUIWidgetLSMlists.statusbar,
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      order=20,
                   },
                   sep2 = {                     
@@ -492,7 +492,7 @@ function CastBar:GetOptions()
                      type="toggle",
                      name=L["Cast Bar Icon"],
                      desc=L["Toggle the cast icon"],
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      order=25,
                   },
                   castIconPosition = {
@@ -500,7 +500,7 @@ function CastBar:GetOptions()
                      name=L["Cast Bar Icon Position"],
                      desc=L["Position of the cast bar icon"],
                      values={ ["LEFT"] = L["LEFT"], ["RIGHT"] = L["RIGHT"] },
-                     disabled=function() return not Gladius.dbi.profile.castIcon or not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.castIcon or not GladiusEx.dbi.profile.modules[self.name] end,
                      order=30,
                   },
                },
@@ -516,7 +516,7 @@ function CastBar:GetOptions()
                      type="toggle",
                      name=L["Cast Bar Adjust Width"],
                      desc=L["Adjust cast bar width to the frame width"],
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      order=5,
                   },
                   sep = {                     
@@ -530,7 +530,7 @@ function CastBar:GetOptions()
                      name=L["Cast Bar Width"],
                      desc=L["Width of the cast bar"],
                      min=10, max=500, step=1,
-                     disabled=function() return Gladius.dbi.profile.castBarAdjustWidth or not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return GladiusEx.dbi.profile.castBarAdjustWidth or not GladiusEx.dbi.profile.modules[self.name] end,
                      order=15,
                   },
                   castBarHeight = {
@@ -538,7 +538,7 @@ function CastBar:GetOptions()
                      name=L["Cast Bar Height"],
                      desc=L["Height of the cast bar"],
                      min=10, max=200, step=1,
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      order=20,
                   },                  
                },
@@ -548,7 +548,7 @@ function CastBar:GetOptions()
                name=L["Position"],
                desc=L["Position settings"],  
                inline=true, 
-               hidden=function() return not Gladius.db.advancedOptions end,               
+               hidden=function() return not GladiusEx.db.advancedOptions end,               
                order=3,
                args = {
                   castBarAttachTo = {
@@ -559,16 +559,16 @@ function CastBar:GetOptions()
                      set=function(info, value) 
                         local key = info.arg or info[#info]
                         
-                        --[[if (Gladius.db.castBarAttachTo == "Frame" or Gladius:GetModule(Gladius.db.castBarAttachTo).isBar) then
+                        --[[if (GladiusEx.db.castBarAttachTo == "Frame" or GladiusEx:GetModule(GladiusEx.db.castBarAttachTo).isBar) then
                            self.isBar = true
                         else
                            self.isBar = false
                         end]]
                         
-                        Gladius.dbi.profile[key] = value
-                        Gladius:UpdateFrame()
+                        GladiusEx.dbi.profile[key] = value
+                        GladiusEx:UpdateFrame()
                      end,
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      width="double",
                      order=5,
                   },
@@ -582,16 +582,16 @@ function CastBar:GetOptions()
                      type="select",
                      name=L["Cast Bar Anchor"],
                      desc=L["Anchor of the cast bar"],
-                     values=function() return Gladius:GetPositions() end,
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     values=function() return GladiusEx:GetPositions() end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      order=10,
                   },
                   castBarRelativePoint = {
                      type="select",
                      name=L["Cast Bar Relative Point"],
                      desc=L["Relative point of the cast bar"],
-                     values=function() return Gladius:GetPositions() end,
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     values=function() return GladiusEx:GetPositions() end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      order=15,               
                   },
                   sep2 = {                     
@@ -605,14 +605,14 @@ function CastBar:GetOptions()
                      name=L["Cast Bar Offset X"],
                      desc=L["X offset of the cast bar"],
                      min=-100, max=100, step=1,
-                     disabled=function() return  not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return  not GladiusEx.dbi.profile.modules[self.name] end,
                      order=20,
                   }, 
                   castBarOffsetY = {
                      type="range",
                      name=L["Cast Bar Offset Y"],
                      desc=L["Y offset of the castbar"],
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      min=-100, max=100, step=1,
                      order=25,
                   },          
@@ -636,7 +636,7 @@ function CastBar:GetOptions()
                      type="toggle",
                      name=L["Cast Text"],
                      desc=L["Toggle cast text"],
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      order=5,
                   },
                   sep = {                     
@@ -650,9 +650,9 @@ function CastBar:GetOptions()
                      name=L["Cast Text Color"],
                      desc=L["Text color of the cast text"],
                      hasAlpha=true,
-                     get=function(info) return Gladius:GetColorOption(info) end,
-                     set=function(info, r, g, b, a) return Gladius:SetColorOption(info, r, g, b, a) end,
-                     disabled=function() return not Gladius.dbi.profile.castText or not Gladius.dbi.profile.modules[self.name] end,
+                     get=function(info) return GladiusEx:GetColorOption(info) end,
+                     set=function(info, r, g, b, a) return GladiusEx:SetColorOption(info, r, g, b, a) end,
+                     disabled=function() return not GladiusEx.dbi.profile.castText or not GladiusEx.dbi.profile.modules[self.name] end,
                      order=10,
                   },
                   castTextSize = {
@@ -660,7 +660,7 @@ function CastBar:GetOptions()
                      name=L["Cast Text Size"],
                      desc=L["Text size of the cast text"],
                      min=1, max=20, step=1,
-                     disabled=function() return not Gladius.dbi.profile.castText or not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.castText or not GladiusEx.dbi.profile.modules[self.name] end,
                      order=15,
                   },                  
                },
@@ -670,7 +670,7 @@ function CastBar:GetOptions()
                name=L["Position"],
                desc=L["Position settings"],  
                inline=true,
-               hidden=function() return not Gladius.db.advancedOptions end,                
+               hidden=function() return not GladiusEx.db.advancedOptions end,                
                order=2,
                args = {
                   castTextAlign = {
@@ -678,7 +678,7 @@ function CastBar:GetOptions()
                      name=L["Cast Text Align"],
                      desc=L["Text align of the cast text"],
                      values={ ["LEFT"] = L["LEFT"], ["CENTER"] = L["CENTER"], ["RIGHT"] = L["RIGHT"] },
-                     disabled=function() return not Gladius.dbi.profile.castText or not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.castText or not GladiusEx.dbi.profile.modules[self.name] end,
                      width="double",
                      order=5,
                   },
@@ -693,14 +693,14 @@ function CastBar:GetOptions()
                      name=L["Cast Text Offset X"],
                      desc=L["X offset of the cast text"],
                      min=-100, max=100, step=1,
-                     disabled=function() return not Gladius.dbi.profile.castText or not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.castText or not GladiusEx.dbi.profile.modules[self.name] end,
                      order=10,
                   },
                   castTextOffsetY = {
                      type="range",
                      name=L["Cast Text Offset Y"],
                      desc=L["Y offset of the cast text"],
-                     disabled=function() return not Gladius.dbi.profile.castText or not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.castText or not GladiusEx.dbi.profile.modules[self.name] end,
                      min=-100, max=100, step=1,
                      order=15,
                   },
@@ -724,7 +724,7 @@ function CastBar:GetOptions()
                      type="toggle",
                      name=L["Cast Time Text"],
                      desc=L["Toggle cast time text"],
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      order=5,
                   },
                   sep = {                     
@@ -738,9 +738,9 @@ function CastBar:GetOptions()
                      name=L["Cast Time Text Color"],
                      desc=L["Text color of the cast time text"],
                      hasAlpha=true,
-                     get=function(info) return Gladius:GetColorOption(info) end,
-                     set=function(info, r, g, b, a) return Gladius:SetColorOption(info, r, g, b, a) end,
-                     disabled=function() return not Gladius.dbi.profile.castTimeText or not Gladius.dbi.profile.modules[self.name] end,
+                     get=function(info) return GladiusEx:GetColorOption(info) end,
+                     set=function(info, r, g, b, a) return GladiusEx:SetColorOption(info, r, g, b, a) end,
+                     disabled=function() return not GladiusEx.dbi.profile.castTimeText or not GladiusEx.dbi.profile.modules[self.name] end,
                      order=10,
                   },
                   castTimeTextSize = {
@@ -748,7 +748,7 @@ function CastBar:GetOptions()
                      name=L["Cast Time Text Size"],
                      desc=L["Text size of the cast time text"],
                      min=1, max=20, step=1,
-                     disabled=function() return not Gladius.dbi.profile.castTimeText or not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.castTimeText or not GladiusEx.dbi.profile.modules[self.name] end,
                      order=15,
                   },
                   
@@ -759,7 +759,7 @@ function CastBar:GetOptions()
                name=L["Position"],
                desc=L["Position settings"],  
                inline=true,
-               hidden=function() return not Gladius.db.advancedOptions end,                
+               hidden=function() return not GladiusEx.db.advancedOptions end,                
                order=2,
                args = {
                   castTimeTextAlign = {
@@ -767,7 +767,7 @@ function CastBar:GetOptions()
                      name=L["Cast Time Text Align"],
                      desc=L["Text align of the cast time text"],
                      values={ ["LEFT"] = L["LEFT"], ["CENTER"] = L["CENTER"], ["RIGHT"] = L["RIGHT"] },
-                     disabled=function() return not Gladius.dbi.profile.castTimeText or not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.castTimeText or not GladiusEx.dbi.profile.modules[self.name] end,
                      width="double",
                      order=5,
                   },
@@ -782,14 +782,14 @@ function CastBar:GetOptions()
                      name=L["Cast Time Offset X"],
                      desc=L["X Offset of the cast time text"],
                      min=-100, max=100, step=1,
-                     disabled=function() return not Gladius.dbi.profile.castTimeText or not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.castTimeText or not GladiusEx.dbi.profile.modules[self.name] end,
                      order=10,
                   },
                   castTimeTextOffsetY = {
                      type="range",
                      name=L["Cast Time Offset Y"],
                      desc=L["Y Offset of the cast time text"],
-                     disabled=function() return not Gladius.dbi.profile.castTimeText or not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.castTimeText or not GladiusEx.dbi.profile.modules[self.name] end,
                      min=-100, max=100, step=1,
                      order=15,
                   },

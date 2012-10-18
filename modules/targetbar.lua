@@ -1,8 +1,8 @@
-local Gladius = _G.Gladius
-if not Gladius then
+local GladiusEx = _G.GladiusEx
+if not GladiusEx then
   DEFAULT_CHAT_FRAME:AddMessage(format("Module %s requires Gladius", "Target Bar"))
 end
-local L = Gladius.L
+local L = GladiusEx.L
 local LSM
 
 -- global functions
@@ -10,7 +10,7 @@ local strfind = string.find
 local pairs = pairs
 local UnitClass, UnitGUID, UnitHealth, UnitHealthMax = UnitClass, UnitGUID, UnitHealth, UnitHealthMax
 
-local TargetBar = Gladius:NewGladiusModule("TargetBar", false, {
+local TargetBar = GladiusEx:NewGladiusExModule("TargetBar", false, {
    targetBarAttachTo = "Trinket",
    
    targetBarHeight = 30,
@@ -44,7 +44,7 @@ function TargetBar:OnEnable()
    self:RegisterEvent("UNIT_TARGET")
    self:RegisterEvent("PLAYER_TARGET_CHANGED", function() self:UNIT_TARGET("PLAYER_TARGET_CHANGED", "player") end)
    
-   LSM = Gladius.LSM
+   LSM = GladiusEx.LSM
    
    if (not self.frame) then
       self.frame = {}
@@ -60,7 +60,7 @@ function TargetBar:OnDisable()
 end
 
 function TargetBar:GetAttachTo()
-   return Gladius.db.targetBarAttachTo
+   return GladiusEx.db.targetBarAttachTo
 end
 
 function TargetBar:GetModuleAttachPoints()
@@ -86,10 +86,10 @@ function TargetBar:SetClassIcon(unit)
    
    -- get unit class
    local class
-   if (not Gladius.test) then
+   if (not GladiusEx.test) then
       class = select(2, UnitClass(unit .. "target"))
    else
-      class = Gladius.testing[unit].unitClass
+      class = GladiusEx.testing[unit].unitClass
    end
       
    if (class) then
@@ -97,7 +97,7 @@ function TargetBar:SetClassIcon(unit)
       local colorx = self:GetBarColor(class)
       if (colorx == nil) then 
           --fallback, when targeting a pet or totem 
-         colorx = Gladius.db.targetBarColor
+         colorx = GladiusEx.db.targetBarColor
       end
       
       self.frame[unit].statusbar:SetStatusBarColor(colorx.r, colorx.g, colorx.b, colorx.a or 1)
@@ -109,7 +109,7 @@ function TargetBar:SetClassIcon(unit)
       
       local left, right, top, bottom = unpack(CLASS_BUTTONS[class])
       
-      if (Gladius.db.targetBarIconCrop) then
+      if (GladiusEx.db.targetBarIconCrop) then
          -- zoom class icon
          left = left + (right - left) * 0.07
          right = right - (right - left) * 0.07
@@ -148,8 +148,8 @@ end
 
 function TargetBar:UpdateHealth(unit, health, maxHealth)
    if (not self.frame[unit]) then
-      if (not Gladius.buttons[unit]) then
-         Gladius:UpdateUnit(unit)
+      if (not GladiusEx.buttons[unit]) then
+         GladiusEx:UpdateUnit(unit)
       else
          self:Update(unit)
       end
@@ -159,7 +159,7 @@ function TargetBar:UpdateHealth(unit, health, maxHealth)
    self.frame[unit].statusbar:SetMinMaxValues(0, maxHealth)
 
    -- inverse bar
-   if (Gladius.db.targetBarInverse) then
+   if (GladiusEx.db.targetBarInverse) then
       self.frame[unit].statusbar:SetValue(maxHealth - health)
    else
       self.frame[unit].statusbar:SetValue(health)
@@ -167,7 +167,7 @@ function TargetBar:UpdateHealth(unit, health, maxHealth)
 end
 
 function TargetBar:CreateBar(unit)
-   local button = Gladius.buttons[unit]
+   local button = GladiusEx.buttons[unit]
    if (not button) then return end       
    
    -- create bar + text
@@ -190,16 +190,16 @@ function TargetBar:Update(unit)
 
    -- update health bar   
    self.frame[unit]:ClearAllPoints()
-   self.frame[unit]:SetPoint(Gladius.db.targetBarAnchor,  Gladius:GetAttachFrame(unit, Gladius.db.targetBarAttachTo), Gladius.db.targetBarRelativePoint, Gladius.db.targetBarOffsetX, Gladius.db.targetBarOffsetY)
+   self.frame[unit]:SetPoint(GladiusEx.db.targetBarAnchor,  GladiusEx:GetAttachFrame(unit, GladiusEx.db.targetBarAttachTo), GladiusEx.db.targetBarRelativePoint, GladiusEx.db.targetBarOffsetX, GladiusEx.db.targetBarOffsetY)
    
-   self.frame[unit]:SetWidth(Gladius.db.targetBarWidth)
-   self.frame[unit]:SetHeight(Gladius.db.targetBarHeight)  
+   self.frame[unit]:SetWidth(GladiusEx.db.targetBarWidth)
+   self.frame[unit]:SetHeight(GladiusEx.db.targetBarHeight)  
 
    -- update icon
 	self.frame[unit].icon:ClearAllPoints()
 	
-	if Gladius.db.targetBarIcon then
-      self.frame[unit].icon:SetPoint(Gladius.db.targetBarIconPosition, self.frame[unit], Gladius.db.targetBarIconPosition)
+	if GladiusEx.db.targetBarIcon then
+      self.frame[unit].icon:SetPoint(GladiusEx.db.targetBarIconPosition, self.frame[unit], GladiusEx.db.targetBarIconPosition)
       
       self.frame[unit].icon:SetWidth(self.frame[unit]:GetHeight())
       self.frame[unit].icon:SetHeight(self.frame[unit]:GetHeight())      
@@ -211,7 +211,7 @@ function TargetBar:Update(unit)
 	end
 
    self.frame[unit].statusbar:ClearAllPoints()
-   if Gladius.db.targetBarIcon then
+   if GladiusEx.db.targetBarIcon then
       -- self.frame[unit].statusbar:SetPoint("TOPLEFT", self.frame[unit], "TOPLEFT", self.frame[unit]:GetHeight(), 0)
       self.frame[unit].statusbar:SetPoint("TOPLEFT", self.frame[unit].icon, "TOPRIGHT")
       self.frame[unit].statusbar:SetPoint("BOTTOMRIGHT")
@@ -221,7 +221,7 @@ function TargetBar:Update(unit)
    
    self.frame[unit].statusbar:SetMinMaxValues(0, 100)
    self.frame[unit].statusbar:SetValue(100)
-   self.frame[unit].statusbar:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, Gladius.db.targetBarTexture))
+   self.frame[unit].statusbar:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, GladiusEx.db.targetBarTexture))
   
    -- disable tileing
    self.frame[unit].statusbar:GetStatusBarTexture():SetHorizTile(false)
@@ -235,10 +235,10 @@ function TargetBar:Update(unit)
    self.frame[unit].background:SetHeight(self.frame[unit]:GetHeight())	
    
   
-   self.frame[unit].background:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, Gladius.db.targetBarTexture))
+   self.frame[unit].background:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, GladiusEx.db.targetBarTexture))
    
-   self.frame[unit].background:SetVertexColor(Gladius.db.targetBarBackgroundColor.r, Gladius.db.targetBarBackgroundColor.g,
-      Gladius.db.targetBarBackgroundColor.b, Gladius.db.targetBarBackgroundColor.a)
+   self.frame[unit].background:SetVertexColor(GladiusEx.db.targetBarBackgroundColor.r, GladiusEx.db.targetBarBackgroundColor.g,
+      GladiusEx.db.targetBarBackgroundColor.b, GladiusEx.db.targetBarBackgroundColor.a)
   
   
    -- disable tileing
@@ -273,7 +273,7 @@ function TargetBar:GetBarColor(class)
 end
 
 function TargetBar:Show(unit)
-   local testing = Gladius.test
+   local testing = GladiusEx.test
    
    -- show frame
    self.frame[unit]:SetAlpha(1)
@@ -286,18 +286,18 @@ function TargetBar:Show(unit)
    if (not testing) then
       class = select(2, UnitClass(unit .. "target"))
    else
-      class = Gladius.testing[unit].unitClass
+      class = GladiusEx.testing[unit].unitClass
    end 
    
    -- set color
-   if (not Gladius.db.targetBarClassColor) then
-      local color = Gladius.db.targetBarColor
+   if (not GladiusEx.db.targetBarClassColor) then
+      local color = GladiusEx.db.targetBarColor
       self.frame[unit].statusbar:SetStatusBarColor(color.r, color.g, color.b, color.a)
    else			
       local color = self:GetBarColor(class)
       if (color == nil) then 
          -- fallback, when targeting a pet or totem 
-         color = Gladius.db.targetBarColor
+         color = GladiusEx.db.targetBarColor
       end
       
       self.frame[unit].statusbar:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
@@ -307,7 +307,7 @@ function TargetBar:Show(unit)
    TargetBar:SetClassIcon(unit)
 
    -- call event
-   if (not Gladius.test) then
+   if (not GladiusEx.test) then
       self:UNIT_HEALTH("UNIT_HEALTH", unit)
    end
 end
@@ -328,8 +328,8 @@ end
 
 function TargetBar:Test(unit)   
    -- set test values
-   local maxHealth = Gladius.testing[unit].maxHealth
-   local health = Gladius.testing[unit].health
+   local maxHealth = GladiusEx.testing[unit].maxHealth
+   local health = GladiusEx.testing[unit].health
    self:UpdateHealth(unit, health, maxHealth)
 end
 
@@ -351,7 +351,7 @@ function TargetBar:GetOptions()
                      type="toggle",
                      name=L["Target bar class color"],
                      desc=L["Toggle health bar class color"],
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      order=5,
                   },
                   sep2 = {                     
@@ -365,9 +365,9 @@ function TargetBar:GetOptions()
                      name=L["Target bar color"],
                      desc=L["Color of the health bar"],
                      hasAlpha=true,
-                     get=function(info) return Gladius:GetColorOption(info) end,
-                     set=function(info, r, g, b, a) return Gladius:SetColorOption(info, r, g, b, a) end,
-                     disabled=function() return Gladius.dbi.profile.targetBarClassColor or not Gladius.dbi.profile.modules[self.name] end,
+                     get=function(info) return GladiusEx:GetColorOption(info) end,
+                     set=function(info, r, g, b, a) return GladiusEx:SetColorOption(info, r, g, b, a) end,
+                     disabled=function() return GladiusEx.dbi.profile.targetBarClassColor or not GladiusEx.dbi.profile.modules[self.name] end,
                      order=10,
                   },
                   targetBarBackgroundColor = {
@@ -375,25 +375,25 @@ function TargetBar:GetOptions()
                      name=L["Target bar background color"],
                      desc=L["Color of the health bar background"],
                      hasAlpha=true,
-                     get=function(info) return Gladius:GetColorOption(info) end,
-                     set=function(info, r, g, b, a) return Gladius:SetColorOption(info, r, g, b, a) end,
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
-                     hidden=function() return not Gladius.db.advancedOptions end,
+                     get=function(info) return GladiusEx:GetColorOption(info) end,
+                     set=function(info, r, g, b, a) return GladiusEx:SetColorOption(info, r, g, b, a) end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     hidden=function() return not GladiusEx.db.advancedOptions end,
                      order=15,
                   },
                   sep3 = {                     
                      type = "description",
                      name="",
                      width="full",
-                     hidden=function() return not Gladius.db.advancedOptions end,
+                     hidden=function() return not GladiusEx.db.advancedOptions end,
                      order=17,
                   },
                   targetBarInverse = {
                      type="toggle",
                      name=L["Target bar inverse"],
                      desc=L["Inverse the health bar"],
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
-                     hidden=function() return not Gladius.db.advancedOptions end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     hidden=function() return not GladiusEx.db.advancedOptions end,
                      order=20,
                   },
                   targetBarTexture = {
@@ -402,7 +402,7 @@ function TargetBar:GetOptions()
                      desc=L["Texture of the health bar"],
                      dialogControl = "LSM30_Statusbar",
                      values = AceGUIWidgetLSMlists.statusbar,
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      order=25,
                   },
                   sep4 = {                     
@@ -415,7 +415,7 @@ function TargetBar:GetOptions()
                      type="toggle",
                      name=L["Target bar class icon"],
                      desc=L["Toggle the target bar class icon"],
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      order=30,
                   },
                   targetBarIconPosition = {
@@ -423,7 +423,7 @@ function TargetBar:GetOptions()
                      name=L["Target bar icon position"],
                      desc=L["Position of the target bar class icon"],
                      values={ ["LEFT"] = L["LEFT"], ["RIGHT"] = L["RIGHT"] },
-                     disabled=function() return not Gladius.dbi.profile.targetBarIcon or not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.targetBarIcon or not GladiusEx.dbi.profile.modules[self.name] end,
                      order=35,
                   },
                   sep6 = {                     
@@ -436,8 +436,8 @@ function TargetBar:GetOptions()
                      type="toggle",
                      name=L["Target Bar Icon Crop Borders"],
                      desc=L["Toggle if the target bar icon borders should be cropped or not."],
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
-                     hidden=function() return not Gladius.db.advancedOptions end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     hidden=function() return not GladiusEx.db.advancedOptions end,
                      order=40,
                   },
                },
@@ -461,7 +461,7 @@ function TargetBar:GetOptions()
                      name=L["Target bar height"],
                      desc=L["Height of the health bar"],
                      min=10, max=200, step=1,
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      order=20,
                   },
                },
@@ -471,7 +471,7 @@ function TargetBar:GetOptions()
                name=L["Position"],
                desc=L["Position settings"],  
                inline=true, 
-               hidden=function() return not Gladius.db.advancedOptions end,               
+               hidden=function() return not GladiusEx.db.advancedOptions end,               
                order=3,
                args = {
                   targetBarAttachTo = {
@@ -479,7 +479,7 @@ function TargetBar:GetOptions()
                      name=L["Target Bar Attach To"],
                      desc=L["Attach health bar to the given frame"],
                      values=function() return TargetBar:GetAttachPoints() end,
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      width="double",
                      order=5,
                   },
@@ -493,16 +493,16 @@ function TargetBar:GetOptions()
                      type="select",
                      name=L["Target Bar Anchor"],
                      desc=L["Anchor of the health bar"],
-                     values=function() return Gladius:GetPositions() end,
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     values=function() return GladiusEx:GetPositions() end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      order=10,
                   },
                   targetBarRelativePoint = {
                      type="select",
                      name=L["Target Bar Relative Point"],
                      desc=L["Relative point of the health bar"],
-                     values=function() return Gladius:GetPositions() end,
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     values=function() return GladiusEx:GetPositions() end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      order=15,               
                   },
                   sep2 = {                     
@@ -516,14 +516,14 @@ function TargetBar:GetOptions()
                      name=L["Target bar offset X"],
                      desc=L["X offset of the health bar"],
                      min=-100, max=100, step=1,
-                     disabled=function() return  not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return  not GladiusEx.dbi.profile.modules[self.name] end,
                      order=20,
                   },
                   targetBarOffsetY = {
                      type="range",
                      name=L["Target bar offset Y"],
                      desc=L["Y offset of the health bar"],
-                     disabled=function() return not Gladius.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
                      min=-100, max=100, step=1,
                      order=25,
                   },  

@@ -2,7 +2,7 @@
 
 do
    if (GetLocale() == "deDE") then
-      Gladius.L = setmetatable({
+      GladiusEx.L = setmetatable({
          ["Frame"] = "Frame",
          ["Welcome to Gladius!"] = "Welcome to Gladius!",
          ["First run has been detected, displaying test frame."] = "First run has been detected, displaying test frame.",
