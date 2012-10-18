@@ -11,6 +11,7 @@ GladiusEx.defaults = {
       modules = {
          ["*"] = true,
          ["TargetBar"] = false,
+         ["Clicks"] = false,
       },
       locked = false,
       growDirection = "HCENTER",
