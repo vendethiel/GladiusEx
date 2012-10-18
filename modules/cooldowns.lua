@@ -444,6 +444,7 @@ function Cooldowns:UpdateIcons(unit)
 		local tracked = tracked_players[unit][spellid]
 		local icon
 
+		-- icon grouping
 		local cat, group
 		for i = 1, #cat_priority do
 			local key = cat_priority[i]
@@ -464,7 +465,9 @@ function Cooldowns:UpdateIcons(unit)
 				for i = 1, skip do
 					self.frame[unit][sidx]:Hide()
 					sidx = sidx + 1
-					if sidx > #self.frame[unit] then return end
+					if sidx > #self.frame[unit] then
+						return
+					end
 				end
 			end
 		end
@@ -495,7 +498,6 @@ function Cooldowns:UpdateIcons(unit)
 	 	frame.state = 0
 		frame.tracked = tracked
 		frame.color = c or border_color["uncat"]
-
 
 		-- refresh
 		frame:SetScript("OnUpdate", CooldownFrame_OnUpdate)

@@ -2,10 +2,316 @@
 
 local SpellData = {
 	-- ================ DK ================
-	-- ================ DRUID ================
 	-- ================ PALADIN ================
 	-- ================ SHAMAN ================
 	-- ================ WARLOCK ================
+
+	-- ================ DRUID ================
+	-- Druid/baseline
+	-- Barkskin
+	[22812] = {
+		class = "DRUID",
+		defensive = true,
+		duration = 12,
+		cooldown = 60
+	},
+	-- Dash
+	[1850] = {
+		class = "DRUID",
+		duration = 15,
+		cooldown = 180
+	},
+	-- Innervate
+	[29166] = {
+		class = "DRUID",
+		duration = 10,
+		cooldown = 180
+	},
+	-- Might of the Ursoc
+	[106922] = {
+		class = "DRUID",
+		defensive = true,
+		duration = 20,
+		cooldown = 180
+	},
+	-- Nature's Grasp
+	[16689] = {
+		class = "DRUID",
+		cc = true,
+		duration = 45,
+		cooldown = 60
+	},
+	-- Stampeding Roar
+	[77761] = {
+		class = "DRUID",
+		duration = 8,
+		cooldown = 120
+	},
+	[77764] = 77761,
+	[106898] = 77761,
+	-- Tranquility
+	[740] = {
+		class = "DRUID",
+		heal = true,
+		duration = 8,
+		cooldown = 480
+	},
+
+	-- Druid/talents
+	-- Cenarion Ward
+	[102351] = {
+		class = "DRUID",
+		talent = true,
+		heal = true,
+		duration = 30,
+		cooldown = 30
+	},
+	-- Disorienting Roar
+	[99] = {
+		class = "DRUID",
+		talent = true,
+		cc = true,
+		cooldown = 30
+	},
+	-- Displacer Beast
+	[102280] = {
+		class = "DRUID",
+		talent = true,
+		cooldown = 30
+	},
+	-- Force of Nature
+	[106737] = {
+		class = "DRUID",
+		talent = true,
+		offensive = true,
+		duration = 15,
+		cooldown = 60
+	},
+	-- Heart of the Wild
+	[108288] = {
+		class = "DRUID",
+		talent = true,
+		offensive = true,
+		defensive = true,
+		duration = 45,
+		cooldown = 360
+	},
+	-- Incarnation
+	[106731] = {
+		class = "DRUID",
+		talent = true,
+		offensive = true,
+		defensive = true,
+		duration = 30,
+		cooldown = 180
+	},
+	-- Mass Entaglement
+	[102359] = {
+		class = "DRUID",
+		talent = true,
+		cc = true,
+		cooldown = 120
+	},
+	-- Mighty Bash
+	[5211] = {
+		class = "DRUID",
+		talent = true,
+		stun = true,
+		cooldown = 50
+	},
+	-- Nature's Swiftness
+	[132158] = {
+		class = "DRUID",
+		talent = true,
+		heal = true,
+		cooldown_starts_on_aura_fade = true,
+		cooldown = 60
+	},
+	-- Nature's Vigil
+	[124974] = {
+		class = "DRUID",
+		talent = true,
+		offensive = true,
+		defensive = true,
+		duration = 30,
+		cooldown = 180
+	},
+	-- Renewal
+	[108238] = {
+		class = "DRUID",
+		talent = true,
+		heal = true,
+		cooldown = 120
+	},
+	-- Typhoon
+	[132469] = {
+		class = "DRUID",
+		talent = true,
+		knockback = true,
+		cooldown = 20
+	},
+	-- Ursol's Vortex
+	[102793] = {
+		class = "DRUID",
+		talent = true,
+		cc = true,
+		cooldown = 60
+	},
+	-- Wild Charge
+	[102401] = {
+		class = "DRUID",
+		talent = true,
+		cooldown = 15
+	},
+
+	-- Druid/Balance
+	-- Celestial Alignment
+	[112071] = {
+		class = "DRUID",
+		specID = 102,
+		offensive = true,
+		duration = 15,
+		cooldown = 180
+	},
+	-- Remove Corruption
+	[2782] = {
+		class = "DRUID",
+		specID = { 102, 103, 104 },
+		dispel = true,
+		cooldown_starts_on_dispel = true,
+		cooldown = 8
+	},
+	-- Solar Beam
+	[78675] = {
+		class = "DRUID",
+		specID = 102,
+		interrupt = true,
+		silence = true,
+		duration = 10,
+		cooldown = 60
+	},
+	-- Starfall
+	[48505] = {
+		class = "DRUID",
+		specID = 102,
+		offensive = true,
+		duration = 10,
+		cooldown = 90
+	},
+	-- Starsurge
+	[78674] = {
+		class = "DRUID",
+		specID = 102,
+		offensive = true,
+		cooldown = 15
+	},
+	-- Wild Mushroom: Detonate
+	[88751] = {
+		class = "DRUID",
+		specID = 102,
+		offensive = true,
+		cooldown = 10
+	},
+
+	-- Druid/Feral
+	-- Berserk (Cat Form)
+	[106951] = {
+		class = "DRUID",
+		specID = { 103, 104 },
+		offensive = true,
+		sets_cooldown = { spellid = 50334, cooldown = 180 },
+		duration = 15,
+		cooldown = 180
+	},
+	-- Berserk (Bear Form)
+	[50334] = {
+		class = "DRUID",
+		specID = { 103, 104 },
+		offensive = true,
+		sets_cooldown = { spellid = 106951, cooldown = 180 },
+		duration = 10,
+		cooldown = 180
+	},
+	-- Skull Bash
+	[106839] = {
+		class = "DRUID",
+		specID = { 103, 104 },
+		interrupt = true,
+		cooldown = 15
+	},
+	-- Tiger's Fury
+	[5217] = {
+		class = "DRUID",
+		specID = 103,
+		offensive = true,
+		duration = 6,
+		cooldown = 30
+	},
+	
+	-- Druid/Guardian
+	-- Bear Hug
+	[102795] = {
+		class = "DRUID",
+		specID = 104,
+		stun = true,
+		duration = 3,
+		cooldown = 60
+	},
+	-- Enrage
+	[5229] = {
+		class = "DRUID",
+		specID = 104,
+		duration = 10,
+		cooldown = 60
+	},
+	-- Savage Defense
+	[62606] = {
+		class = "DRUID",
+		specID = 104,
+		defensive = true,
+		duration = 6,
+		cooldown = 90
+	},
+	-- Survival Instincts
+	[61336] = {
+		class = "DRUID",
+		specID = 104,
+		defensive = true,
+		duration = 12,
+		cooldown = 180
+	},
+
+	-- Druid/Restoration
+	-- Ironbark
+	[102342] = {
+		class = "DRUID",
+		specID = 105,
+		defensive = true,
+		duration = 12,
+		cooldown = 120
+	},
+	-- Nature's Cure
+	[88423] = {
+		class = "DRUID",
+		specID = 105,
+		dispel = true,
+		cooldown_starts_on_dispel = true,
+		cooldown = 8
+	},
+	-- Swiftmend
+	[18562] = {
+		class = "DRUID",
+		specID = 105,
+		heal = true,
+		cooldown = 15
+	},
+	-- Wild Growth
+	[48438] = {
+		class = "DRUID",
+		specID = 105,
+		heal = true,
+		cooldown = 8
+	},
 
 
 	-- ================ MONK ================
@@ -13,8 +319,8 @@ local SpellData = {
 	-- Detox
 	[115450] = {
 		class = "MONK",
-	 	dispel = true,
-	 	cooldown_starts_on_dispel = true,
+		dispel = true,
+		cooldown_starts_on_dispel = true,
 		cooldown = 8,
 	},	
 	-- Expel Harm
@@ -233,7 +539,7 @@ local SpellData = {
 	[116849] = {
 		class = "MONK",
 		specID = 270,
-	 	heal = true,
+		heal = true,
 		duration = 12,
 		cooldown = 120,
 	},	
@@ -534,7 +840,6 @@ local SpellData = {
 	-- Hymn of Hope
 	[64901] = {
 		class = "PRIEST",
-		defensive = true,
 		duration = 8,
 		cooldown = 360,
 	},
@@ -921,24 +1226,24 @@ local SpellData = {
 		cooldown = 120
 	},
 
-    -- Rogue/Subtlety 261
-    -- Premeditation
-    [14183] = {
-    	class = "ROGUE",
-    	specID = 261,
-    	offensive = true,
-    	cooldown = 20
-    },
-    -- Shadow Dance
-    [51713] = {
-    	class = "ROGUE",
-    	specID = 261,
-    	offensive = true,
-    	duration = 8,
-    	cooldown = 60
-    },
+	-- Rogue/Subtlety 261
+	-- Premeditation
+	[14183] = {
+	class = "ROGUE",
+	specID = 261,
+	offensive = true,
+	cooldown = 20
+	},
+	-- Shadow Dance
+	[51713] = {
+	class = "ROGUE",
+	specID = 261,
+	offensive = true,
+	duration = 8,
+	cooldown = 60
+	},
 
-    -- Rogue/talents
+	-- Rogue/talents
 	-- Cheat Death
 	[31230] = {
 		class = "ROGUE",
@@ -1195,32 +1500,32 @@ local SpellData = {
 		duration = 8,
 		cooldown = 120
 	},
-    -- Warrior/Fury
-    -- Warrior/Protection
-    -- Demoralizing Shout
-    [1160] = {
-    	class = "WARRIOR",
-    	specID = 73,
-    	defensive = true,
-    	duration = 10,
-    	cooldown = 60
-    },
-    -- Last Stand
-    [12975] = {
-    	class = "WARRIOR",
-    	specID = 73,
-    	defensive = true,
-    	duration = 20,
-    	cooldown = 180
-    },
-    -- Shield Barrier
-    [112048] = {
-    	class = "WARRIOR",
-    	specID = 73,
-    	defensive = true,
-    	duration = 6,
-    	cooldown = 90
-    },
+	-- Warrior/Fury
+	-- Warrior/Protection
+	-- Demoralizing Shout
+	[1160] = {
+	class = "WARRIOR",
+	specID = 73,
+	defensive = true,
+	duration = 10,
+	cooldown = 60
+	},
+	-- Last Stand
+	[12975] = {
+	class = "WARRIOR",
+	specID = 73,
+	defensive = true,
+	duration = 20,
+	cooldown = 180
+	},
+	-- Shield Barrier
+	[112048] = {
+	class = "WARRIOR",
+	specID = 73,
+	defensive = true,
+	duration = 6,
+	cooldown = 90
+	},
 
 	-- Racials
 	-- Every Man for Himself (Human)
