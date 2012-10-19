@@ -46,8 +46,8 @@ local function pairsByKeys(t, f)
    return iter
 end
 
-SLASH_GLADIUS1 = "/gladius"
-SlashCmdList["GLADIUS"] = function(msg)
+SLASH_GLADIUSEX1 = "/gladiusex"
+SlashCmdList["GLADIUSEX"] = function(msg)
    if msg:find("test") then
       local test = false
    

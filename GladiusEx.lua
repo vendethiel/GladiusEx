@@ -155,6 +155,9 @@ function GladiusEx:OnInitialize()
 	-- libsharedmedia
 	self.LSM = LibStub("LibSharedMedia-3.0")
 	self.LSM:Register("statusbar", "Minimalist", "Interface\\Addons\\GladiusEx\\images\\Minimalist")
+
+	-- libspecroster
+	self.LSR = LibStub("LibSpecRoster-1.0")
 		
 	-- test environment
 	self.test = false
@@ -190,9 +193,8 @@ function GladiusEx:OnEnable()
 	self:RegisterEvent("UNIT_NAME_UPDATE")
 	self:RegisterEvent("UNIT_HEALTH")
 	self:RegisterEvent("GROUP_ROSTER_UPDATE")
-	self:RegisterEvent("INSPECT_READY")
-	self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
+	self.LSR.RegisterMessage(self, "LSR_SpecializationChanged")
 
 	-- enable modules
 	for moduleName, module in self:IterateModules() do
@@ -468,45 +470,22 @@ function GladiusEx:UNIT_HEALTH(event, unit)
 	end
 end
 
-local last_inspect = {}
-function GladiusEx:INSPECT_READY(event, guid)
+function GladiusEx:LSR_SpecializationChanged(event, guid, unitID, specID)
+	log("LSR_SpecializationChanged", guid, unitID, specID)
+
 	for u, _ in pairs(party_units) do
 		if UnitGUID(u) == guid then
-			log("INSPECT_READY", u)
-			self:UpdateUnitSpecialization(u, GetInspectSpecialization(u))
+			self:UpdateUnitSpecialization(u, specID)
 			break
 		end
 	end
-
-	if self:IsPartyShown() then
-		for u, _ in pairs(party_units) do
-			if UnitExists(u) and UnitLevel(u) >= 10 and (not last_inspect[u] or (last_inspect[u] + 10) < GetTime()) then
-				last_inspect[u] = GetTime()
-				NotifyInspect(u)
-				return
-			end
-		end
-	end
-end
-
-function GladiusEx:PLAYER_SPECIALIZATION_CHANGED(event, unit)
-	log(event, unit)
-
-	self:CheckUnitSpecialization(unit or "player")
 end
 
 function GladiusEx:CheckUnitSpecialization(unit)
 	log("CheckUnitSpecialization", unit)
+	
+	local _, specID = self.LSR:getSpecialization(UnitGUID(unit))
 
-	if unit == "player" then
-		local spec = GetSpecialization()
-		specID = GetSpecializationInfo(spec)
-	else
-		specID = GetInspectSpecialization(unit)
-		if specID == 0 then
-			NotifyInspect(unit)
-		end
-	end
 	self:UpdateUnitSpecialization(unit, specID)
 end
 
@@ -515,11 +494,11 @@ function GladiusEx:UpdateUnitSpecialization(unitid, specID)
 
 	local _, class, spec
 
-	if specID > 0 then 
+	if specID and specID > 0 then 
 		_, spec, _, _, _, _, class = GetSpecializationInfoByID(specID)
 	end
 
-	specID = specID > 0 and specID or nil
+	specID = (specID and specID > 0) and specID or nil
 
 	if self.buttons[unitid] and self.buttons[unitid].specID ~= specID then
 		self.buttons[unitid].class = class
@@ -598,7 +577,6 @@ function GladiusEx:ShowUnit(unit)
 
 	-- update spec
 	if self:IsPartyUnit(unit) and not self.buttons[unit].spec then
-		local specID = 0
 		self:CheckUnitSpecialization(unit)
 	end
 end
