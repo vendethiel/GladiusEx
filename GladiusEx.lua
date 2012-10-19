@@ -400,6 +400,7 @@ function GladiusEx:PLAYER_ENTERING_WORLD()
 	if instanceType == "arena" then
 		self:SetTesting(false)
 		self:ShowFrames()
+		self:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
 		log("ENABLE LOGGING")
 	else
 		if not self:IsTesting() then

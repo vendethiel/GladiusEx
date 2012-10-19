@@ -47,6 +47,7 @@ local function pairsByKeys(t, f)
 end
 
 SLASH_GLADIUSEX1 = "/gladiusex"
+SLASH_GLADIUSEX2 = "/gex"
 SlashCmdList["GLADIUSEX"] = function(msg)
    if msg:find("test") then
       local test = false

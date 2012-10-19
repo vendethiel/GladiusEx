@@ -86,6 +86,7 @@ local MAX_ICONS = 40
 function Cooldowns:OnEnable()
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterMessage("GLADIUS_SPEC_UPDATE")
 
 	LSM = GladiusEx.LSM
@@ -121,6 +122,7 @@ function Cooldowns:PLAYER_ENTERING_WORLD()
 	-- reset cooldowns when joining an arena
 	if instanceType == "arena" then
 		tracked_players = {}
+		self:UpdateAllIcons()
 	end
 end
 
