@@ -2,6 +2,7 @@
 
 local SpellData = {
 	-- ================ DK ================
+	-- ================ HUNTER ================
 	-- ================ SHAMAN ================
 	-- ================ WARLOCK ================
 
@@ -1911,7 +1912,7 @@ for spellid, spelldata in pairs(SpellData) do
 		local name, _, icon = GetSpellInfo(spellid)	
 
 		if not name then
-			Gladius:Print("Cooldowns: Bad spellid", spellid)
+			Gladius:Print("Cooldowns: bad spellid", spellid)
 			break
 		end
 

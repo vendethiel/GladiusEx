@@ -49,7 +49,6 @@ end
 
 -- New enemy announcement, could be broken.
 function Announcements:Show(unit)
-   self:UNIT_NAME_UPDATE(nil, unit)
 end
 
 function Announcements:GLADIUS_SPEC_UPDATE(event, unit)
