@@ -17,7 +17,6 @@ local GetRealNumPartyMembers, GetRealNumRaidMembers, IsRaidLeader, IsRaidOfficer
 local Announcements = GladiusEx:NewGladiusExModule("Announcements", false, {
    announcements = {
       drinks = true,
-      enemies = true,
       health = true,
       resurrect = true,
       spec = true,
@@ -31,16 +30,12 @@ function Announcements:OnEnable()
    self:RegisterEvent("UNIT_HEALTH")
    self:RegisterEvent("UNIT_AURA")
    self:RegisterEvent("UNIT_SPELLCAST_START")
-   self:RegisterEvent("UNIT_NAME_UPDATE")
    
    -- register custom events
    self:RegisterMessage("GLADIUS_SPEC_UPDATE")
    
    -- Table holding messages to throttle
    self.throttled = {}
-   
-   -- enemy detected
-   self.enemy = {}
 end
 
 function Announcements:OnDisable()
@@ -50,7 +45,6 @@ end
 -- Reset throttled messages
 function Announcements:Reset(unit)
    self.throttled = {}
-   self.enemy = {}
 end
 
 -- New enemy announcement, could be broken.
@@ -58,25 +52,10 @@ function Announcements:Show(unit)
    self:UNIT_NAME_UPDATE(nil, unit)
 end
 
-function Announcements:UNIT_NAME_UPDATE(event, unit)
-   if (not strfind(unit, "arena") or strfind(unit, "pet")) then return end
-   if (not GladiusEx.db.announcements.enemies or not UnitName(unit)) then return end
-   
-   local name = UnitName(unit)
-   if (name == UNKNOWN or name == nil) then
-      return
-   end
-   
-   if (not self.enemy[unit]) then
-      self:Send(string.format("%s - %s", name, UnitClass(unit) or ""), 2, unit)
-      self.enemy[unit] = true
-   end
-end
-
 function Announcements:GLADIUS_SPEC_UPDATE(event, unit)
    if (not strfind(unit, "arena") or strfind(unit, "pet") or not GladiusEx.db.announcements.spec) then return end
    if GladiusEx.buttons[unit].spec then
-      self:Send(string.format(L["SPEC DETECTED: %s (%s)"], UnitName(unit) or unit, GladiusEx.buttons[unit].spec), 2, unit)
+      self:Send(string.format(L["SPEC DETECTED: %s (%s/%s)"], UnitName(unit) or unit, GladiusEx.buttons[unit].class, GladiusEx.buttons[unit].spec), 2, unit)
    end
 end
 
@@ -232,12 +211,6 @@ function Announcements:GetOptions()
                inline=true,
                order=5,
                args = {
-                  enemies = {
-                     type="toggle",
-                     name=L["New enemies"],
-                     desc=L["Announces when new enemies are discovered."],
-                     order=10,
-                  },
                   drinks = {
                      type="toggle",
                      name=L["Drinking"],

@@ -2,9 +2,267 @@
 
 local SpellData = {
 	-- ================ DK ================
-	-- ================ PALADIN ================
 	-- ================ SHAMAN ================
 	-- ================ WARLOCK ================
+
+	-- ================ PALADIN ================
+	-- Paladin/baseline
+	-- Avengin Wrath
+	[31884] = {
+		class = "PALADIN",
+		offensive = true,
+		defensive = true,
+		duration = 20,
+		cooldown = 180
+	},
+	-- Cleanse
+	[4987] = {
+		class = "PALADIN",
+		cooldown_starts_on_dispel = true,
+		dispel = true,
+		cooldown = 8
+	},
+	-- Devotion Aura
+	[31821] = {
+		class = "PALADIN",
+		defensive = true,
+		duration = 6,
+		cooldown = 180
+	},
+	-- Divine Protection
+	[498] = {
+		class = "PALADIN",
+		defensive = true,
+		duration = 10,
+		cooldown = 60
+	},
+	-- Divine Shield
+	[642] = {
+		class = "PALADIN",
+		immune = true,
+		duration = 8,
+		cooldown = 300
+	},
+	-- Hammer of Justice
+	[853] = {
+		class = "PALADIN",
+		stun = true,
+		cooldown = 60
+	},
+	-- Hammer of Wrath
+	[24275] = {
+		class = "PALADIN",
+		offensive = true,
+		cooldown = 6
+	},
+	-- Hand of Freedom
+	[1044] = {
+		class = "PALADIN",
+		defensive = true,
+		duration = 6,
+		cooldown = 25
+	},
+	-- Hand of Protection
+	[1022] = {
+		class = "PALADIN",
+		defensive = true,
+		duration = 10,
+		cooldown = 300
+	},
+	-- Hand of Sacrifice
+	[6940] = {
+		class = "PALADIN",
+		defensive = true,
+		duration = 12,
+		cooldown = 120
+	},
+	-- Judgement
+	[20271] = {
+		class = "PALADIN",
+		offensive = true,
+		cooldown = 6
+	},
+	-- Lay on Hands
+	--[[
+	[633] = {
+		class = "PALADIN",
+		heal = true -- todo: available on arenas?
+		cooldown = 600
+	},
+	]]
+	-- Rebuke
+	[96231] = {
+		class = "PALADIN",
+		interrupt = true,
+		cooldown = 15
+	},
+
+	-- Paladin/talents
+	-- Execution Sentence
+	[114157] = {
+		class = "PALADIN",
+		talent = true,
+		offensive = true,
+		heal = true, -- todo: check spellids for off/heal
+		duration = 10,
+		cooldown = 60
+	},
+	-- Fist of Justice
+	[105593] = {
+		class = "PALADIN",
+		talent = true,
+		stun = true,
+		replaces = 853,
+		cooldown = 30
+	},
+	-- Hand of Purify
+	[114039] = {
+		class = "PALADIN",
+		talent = true,
+		defensive = true,
+		duration = 6,
+		cooldown = 30
+	},
+	-- Holy Avenger
+	[105809] = {
+		class = "PALADIN",
+		talent = true,
+		offensive = true,
+		defensive = true,
+		duration = 18,
+		cooldown = 120
+	},
+	-- Holy Prism
+	[114165] = {
+		class = "PALADIN",
+		talent = true,
+		offensive = true,
+		heal = true,
+		cooldown = 20
+	},
+	-- Light's Hammer
+	[114158] = {
+		class = "PALADIN",
+		talent = true,
+		offensive = true,
+		heal = true,
+		duration = 16,
+		cooldown = 60
+	},
+	-- Repentance
+	[20066] = {
+		class = "PALADIN",
+		talent = true,
+		cc = true,
+		cooldown = 15
+	},
+	-- Sacred Shield
+	[20925] = {
+		class = "PALADIN",
+		talent = true,
+		defensive = true,
+		duration = 30,
+		cooldown = 6
+	},
+	-- Speed of Light
+	[85499] = {
+		class = "PALADIN",
+		talent = true,
+		duration = 8,
+		cooldown = 45
+	},
+
+
+	-- Paladin/Holy 65
+	-- Divine Favor
+	[31842] = {
+		class = "PALADIN",
+		specID = 65,
+		defensive = true,
+		duration = 20,
+		cooldown = 180
+	},
+	-- Divine Plea
+	[54428] = {
+		class = "PALADIN",
+		specID = 65,
+		duration = 9,
+		cooldown = 120
+	},
+	-- Guardian of Ancient Kings
+	[86669] = {
+		class = "PALADIN",
+		specID = 65,
+		heal = true,
+		duration = 30,
+		cooldown = 300
+	},
+	-- Holy Shock
+	[20473] = {
+		class = "PALADIN",
+		specID = 65,
+		offensive = true,
+		heal = true,
+		cooldown = 6
+	},
+
+	-- Paladin/Protection 66
+	-- Ardent Defender
+	[31850] = {
+		class = "PALADIN",
+		specID = 66,
+		defensive = true,
+		duration = 10,
+		cooldown = 180
+	},
+	-- Avenger's Shield
+	[31935] = {
+		class = "PALADIN",
+		specID = 66,
+		silence = true,
+		interrupt = true,
+		cooldown = 15
+	},
+	-- Consecration
+	[26573] = {
+		class = "PALADIN",
+		specID = 66,
+		offensive = true,
+		duration = 9,
+		cooldown = 9
+	},
+	-- Guardian of Ancient Kings
+	[86659] = {
+		class = "PALADIN",
+		duration = 12,
+		defensive = true,
+		cooldown = 180
+	},
+	-- Holy Wrath
+	[119072] = {
+		class = "PALADIN",
+		specID = 66,
+		offensive = true,
+		cooldown = 9
+	},
+
+	-- Paladin/Retribution 70
+	-- Exorcism
+	[879] = {
+		class = "PALADIN",
+		specID = 70,
+		offensive = true,
+		cooldown = 15
+	},
+	-- Guardian of Ancient Kings
+	[86698] = {
+		class = "PALADIN",
+		specID = 70,
+		offensive = true,
+		duration = 30,
+		cooldown = 300
+	},
+
 
 	-- ================ DRUID ================
 	-- Druid/baseline
@@ -1651,6 +1909,12 @@ for spellid, spelldata in pairs(SpellData) do
 	if type(spelldata) == "table" then
 		-- add name and icon
 		local name, _, icon = GetSpellInfo(spellid)	
+
+		if not name then
+			Gladius:Print("Cooldowns: Bad spellid", spellid)
+			break
+		end
+
 		spelldata.name = name
 		spelldata.icon = icon
 
