@@ -95,6 +95,9 @@ end
 function Announcements:Send(msg, throttle, unit)
    local color = unit and RAID_CLASS_COLORS[UnitClass(unit)] or { r=0, g=1, b=0 }
    local dest = GladiusEx.db.announcements.dest
+
+   -- only send announcements inside arenas
+   if select(2, IsInInstance()) ~= "arena" then return end
    
    if (not self.throttled) then
       self.throttled = {}
