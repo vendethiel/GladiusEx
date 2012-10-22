@@ -3,8 +3,343 @@
 local SpellData = {
 	-- ================ DK ================
 	-- ================ HUNTER ================
-	-- ================ SHAMAN ================
 	-- ================ WARLOCK ================
+
+	-- ================ SHAMAN ================
+	-- Shaman/baseline
+	-- Ascendance
+	[114049] = {
+		class = "SHAMAN",
+		offensive = true,
+		defensive = true,
+		duration = 15,
+		cooldown = 180
+	},
+	-- Bloodlust
+	[2825] = {
+		class = "SHAMAN",
+		duration = 40,
+		offensive = true,
+		cooldown = 300
+	},
+	-- Capacitor Totem
+	[108269] = {
+		class = "SHAMAN",
+		stun = true,
+		duration = 5,
+		cooldown = 45
+	},
+	-- Cleanse Spirit
+	[51886] = {
+		class = "SHAMAN",
+		dispel = true,
+		cooldown_starts_on_dispel = true,
+		cooldown = 8
+	},
+	-- Earth Elemental Totem
+	[2062] = {
+		class = "SHAMAN",
+		duration = 60,
+		cooldown = 300
+	},
+	-- Earth Shock
+	[8042] = {
+		class = "SHAMAN",
+		offensive = true,
+		cooldown = 6
+	},
+	-- Earthbind Totem
+	[2484] = {
+		class = "SHAMAN",
+		cc = true,
+		duration = 20,
+		cooldown = 30
+	},
+	-- Fire Elemental Totem
+	[2894] = {
+		class = "SHAMAN",
+		duration = 60,
+		offensive = true,
+		cooldown = 300
+	},
+	-- Flame Shock
+	[8050] = {
+		class = "SHAMAN",
+		offensive = true,
+		cooldown = 6
+	},
+	-- Frost Shock
+	[8056] = {
+		class = "SHAMAN",
+		cc = true,
+		cooldown = 6
+	},
+	-- Grounding Totem
+	[8177] = {
+		class = "SHAMAN",
+		defensive = true,
+		duration = 15,
+		cooldown = 25
+	},
+	-- Healing Rain
+	[73920] = {
+		class = "SHAMAN",
+		heal = true,
+		duration = 10,
+		cooldown = 10
+	},
+	-- Healing Stream Totem
+	[5394] = {
+		class = "SHAMAN",
+		heal = true,
+		duration = 15,
+		cooldown = 30
+	},
+	-- Heroism
+	[32182] = 2825,
+	-- Hex
+	[51514] = {
+		class = "SHAMAN",
+		cc = true,
+		cooldown = 45
+	},
+	-- Primal Strike
+	[73899] = {
+		class = "SHAMAN",
+		offensive = true,
+		cooldown = 8
+	},
+	-- Spiritwalker's Grace
+	[79206] = {
+		class = "SHAMAN",
+		duration = 15,
+		cooldown = 120
+	},
+	-- Stormblast
+	[115356] = {
+		class = "SHAMAN",
+		offensive = true,
+		cooldown = 8
+	},
+	-- Stormlash Totem
+	[120668] = {
+		class = "SHAMAN",
+		offensive = true,
+		duration = 10,
+		cooldown = 300
+	},
+	-- Tremor Totem
+	[8143] = {
+		class = "SHAMAN",
+		defensive = true,
+		duration = 6,
+		cooldown = 60
+	},
+	-- Unleash Elements
+	[73680] = {
+		class = "SHAMAN",
+		cooldown = 15
+	},
+	-- Unleash Life
+	[73685] = {
+		class = "SHAMAN",
+		heal = true,
+		cooldown = 15
+	},
+	-- Wind Shear
+	[57994] = {
+		class = "SHAMAN",
+		interrupt = true,
+		cooldown = 12
+	},
+
+
+	-- Shaman/talents
+	-- Ancestral Guidance
+	[108281] = {
+		class = "SHAMAN",
+		talent = true,
+		heal = true,
+		duration = 10,
+		cooldown = 120
+	},
+	-- Ancestral Swiftness
+	[16188] = {
+		class = "SHAMAN",
+		talent = true,
+		cooldown_starts_on_aura_fade = true,
+		cooldown = 60
+	},
+	-- Astral Shift
+	[108271] = {
+		class = "SHAMAN",
+		talent = true,
+		defensive = true,
+		duration = 6,
+		cooldown = 120
+	},
+	-- Call of the Elements
+	[108285] = {
+		class = "SHAMAN",
+		talent = true,
+		-- rests=... = true, TODO: this
+		cooldown = 180
+	},
+	-- Earthgrab Totem
+	[51485] = {
+		class = "SHAMAN",
+		talent = true,
+		replaces = 2484,
+		duration = 20,
+		cooldown = 30
+	},
+	-- Elemental Blast
+	[117014] = {
+		class = "SHAMAN",
+		talent = true,
+		offensive = true,
+		cooldown = 12
+	},
+	-- Elemental Mastery
+	[16166] = {
+		class = "SHAMAN",
+		talent = true,
+		offensive = true,
+		duration = 20,
+		cooldown = 120
+	},
+	-- Healing Tide Totem
+	[108280] = {
+		class = "SHAMAN",
+		talent = true,
+		heal = true,
+		duration = 10,
+		cooldown = 180
+	},
+	-- Stone Bulwark Totem
+	[108270] = {
+		class = "SHAMAN",
+		talent = true,
+		defensive = true,
+		duration = 30,
+		cooldown = 60
+	},
+	-- Totem Projection
+	[108287] = {
+		class = "SHAMAN",
+		talent = true,
+		cooldown = 10
+	},
+	-- Windwalk Totem
+	[108273] = {
+		class = "SHAMAN",
+		talent = true,
+		defensive = true,
+		duration = 6,
+		cooldown = 60
+	},
+
+
+	-- Shaman/Elemental
+	-- Earthquake
+	[61882] = {
+		class = "SHAMAN",
+		specID = 262,
+		knockback = true,
+		duration = 10,
+		cooldown = 10
+	},
+	-- Lave Burst
+	[51505] = {
+		class = "SHAMAN",
+		specID = 262,
+		offensive = true,
+		cooldown = 8
+	},
+	-- Thunderstorm
+	[51490] = {
+		class = "SHAMAN",
+		specID = 262,
+		knockback = true,
+		cc = true,
+		cooldown = 45
+	},
+
+	
+	-- Shaman/Enhancement
+	-- Feral Spirit
+	[51533] = {
+		class = "SHAMAN",
+		specID = 263,
+		offensive = true,
+		heal = true,
+		duration = 30,
+		cooldown = 120
+	},
+	-- Lava Lash
+	[60103] = {
+		class = "SHAMAN",
+		specID = 263,
+		offensive = true,
+		cooldown = 10
+	},
+	-- Shamanistic Rage
+	[30823] = {
+		class = "SHAMAN",
+		specID = 263,
+		defensive = true,
+		duration = 15,
+		cooldown = 60
+	},
+	-- Spirit Walk
+	[58875] = {
+		class = "SHAMAN",
+		specID = 263,
+		defensive = true,
+		duration = 15,
+		cooldown = 120
+	},
+	-- Stormstrike
+	[17364] = {
+		class = "SHAMAN",
+		specID = 263,
+		offensive = true,
+		cooldown = 8
+	},
+	
+
+	-- Shaman/Restoration 264
+	-- Mana Tide Totem
+	[16190] = {
+		class = "SHAMAN",
+		specID = 264,
+		duration = 16,
+		cooldown = 180
+	},
+	-- Purify Spirit
+	[77130] = {
+		class = "SHAMAN",
+		specID = 264,
+		dispel = true,
+		cooldown_starts_on_dispel = true,
+		cooldown = 8
+	},
+	-- Riptide
+	[61295] = {
+		class = "SHAMAN",
+		specID = 264,
+		heal = true,
+		cooldown = 6
+	},
+	-- Spirit Link Totem
+	[98008] = {
+		class = "SHAMAN",
+		specID = 264,
+		defensive = true,
+		duration = 6,
+		cooldown = 180
+	},
+
 
 	-- ================ PALADIN ================
 	-- Paladin/baseline
@@ -174,7 +509,7 @@ local SpellData = {
 	},
 
 
-	-- Paladin/Holy 65
+	-- Paladin/Holy
 	-- Divine Favor
 	[31842] = {
 		class = "PALADIN",
@@ -207,7 +542,7 @@ local SpellData = {
 		cooldown = 6
 	},
 
-	-- Paladin/Protection 66
+	-- Paladin/Protection
 	-- Ardent Defender
 	[31850] = {
 		class = "PALADIN",
@@ -247,7 +582,7 @@ local SpellData = {
 		cooldown = 9
 	},
 
-	-- Paladin/Retribution 70
+	-- Paladin/Retribution
 	-- Exorcism
 	[879] = {
 		class = "PALADIN",
@@ -1395,7 +1730,7 @@ local SpellData = {
 	[1966] = {
 		class = "ROGUE",
 		defensive = true,
-		duration = 5
+		duration = 5,
 	},
 	]]
 	-- Gouge

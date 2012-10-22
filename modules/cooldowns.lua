@@ -15,7 +15,7 @@ local UnitGUID = UnitGUID
 
 local SpellData = GladiusEx.CooldownsSpellData
 local guid_to_unitid = {} -- [guid] = unitid
-local tracked_players = {} -- [unit][spellid] = cd start time
+local tracked_players = {} -- [unitid][spellid] = { cooldown_start, cooldown_end, used_start, used_end }
 
 
 local Cooldowns = GladiusEx:NewGladiusExModule("Cooldowns", false, {
