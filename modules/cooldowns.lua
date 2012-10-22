@@ -87,6 +87,7 @@ function Cooldowns:OnEnable()
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
+	self:RegisterEvent("UNIT_NAME_UPDATE")
 	self:RegisterMessage("GLADIUS_SPEC_UPDATE")
 
 	LSM = GladiusEx.LSM
@@ -144,6 +145,11 @@ function Cooldowns:COMBAT_LOG_EVENT_UNFILTERED(_, timestamp, event, hideCaster, 
 end
 
 function Cooldowns:GLADIUS_SPEC_UPDATE(event, unit)
+	self:UpdateIcons(unit)
+end
+
+function Cooldowns:UNIT_NAME_UPDATE(event, unit)
+	-- hopefully at this point the opponent's faction is known
 	self:UpdateIcons(unit)
 end
 
