@@ -2,9 +2,26 @@
 
 local SpellData = {
 	-- ================ DK ================
+	[48707] = {
+		class = "DEATHKNIGHT",
+		defensive = true,
+		duration = 5,
+		cooldown = 45
+	},
 	-- ================ HUNTER ================
+	[19263] = {
+		class = "HUNTER",
+		defensive = true,
+		duration = 5,
+		cooldown = 120
+	},
 	-- ================ WARLOCK ================
-
+	[104773] ={
+		class = "WARLOCK",
+		defensive = true,
+		duration = 8,
+		cooldown = 180
+	},
 	-- ================ SHAMAN ================
 	-- Shaman/baseline
 	-- Ascendance
@@ -1886,12 +1903,12 @@ local SpellData = {
 		stun = true,
 		cooldown = 20
 	},
-	-- Deadly Calm
-	[85730] = {
-		class = "WARRIOR",
-		offensive = true,
-		cooldown = 60
-	},
+	-- -- Deadly Calm
+	-- [85730] = {
+		-- class = "WARRIOR",
+		-- offensive = true,
+		-- cooldown = 60
+	-- },
 	-- Disarm
 	[676] = {
 		class = "WARRIOR",
@@ -2247,7 +2264,7 @@ for spellid, spelldata in pairs(SpellData) do
 		local name, _, icon = GetSpellInfo(spellid)	
 
 		if not name then
-			Gladius:Print("Cooldowns: bad spellid", spellid)
+			GladiusEx:Print("Cooldowns: bad spellid", spellid)
 			break
 		end
 
