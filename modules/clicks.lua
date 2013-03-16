@@ -96,7 +96,7 @@ end
 local function setOption(info, value)
    local key = info[#info - 2]
    GladiusEx.dbi.profile.clickAttributes[key][info[#info]] = value
-   GladiusEx:UpdateFrame()
+   GladiusEx:UpdateFrames()
 end
 
 local CLICK_BUTTONS = {["1"] = L["Left"], ["2"] = L["Right"], ["3"] = L["Middle"], ["4"] = L["Button 4"], ["5"] = L["Button 5"]}
@@ -145,19 +145,18 @@ function Clicks:GetOptions()
                         local attr = addAttrMod ~= "" and CLICK_MODIFIERS[addAttrMod] .. CLICK_BUTTONS[addAttrButton] or CLICK_BUTTONS[addAttrButton]
                         
                         if (not GladiusEx.db.clickAttributes[attr]) then                           
+						GladiusEx:Print("adding attr")
                            -- add to db
                            GladiusEx.db.clickAttributes[attr] = {
-                              button = addAttrButton, 
-                              modifier = addAttrMod, 
+						      button = addAttrButton, 
+                              modifier =  addAttrMod,
                               action = "target", 
-                              macro = ""
+                              macro = ""							   
                            }
-                           
-                           -- add to options
-                           GladiusEx.options.args[self.name].args.attributeList.args[attr] = self:GetAttributeOptionTable(attr, order)
-                           
-                           -- update
-                           GladiusEx:UpdateFrame()
+--						   GladiusEx.options.args[self.name].args.attributeList.args[attr] = self:GetAttributeOptionTable(attr, order)
+						   GladiusEx.options.args[self:GetName()].args.attributeList.args[attr] = self:GetAttributeOptionTable(attr, order)
+						   -- update
+						   GladiusEx:UpdateFrames()
                         end
                      end,
                      order=30,
