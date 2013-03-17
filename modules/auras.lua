@@ -918,7 +918,7 @@ function Auras:GetOptions()
                      name = L["Add new Aura"],
                      func = function(info)
                         GladiusEx.dbi.profile.aurasFrameAuras[Auras.newAuraName] = Auras.newAuraPriority 
-                        GladiusEx.options.args[self.name].args.auraList.args[Auras.newAuraName] = Auras:SetupAura(Auras.newAuraName, Auras.newAuraPriority)
+                        GladiusEx.options.args[self:GetName()].args.auraList.args[Auras.newAuraName] = Auras:SetupAura(Auras.newAuraName, Auras.newAuraPriority)
                      end,
                      order=3,
                   },
@@ -1061,6 +1061,7 @@ function Auras:GetAuraList()
 		--[GetSpellInfo(49203)] 	= 3,	-- Hungering Cold
 		[GetSpellInfo(47481)]	= 3,	-- Gnaw (dk pet stun)
 		[GetSpellInfo(90337)]  = 3, -- Bad Manner (monkey blind)
+		[GetSpellInfo(118905) = 3, -- Static Charge - Capacitor Totem
 		
 		-- Silences
 		[GetSpellInfo(55021)] 	= 1,	-- Improved Counterspell
