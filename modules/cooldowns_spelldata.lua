@@ -2,26 +2,152 @@
 
 local SpellData = {
 	-- ================ DK ================
+	--Anti Magic Shell
 	[48707] = {
 		class = "DEATHKNIGHT",
 		defensive = true,
 		duration = 5,
 		cooldown = 45
 	},
+	--Asphyxiate
+	[108194] = {
+		class = "DEATHKNIGHT",
+		offensive = true,
+		duration = 5,
+		cooldown = 30
+	},
+	--Lichborne
+	[49039] = {
+		class = "DEATHKNIGHT",
+		offensive = true,
+		defensive = true,
+		duration = 10,
+		cooldown = 120
+	},
+	--Remorseless Winter
+	[108200] = {
+		class = "DEATHKNIGHT",
+		offensive = true,
+		defensive = true,
+		duration = 6,
+		cooldown = 60
+	},
+	--Pillar of Frost
+	[51271] = {
+		class = "DEATHKNIGHT",
+		offensive = true,
+		duration = 20,
+		cooldown = 60
+	},
+	--Dark Simulacrum
+	[77606] = {
+		class = "DEATHKNIGHT",
+		offensive = true,
+		duration = 8,
+		cooldown = 60
+	},
+		--Icebound Fortitude
+	[48792] = {
+		class = "DEATHKNIGHT",
+		defensive = true,
+		duration = 12,
+		cooldown = 180
+	},
+	--Mind Freeze
+	[47528] = {
+		class = "DEATHKNIGHT",
+		offensive = true,
+		duration = 4,
+		cooldown = 15
+	},
+	--Strangulate
+	[47476] = {
+		class = "DEATHKNIGHT",
+		offensive = true,
+		duration = 8,
+		cooldown = 60
+	},
 	-- ================ HUNTER ================
+	--Detterence
 	[19263] = {
 		class = "HUNTER",
 		defensive = true,
 		duration = 5,
 		cooldown = 120
 	},
+	--Readiness
+	[23989] = {
+		class = "HUNTER",
+		defensive = true,
+		offensive = true,
+		cooldown = 300
+	},
+		--Bestial Wrath
+	[19574] = {
+		class = "HUNTER",
+		offensive = true,
+		duration = 10,
+		cooldown = 60
+	},
+	--Stampede
+	[121818] = {
+		class = "HUNTER",
+		offensive = true,
+		duration = 20,
+		cooldown = 300
+	},
+	--Silencing Shot
+	[34490] = {
+		class = "HUNTER",
+		offensive = true,
+		duration = 3,
+		cooldown = 24
+	},
 	-- ================ WARLOCK ================
+	--unending resolve
 	[104773] ={
 		class = "WARLOCK",
 		defensive = true,
 		duration = 8,
 		cooldown = 180
 	},
+	
+	--sacrificialPact
+	[108416] = {
+		class = "WARLOCK",
+		defensive = true,
+		duration = 20,
+		cooldown = 60
+	},
+	--grimoireOfSacrifice
+	[108503] = {
+		class = "WARLOCK",
+		defensive = true,
+		duration = 600,
+		cooldown = 30
+	},
+	--darksoul instability
+	[113858] = {
+		class = "WARLOCK",
+		offensive = true,
+		duration = 20,
+		cooldown = 120
+	},
+	--darksoul
+	[113861] = {
+		class = "WARLOCK",
+		offensive = true,
+		duration = 20,
+		cooldown = 120
+	},
+	--darksoul
+	[113860] = {
+		class = "WARLOCK",
+		offensive = true,
+		duration = 20,
+		cooldown = 120
+	},
+	
 	-- ================ SHAMAN ================
 	-- Shaman/baseline
 	-- Ascendance
