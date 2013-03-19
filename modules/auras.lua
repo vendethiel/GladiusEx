@@ -1061,7 +1061,7 @@ function Auras:GetAuraList()
 		--[GetSpellInfo(49203)] 	= 3,	-- Hungering Cold
 		[GetSpellInfo(47481)]	= 3,	-- Gnaw (dk pet stun)
 		[GetSpellInfo(90337)]  = 3, -- Bad Manner (monkey blind)
-		[GetSpellInfo(118905) = 3, -- Static Charge - Capacitor Totem
+		[GetSpellInfo(118905)] = 3, -- Static Charge - Capacitor Totem
 		
 		-- Silences
 		[GetSpellInfo(55021)] 	= 1,	-- Improved Counterspell
