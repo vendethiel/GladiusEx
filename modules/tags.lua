@@ -179,7 +179,7 @@ function Tags:CreateFrame(unit, text)
    if (not button) then return end       
    
    -- create frame
-   self.frame[unit][text] = button:CreateFontString("Gladius" .. self.name .. unit .. text, "OVERLAY")
+   self.frame[unit][text] = button:CreateFontString("Gladius" .. self:GetName() .. unit .. text, "OVERLAY")
 end
 
 function Tags:UpdateText(unit, text)
@@ -312,7 +312,7 @@ end
 local function setOption(info, value)
    local key = info[#info - 2]
    GladiusEx.dbi.profile.tagsTexts[key][info[#info]] = value
-   GladiusEx:UpdateFrame()
+   GladiusEx:UpdateFrames()
 end
 
 local function getColorOption(info)
@@ -325,7 +325,7 @@ local function setColorOption(info, r, g, b, a)
    local key = info[#info - 2]
    GladiusEx.dbi.profile.tagsTexts[key][info[#info]].r, GladiusEx.dbi.profile.tagsTexts[key][info[#info]].g, 
    GladiusEx.dbi.profile.tagsTexts[key][info[#info]].b, GladiusEx.dbi.profile.tagsTexts[key][info[#info]].a = r, g, b, a
-   GladiusEx:UpdateFrame()
+   GladiusEx:UpdateFrames()
 end
 
 function Tags:GetOptions()
@@ -364,7 +364,7 @@ function Tags:GetOptions()
                      set=function(info, value)
                         self.addTextName = value
                      end,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=5,
                   },
                   attachTo = {
@@ -388,7 +388,7 @@ function Tags:GetOptions()
                      set=function(info, value)
                         self.addTextAttachTo = value
                      end,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=10,
                   },
                   add = {
@@ -412,13 +412,13 @@ function Tags:GetOptions()
                            }
                            
                            -- add to options
-                           GladiusEx.options.args[self.name].args.textList.args[text] = self:GetTextOptionTable(text, order)
+                           GladiusEx.options.args[self:GetName()].args.textList.args[text] = self:GetTextOptionTable(text, order)
    
                            -- set tags
-                           GladiusEx.options.args[self.name].args.textList.args[text].args.tag.args = self.optionTags
+                           GladiusEx.options.args[self:GetName()].args.textList.args[text].args.tag.args = self.optionTags
                            
                            -- update
-                           GladiusEx:UpdateFrame()
+                           GladiusEx:UpdateFrames()
                         end
                      end,
                      order=15,
@@ -449,7 +449,7 @@ function Tags:GetOptions()
                      set=function(info, value)
                         self.addTagName = value
                      end,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=5,
                   },
                   add = {
@@ -463,15 +463,15 @@ function Tags:GetOptions()
                            GladiusEx.db.tagEvents[self.addTagName] = ""
                            
                            -- add to options
-                           GladiusEx.options.args[self.name].args.tagList.args[self.addTagName] = self:GetTagOptionTable(self.addTagName, order)
+                           GladiusEx.options.args[self:GetName()].args.tagList.args[self.addTagName] = self:GetTagOptionTable(self.addTagName, order)
                            
                            -- add to text option tags
-                           for text, v in pairs(GladiusEx.options.args[self.name].args.textList.args) do
+                           for text, v in pairs(GladiusEx.options.args[self:GetName()].args.textList.args) do
                               if (v.args.tag) then
                                  local tag = self.addTagName
                                  local tagName = L[tag .. "Tag"] ~= tag .. "Tag" and L[tag .. "Tag"] or strformat(L["Tag: %s"], tag) 
                               
-                                 GladiusEx.options.args[self.name].args.textList.args[text].args.tag.args[tag] = {
+                                 GladiusEx.options.args[self:GetName()].args.textList.args[text].args.tag.args[tag] = {
                                     type="toggle",
                                     name=tagName,
                                     get=function(info) 
@@ -498,7 +498,7 @@ function Tags:GetOptions()
                                        end
                                        
                                        -- update
-                                       GladiusEx:UpdateFrame()
+                                       GladiusEx:UpdateFrames()
                                     end,
                                     order=order,
                                  }
@@ -506,7 +506,7 @@ function Tags:GetOptions()
                            end  
                            
                            -- update
-                           GladiusEx:UpdateFrame()
+                           GladiusEx:UpdateFrames()
                         end
                      end,
                      order=10,
@@ -523,7 +523,7 @@ function Tags:GetOptions()
          type="input",
          name=L["Text"],
          desc=L["Text to be displayed"],
-         disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+         disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
          width="double",
          order=1,
       },
@@ -560,7 +560,7 @@ function Tags:GetOptions()
             end
             
             -- update
-            GladiusEx:UpdateFrame()
+            GladiusEx:UpdateFrames()
          end,
          order=order,
       }
@@ -606,10 +606,10 @@ function Tags:GetTextOptionTable(text, order)
                GladiusEx.db.tagsTexts[text] = nil
                
                -- remove from options
-               GladiusEx.options.args[self.name].args.textList.args[text] = nil
+               GladiusEx.options.args[self:GetName()].args.textList.args[text] = nil
                
                -- update
-               GladiusEx:UpdateFrame()
+               GladiusEx:UpdateFrames()
             end,
             order=1,
          },
@@ -635,7 +635,7 @@ function Tags:GetTextOptionTable(text, order)
                   hasAlpha=true,
                   get=getColorOption,
                   set=setColorOption,
-                  disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                  disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                   order=5,
                },
                size = {
@@ -643,7 +643,7 @@ function Tags:GetTextOptionTable(text, order)
                   name=L["Text Size"],
                   desc=L["Text size of the text"],
                   min=1, max=20, step=1,
-                  disabled=function() return not GladiusEx.dbi.profile.modules[self.name] or GladiusEx.db.useGlobalFontSize end,
+                  disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] or GladiusEx.db.useGlobalFontSize end,
                   order=10,
                },                  
             },
@@ -660,7 +660,7 @@ function Tags:GetTextOptionTable(text, order)
                   name=L["Text Align"],
                   desc=L["Text align of the text"],
                   values={ ["LEFT"] = L["LEFT"], ["CENTER"] = L["CENTER"], ["RIGHT"] = L["RIGHT"] },
-                  disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                  disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                   width="double",
                   order=5,
                },
@@ -669,7 +669,7 @@ function Tags:GetTextOptionTable(text, order)
                   name=L["Text Offset X"],
                   desc=L["X offset of the text"],
                   min=-100, max=100, step=1,
-                  disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                  disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                   hidden=function() return not GladiusEx.db.advancedOptions end,
                   order=10,
                },
@@ -677,7 +677,7 @@ function Tags:GetTextOptionTable(text, order)
                   type="range",
                   name=L["Text Offset Y"],
                   desc=L["Y offset of the text"],
-                  disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                  disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                   hidden=function() return not GladiusEx.db.advancedOptions end,
                   min=-100, max=100, step=1,
                   order=15,
@@ -706,17 +706,17 @@ function Tags:GetTagOptionTable(tag, order)
                GladiusEx.db.tagEvents[tag] = nil
                
                -- remove from options
-               GladiusEx.options.args[self.name].args.tagList.args[tag] = nil
+               GladiusEx.options.args[self:GetName()].args.tagList.args[tag] = nil
                
                -- remove from text option tags
-               for text, v in pairs(GladiusEx.options.args[self.name].args.textList.args) do
+               for text, v in pairs(GladiusEx.options.args[self:GetName()].args.textList.args) do
                   if (v.args.tag and v.args.tag.args[tag]) then
-                     GladiusEx.options.args[self.name].args.textList.args[text].args.tag.args[tag] = nil
+                     GladiusEx.options.args[self:GetName()].args.textList.args[text].args.tag.args[tag] = nil
                   end
                end               
                
                -- update
-               GladiusEx:UpdateFrame()
+               GladiusEx:UpdateFrames()
             end,
             order=1,
          },
@@ -746,13 +746,13 @@ function Tags:GetTagOptionTable(tag, order)
                      GladiusEx.db.tagEvents[key] = nil
                      
                      -- options
-                     GladiusEx.options.args[self.name].args.tagList.args[key] = nil                     
-                     GladiusEx.options.args[self.name].args.tagList.args[value] = self:GetTagOptionTable(value, order) 
+                     GladiusEx.options.args[self:GetName()].args.tagList.args[key] = nil                     
+                     GladiusEx.options.args[self:GetName()].args.tagList.args[value] = self:GetTagOptionTable(value, order) 
                      
                      -- update
-                     GladiusEx:UpdateFrame()                   
+                     GladiusEx:UpdateFrames()                   
                   end,
-                  disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                  disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                   width="double",
                   order=5,
                },
@@ -769,9 +769,9 @@ function Tags:GetTagOptionTable(tag, order)
                      GladiusEx.db.tagEvents[key] = value
                      
                      -- update
-                     GladiusEx:UpdateFrame() 
+                     GladiusEx:UpdateFrames() 
                   end,
-                  disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                  disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                   width="double",
                   order=10,
                },
@@ -790,9 +790,9 @@ function Tags:GetTagOptionTable(tag, order)
                      self.func[key] = nil
                      
                      -- update
-                     GladiusEx:UpdateFrame() 
+                     GladiusEx:UpdateFrames() 
                   end,
-                  disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                  disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                   width="double",
                   multiline=true,
                   order=15,

@@ -125,7 +125,7 @@ function Clicks:GetOptions()
                      values=CLICK_BUTTONS,
                      get=function(info) return addAttrButton end,
                      set=function(info, value) addAttrButton = value end,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=10,
                   },
                   modifier = {
@@ -135,7 +135,7 @@ function Clicks:GetOptions()
                      values=CLICK_MODIFIERS,
                      get=function(info) return addAttrMod end,
                      set=function(info, value) addAttrMod = value end,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=20,
                   },
                   add = {
@@ -145,7 +145,7 @@ function Clicks:GetOptions()
                         local attr = addAttrMod ~= "" and CLICK_MODIFIERS[addAttrMod] .. CLICK_BUTTONS[addAttrButton] or CLICK_BUTTONS[addAttrButton]
                         
                         if (not GladiusEx.db.clickAttributes[attr]) then                           
-						GladiusEx:Print("adding attr")
+						
                            -- add to db
                            GladiusEx.db.clickAttributes[attr] = {
 						      button = addAttrButton, 
@@ -183,7 +183,7 @@ function Clicks:GetAttributeOptionTable(attribute, order)
       name=attribute,
       childGroups="tree",
       order=order,
-      disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+      disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
       args = {
          delete = {
             type="execute",

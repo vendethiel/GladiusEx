@@ -585,11 +585,11 @@ function Cooldowns:CreateFrame(unit)
 
 	-- create cooldown frame
 	if not self.frame[unit] then
-		self.frame[unit] = CreateFrame("Frame", "Gladius" .. self.name .. "frame" .. unit, button)
+		self.frame[unit] = CreateFrame("Frame", "Gladius" .. self:GetName() .. "frame" .. unit, button)
 		self.frame[unit]:EnableMouse(false)
 
 		for i=1, MAX_ICONS do
-			self.frame[unit][i] = CreateCooldownFrame("Gladius" .. self.name .. "frameIcon" .. i .. unit, self.frame[unit])
+			self.frame[unit][i] = CreateCooldownFrame("Gladius" .. self:GetName() .. "frameIcon" .. i .. unit, self.frame[unit])
 			self.frame[unit][i]:SetScript("OnUpdate", CooldownFrame_OnUpdate)
 			self.frame[unit][i]:Hide()
 		end
@@ -763,7 +763,7 @@ function Cooldowns:GetOptions()
 									["DOWNRIGHT"] = L["Down Right"],
 							}
 							end,
-							disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+							disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
 							order=10,
 						}, 
 						sep = {
@@ -777,7 +777,7 @@ function Cooldowns:GetOptions()
 							name=L["Cooldown Icons Per Column"],
 							desc=L["Number of cooldown icons per column"],
 							min=1, max=50, step=1,
-							disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+							disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
 							order=15,
 						},
 						cooldownsMax = {
@@ -785,7 +785,7 @@ function Cooldowns:GetOptions()
 							name=L["Cooldown Icons Max"],
 							desc=L["Number of max cooldowns"],
 							min=1, max=MAX_ICONS, step=1,
-							disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+							disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
 							order=20,
 						},  
 						sep2 = {
@@ -808,7 +808,7 @@ function Cooldowns:GetOptions()
 								name=L["Cooldown Icon Size"],
 								desc=L["Size of the cooldown icons"],
 								min=10, max=100, step=1,
-								disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+								disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
 								order=5,
 							},
 							sep = {
@@ -822,14 +822,14 @@ function Cooldowns:GetOptions()
 								name=L["Cooldowns Spacing Vertical"],
 								desc=L["Vertical spacing of the cooldowns"],
 								min=0, max=30, step=1,
-								disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+								disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
 								order=15,
 							},
 							cooldownsSpacingX = {
 								type="range",
 								name=L["Cooldowns Spacing Horizontal"],
 								desc=L["Horizontal spacing of the cooldowns"],
-								disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+								disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
 								min=0, max=30, step=1,
 								order=20,
 							},
@@ -848,7 +848,7 @@ function Cooldowns:GetOptions()
 								name=L["Cooldowns Attach To"],
 								desc=L["Attach cooldowns to the given frame"],
 								values=function() return Cooldowns:GetAttachPoints() end,
-								disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+								disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
 								width="double",
 								order=5,
 							},
@@ -863,7 +863,7 @@ function Cooldowns:GetOptions()
 								name=L["Cooldowns Anchor"],
 								desc=L["Anchor of the cooldowns"],
 								values=function() return GladiusEx:GetPositions() end,
-								disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+								disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
 								order=10,
 							},
 							cooldownsRelativePoint = {
@@ -871,7 +871,7 @@ function Cooldowns:GetOptions()
 								name=L["Cooldowns Relative Point"],
 								desc=L["Relative point of the cooldowns"],
 								values=function() return GladiusEx:GetPositions() end,
-								disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+								disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
 								order=15,
 							},
 							sep2 = {
@@ -885,14 +885,14 @@ function Cooldowns:GetOptions()
 								name=L["Cooldowns Offset X"],
 								desc=L["X offset of the cooldowns"],
 								min=-100, max=100, step=1,
-								disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+								disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
 								order=20,
 							},
 							cooldownsOffsetY = {
 								type="range",
 								name=L["Cooldowns Offset Y"],
 								desc=L["Y  offset of the cooldowns"],
-								disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+								disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
 								min=-50, max=50, step=1,
 								order=25,
 							},
