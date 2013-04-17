@@ -132,7 +132,7 @@ local function SetDebuff(debuffFrame, unit, i)
    end
 
    debuffFrame.count:SetText(count > 1 and count or nil)
-   color = debuffType and DebuffTypeColor[debuffType] or DebuffTypeColor["none"]
+   local color = debuffType and DebuffTypeColor[debuffType] or DebuffTypeColor["none"]
    debuffFrame.border:SetVertexColor(color.r, color.g, color.b)
 end
 

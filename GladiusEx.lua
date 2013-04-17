@@ -711,7 +711,7 @@ function GladiusEx:CreateAnchor(unit)
 				-- center horizontally
 			end
 		elseif button == "RightButton" then
-			SlashCmdList["GLADIUSEX"]("options")
+			self:ShowOptionsDialog()
 		end
 	end)
 	
