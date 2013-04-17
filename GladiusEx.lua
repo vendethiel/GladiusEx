@@ -217,10 +217,10 @@ function GladiusEx:OnEnable()
 		self:Print(L["Welcome to GladiusEx!"])
 		self:Print(L["First run has been detected, displaying test frame."])
 		self:Print(L["Valid slash commands are:"])
-		self:Print(L["/gladiusex ui"])
-		self:Print(L["/gladiusex test 2-5"])
-		self:Print(L["/gladiusex hide"])
-		self:Print(L["/gladiusex reset"])
+		self:Print(L["/gex ui"])
+		self:Print(L["/gex test 2-5"])
+		self:Print(L["/gex hide"])
+		self:Print(L["/gex reset"])
 		self:Print(L["** If this is not your first run please lock or move the frame to prevent this from happening **"])
 
 		self:SetTesting(3)
@@ -711,7 +711,7 @@ function GladiusEx:CreateAnchor(unit)
 				-- center horizontally
 			end
 		elseif button == "RightButton" then
-			SlashCmdList["GLADIUS"]("options")
+			SlashCmdList["GLADIUSEX"]("options")
 		end
 	end)
 	

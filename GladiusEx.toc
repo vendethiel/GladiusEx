@@ -8,7 +8,6 @@ embeds.xml
 
 GladiusEx.lua
 
-localization\deDE.lua
 localization\enUS.lua
 
 options.lua

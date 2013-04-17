@@ -1,7 +1,4 @@
 local GladiusEx = _G.GladiusEx
-if not GladiusEx then
-  DEFAULT_CHAT_FRAME:AddMessage(format("Module %s requires Gladius", "Class Icon"))
-end
 local L = GladiusEx.L
 local LSM
 

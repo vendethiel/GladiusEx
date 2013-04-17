@@ -73,10 +73,10 @@ SlashCmdList["GLADIUSEX"] = function(msg)
       
       if (not GladiusEx.options) then
          GladiusEx:SetupOptions()
-         AceDialog:SetDefaultSize("Gladius", 830, 530)
+         AceDialog:SetDefaultSize("GladiusEx", 830, 530)
       end
       
-      AceDialog:Open("Gladius")
+      AceDialog:Open("GladiusEx")
    elseif msg == "hide" then
       -- hide buttons
       GladiusEx:HideFrames()
@@ -184,7 +184,7 @@ end
 function GladiusEx:SetupOptions()
    self.options = {
       type = "group",
-      name = "Gladius",
+      name = "GladiusEx",
       plugins = {},
       get=getOption,
       set=setOption,
@@ -375,6 +375,6 @@ function GladiusEx:SetupOptions()
    ]]
    
    self.options.plugins.profiles = { profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.dbi) }
-	LibStub("AceConfig-3.0"):RegisterOptionsTable("Gladius", self.options)
-	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Gladius", "Gladius")
+	LibStub("AceConfig-3.0"):RegisterOptionsTable("GladiusEx", self.options)
+	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("GladiusEx", "GladiusEx")
 end
