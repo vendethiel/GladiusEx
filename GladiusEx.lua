@@ -41,12 +41,12 @@ local function log(...)
 		log_frame:SetSize(500, 400)
 		log_frame:SetFont(STANDARD_TEXT_FONT, 9, "NONE")
 		log_frame:SetShadowColor(0, 0, 0, 1)
-		log_frame:SetShadowOffset(1, -1)  
+		log_frame:SetShadowOffset(1, -1)
 		log_frame:SetFading(false)
 		log_frame:SetJustifyH("LEFT")
 		log_frame:SetIndentedWordWrap(true)
 		log_frame:SetMaxLines(10000)
-		log_frame:SetBackdropColor(1,1,1,0.2)
+		log_frame:SetBackdropColor(1, 1, 1, 0.2)
 		log_frame.starttime = GetTime()
 	end
 	local p = ...
@@ -174,7 +174,7 @@ function GladiusEx:OnInitialize()
 		["party3"] = { health = 20000, maxHealth = 40000, power = 80, maxPower = 130, powerType = 6, unitClass = "DEATHKNIGHT", unitRace = "Dwarf", unitSpec = "Unholy", specID = 252 },
 		["party4"] = { health = 10000, maxHealth = 30000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Gnome", unitSpec = "Arms", specID = 71 },
 
-	}, { 
+	}, {
 		__index = function(t, k)
 			return t["arena1"]
 		end
@@ -207,9 +207,8 @@ function GladiusEx:OnEnable()
 	
 	-- create frames
 	if #self.buttons == 0 then
-		self:InitializeUnit("player")
-		for i = 1, 4 do self:InitializeUnit("party" .. i) end
-		for i = 1, 5 do self:InitializeUnit("arena" .. i) end
+		for unit in pairs(party_units) do self:InitializeUnit(unit) end
+		for unit in pairs(arena_units) do self:InitializeUnit(unit) end
 	end
 
 	-- display help message
@@ -495,7 +494,7 @@ function GladiusEx:UpdateUnitSpecialization(unitid, specID)
 
 	local _, class, spec
 
-	if specID and specID > 0 then 
+	if specID and specID > 0 then
 		_, spec, _, _, _, _, class = GetSpecializationInfoByID(specID)
 	end
 
@@ -525,6 +524,7 @@ function GladiusEx:IsPartyUnit(unit)
 end
 
 function GladiusEx:InitializeUnit(unit)
+	log("InitializeUnit", unit)
 	self:CreateUnit(unit)
 	self:UpdateUnit(unit)
 end
@@ -544,7 +544,7 @@ function GladiusEx:TestUnit(unit)
 	end
 	
 	-- lower secure frame in test mode so we can move the frame
-	self.buttons[unit]:SetFrameStrata("LOW")     
+	self.buttons[unit]:SetFrameStrata("LOW")
 	self.buttons[unit].secure:SetFrameStrata("BACKGROUND")
 end
 
@@ -639,7 +639,7 @@ function GladiusEx:CreateUnit(unit)
 	self.buttons[unit]:Hide()
 	
 	-- Commenting this out as it messes up the look of the bar backgrounds.
-	-- Should leave the background color to the actual background frame 
+	-- Should leave the background color to the actual background frame
 	-- and the bar backgrounds imo - Proditor
 	--[[
 	button:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16,})
@@ -655,17 +655,17 @@ function GladiusEx:CreateUnit(unit)
 	local dragparentunit = self:IsArenaUnit(unit) and "anchor_arena" or "anchor_party"
 	local dragparent = self:IsArenaUnit(unit) and self.anchor_arena or self.anchor_party
 	
-	button:SetScript("OnDragStart", function(f) 
-		if (not InCombatLockdown() and not self.db.locked) then 
+	button:SetScript("OnDragStart", function(f)
+		if (not InCombatLockdown() and not self.db.locked) then
 			local f = self.db.groupButtons and dragparent or f
-			f:StartMoving() 
-		end 
+			f:StartMoving()
+		end
 	end)
 	 
 	button:SetScript("OnDragStop", function(f)
 		if (not InCombatLockdown()) then
 			local f = self.db.groupButtons and dragparent or f
-			local unit = self.db.groupButtons and dragparentunit or unit 
+			local unit = self.db.groupButtons and dragparentunit or unit
 				
 			f:StopMovingOrSizing()
 			local scale = f:GetEffectiveScale()
@@ -706,7 +706,7 @@ function GladiusEx:CreateAnchor(unit)
 	anchor:RegisterForDrag("LeftButton")
 
 	anchor:SetScript("OnMouseDown", function(f, button)
-		if button == "LeftButton" then 
+		if button == "LeftButton" then
 			if IsShiftKeyDown() then
 				-- center horizontally
 			end
@@ -715,10 +715,10 @@ function GladiusEx:CreateAnchor(unit)
 		end
 	end)
 	
-	anchor:SetScript("OnDragStart", function(f) 
-		if (not InCombatLockdown() and not self.db.locked) then 
-			anchor:StartMoving() 
-		end 
+	anchor:SetScript("OnDragStart", function(f)
+		if (not InCombatLockdown() and not self.db.locked) then
+			anchor:StartMoving()
+		end
 	end)
 	 
 	anchor:SetScript("OnDragStop", function(f)
@@ -755,9 +755,9 @@ function GladiusEx:UpdateUnit(unit, module)
 	log("UpdateUnit", unit)
 
 	-- todo: handle this properly
-	if (InCombatLockdown()) then 
+	if (InCombatLockdown()) then
 		log("UpdateUnit aborted due to InCombatLockdown")
-		return 
+		return
 	end
 
 	local height = 0
@@ -765,7 +765,7 @@ function GladiusEx:UpdateUnit(unit, module)
 	local frameHeight = 0
 	
 	-- reset hit rect
-	self.buttons[unit]:SetHitRectInsets(0, 0, 0, 0) 
+	self.buttons[unit]:SetHitRectInsets(0, 0, 0, 0)
 	self.buttons[unit].secure:SetHitRectInsets(0, 0, 0, 0)
 
 	-- update modules (bars first, because we need the height)
@@ -786,7 +786,7 @@ function GladiusEx:UpdateUnit(unit, module)
 	self.buttons[unit].frameWidth = frameWidth
 	self.buttons[unit].frameHeight = frameHeight
 	
-	-- update button 
+	-- update button
 	self.buttons[unit]:SetScale(self.db.frameScale)
 	self.buttons[unit]:SetSize(frameWidth, frameHeight)
 	
@@ -815,7 +815,7 @@ function GladiusEx:UpdateUnit(unit, module)
 	else
 		local base, n = string.match(unit, "^(%a+)(%d+)$")
 		local parentUnit = unit == "party1" and "player" or (base .. (n - 1))
-		local parentButton = self.buttons[parentUnit] 
+		local parentButton = self.buttons[parentUnit]
 		
 		if self.db.growDirection == "UP" then
 			self.buttons[unit]:SetPoint("BOTTOMLEFT", parentButton, "TOPLEFT", 0, self.db.margin)
@@ -826,7 +826,7 @@ function GladiusEx:UpdateUnit(unit, module)
 		elseif self.db.growDirection == "RIGHT" or self.db.growDirection == "HCENTER" then
 			self.buttons[unit]:SetPoint("TOPLEFT", parentButton, "TOPLEFT", frameWidth + abs(left) + abs(right) + self.db.margin, 0)
 	  end
-	end   
+	end
 	
 	-- update secure frame
 	self.buttons[unit].secure:ClearAllPoints()
@@ -866,18 +866,18 @@ function GladiusEx:UpdateUnit(unit, module)
 		anchor.text:SetTextColor(1, 1, 1, 1)
 		
 		anchor.text:SetShadowOffset(1, -1)
-		anchor.text:SetShadowColor(0, 0, 0, 1)   
+		anchor.text:SetShadowColor(0, 0, 0, 1)
 		
 		anchor.text:SetText(unit == "player" and L["GladiusEx Party Anchor - click to move"] or L["GladiusEx Enemy Anchor - click to move"])
 		
 		if (self.db.groupButtons and not self.db.locked) then
 			anchor:Show()
-		else         
+		else
 			anchor:Hide()
 		end
 
 		-- background
-		background:SetBackdropColor(self.db.backgroundColor.r, self.db.backgroundColor.g, self.db.backgroundColor.b, self.db.backgroundColor.a)         
+		background:SetBackdropColor(self.db.backgroundColor.r, self.db.backgroundColor.g, self.db.backgroundColor.b, self.db.backgroundColor.a)
 		if self.db.growDirection == "UP" or self.db.growDirection == "DOWN" then
 			-- vertical
 			background:SetWidth(self.db.barWidth + self.db.backgroundPadding * 2 + abs(right) + abs(left))
@@ -887,7 +887,7 @@ function GladiusEx:UpdateUnit(unit, module)
 		end
 
 
-		background:ClearAllPoints()      
+		background:ClearAllPoints()
 		if self.db.growDirection == "UP" then
 			background:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT")
 		elseif self.db.growDirection == "DOWN" or self.db.growDirection == "RIGHT"  then
@@ -900,7 +900,7 @@ function GladiusEx:UpdateUnit(unit, module)
 		
 		if (self.db.groupButtons) then
 			background:Show()
-		else         
+		else
 			background:Hide()
 		end
 	end
