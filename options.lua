@@ -79,20 +79,6 @@ local function setOption(info, value)
 	GladiusEx:ShowFrames()
 end
 
-local AceDialog
-local AceRegistry
-function GladiusEx:ShowOptionsDialog()
-	AceDialog = AceDialog or LibStub("AceConfigDialog-3.0")
-	AceRegistry = AceRegistry or LibStub("AceConfigRegistry-3.0")
-	
-	if (not GladiusEx.options) then
-		GladiusEx:SetupOptions()
-		AceDialog:SetDefaultSize("GladiusEx", 830, 530)
-	end
-	
-	AceDialog:Open("GladiusEx")
-end
-
 function GladiusEx:GetColorOption(info)
 	local key = info.arg or info[#info]
 	return self.dbi.profile[key].r, self.dbi.profile[key].g, self.dbi.profile[key].b, self.dbi.profile[key].a
@@ -357,4 +343,8 @@ function GladiusEx:SetupOptions()
 	self.options.plugins.profiles = { profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.dbi) }
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("GladiusEx", self.options)
 	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("GladiusEx", "GladiusEx")
+end
+
+function GladiusEx:ShowOptionsDialog()
+	InterfaceOptionsFrame_OpenToCategory("GladiusEx")
 end

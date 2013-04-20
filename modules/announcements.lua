@@ -111,7 +111,7 @@ function Announcements:Send(msg, throttle, unit)
    end
    
    if (dest == "self") then
-      DEFAULT_CHAT_FRAME:AddMessage("|cff33ff99Gladius|r: " .. msg)
+      GladiusEx:Print(msg)
    end
 	
 	-- change destination to party if not raid leader/officer.

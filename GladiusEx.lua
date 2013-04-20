@@ -182,6 +182,9 @@ function GladiusEx:OnInitialize()
 	
 	-- buttons
 	self.buttons = {}
+
+	-- init optinos
+	self:SetupOptions()
 end
 
 function GladiusEx:OnEnable()
