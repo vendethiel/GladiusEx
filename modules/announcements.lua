@@ -49,6 +49,7 @@ end
 
 function Announcements:GLADIUS_SPEC_UPDATE(event, unit)
    if (not strfind(unit, "arena") or strfind(unit, "pet") or not GladiusEx.db.announcements.spec) then return end
+   
    if GladiusEx.buttons[unit].spec then
       self:Send(string.format(L["SPEC DETECTED: %s (%s/%s)"], UnitName(unit) or unit, GladiusEx.buttons[unit].class, GladiusEx.buttons[unit].spec), 2, unit)
    end
