@@ -1,6 +1,9 @@
 package-as: GladiusEx
 
 externals:
+    libs/LibFunctional-1.0:
+        url: git://git.wowace.com/wow/libfunctional-1-0/mainline.git
+        tag: latest
     libs/AceAddon-3.0:
         url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceAddon-3.0
         tag: latest
