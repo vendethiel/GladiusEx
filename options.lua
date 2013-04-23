@@ -1,4 +1,5 @@
 ﻿-- global functions
+local fn = LibStub("LibFunctional-1.0")
 local pairs = pairs
 local type = type
 
@@ -334,10 +335,9 @@ function GladiusEx:SetupOptions()
 		},
 	}
 
-	local order = 10
-	for moduleName, module in self:IterateModules() do
-		self:SetupModule(moduleName, module, order)
-		order = order + 5
+	local mods = fn.sort(fn.from_iterator(self:IterateModules()), function(x, y) return x[1] < y[1] end)
+	for order, mod in ipairs(mods) do
+		self:SetupModule(mod[1], mod[2], order + 10)
 	end
 
 	self.options.plugins.profiles = { profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.dbi) }
