@@ -802,33 +802,32 @@ function Tags:GetBuiltinTags()
 			return UnitIsDeadOrGhost(unit) and GladiusEx.L["DEAD"] or (UnitName(unit) or unit)
 		end,
 		["class"] = function(unit)
-			return not GladiusEx.test and UnitClass(unit) or LOCALIZED_CLASS_NAMES_MALE[GladiusEx.testing[unit].unitClass]
+			return not GladiusEx:IsTesting(unit) and UnitClass(unit) or LOCALIZED_CLASS_NAMES_MALE[GladiusEx.testing[unit].unitClass]
 		end,
 		["class:short"] = function(unit)
-			return not GladiusEx.test and GladiusEx.L[(UnitClass(unit) or GladiusEx.buttons[unit].clas or "") .. ":short"] or GladiusEx.L[LOCALIZED_CLASS_NAMES_MALE[GladiusEx.testing[unit].unitClass] .. ":short"]
+			return not GladiusEx:IsTesting(unit) and GladiusEx.L[(UnitClass(unit) or GladiusEx.buttons[unit].clas or "") .. ":short"] or GladiusEx.L[LOCALIZED_CLASS_NAMES_MALE[GladiusEx.testing[unit].unitClass] .. ":short"]
 		end,
 		["race"] = function(unit)
-			return not GladiusEx.test and UnitRace(unit) or GladiusEx.testing[unit].unitRace
+			return not GladiusEx:IsTesting(unit) and UnitRace(unit) or GladiusEx.testing[unit].unitRace
 		end,
 		["spec"] = function(unit)
-			return GladiusEx.test and GladiusEx.testing[unit].unitSpec or GladiusEx.buttons[unit].spec
+			return GladiusEx:IsTesting(unit) and GladiusEx.testing[unit].unitSpec or GladiusEx.buttons[unit].spec
 		end,
 		["spec:short"] = function(unit)
-			local spec = GladiusEx.test and GladiusEx.testing[unit].unitSpec or GladiusEx.buttons[unit].spec
+			local spec = GladiusEx:IsTesting(unit) and GladiusEx.testing[unit].unitSpec or GladiusEx.buttons[unit].spec
 			if (spec == nil or spec == "") then
 				return ""
 			end
-
 			return GladiusEx.L[spec .. ":short"]
 		end,
 		["health"] = function(unit)
-			return not GladiusEx.test and UnitHealth(unit) or GladiusEx.testing[unit].health
+			return not GladiusEx:IsTesting(unit) and UnitHealth(unit) or GladiusEx.testing[unit].health
 		end,
 		["maxhealth"] = function(unit)
-			return not GladiusEx.test and UnitHealthMax(unit) or GladiusEx.testing[unit].maxHealth
+			return not GladiusEx:IsTesting(unit) and UnitHealthMax(unit) or GladiusEx.testing[unit].maxHealth
 		end,
 		["health:short"] = function(unit)
-			local health = not GladiusEx.test and UnitHealth(unit) or GladiusEx.testing[unit].health
+			local health = not GladiusEx:IsTesting(unit) and UnitHealth(unit) or GladiusEx.testing[unit].health
 
 			if (health > 999) then
 				return strformat("%.1fk", (health / 1000))
@@ -837,7 +836,7 @@ function Tags:GetBuiltinTags()
 			end
 		end,
 		["maxhealth:short"] = function(unit)
-			local health = not GladiusEx.test and UnitHealthMax(unit) or GladiusEx.testing[unit].maxHealth
+			local health = not GladiusEx:IsTesting(unit) and UnitHealthMax(unit) or GladiusEx.testing[unit].maxHealth
 
 			if (health > 999) then
 				return strformat("%.1fk", (health / 1000))
@@ -846,20 +845,20 @@ function Tags:GetBuiltinTags()
 			end
 		end,
 		["health:percentage"] = function(unit)
-			local health = not GladiusEx.test and UnitHealth(unit) or GladiusEx.testing[unit].health
-			local maxHealth = not GladiusEx.test and UnitHealthMax(unit) or GladiusEx.testing[unit].maxHealth
+			local health = not GladiusEx:IsTesting(unit) and UnitHealth(unit) or GladiusEx.testing[unit].health
+			local maxHealth = not GladiusEx:IsTesting(unit) and UnitHealthMax(unit) or GladiusEx.testing[unit].maxHealth
 
 			return strformat("%.1f%%", (health / maxHealth * 100))
 		end,
 
 		["power"] = function(unit)
-			return not GladiusEx.test and UnitPower(unit) or GladiusEx.testing[unit].power
+			return not GladiusEx:IsTesting(unit) and UnitPower(unit) or GladiusEx.testing[unit].power
 		end,
 		["maxpower"] = function(unit)
-			return not GladiusEx.test and UnitPowerMax(unit) or GladiusEx.testing[unit].maxPower
+			return not GladiusEx:IsTesting(unit) and UnitPowerMax(unit) or GladiusEx.testing[unit].maxPower
 		end,
 		["power:short"] = function(unit)
-			local power = not GladiusEx.test and UnitPower(unit) or GladiusEx.testing[unit].power
+			local power = not GladiusEx:IsTesting(unit) and UnitPower(unit) or GladiusEx.testing[unit].power
 
 			if (power > 999) then
 				return strformat("%.1fk", (power / 1000))
@@ -868,7 +867,7 @@ function Tags:GetBuiltinTags()
 			end
 		end,
 		["maxpower:short"] = function(unit)
-			local power = not GladiusEx.test and UnitPowerMax(unit) or GladiusEx.testing[unit].maxPower
+			local power = not GladiusEx:IsTesting(unit) and UnitPowerMax(unit) or GladiusEx.testing[unit].maxPower
 
 			if (power > 999) then
 				return strformat("%.1fk", (power / 1000))
@@ -877,8 +876,8 @@ function Tags:GetBuiltinTags()
 			end
 		end,
 		["power:percentage"] = function(unit)
-			local power = not GladiusEx.test and UnitPower(unit) or GladiusEx.testing[unit].power
-			local maxPower = not GladiusEx.test and UnitPowerMax(unit) or GladiusEx.testing[unit].maxPower
+			local power = not GladiusEx:IsTesting(unit) and UnitPower(unit) or GladiusEx.testing[unit].power
+			local maxPower = not GladiusEx:IsTesting(unit) and UnitPowerMax(unit) or GladiusEx.testing[unit].maxPower
 
 			return strformat("%.1f%%", (power / maxPower * 100))
 		end,

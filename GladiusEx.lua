@@ -256,8 +256,12 @@ function GladiusEx:SetTesting(count)
 	end
 end
 
-function GladiusEx:IsTesting()
-	return self.test
+function GladiusEx:IsTesting(unit)
+	if unit == "player" then
+		return false
+	else
+		return self.test
+	end
 end
 
 function GladiusEx:GetArenaSize()
