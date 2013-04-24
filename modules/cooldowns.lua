@@ -2,15 +2,13 @@ local GladiusEx = _G.GladiusEx
 local L = GladiusEx.L
 local LSM
 
+local CT = LibStub("LibCooldownTracker-1.0")
+
 -- global functions
 local tinsert, tsort = table.insert, table.sort
 local pairs, ipairs, select, type = pairs, ipairs, select, type
 local min, max = math.min, math.max
 local GetTime, UnitExists, UnitFactionGroup, UnitRace, UnitGUID = GetTime, UnitExists, UnitFactionGroup, UnitRace, UnitGUID
-local SpellData = GladiusEx.CooldownsSpellData
-local guid_to_unitid = {} -- [guid] = unitid
-local tracked_players = {} -- [unitid][spellid] = { cooldown_start, cooldown_end, used_start, used_end }
-
 
 local Cooldowns = GladiusEx:NewGladiusExModule("Cooldowns", false, {
 	cooldownsAttachTo = "CastBarIcon",
@@ -78,9 +76,9 @@ local Cooldowns = GladiusEx:NewGladiusExModule("Cooldowns", false, {
 local MAX_ICONS = 40
 
 function Cooldowns:OnEnable()
-	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-	self:RegisterEvent("PLAYER_ENTERING_WORLD")
+	CT.RegisterCallback(self, "CooldownUsed")
+	CT.RegisterCallback(self, "CooldownsReset")
+
 	self:RegisterEvent("UNIT_NAME_UPDATE")
 	self:RegisterMessage("GLADIUS_SPEC_UPDATE")
 
@@ -111,33 +109,6 @@ function Cooldowns:GetAttachFrame(unit, point)
 	return self.frame[unit]
 end
 
-function Cooldowns:PLAYER_ENTERING_WORLD()
-	local instanceType = select(2, IsInInstance())
-
-	-- reset cooldowns when joining an arena
-	if instanceType == "arena" then
-		tracked_players = {}
-		self:UpdateAllIcons()
-	end
-end
-
-function Cooldowns:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, rank, lineaID, spellId)
-	self:CooldownUsed("SPELL_CAST_SUCCESS", unit, spellId)
-end
-
-function Cooldowns:COMBAT_LOG_EVENT_UNFILTERED(_, timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellId, spellName, spellSchool)
-	if not guid_to_unitid[sourceGUID] then return end
-	local spelldata = SpellData[spellId]
-	if not spelldata then return end
-
-	if event == "SPELL_DISPEL" or
-	   event == "SPELL_AURA_REMOVED" or
-	   event == "SPELL_AURA_APPLIED" or
-	   event == "SPELL_CAST_SUCCESS" then
-		self:CooldownUsed(event, guid_to_unitid[sourceGUID], spellId)
-	end
-end
-
 function Cooldowns:GLADIUS_SPEC_UPDATE(event, unit)
 	self:UpdateIcons(unit)
 end
@@ -147,106 +118,14 @@ function Cooldowns:UNIT_NAME_UPDATE(event, unit)
 	self:UpdateIcons(unit)
 end
 
+function Cooldowns:CooldownsReset(event, unit)
+	print(event, unit)
+	self:UpdateIcons(unit)
+end
+
 function Cooldowns:CooldownUsed(event, unit, spellId)
-	local spelldata = SpellData[spellId]
-	if not spelldata then return end
-
-	if type(spelldata) == "number" then
-		spellId = spelldata
-		spelldata = SpellData[spelldata]
-	end
-
-	if self.frame[unit] then
-		local now = GetTime()
-
-		if not tracked_players[unit] then
-			tracked_players[unit] = {}
-		end
-
-		local tpu = tracked_players[unit]
-
-		-- check if the same spell cast was detected recently
-		-- if so, we assume that the first detection time is more accurate and ignore this one
-		if tpu[spellId] then
-			if (event == "SPELL_CAST_SUCCESS" or event == "SPELL_AURA_APPLIED") and (
-				(tpu[spellId]["SPELL_AURA_APPLIED"] and (tpu[spellId]["SPELL_AURA_APPLIED"] + 3) > now) or
-				(tpu[spellId]["SPELL_CAST_SUCCESS"] and (tpu[spellId]["SPELL_CAST_SUCCESS"] + 3) > now))
-				then
-				return
-			end
-		else
-			tpu[spellId] = { detected = true }
-		end
-
-		tpu[spellId][event] = now
-
-		-- find what actions are needed
-		local used_start, used_end, cooldown_start
-
-		if spelldata.cooldown_starts_on_dispel then
-			if event == "SPELL_DISPEL" then
-				used_start = true
-				cooldown_start = true
-			end
-		elseif spelldata.cooldown_starts_on_aura_fade then
-			if event == "SPELL_CAST_SUCCESS" or event == "SPELL_AURA_APPLIED" then
-				used_start = true
-			elseif event == "SPELL_AURA_REMOVED" then
-				cooldown_start = true
-			end
-		else
-			if event == "SPELL_CAST_SUCCESS" or event == "SPELL_AURA_APPLIED" then
-				used_start = true
-				cooldown_start = true
-			elseif event == "SPELL_AURA_REMOVED" then
-				used_end = true
-			end
-		end
-
-		-- print(UnitName(unit), "used", spelldata.name, "cooldown:", spelldata.cooldown, used_start, used_end, cooldown_start)
-		if used_start then
-			tpu[spellId].used_start = now
-			tpu[spellId].used_end = spelldata.duration and (now + spelldata.duration)
-
-			-- reset other cooldowns (Cold Snap, Preparation)
-			if spelldata.resets then
-				for i = 1, #spelldata.resets do
-					local rspellid = spelldata.resets[i]
-					if tpu[rspellid] then
-						tpu[rspellid].cooldown_start = 0
-						tpu[rspellid].cooldown_end = 0
-					end
-				end
-			end
-		end
-		if used_end then
-			tpu[spellId].used_end = now
-		end
-
-		if cooldown_start then
-			tpu[spellId].cooldown_start = spelldata.cooldown and now
-			tpu[spellId].cooldown_end = spelldata.cooldown and (now + spelldata.cooldown)
-
-			-- set other cooldowns
-			if spelldata.sets_cooldown then
-				local cspellid = spelldata.sets_cooldown.spellid
-				local cspelldata = SpellData[cspellid]
-				if (tpu[cspellid] and tpu[cspellid].detected) or (not cspelldata.talent and not cspelldata.glyph) then
-					if not tpu[cspellid] then
-						tpu[cspellid] = {}
-					end
-					if not tpu[cspellid].cooldown_end or (tpu[cspellid].cooldown_end < (now + spelldata.sets_cooldown.cooldown)) then
-						tpu[cspellid].cooldown_start = now
-						tpu[cspellid].cooldown_end = now + spelldata.sets_cooldown.cooldown
-						tpu[cspellid].used_start = tpu[cspellid].used_start or 0
-						tpu[cspellid].used_end = tpu[cspellid].used_end or 0
-					end
-				end
-			end
-		end
-
-		self:UpdateIcons(unit)
-	end
+	print(event, unit, spellId)
+	self:UpdateIcons(unit)
 end
 
 local function CooldownFrame_OnUpdate(frame)
@@ -299,25 +178,23 @@ local function CooldownFrame_OnUpdate(frame)
 	frame:SetScript("OnUpdate", nil)
 end
 
+local sortscore = {}
+
 local function SpellSortingChanged()
 	-- remove cached sorting info from spells
-	for spellid, spelldata in pairs(SpellData) do
-		if type(spelldata) == "table" then
-			spelldata.sortscore = nil
-		end
-	end
+	sortscore = {}
 end
 
 local function GetSpellSortScore(spellid)
-	local spelldata = SpellData[spellid]
+	local spelldata = CT:GetCooldownData(spellid)
 	
 	if spelldata.replaces then
 		spellid = spelldata.replaces
-		spelldata = SpellData[spelldata.replaces]
+		spelldata = CT:GetCooldownData(spelldata.replaces)
 	end
 
-	if spelldata.sortscore then
-		return spelldata.sortscore
+	if sortscore[spellid] then
+		return sortscore[spellid]
 	end
 
 	local cat_priority = GladiusEx.db.cooldownsCatPriority
@@ -347,33 +224,15 @@ local function GetSpellSortScore(spellid)
 	end
 	score = score + (max - sum) / max
 
-	spelldata.sortscore = score
+	sortscore[spellid] = score
 
 	return score
 end
 
-local function UpdateIcons_AddSpell(spell_list, unit, spellid, spelldata)
-	if not GladiusEx.db.cooldownsSpells[spellid] then
-		return
-	end
-
-	if (not spelldata.glyph and not spelldata.talent) or (tracked_players[unit][spellid] and tracked_players[unit][spellid].detected) or not GladiusEx.db.cooldownsHideTalentsUntilDetected then
-		if spelldata.replaces then
-			-- remove replaced spell if detected
-			spell_list[spelldata.replaces] = false
-		end
-		-- do not overwrite if this spell has been replaced
-		if spell_list[spellid] == nil then
-			spell_list[spellid] = true
-		end
-	end
-end
-
 function Cooldowns:UpdateIcons(unit)
 	if not self.frame[unit] then return end
-	if not tracked_players[unit] then tracked_players[unit] = {} end
 
-	local _debugstart = debugprofilestop()
+	local _debugstart = GladiusEx:IsDebugging() and debugprofilestop()
 
 	local now = GetTime()
 
@@ -390,30 +249,23 @@ function Cooldowns:UpdateIcons(unit)
 		faction = UnitFactionGroup(unit)
 	end
 
-	-- generate list of cooldowns available for this unit
+	-- generate list of cooldowns available (and enabled) for this unit
 	local spell_list = {}
+	for spellid, spelldata in CT:IterateCooldowns(class, specID, race) do
+		if not GladiusEx.db.cooldownsSpells[spellid] then
+			return
+		end
 
-	for spellid, spelldata in pairs(SpellData) do
-		-- ignore references to other spells
-		if type(spelldata) ~= "number" then
-			if class and class == spelldata.class then
-				if specID and spelldata.specID and spelldata.specID[specID] then
-					-- add spec
-					UpdateIcons_AddSpell(spell_list, unit, spellid, spelldata)
-				elseif not spelldata.specID then
-					-- add base
-					UpdateIcons_AddSpell(spell_list, unit, spellid, spelldata)
-				end
+		local tracked = CT:GetUnitCooldownInfo(unit, spellid)
+
+		if (not spelldata.glyph and not spelldata.talent) or (tracked and tracked.detected) or not GladiusEx.db.cooldownsHideTalentsUntilDetected then
+			if spelldata.replaces then
+				-- remove replaced spell if detected
+				spell_list[spelldata.replaces] = false
 			end
-
-			if race and race == spelldata.race then
-				-- add racial
-				UpdateIcons_AddSpell(spell_list, unit, spellid, spelldata)
-			end
-
-			if spelldata.item then
-				-- add item
-				UpdateIcons_AddSpell(spell_list, unit, spellid, spelldata)
+			-- do not overwrite if this spell has been replaced
+			if spell_list[spellid] == nil then
+				spell_list[spellid] = true
 			end
 		end
 	end
@@ -442,9 +294,11 @@ function Cooldowns:UpdateIcons(unit)
 	local prev_group
 	for i = 1, #sorted_spells do
 		local spellid = sorted_spells[i]
-		local spelldata = SpellData[spellid]
-		local tracked = tracked_players[unit][spellid]
+		local spelldata = CT:GetCooldownData(spellid)
+		local tracked = CT:GetUnitCooldownInfo(unit, spellid)
 		local icon
+
+		-- print(spellid, tracked)
 
 		-- icon grouping
 		local cat, group
@@ -518,8 +372,10 @@ function Cooldowns:UpdateIcons(unit)
 		frame:Hide()
 	end
 
-	local _debugstop = debugprofilestop()
-	-- print("UpdateIcons for", unit, "done in", _debugstop - _debugstart)
+	if GladiusEx:IsDebugging() then
+		local _debugstop = GladiusEx:IsDebugging() and debugprofilestop()
+		GladiusEx:Log("UpdateIcons for", unit, "done in", _debugstop - _debugstart)
+	end
 end
 
 function Cooldowns:UpdateAllIcons()
@@ -656,29 +512,11 @@ function Cooldowns:UpdateCooldownGroup(
 	end
 end
 
-function Cooldowns:UpdateGUID(unit)
-	-- find and delete old reference to that unit
-	for guid, unitid in pairs(guid_to_unitid) do
-		if unitid == unit then
-			guid_to_unitid[guid] = nil
-			break
-		end
-	end
-
-	local guid = UnitGUID(unit)
-	if guid then
-		guid_to_unitid[guid] = unit
-	end
-end
-
 function Cooldowns:Update(unit)
 	-- create frame
 	if not self.frame[unit] then 
 		self:CreateFrame(unit)
 	end
-
-	-- update guid
-	self:UpdateGUID(unit)
 
 	-- update cooldown frame 
 	self:UpdateCooldownGroup(self.frame[unit], unit,
@@ -702,17 +540,18 @@ function Cooldowns:Update(unit)
 end
 
 function Cooldowns:Show(unit)
-	self:UpdateGUID(unit)
-
 	if self.frame[unit] then 
 		self.frame[unit]:Show()
+		CT:RegisterUnit(unit)
 	end
 end
 
 function Cooldowns:Reset(unit) 
-	self:UpdateGUID(unit)
-
 	if self.frame[unit] then 
+		if self.frame[unit]:IsShown() then
+			CT:UnregisterUnit(unit)
+		end
+
 		-- hide cooldown frame
 		self.frame[unit]:Hide()
 
@@ -1102,7 +941,7 @@ function Cooldowns:GetOptions()
 	FillLocalizedClassList(lclasses)
 
 	local args = options.cooldowns.args.cooldowns.args
-	for spellid, spelldata in pairs(SpellData) do
+	for spellid, spelldata in pairs(CT:GetCooldownsData()) do
 		if type(spelldata) == "table" then
 			local basecd = GetSpellBaseCooldown(spellid)
 			local cats = {}

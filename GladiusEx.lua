@@ -29,7 +29,7 @@ local L
 local log_frame
 local logging = false
 local function log(...)
-	if not GladiusEx.db.debug then return end
+	if not GladiusEx:IsDebugging() then return end
 	if not log_frame then
 		log_frame = CreateFrame("ScrollingMessageFrame", "GladiusExLogFrame")
 
@@ -65,6 +65,10 @@ local function log(...)
 	end
 
 	log_frame:AddMessage(msg)
+end
+
+function GladiusEx:IsDebugging()
+	return GladiusEx.db.debug
 end
 
 function GladiusEx:Log(...)
