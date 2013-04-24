@@ -119,12 +119,10 @@ function Cooldowns:UNIT_NAME_UPDATE(event, unit)
 end
 
 function Cooldowns:CooldownsReset(event, unit)
-	print(event, unit)
 	self:UpdateIcons(unit)
 end
 
 function Cooldowns:CooldownUsed(event, unit, spellId)
-	print(event, unit, spellId)
 	self:UpdateIcons(unit)
 end
 
@@ -297,8 +295,6 @@ function Cooldowns:UpdateIcons(unit)
 		local spelldata = CT:GetCooldownData(spellid)
 		local tracked = CT:GetUnitCooldownInfo(unit, spellid)
 		local icon
-
-		-- print(spellid, tracked)
 
 		-- icon grouping
 		local cat, group
