@@ -1,5 +1,5 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
-<!--@do-not-package@-->
+<!--@no-lib-strip@-->
 	<Script file="libs/LibStub/LibStub.lua"/>
 	<Include file="libs/LibFunctional-1.0/lib.xml"/>
 	<Include file="libs/CallbackHandler-1.0/CallbackHandler-1.0.xml"/>
@@ -15,5 +15,5 @@
 	<Include file="libs/AceDBOptions-3.0/AceDBOptions-3.0.xml"/>
 	<Include file="libs/AceConfig-3.0/AceConfig-3.0.xml"/>
 	<Include file="libs/AceSerializer-3.0/AceSerializer-3.0.xml"/>
-<!--@end-do-not-package@-->
+<!--@end-no-lib-strip@-->
 </Ui>
