@@ -8,8 +8,6 @@ local pairs = pairs
 local UnitClass, UnitGUID, UnitHealth, UnitHealthMax = UnitClass, UnitGUID, UnitHealth, UnitHealthMax
 
 local TargetBar = GladiusEx:NewGladiusExModule("TargetBar", false, {
-   targetBarAttachTo = "Trinket",
-   
    targetBarHeight = 30,
    targetBarWidth = 200,
    
@@ -23,11 +21,12 @@ local TargetBar = GladiusEx:NewGladiusExModule("TargetBar", false, {
    targetBarIcon = true,
    targetBarIconCrop = false,
    
-   targetBarOffsetX = 10,
-   targetBarOffsetY = 0,  
+   targetBarOffsetX = 0,
+   targetBarOffsetY = 0,
    
-   targetBarAnchor = "TOPLEFT",
-   targetBarRelativePoint = "TOPRIGHT",
+   targetBarAttachTo = "ClassIcon",
+   targetBarAnchor = "BOTTOMLEFT",
+   targetBarRelativePoint = "TOPLEFT",
 })
 
 function TargetBar:OnInitialize()
@@ -37,7 +36,8 @@ end
 
 function TargetBar:OnEnable()   
    self:RegisterEvent("UNIT_HEALTH")
-   self:RegisterEvent("UNIT_MAXHEALTH", "UNIT_HEALTH")   
+   self:RegisterEvent("UNIT_HEALTH_FREQUENT", "UNIT_HEALTH")
+   self:RegisterEvent("UNIT_MAXHEALTH", "UNIT_HEALTH")
    self:RegisterEvent("UNIT_TARGET")
    self:RegisterEvent("PLAYER_TARGET_CHANGED", function() self:UNIT_TARGET("PLAYER_TARGET_CHANGED", "player") end)
    
@@ -83,7 +83,7 @@ function TargetBar:SetClassIcon(unit)
    
    -- get unit class
    local class
-   if (not GladiusEx.test) then
+   if GladiusEx:IsTesting(unit) then
       class = select(2, UnitClass(unit .. "target"))
    else
       class = GladiusEx.testing[unit].unitClass
@@ -124,7 +124,13 @@ function TargetBar:SetClassIcon(unit)
 end
 
 function TargetBar:UNIT_TARGET(event, unit)
-   self:SetClassIcon(unit)
+   if not self.frame[unit] then return end
+   if UnitExists(unit .. "target") then
+      self:SetClassIcon(unit)
+      self.frame[unit]:SetAlpha(1)
+   else
+      self.frame[unit]:SetAlpha(0)
+   end
 end
 
 function TargetBar:UNIT_HEALTH(event, unit)
@@ -270,13 +276,13 @@ function TargetBar:GetBarColor(class)
 end
 
 function TargetBar:Show(unit)
-   local testing = GladiusEx.test
+   local testing = GladiusEx:IsTesting(unit)
    
    -- show frame
    self.frame[unit]:SetAlpha(1)
    
    -- set secure frame
-   self.frame[unit].secure:SetFrameStrata("DIALOG")
+   self.frame[unit].secure:SetFrameStrata("MEDIUM")
    
    -- get unit class
    local class
@@ -304,7 +310,10 @@ function TargetBar:Show(unit)
    TargetBar:SetClassIcon(unit)
 
    -- call event
-   if (not GladiusEx.test) then
+   if (not testing) then
+      if not UnitExists(unit .. "target") then
+         self.frame[unit]:SetAlpha(0)
+      end
       self:UNIT_HEALTH("UNIT_HEALTH", unit)
    end
 end

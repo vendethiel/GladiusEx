@@ -279,8 +279,6 @@ function ClassIcon:Update(unit)
 end
 
 function ClassIcon:Show(unit)
-	local testing = GladiusEx.test
-
 	-- show frame
 	self.frame[unit]:SetAlpha(1)
 

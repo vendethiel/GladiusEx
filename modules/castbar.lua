@@ -174,8 +174,6 @@ function CastBar:UNIT_SPELLCAST_DELAYED(event, unit)
 end
 
 local function CastUpdate(self)
-   -- if GladiusEx:IsTesting() then return end 
-
    if self.isCasting or self.isChanneling then
       local currentTime = min(self.endTime, GetTime())
       local value = self.endTime - currentTime
@@ -230,8 +228,6 @@ function CastBar:Update(unit)
       return
    end
 
-   local testing = GladiusEx.test
-   
    -- create power bar
    if (not self.frame[unit]) then 
       self:CreateBar(unit)
@@ -399,7 +395,6 @@ function CastBar:Reset(unit)
 end
 
 function CastBar:Test(unit)
-   -- if (unit == "arena1") then
       self.frame[unit]:SetMinMaxValues(0, 100)
       self.frame[unit]:SetValue(70)
       
@@ -417,7 +412,6 @@ function CastBar:Test(unit)
       else
          self.frame[unit].castText:SetText("")
       end
-   -- end
 end
 
 function CastBar:GetOptions()

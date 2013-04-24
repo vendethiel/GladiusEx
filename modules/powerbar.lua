@@ -29,6 +29,7 @@ local PowerBar = GladiusEx:NewGladiusExModule("PowerBar", true, {
 
 function PowerBar:OnEnable()
    self:RegisterEvent("UNIT_POWER")
+   self:RegisterEvent("UNIT_POWER_FREQUENT", "UNIT_POWER")
    self:RegisterEvent("UNIT_MAXPOWER", "UNIT_POWER")
    
    self:RegisterEvent("UNIT_MANA", "UNIT_POWER")
@@ -92,7 +93,6 @@ end
 
 function PowerBar:UpdatePower(unit, power, maxPower, powerType)
    if (not self.frame[unit]) then return end   
-   local testing = GladiusEx.test
    
    if (not self.frame[unit]) then
       if (not GladiusEx.buttons[unit]) then
@@ -130,6 +130,8 @@ function PowerBar:CreateBar(unit)
 end
 
 function PowerBar:Update(unit)
+   local testing = GladiusEx:IsTesting(unit)
+
    -- check parent module
    if (not GladiusEx:GetModule(GladiusEx.db.castBarAttachTo)) then
       if (self.frame[unit]) then
@@ -231,12 +233,10 @@ function PowerBar:GetBarHeight()
 end
 
 function PowerBar:Show(unit)
-   local testing = GladiusEx.test
-   
    -- show frame
    self.frame[unit]:SetAlpha(1)
 
-   if (not GladiusEx.test) then
+   if (not GladiusEx:IsTesting()) then
       self:UNIT_POWER("UNIT_POWER", unit)
    end
 end

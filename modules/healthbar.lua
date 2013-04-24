@@ -29,6 +29,7 @@ local HealthBar = GladiusEx:NewGladiusExModule("HealthBar", true, {
 
 function HealthBar:OnEnable()   
    self:RegisterEvent("UNIT_HEALTH")
+   self:RegisterEvent("UNIT_HEALTH_FREQUENT", "UNIT_HEALTH")
    self:RegisterEvent("UNIT_MAXHEALTH", "UNIT_HEALTH")
    
    LSM = GladiusEx.LSM
@@ -193,14 +194,14 @@ function HealthBar:GetBarHeight()
 end
 
 function HealthBar:Show(unit)
-   local testing = GladiusEx.test
+   local testing = GladiusEx:IsTesting(unit)
    
    -- show frame
    self.frame[unit]:SetAlpha(1)
    
    -- get unit class
    local class
-   if (not testing) then
+   if not testing then
       class = select(2, UnitClass(unit))
    else
       class = GladiusEx.testing[unit].unitClass
@@ -216,7 +217,7 @@ function HealthBar:Show(unit)
    end
 
    -- call event
-   if (not GladiusEx.test) then
+   if not testing then
       self:UNIT_HEALTH("UNIT_HEALTH", unit)
    end
 end

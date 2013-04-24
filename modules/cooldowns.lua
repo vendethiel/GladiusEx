@@ -235,7 +235,7 @@ function Cooldowns:UpdateIcons(unit)
 	local now = GetTime()
 
 	local specID, class, race, faction
-	if GladiusEx:IsTesting() and not UnitExists(unit) then
+	if GladiusEx:IsTesting(unit) then
 		specID = GladiusEx.testing[unit].specID
 		class = GladiusEx.testing[unit].unitClass
 		race = GladiusEx.testing[unit].unitRace

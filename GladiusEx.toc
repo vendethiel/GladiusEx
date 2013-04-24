@@ -7,13 +7,9 @@
 ## X-LoadOn-Always: delayed
 
 embeds.xml
-
 GladiusEx.lua
-
 localization\enUS.lua
-
 options.lua
-
 modules\healthbar.lua
 modules\powerbar.lua
 modules\castbar.lua

@@ -261,8 +261,10 @@ function GladiusEx:SetTesting(count)
 end
 
 function GladiusEx:IsTesting(unit)
-	if unit == "player" then
+	if not self.test then
 		return false
+	elseif unit then
+		return not UnitExists(unit)
 	else
 		return self.test
 	end
@@ -295,7 +297,7 @@ function GladiusEx:UpdatePartyFrames()
 			end
 
 			-- test environment
-			if self:IsTesting() then
+			if self:IsTesting(unit) then
 				self:TestUnit(unit)
 			end
 		else

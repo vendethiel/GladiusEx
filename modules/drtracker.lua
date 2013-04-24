@@ -143,7 +143,7 @@ function DRTracker:DRFaded(unit, spellID)
       tracked.diminished = DRData:NextDR(tracked.diminished)
 	end
 	
-	if (GladiusEx.test and tracked.diminished == 0) then
+	if (GladiusEx:IsTesting() and tracked.diminished == 0) then
       tracked.diminished = 1
    end
 	
@@ -162,7 +162,7 @@ function DRTracker:DRFaded(unit, spellID)
 	tracked:SetScript("OnUpdate", function(f, elapsed)
       f.timeLeft = f.timeLeft - elapsed
       if (f.timeLeft <= 0) then
-         if (GladiusEx.test) then return end
+         if (GladiusEx:IsTesting()) then return end
          
          f.active = false
 
@@ -297,8 +297,6 @@ function DRTracker:Update(unit)
 end
 
 function DRTracker:Show(unit)
-   local testing = GladiusEx.test
-  
    -- show frame
    self.frame[unit]:SetAlpha(1)
 end
