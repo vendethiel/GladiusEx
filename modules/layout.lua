@@ -109,7 +109,7 @@ function Layout:GetOptions()
 							disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
 							func=function()
 								local t = CopyTable(GladiusEx.dbi.profile)
-								self.layout = LibStub("AceSerializer-3.0"):Serialize(SerializeTable(t, GladiusEx.defaults.profile)	)
+								self.layout = LibStub("AceSerializer-3.0"):Serialize(SerializeTable(t, GladiusEx.defaults.profile))
 							end,
 							order=15,
 						},

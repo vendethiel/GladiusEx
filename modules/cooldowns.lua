@@ -169,7 +169,7 @@ local function CooldownFrame_OnUpdate(frame)
 		end
 	end
 
- 	frame.tracked = nil
+	frame.tracked = nil
 	frame.cooldown:Hide()
 	frame.border:SetVertexColor(frame.color.r, frame.color.g, frame.color.b, 0.3)
 	frame:SetAlpha(1)

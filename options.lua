@@ -193,7 +193,7 @@ function GladiusEx:SetupOptions()
 								name = "Direction",
 								desc = L["The Direction you want the frame to go in."],
 								name=L["Grow Direction"],
-								values = { 
+								values = {
 									["HCENTER"] = L["Left and right"],
 									["LEFT"]    = L["Left"],
 									["RIGHT"]   = L["Right"],

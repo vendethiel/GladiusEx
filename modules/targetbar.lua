@@ -25,7 +25,7 @@ local TargetBar = GladiusEx:NewGladiusExModule("TargetBar", false, {
 
 	targetBarIconPosition = "LEFT",
 	targetBarIcon = true,
-	targetBarIconCrop = false,	
+	targetBarIconCrop = false,
 })
 
 function TargetBar:OnInitialize()
