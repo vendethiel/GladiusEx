@@ -148,7 +148,7 @@ function ClassIcon:SetClassIcon(unit)
 
 	-- get unit class
 	local class, specID
-	if not GladiusEx:IsTesting() or UnitExists(unit) then
+	if not GladiusEx:IsTesting(unit) then
 		class = select(2, UnitClass(unit))
 		-- check for arena prep info
 		if not class then
@@ -160,37 +160,39 @@ function ClassIcon:SetClassIcon(unit)
 		specID = GladiusEx.testing[unit].specID
 	end
 
-	if (class) then
-		local texture
-		local left, right, top, bottom
-		local need_crop
+	local texture
+	local left, right, top, bottom
+	local needs_crop
 
-		if GladiusEx.db.classIconMode == "ROLE" and specID then
-			local _, _, _, _, _, role = GetSpecializationInfoByID(specID)
-			texture = "Interface\\LFGFrame\\UI-LFG-ICON-ROLES"
-			left, right, top, bottom = GetTexCoordsForRole(role)
-			need_crop = false
-		elseif GladiusEx.db.classIconMode == "SPEC" and specID then
-			texture = select(4, GetSpecializationInfoByID(specID))
-			left, right, top, bottom = 0, 1, 0, 1
-			need_crop = true
-		else
-			texture ="Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes"
-			left, right, top, bottom = unpack(CLASS_BUTTONS[class])
-			need_crop = true
-		end
-
-		-- Crop class icon borders
-		if GladiusEx.db.classIconCrop and need_crop then
-			left = left + (right - left) * 0.07
-			right = right - (right - left) * 0.07
-			top = top + (bottom - top) * 0.07
-			bottom = bottom - (bottom - top) * 0.07
-		end
-
-		self.frame[unit].texture:SetTexture(texture)
-		self.frame[unit].texture:SetTexCoord(left, right, top, bottom)
+	if not class then
+		texture = "Interface\\Icons\\INV_Misc_QuestionMark"
+		left, right, top, bottom = 0, 1, 0, 1
+		needs_crop = true
+	elseif GladiusEx.db.classIconMode == "ROLE" and specID then
+		local _, _, _, _, _, role = GetSpecializationInfoByID(specID)
+		texture = "Interface\\LFGFrame\\UI-LFG-ICON-ROLES"
+		left, right, top, bottom = GetTexCoordsForRole(role)
+		needs_crop = false
+	elseif GladiusEx.db.classIconMode == "SPEC" and specID then
+		texture = select(4, GetSpecializationInfoByID(specID))
+		left, right, top, bottom = 0, 1, 0, 1
+		needs_crop = true
+	else
+		texture ="Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes"
+		left, right, top, bottom = unpack(CLASS_BUTTONS[class])
+		needs_crop = true
 	end
+
+	-- crop class icon borders
+	if GladiusEx.db.classIconCrop and needs_crop then
+		left = left + (right - left) * 0.07
+		right = right - (right - left) * 0.07
+		top = top + (bottom - top) * 0.07
+		bottom = bottom - (bottom - top) * 0.07
+	end
+
+	self.frame[unit].texture:SetTexture(texture)
+	self.frame[unit].texture:SetTexCoord(left, right, top, bottom)
 end
 
 function ClassIcon:CreateFrame(unit)
@@ -222,27 +224,12 @@ function ClassIcon:Update(unit)
 	self.frame[unit]:SetFrameLevel(GladiusEx.db.classIconFrameLevel)
 
 	if (GladiusEx.db.classIconAdjustSize) then
-		local height = false
-		--[[ need to rethink that
-		for _, module in pairs(GladiusEx.modules) do
-			if (module:GetAttachTo() == self:GetName()) then
-				height = false
-			end
-		end]]
-
-		if (height) then
-			self.frame[unit]:SetWidth(GladiusEx.buttons[unit].height)
-			self.frame[unit]:SetHeight(GladiusEx.buttons[unit].height)
-		else
-			self.frame[unit]:SetWidth(GladiusEx.buttons[unit].frameHeight)
-			self.frame[unit]:SetHeight(GladiusEx.buttons[unit].frameHeight)
-		end
+		self.frame[unit]:SetWidth(GladiusEx.buttons[unit].frameHeight)
+		self.frame[unit]:SetHeight(GladiusEx.buttons[unit].frameHeight)
 	else
 		self.frame[unit]:SetWidth(GladiusEx.db.classIconSize)
 		self.frame[unit]:SetHeight(GladiusEx.db.classIconSize)
 	end
-
-	self.frame[unit].texture:SetTexture("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes")
 
 	-- set frame mouse-interactable area
 	if (self:GetAttachTo() == "Frame") then
@@ -253,19 +240,6 @@ function ClassIcon:Update(unit)
 		else
 			right = -self.frame[unit]:GetWidth() + -GladiusEx.db.classIconOffsetX
 		end
-
-		--[[ search for an attached frame
-		for _, module in pairs(GladiusEx.modules) do
-			if (module.attachTo and module:GetAttachTo() == self:GetName() and module.frame and module.frame[unit]) then
-				local attachedPoint = module.frame[unit]:GetPoint()
-
-				if (strfind(GladiusEx.db.classIconRelativePoint, "LEFT") and (not attachedPoint or (attachedPoint and strfind(attachedPoint, "RIGHT")))) then
-					left = left - module.frame[unit]:GetWidth()
-				elseif (strfind(GladiusEx.db.classIconRelativePoint, "LEFT") and (not attachedPoint or (attachedPoint and strfind(attachedPoint, "LEFT")))) then
-					right = right - module.frame[unit]:GetWidth()
-				end
-			end
-		end]]
 
 		-- top / bottom
 		if (self.frame[unit]:GetHeight() > GladiusEx.buttons[unit]:GetHeight()) then
@@ -290,8 +264,6 @@ function ClassIcon:Update(unit)
 
 	self.frame[unit].normalTexture:SetVertexColor(GladiusEx.db.classIconGlossColor.r, GladiusEx.db.classIconGlossColor.g,
 		GladiusEx.db.classIconGlossColor.b, GladiusEx.db.classIconGloss and GladiusEx.db.classIconGlossColor.a or 0)
-
-	self.frame[unit].texture:SetTexCoord(left, right, top, bottom)
 
 	-- cooldown
 	if (GladiusEx.db.classIconCooldown) then

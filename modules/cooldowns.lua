@@ -6,10 +6,7 @@ local LSM
 local tinsert, tsort = table.insert, table.sort
 local pairs, ipairs, select, type = pairs, ipairs, select, type
 local min, max = math.min, math.max
-local GetTime, UnitExists, UnitFactionGroup, UnitRace = GetTime, UnitExists, UnitFactionGroup, UnitRace
-local UnitGUID = UnitGUID
- 
-
+local GetTime, UnitExists, UnitFactionGroup, UnitRace, UnitGUID = GetTime, UnitExists, UnitFactionGroup, UnitRace, UnitGUID
 local SpellData = GladiusEx.CooldownsSpellData
 local guid_to_unitid = {} -- [guid] = unitid
 local tracked_players = {} -- [unitid][spellid] = { cooldown_start, cooldown_end, used_start, used_end }
