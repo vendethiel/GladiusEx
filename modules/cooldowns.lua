@@ -582,11 +582,11 @@ function Cooldowns:CreateFrame(unit)
 
 	-- create cooldown frame
 	if not self.frame[unit] then
-		self.frame[unit] = CreateFrame("Frame", "Gladius" .. self:GetName() .. "frame" .. unit, button)
+		self.frame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. "frame" .. unit, button)
 		self.frame[unit]:EnableMouse(false)
 
 		for i=1, MAX_ICONS do
-			self.frame[unit][i] = CreateCooldownFrame("Gladius" .. self:GetName() .. "frameIcon" .. i .. unit, self.frame[unit])
+			self.frame[unit][i] = CreateCooldownFrame("GladiusEx" .. self:GetName() .. "frameIcon" .. i .. unit, self.frame[unit])
 			self.frame[unit][i]:SetScript("OnUpdate", CooldownFrame_OnUpdate)
 			self.frame[unit][i]:Hide()
 		end

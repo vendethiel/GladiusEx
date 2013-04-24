@@ -133,7 +133,7 @@ function Highlight:CreateFrame(unit)
    if (not button) then return end       
    
    -- create frame
-   self.frame[unit] = CreateFrame("Frame", "Gladius" .. self.name .. unit, button)
+   self.frame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. unit, button)
 
    self.frame[unit]:SetFrameLevel(20)
    
@@ -245,7 +245,7 @@ function Highlight:GetOptions()
                type="range",
                name=L["Highlight border width"],
                min=1, max=10, step=1,
-               disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+               disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                width="double",
                order=0.1,
             },
@@ -260,7 +260,7 @@ function Highlight:GetOptions()
                      type="toggle",
                      name=L["Highlight On Mouseover"],
                      desc=L["Highlight frame on mouseover"],
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=5,
                   },  
                   highlightHoverColor = {
@@ -270,7 +270,7 @@ function Highlight:GetOptions()
                      hasAlpha=true,
                      get=function(info) return GladiusEx:GetColorOption(info) end,
                      set=function(info, r, g, b, a) return GladiusEx:SetColorOption(info, r, g, b, a) end,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=10,
                   }, 
                },
@@ -286,7 +286,7 @@ function Highlight:GetOptions()
                      type="toggle",
                      name=L["Highlight Target"],
                      desc=L["Show border around player target"],
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=5,
                   },  
                   highlightTargetColor = {
@@ -296,7 +296,7 @@ function Highlight:GetOptions()
                      hasAlpha=true,
                      get=function(info) return GladiusEx:GetColorOption(info) end,
                      set=function(info, r, g, b, a) return GladiusEx:SetColorOption(info, r, g, b, a) end,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=10,
                   }, 
                   highlightTargetPriority = {
@@ -304,7 +304,7 @@ function Highlight:GetOptions()
                      name=L["Highlight Target Priority"],
                      desc=L["Priority of the target border"],
                      min=0, max=10, step=1,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      hidden=function() return not GladiusEx.db.advancedOptions end,
                      width="double",
                      order=15,
@@ -322,7 +322,7 @@ function Highlight:GetOptions()
                      type="toggle",
                      name=L["Highlight Focus Target"],
                      desc=L["Show border around player target"],
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=5,
                   },  
                   highlightFocusColor = {
@@ -332,7 +332,7 @@ function Highlight:GetOptions()
                      hasAlpha=true,
                      get=function(info) return GladiusEx:GetColorOption(info) end,
                      set=function(info, r, g, b, a) return GladiusEx:SetColorOption(info, r, g, b, a) end,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=10,
                   }, 
                   highlightFocusPriority = {
@@ -340,7 +340,7 @@ function Highlight:GetOptions()
                      name=L["Highlight Focus Target Priority"],
                      desc=L["Priority of the focus target border"],
                      min=0, max=10, step=1,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      hidden=function() return not GladiusEx.db.advancedOptions end,
                      width="double",
                      order=15,
@@ -358,7 +358,7 @@ function Highlight:GetOptions()
                      type="toggle",
                      name=L["Highlight Raid Assist"],
                      desc=L["Show border around raid assist"],
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=5,
                   },  
                   highlightAssistColor = {
@@ -368,7 +368,7 @@ function Highlight:GetOptions()
                      hasAlpha=true,
                      get=function(info) return GladiusEx:GetColorOption(info) end,
                      set=function(info, r, g, b, a) return GladiusEx:SetColorOption(info, r, g, b, a) end,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=10,
                   }, 
                   highlightAssistPriority = {
@@ -376,7 +376,7 @@ function Highlight:GetOptions()
                      name=L["Highlight Raid Assist Priority"],
                      desc=L["Priority of the raid assist border"],
                      min=0, max=10, step=1,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      hidden=function() return not GladiusEx.db.advancedOptions end,
                      width="double",
                      order=15,
@@ -408,7 +408,7 @@ function Highlight:GetOptions()
                type="toggle",
                name=L["Highlight Raid Target " .. i],
                desc=L["Show border around raid target " .. i],
-               disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+               disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                arg="highlightRaidIcon" .. i,
                order=5,
             },  
@@ -419,7 +419,7 @@ function Highlight:GetOptions()
                hasAlpha=true,
                get=function(info) return GladiusEx:GetColorOption(info) end,
                set=function(info, r, g, b, a) return GladiusEx:SetColorOption(info, r, g, b, a) end,
-               disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+               disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                arg="highlightRaidIcon" .. i .. "Color",
                order=10,
             }, 
@@ -428,7 +428,7 @@ function Highlight:GetOptions()
                name=L["Highlight Raid Assist Priority"],
                desc=L["Priority of the raid assist border"],
                min=0, max=10, step=1,
-               disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+               disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                hidden=function() return not GladiusEx.db.advancedOptions end,
                arg="highlightRaidIcon" .. i .. "Priority",
                width="double",

@@ -168,13 +168,13 @@ function TargetBar:CreateBar(unit)
    if (not button) then return end       
    
    -- create bar + text
-   self.frame[unit] = CreateFrame("Frame", "Gladius" .. self:GetName() .. unit, button)   
-   self.frame[unit].statusbar = CreateFrame("STATUSBAR", "Gladius" .. self:GetName() .. "Bar" .. unit, self.frame[unit]) 
+   self.frame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. unit, button)   
+   self.frame[unit].statusbar = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. "Bar" .. unit, self.frame[unit]) 
    
-   self.frame[unit].secure = CreateFrame("Button", "Gladius" .. self:GetName() .. "Secure" .. unit, self.frame[unit], "SecureActionButtonTemplate")
-   self.frame[unit].background = self.frame[unit]:CreateTexture("Gladius" .. self:GetName() .. unit .. "Background", "BACKGROUND") 
-   self.frame[unit].highlight = self.frame[unit]:CreateTexture("Gladius" .. self:GetName() .. "Highlight" .. unit, "OVERLAY")
-   self.frame[unit].icon = self.frame[unit]:CreateTexture("Gladius" .. self:GetName() .. "IconFrame" .. unit, "ARTWORK") 
+   self.frame[unit].secure = CreateFrame("Button", "GladiusEx" .. self:GetName() .. "Secure" .. unit, self.frame[unit], "SecureActionButtonTemplate")
+   self.frame[unit].background = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "Background", "BACKGROUND") 
+   self.frame[unit].highlight = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "Highlight" .. unit, "OVERLAY")
+   self.frame[unit].icon = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "IconFrame" .. unit, "ARTWORK") 
    
    self.frame[unit].statusbar.unit = unit .. "target"
 end

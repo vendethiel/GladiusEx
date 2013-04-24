@@ -130,7 +130,7 @@ function DRTracker:DRFaded(unit, spellID)
    }
 
 	if (not self.frame[unit].tracker[drCat]) then
-		self.frame[unit].tracker[drCat] = CreateFrame("CheckButton", "Gladius" .. self.name .. "FrameCat" .. drCat .. unit, self.frame[unit], "ActionButtonTemplate")
+		self.frame[unit].tracker[drCat] = CreateFrame("CheckButton", "GladiusEx" .. self:GetName() .. "FrameCat" .. drCat .. unit, self.frame[unit], "ActionButtonTemplate")
 		self:UpdateIcon(unit, drCat)		
 	end
 	
@@ -230,7 +230,7 @@ function DRTracker:CreateFrame(unit)
    if (not button) then return end       
    
    -- create frame
-   self.frame[unit] = CreateFrame("Frame", "Gladius" .. self.name .. "Frame" .. unit, button, "ActionButtonTemplate")
+   self.frame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. "Frame" .. unit, button, "ActionButtonTemplate")
 end
 
 function DRTracker:Update(unit)   
@@ -254,7 +254,7 @@ function DRTracker:Update(unit)
          local height = false
          --[[ need to rethink that
          for _, module in pairs(GladiusEx.modules) do
-            if (module:GetAttachTo() == self.name) then
+            if (module:GetAttachTo() == self:GetName()) then
                height = false
             end
          end]]
@@ -353,7 +353,7 @@ function DRTracker:GetOptions()
                      name=L["DRTracker Space"],
                      desc=L["Space between the icons"],
                      min=0, max=100, step=1,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=5,
                   },
                   sep = {                     
@@ -366,7 +366,7 @@ function DRTracker:GetOptions()
                      type="toggle",
                      name=L["DRTracker Cooldown Spiral"],
                      desc=L["Display the cooldown spiral for important auras"],
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      hidden=function() return not GladiusEx.db.advancedOptions end,
                      order=10,
                   },
@@ -374,7 +374,7 @@ function DRTracker:GetOptions()
                      type="toggle",
                      name=L["DRTracker Cooldown Reverse"],
                      desc=L["Invert the dark/bright part of the cooldown spiral"],
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      hidden=function() return not GladiusEx.db.advancedOptions end,
                      order=15,
                   },
@@ -388,7 +388,7 @@ function DRTracker:GetOptions()
                      type="toggle",
                      name=L["DRTracker Gloss"],
                      desc=L["Toggle gloss on the drTracker icon"],
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      hidden=function() return not GladiusEx.db.advancedOptions end,
                      order=25,
                   },
@@ -399,7 +399,7 @@ function DRTracker:GetOptions()
                      get=function(info) return GladiusEx:GetColorOption(info) end,
                      set=function(info, r, g, b, a) return GladiusEx:SetColorOption(info, r, g, b, a) end,
                      hasAlpha=true,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      hidden=function() return not GladiusEx.db.advancedOptions end,
                      order=30,
                   },
@@ -414,7 +414,7 @@ function DRTracker:GetOptions()
                      type="range",
                      name=L["DRTracker Frame Level"],
                      desc=L["Frame level of the drTracker"],
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      hidden=function() return not GladiusEx.db.advancedOptions end,
                      min=1, max=5, step=1,
                      width="double",
@@ -433,7 +433,7 @@ function DRTracker:GetOptions()
                      type="toggle",
                      name=L["DRTracker Adjust Size"],
                      desc=L["Adjust drTracker size to the frame size"],
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=5,
                   },
                   drTrackerSize = {
@@ -441,7 +441,7 @@ function DRTracker:GetOptions()
                      name=L["DRTracker Size"],
                      desc=L["Size of the drTracker"],
                      min=10, max=100, step=1,
-                     disabled=function() return GladiusEx.dbi.profile.drTrackerAdjustSize or not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return GladiusEx.dbi.profile.drTrackerAdjustSize or not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=10,
                   },               
                },
@@ -461,7 +461,7 @@ function DRTracker:GetOptions()
                      hasAlpha=true,
                      get=function(info) return GladiusEx:GetColorOption(info) end,
                      set=function(info, r, g, b, a) return GladiusEx:SetColorOption(info, r, g, b, a) end,
-                     disabled=function() return not GladiusEx.dbi.profile.castText or not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.castText or not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=10,
                   },
                   drFontSize = {
@@ -469,7 +469,7 @@ function DRTracker:GetOptions()
                      name=L["DR Text Size"],
                      desc=L["Text size of the DR text"],
                      min=1, max=20, step=1,
-                     disabled=function() return not GladiusEx.dbi.profile.castText or not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.castText or not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=15,
                   },                
                },
@@ -486,7 +486,7 @@ function DRTracker:GetOptions()
                      name=L["DRTracker Attach To"],
                      desc=L["Attach drTracker to the given frame"],
                      values=function() return DRTracker:GetAttachPoints() end,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=5,
                   },
                   drTrackerPosition = {
@@ -506,7 +506,7 @@ function DRTracker:GetOptions()
                         
                         GladiusEx:UpdateFrame(info[1])
                      end,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      hidden=function() return GladiusEx.db.advancedOptions end,
                      order=6,
                   },
@@ -531,7 +531,7 @@ function DRTracker:GetOptions()
                      name=L["DRTracker Anchor"],
                      desc=L["Anchor of the drTracker"],
                      values=function() return GladiusEx:GetPositions() end,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      hidden=function() return not GladiusEx.db.advancedOptions end,
                      order=10,
                   },
@@ -540,7 +540,7 @@ function DRTracker:GetOptions()
                      name=L["DRTracker Relative Point"],
                      desc=L["Relative point of the drTracker"],
                      values=function() return GladiusEx:GetPositions() end,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      hidden=function() return not GladiusEx.db.advancedOptions end,
                      order=15,               
                   },
@@ -555,14 +555,14 @@ function DRTracker:GetOptions()
                      name=L["DRTracker Offset X"],
                      desc=L["X offset of the drTracker"],
                      min=-100, max=100, step=1,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=20,
                   },
                   drTrackerOffsetY = {
                      type="range",
                      name=L["DRTracker Offset Y"],
                      desc=L["Y  offset of the drTracker"],
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      min=-50, max=50, step=1,
                      order=25,
                   },
@@ -604,7 +604,7 @@ function DRTracker:GetOptions()
          set=function(info, value)
             GladiusEx.dbi.profile.drCategories[info[#info]] = value
          end,
-         disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+         disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
          order=index * 5,
       }
       

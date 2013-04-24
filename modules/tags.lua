@@ -172,7 +172,7 @@ function Tags:CreateFrame(unit, text)
 	if (not button) then return end
 
 	-- create frame
-	self.frame[unit][text] = button:CreateFontString("Gladius" .. self:GetName() .. unit .. text, "OVERLAY")
+	self.frame[unit][text] = button:CreateFontString("GladiusEx" .. self:GetName() .. unit .. text, "OVERLAY")
 end
 
 function Tags:UpdateText(unit, text)

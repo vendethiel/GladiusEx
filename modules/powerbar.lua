@@ -124,9 +124,9 @@ function PowerBar:CreateBar(unit)
    if (not button) then return end      
    
    -- create bar + text
-   self.frame[unit] = CreateFrame("STATUSBAR", "Gladius" .. self.name .. unit, button) 
-   self.frame[unit].background = self.frame[unit]:CreateTexture("Gladius" .. self.name .. unit .. "Background", "BACKGROUND") 
-   self.frame[unit].highlight = self.frame[unit]:CreateTexture("Gladius" .. self.name .. "Highlight" .. unit, "OVERLAY")
+   self.frame[unit] = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. unit, button) 
+   self.frame[unit].background = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "Background", "BACKGROUND") 
+   self.frame[unit].highlight = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "Highlight" .. unit, "OVERLAY")
 end
 
 function PowerBar:Update(unit)
@@ -281,7 +281,7 @@ function PowerBar:GetOptions()
                      type="toggle",
                      name=L["Power Bar Default Color"],
                      desc=L["Toggle power bar default color"],
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=5,
                   },
                   sep = {                     
@@ -298,7 +298,7 @@ function PowerBar:GetOptions()
                      hasAlpha=true,
                      get=function(info) return GladiusEx:GetColorOption(info) end,
                      set=function(info, r, g, b, a) return GladiusEx:SetColorOption(info, r, g, b, a) end,
-                     disabled=function() return GladiusEx.dbi.profile.powerBarDefaultColor or not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return GladiusEx.dbi.profile.powerBarDefaultColor or not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=10,
                   },                  
                   powerBarBackgroundColor = {
@@ -308,7 +308,7 @@ function PowerBar:GetOptions()
                      hasAlpha=true,
                      get=function(info) return GladiusEx:GetColorOption(info) end,
                      set=function(info, r, g, b, a) return GladiusEx:SetColorOption(info, r, g, b, a) end,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      hidden=function() return not GladiusEx.db.advancedOptions end,
                      order=15,
                   }, 
@@ -322,7 +322,7 @@ function PowerBar:GetOptions()
                      type="toggle",
                      name=L["Power Bar Inverse"],
                      desc=L["Inverse the power bar"],
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      hidden=function() return not GladiusEx.db.advancedOptions end,
                      order=20,
                   },         
@@ -332,7 +332,7 @@ function PowerBar:GetOptions()
                      desc=L["Texture of the power bar"],
                      dialogControl = "LSM30_Statusbar",
                      values = AceGUIWidgetLSMlists.statusbar,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=25,
                   },
                },
@@ -348,7 +348,7 @@ function PowerBar:GetOptions()
                      type="toggle",
                      name=L["Power Bar Adjust Width"],
                      desc=L["Adjust power bar width to the frame width"],
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=5,
                   },
                   sep = {                     
@@ -362,7 +362,7 @@ function PowerBar:GetOptions()
                      name=L["Power Bar Width"],
                      desc=L["Width of the power bar"],
                      min=10, max=500, step=1,
-                     disabled=function() return GladiusEx.dbi.profile.powerBarAdjustWidth or not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return GladiusEx.dbi.profile.powerBarAdjustWidth or not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=15,
                   },
                   powerBarHeight = {
@@ -370,7 +370,7 @@ function PowerBar:GetOptions()
                      name=L["Power Bar Height"],
                      desc=L["Height of the power bar"],
                      min=10, max=200, step=1,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=20,
                   },
                },
@@ -400,7 +400,7 @@ function PowerBar:GetOptions()
                         GladiusEx.dbi.profile[key] = value
                         GladiusEx:UpdateFrame()
                      end,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      width="double",
                      order=5,
                   },
@@ -415,7 +415,7 @@ function PowerBar:GetOptions()
                      name=L["Power Bar Anchor"],
                      desc=L["Anchor of the power bar"],
                      values=function() return GladiusEx:GetPositions() end,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=10,
                   },
                   powerBarRelativePoint = {
@@ -423,7 +423,7 @@ function PowerBar:GetOptions()
                      name=L["Power Bar Relative Point"],
                      desc=L["Relative point of the power bar"],
                      values=function() return GladiusEx:GetPositions() end,
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=15,               
                   },
                   sep2 = {                     
@@ -437,14 +437,14 @@ function PowerBar:GetOptions()
                      name=L["Power Bar Offset X"],
                      desc=L["X offset of the power bar"],
                      min=-100, max=100, step=1,
-                     disabled=function() return  not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return  not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      order=20,
                   },
                   powerBarOffsetY = {
                      type="range",
                      name=L["Power Bar Offset Y"],
                      desc=L["X offset of the power bar"],
-                     disabled=function() return not GladiusEx.dbi.profile.modules[self.name] end,
+                     disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
                      min=-100, max=100, step=1,
                      order=25,
                   },

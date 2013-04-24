@@ -177,7 +177,7 @@ function Announcements:GetOptions()
          order=1,
          get=getOption,
          set=setOption,
-         disabled=function() return not GladiusEx.db.modules[self.name] end,
+         disabled=function() return not GladiusEx.db.modules[self:GetName()] end,
          args = {
             options = {
                type="group",
