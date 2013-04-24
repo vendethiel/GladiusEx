@@ -62,7 +62,7 @@ local Tags = GladiusEx:NewGladiusExModule("Tags", false, {
 
 			text = "[power:short]/[maxpower:short]",
 		},
-		 ["TargetBar Left Text"] = {
+		["TargetBar Left Text"] = {
 			attachTo = "TargetBar",
 			position = "LEFT",
 			offsetX = 2,
@@ -649,7 +649,7 @@ function Tags:GetTextOptionTable(text, order)
 						width="double",
 						order=5,
 					},
-				  offsetX = {
+					offsetX = {
 						type="range",
 						name=L["Text Offset X"],
 						desc=L["X offset of the text"],

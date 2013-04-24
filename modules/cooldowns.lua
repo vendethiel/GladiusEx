@@ -14,14 +14,14 @@ local Cooldowns = GladiusEx:NewGladiusExModule("Cooldowns", false, {
 	cooldownsAttachTo = "CastBarIcon",
 	cooldownsAnchor = "TOPLEFT",
 	cooldownsRelativePoint = "BOTTOMLEFT",
+	cooldownsOffsetX = 0,
+	cooldownsOffsetY = 0,
 	cooldownsGrow = "DOWNRIGHT",
 	cooldownsSpacingX = 0,
 	cooldownsSpacingY = 0,
 	cooldownsPerColumn = 8,
 	cooldownsMax = 40,
 	cooldownsSize = 23,
-	cooldownsOffsetX = 0,
-	cooldownsOffsetY = 0,
 	cooldownsGloss = false,
 	cooldownsGlossColor = { r = 1, g = 1, b = 1, a = 0.4 },
 	cooldownsSpells = { ["*"] = true },
@@ -53,7 +53,7 @@ local Cooldowns = GladiusEx:NewGladiusExModule("Cooldowns", false, {
 		["offensive"] =    { r = 1.0, g = 0.0, b = 0.0 },
 		["defensive"] =    { r = 0.0, g = 1.0, b = 0.0 },
 		["heal"] =         { r = 0.0, g = 1.0, b = 0.0 },
-		["uncat"]      =    { r = 1.0, g = 1.0, b = 1.0 },
+		["uncat"] =        { r = 1.0, g = 1.0, b = 1.0 },
 	},
 	cooldownsCatGroups = {
 		["pvp_trinket"] =  1,
@@ -68,7 +68,7 @@ local Cooldowns = GladiusEx:NewGladiusExModule("Cooldowns", false, {
 		["offensive"] =    1,
 		["defensive"] =    1,
 		["heal"] =         1,
-		["uncat"]      =    1,
+		["uncat"] =        1,
 	},
 	cooldownsHideTalentsUntilDetected = true,
 })
@@ -185,7 +185,7 @@ end
 
 local function GetSpellSortScore(spellid)
 	local spelldata = CT:GetCooldownData(spellid)
-	
+
 	if spelldata.replaces then
 		spellid = spelldata.replaces
 		spelldata = CT:GetCooldownData(spelldata.replaces)
@@ -270,7 +270,7 @@ function Cooldowns:UpdateIcons(unit)
 
 	-- sort spells
 	local sorted_spells = {}
-	for spellid, valid in pairs(spell_list) do	
+	for spellid, valid in pairs(spell_list) do
 		if valid then
 			tinsert(sorted_spells, spellid)
 		end
@@ -347,7 +347,7 @@ function Cooldowns:UpdateIcons(unit)
 
 		frame.spellid = spellid
 		frame.spelldata = spelldata
-	 	frame.state = 0
+		frame.state = 0
 		frame.tracked = tracked
 		frame.color = c or border_color["uncat"]
 
@@ -459,7 +459,7 @@ function Cooldowns:UpdateCooldownGroup(
 
 	cooldownFrame:ClearAllPoints()
 
-	-- anchor point 
+	-- anchor point
 	local parent = GladiusEx:GetAttachFrame(unit, cooldownAttachTo)
 	cooldownFrame:SetPoint(cooldownAnchor, parent, cooldownRelativePoint, cooldownOffsetX, cooldownOffsetY)
 
@@ -510,11 +510,11 @@ end
 
 function Cooldowns:Update(unit)
 	-- create frame
-	if not self.frame[unit] then 
+	if not self.frame[unit] then
 		self:CreateFrame(unit)
 	end
 
-	-- update cooldown frame 
+	-- update cooldown frame
 	self:UpdateCooldownGroup(self.frame[unit], unit,
 		GladiusEx.db.cooldownsAttachTo,
 		GladiusEx.db.cooldownsAnchor,
@@ -536,14 +536,14 @@ function Cooldowns:Update(unit)
 end
 
 function Cooldowns:Show(unit)
-	if self.frame[unit] then 
+	if self.frame[unit] then
 		self.frame[unit]:Show()
 		CT:RegisterUnit(unit)
 	end
 end
 
-function Cooldowns:Reset(unit) 
-	if self.frame[unit] then 
+function Cooldowns:Reset(unit)
+	if self.frame[unit] then
 		if self.frame[unit]:IsShown() then
 			CT:UnregisterUnit(unit)
 		end
@@ -563,13 +563,13 @@ end
 
 function Cooldowns:GetOptions()
 	local options = {
-		cooldowns = {  
+		cooldowns = {
 			type="group",
 			name=L["Cooldowns"],
 			childGroups="tab",
 			order=1,
 			args = {
-			general = {  
+			general = {
 				type="group",
 				name=L["General"],
 				order=1,
@@ -577,10 +577,10 @@ function Cooldowns:GetOptions()
 						widget = {
 						type="group",
 						name=L["Widget"],
-						desc=L["Widget settings"],  
+						desc=L["Widget settings"],
 						inline=true,
 						order=1,
-						args = { 
+						args = {
 						cooldownsGrow = {
 							type="select",
 							name=L["Cooldowns Column Grow"],
@@ -594,7 +594,7 @@ function Cooldowns:GetOptions()
 							end,
 							disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
 							order=10,
-						}, 
+						},
 						sep = {
 							type = "description",
 							name="",
@@ -616,7 +616,7 @@ function Cooldowns:GetOptions()
 							min=1, max=MAX_ICONS, step=1,
 							disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
 							order=20,
-						},  
+						},
 						sep2 = {
 							type = "description",
 							name="",
@@ -628,7 +628,7 @@ function Cooldowns:GetOptions()
 				size = {
 					type="group",
 					name=L["Size"],
-					desc=L["Size settings"],  
+					desc=L["Size settings"],
 					inline=true,
 					order=2,
 					args = {
@@ -667,7 +667,7 @@ function Cooldowns:GetOptions()
 					position = {
 						type="group",
 						name=L["Position"],
-						desc=L["Position settings"],  
+						desc=L["Position settings"],
 						inline=true,
 						hidden=function() return not GladiusEx.db.advancedOptions end,
 						order=3,
@@ -777,7 +777,7 @@ function Cooldowns:GetOptions()
 						},
 					},
 				},
-				cooldowns = {  
+				cooldowns = {
 					type="group",
 					name=L["Cooldowns"],
 					order=3,
@@ -849,7 +849,7 @@ function Cooldowns:GetOptions()
 					desc=L["Increase the priority of spells in this category"],
 					func=function()
 						for i = 1, #GladiusEx.db.cooldownsCatPriority do
-							if GladiusEx.db.cooldownsCatPriority[i] == cat then 
+							if GladiusEx.db.cooldownsCatPriority[i] == cat then
 								if i ~= 1 then
 									local tmp = GladiusEx.db.cooldownsCatPriority[i - 1]
 									GladiusEx.db.cooldownsCatPriority[i - 1] = GladiusEx.db.cooldownsCatPriority[i]
@@ -870,7 +870,7 @@ function Cooldowns:GetOptions()
 					desc=L["Decrease the priority of spells in this category"],
 					func=function()
 						for i = 1, #GladiusEx.db.cooldownsCatPriority do
-							if GladiusEx.db.cooldownsCatPriority[i] == cat then 
+							if GladiusEx.db.cooldownsCatPriority[i] == cat then
 								if i ~= #GladiusEx.db.cooldownsCatPriority then
 									local tmp = GladiusEx.db.cooldownsCatPriority[i + 1]
 									GladiusEx.db.cooldownsCatPriority[i + 1] = GladiusEx.db.cooldownsCatPriority[i]
@@ -968,7 +968,7 @@ function Cooldowns:GetOptions()
 				get=getSpell,
 				set=setSpell,
 				order=spelldata.name:byte(1) * 0xff + spelldata.name:byte(2),
-			}			
+			}
 			if spelldata.class then
 				if not args[spelldata.class] then
 					args[spelldata.class] = {

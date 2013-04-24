@@ -26,28 +26,28 @@ do
 			["power:shortTag"] = "Power (Short)",
 			["raceTag"] = "Race",
 			["nameTag"] = "Name",
-			["name:statusTag"] = "Name/Status",  
+			["name:statusTag"] = "Name/Status",
 			["specTag"] = "Spec",
 			["spec:shortTag"] = "Spec (Short)",
 			["health:percentageTag"] = "Health (Percentage)",
 			["healthTag"] = "Health",
 			["maxhealth:shortTag"] = "Max Health (Short)",
 			["maxpowerTag"] = "Max Power",
-			
+
 			-- Specs
 			["Unholy:short"] = "Unh",
 			["Frost:short"] = "Frost",
-			["Blood:short"] = "Blood",  
+			["Blood:short"] = "Blood",
 			["Fire:short"] = "Fire",
 			["Arcane:short"] = "Arcane",
 			["Marksmanship:short"] = "Marks",
 			["Survival:short"] = "Surv",
-			["Beast Mastery:short"] = "BM", 
+			["Beast Mastery:short"] = "BM",
 			["Elemental:short"] = "Ele",
 			["Enhancement:short"] = "Enh",
 			["Restoration:short"] = "Resto",
 			["Feral:short"] = "Feral",
-			["Balance:short"] = "Balance",  
+			["Balance:short"] = "Balance",
 			["Demonology:short"] = "Demo",
 			["Destruction:short"] = "Destro",
 			["Affliction:short"] = "Affli",
@@ -56,7 +56,7 @@ do
 			["Assassination:short"] = "Assa",
 			["Shadow:short"] = "Shadow",
 			["Discipline:short"] = "Disc",
-			["Holy:short"] = "Holy",   
+			["Holy:short"] = "Holy",
 			["Retribution:short"] = "Ret",
 			["Protection:short"] = "Prot",
 			["Arms:short"] = "Arms",
@@ -64,7 +64,7 @@ do
 			["Brewmaster:short"] = "Brew",
 			["Mistweaver:short"] = "Mist",
 			["Windwalker:short"] = "Wind",
-			
+
 			["Warrior:short"] = "Warr",
 			["Death Knight:short"] = "DK",
 			["Warlock:short"] = "Lock",
@@ -75,7 +75,7 @@ do
 			["Druid:short"] = "Druid",
 			["Paladin:short"] = "Pala",
 			["Mage:short"] = "Mage",
-			["Monk:short"] = "Monk" 
+			["Monk:short"] = "Monk"
 		}, {
 			__index = function(t, index)
 				return index end

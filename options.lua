@@ -38,7 +38,7 @@ SLASH_GLADIUSEX2 = "/gex"
 SlashCmdList["GLADIUSEX"] = function(msg)
 	if msg:find("test") then
 		local test = false
-	
+
 		if (msg == "test2") then
 			test = 2
 		elseif (msg == "test3") then
@@ -47,12 +47,12 @@ SlashCmdList["GLADIUSEX"] = function(msg)
 			test = 5
 		else
 			test = tonumber(msg:match("^test (.+)"))
-			
+
 			if test and (test > 5 or test < 2 or test == 4) then
 				test = 5
 			end
 		end
-		
+
 		GladiusEx:SetTesting(test)
 	elseif (msg == "" or msg == "options" or msg == "config" or msg == "ui") then
 		GladiusEx:ShowOptionsDialog()
@@ -60,8 +60,8 @@ SlashCmdList["GLADIUSEX"] = function(msg)
 		-- hide buttons
 		GladiusEx:HideFrames()
 	elseif (msg == "reset") then
-		-- reset profile		
-		GladiusEx.dbi:ResetProfile()	
+		-- reset profile
+		GladiusEx.dbi:ResetProfile()
 	end
 end
 
@@ -72,9 +72,9 @@ end
 local function setOption(info, value)
 	local key = info[#info]
 	GladiusEx.dbi.profile[key] = value
-	
-	info = info.arg and info.arg or info[1]  
-	
+
+	info = info.arg and info.arg or info[1]
+
 	GladiusEx:HideFrames()
 	GladiusEx:UpdateFrames()
 	GladiusEx:ShowFrames()
@@ -85,10 +85,10 @@ function GladiusEx:GetColorOption(info)
 	return self.dbi.profile[key].r, self.dbi.profile[key].g, self.dbi.profile[key].b, self.dbi.profile[key].a
 end
 
-function GladiusEx:SetColorOption(info, r, g, b, a) 
+function GladiusEx:SetColorOption(info, r, g, b, a)
 	local key = info.arg or info[#info]
 	self.dbi.profile[key].r, self.dbi.profile[key].g, self.dbi.profile[key].b, self.dbi.profile[key].a = r, g, b, a
-	
+
 	GladiusEx:HideFrames()
 	GladiusEx:UpdateFrames()
 	GladiusEx:ShowFrames()
@@ -114,37 +114,37 @@ function GladiusEx:SetupModule(key, module, order)
 		order=order,
 		args={},
 	}
-	
+
 	-- set additional module options
 	local options = module:GetOptions()
-	
+
 	if (type(options) == "table") then
 		self.options.args[key].args = options
 	end
-	
+
 	-- set enable module option
 	self.options.args[key].args.enable = {
 		type="toggle",
 		name=L["Enable Module"],
-		set=function(info, v) 
+		set=function(info, v)
 			local module = info[1]
 			self.dbi.profile.modules[module] = v
-			
+
 			if (v) then
 				self:EnableModule(module)
 			else
 				self:DisableModule(module)
-			end 
-			
+			end
+
 			self:UpdateFrames()
-		end, 
-		get=function(info) 
+		end,
+		get=function(info)
 			local module = info[1]
 			return self.dbi.profile.modules[module]
 		end,
 		order=0,
 	}
-	
+
 	-- set reset module option
 	self.options.args[key].args.reset = {
 		type="execute",
@@ -153,7 +153,7 @@ function GladiusEx:SetupModule(key, module, order)
 			for k,v in pairs(module.defaults) do
 				self.dbi.profile[k] = v
 			end
-			
+
 			self:UpdateFrames()
 		end,
 		order=0.5,
@@ -187,18 +187,18 @@ function GladiusEx:SetupOptions()
 								desc=L["Toggle if the frame can be moved"],
 								order=1,
 							},
-						  growDirection = {
+							growDirection = {
 								order = 5,
 								type = "select",
 								name = "Direction",
 								desc = L["The Direction you want the frame to go in."],
 								name=L["Grow Direction"],
-								values = {
-									["HCENTER"]= L["Left and right"],
-									["LEFT"]	= L["Left"],
-									["RIGHT"]  = L["Right"],
-									["UP"]	  = L["Up"],
-									["DOWN"]	= L["Down"],
+								values = { 
+									["HCENTER"] = L["Left and right"],
+									["LEFT"]    = L["Left"],
+									["RIGHT"]   = L["Right"],
+									["UP"]      = L["Up"],
+									["DOWN"]    = L["Down"],
 								},
 							},
 							sep = {
