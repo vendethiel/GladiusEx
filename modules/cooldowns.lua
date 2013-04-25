@@ -726,7 +726,7 @@ function Cooldowns:GetOptions()
 							},
 					},
 				},
-				cooldown_options = {
+				category_options = {
 					type="group",
 					name=L["Category"],
 					order=2,
@@ -736,34 +736,6 @@ function Cooldowns:GetOptions()
 							name=L["Hide talents until detected"],
 							width="full",
 							order=1
-						},
-						enableall = {
-							type="execute",
-							name=L["Enable all"],
-							desc=L["Enable all the spells"],
-							func=function()
-								for spellid, spelldata in pairs(SpellData) do
-									if type(spelldata) == "table" then
-										GladiusEx.db.cooldownsSpells[spellid] = true
-									end
-								end
-								self:UpdateAllIcons()
-							end,
-							order=2,
-						},
-						disableall = {
-							type="execute",
-							name=L["Disable all"],
-							desc=L["Disable all the spells"],
-							func=function()
-								for spellid, spelldata in pairs(SpellData) do
-									if type(spelldata) == "table" then
-										GladiusEx.db.cooldownsSpells[spellid] = false
-									end
-								end
-								self:UpdateAllIcons()
-							end,
-							order=3,
 						},
 						priorities = {
 							type="group",
@@ -779,6 +751,34 @@ function Cooldowns:GetOptions()
 					name=L["Cooldowns"],
 					order=3,
 					args = {
+						enableall = {
+							type="execute",
+							name=L["Enable all"],
+							desc=L["Enable all the spells"],
+							func=function()
+								for spellid, spelldata in pairs(CT:GetCooldownsData()) do
+									if type(spelldata) == "table" then
+										GladiusEx.db.cooldownsSpells[spellid] = true
+									end
+								end
+								self:UpdateAllIcons()
+							end,
+							order=0,
+						},
+						disableall = {
+							type="execute",
+							name=L["Disable all"],
+							desc=L["Disable all the spells"],
+							func=function()
+								for spellid, spelldata in pairs(CT:GetCooldownsData()) do
+									if type(spelldata) == "table" then
+										GladiusEx.db.cooldownsSpells[spellid] = false
+									end
+								end
+								self:UpdateAllIcons()
+							end,
+							order=0.5,
+						},
 						preracesep = {
 							type="group",
 							name="",
@@ -799,7 +799,7 @@ function Cooldowns:GetOptions()
 
 	-- fill spell priority list
 	-- yeah, all of this sucks
-	local pargs = options.cooldowns.args.cooldown_options.args.priorities.args
+	local pargs = options.cooldowns.args.category_options.args.priorities.args
 	for i = 1, #GladiusEx.db.cooldownsCatPriority do
 		local cat = GladiusEx.db.cooldownsCatPriority[i]
 		local option = {
@@ -887,7 +887,7 @@ function Cooldowns:GetOptions()
 					name=L["Enable all"],
 					desc=L["Enable all the spells in this category"],
 					func=function()
-						for spellid, spelldata in pairs(SpellData) do
+						for spellid, spelldata in pairs(CT:GetCooldownsData()) do
 							if type(spelldata) == "table" then
 								if spelldata[cat] then
 									GladiusEx.db.cooldownsSpells[spellid] = true
@@ -903,7 +903,7 @@ function Cooldowns:GetOptions()
 					name=L["Disable all"],
 					desc=L["Disable all the spells in this category"],
 					func=function()
-						for spellid, spelldata in pairs(SpellData) do
+						for spellid, spelldata in pairs(CT:GetCooldownsData()) do
 							if type(spelldata) == "table" then
 								if spelldata[cat] then
 									GladiusEx.db.cooldownsSpells[spellid] = false
@@ -1020,7 +1020,7 @@ function Cooldowns:GetOptions()
 					args[spelldata.race] = {
 						type="group",
 						name=spelldata.race,
-						icon=function() return [[Interface\CHARACTERFRAME\TEMPORARYPORTRAIT]] .. (math.random(0, 1) == 0 and "-FEMALE-" or "-MALE-") .. spelldata.race end, -- because fuck you that's why
+						icon=function() return [[Interface\CHARACTERFRAME\TEMPORARYPORTRAIT]] .. (math.random(0, 1) == 0 and "-FEMALE-" or "-MALE-") .. spelldata.race end,
 						order=3,
 						args={}
 					}
