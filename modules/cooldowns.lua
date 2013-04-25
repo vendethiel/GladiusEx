@@ -457,10 +457,9 @@ function Cooldowns:UpdateCooldownGroup(
 	cooldownSpacingY,
 	cooldownMax)
 
-	cooldownFrame:ClearAllPoints()
-
 	-- anchor point
 	local parent = GladiusEx:GetAttachFrame(unit, cooldownAttachTo)
+	cooldownFrame:ClearAllPoints()
 	cooldownFrame:SetPoint(cooldownAnchor, parent, cooldownRelativePoint, cooldownOffsetX, cooldownOffsetY)
 
 	-- size
@@ -469,7 +468,6 @@ function Cooldowns:UpdateCooldownGroup(
 
 	-- icon points
 	local anchor, parent, relativePoint, offsetX, offsetY
-	local start, startAnchor = 1, cooldownFrame
 
 	-- grow anchor
 	local grow1, grow2, grow3, startRelPoint
@@ -483,27 +481,26 @@ function Cooldowns:UpdateCooldownGroup(
 		grow1, grow2, grow3, startRelPoint = "BOTTOMRIGHT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT"
 	end
 
+	local start, startAnchor = 1, cooldownFrame
 	for i=1, #cooldownFrame do
-		cooldownFrame[i]:ClearAllPoints()
-
 		if (cooldownMax >= i) then
 			if (start == 1) then
-			anchor, parent, relativePoint, offsetX, offsetY = grow1, startAnchor, startRelPoint, 0, string.find(cooldownGrow, "DOWN") and -cooldownSpacingY or cooldownSpacingY
+				anchor, parent, relativePoint, offsetX, offsetY = grow1, startAnchor, startRelPoint, 0, string.find(cooldownGrow, "DOWN") and -cooldownSpacingY or cooldownSpacingY
 			else
-			anchor, parent, relativePoint, offsetX, offsetY = grow1, cooldownFrame[i-1], grow3, string.find(cooldownGrow, "LEFT") and -cooldownSpacingX or cooldownSpacingX, 0
+				anchor, parent, relativePoint, offsetX, offsetY = grow1, cooldownFrame[i-1], grow3, string.find(cooldownGrow, "LEFT") and -cooldownSpacingX or cooldownSpacingX, 0
+			end
 
 			if (start == cooldownPerColumn) then
 				start = 0
 				startAnchor = cooldownFrame[i - cooldownPerColumn + 1]
 				startRelPoint = grow2
 			end
-			end
 
 			start = start + 1
 		end
 
+		cooldownFrame[i]:ClearAllPoints()
 		cooldownFrame[i]:SetPoint(anchor, parent, relativePoint, offsetX, offsetY)
-
 		UpdateCooldownFrame(cooldownFrame[i], cooldownSize)
 	end
 end

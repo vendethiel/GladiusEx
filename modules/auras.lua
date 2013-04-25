@@ -272,10 +272,9 @@ function Auras:UpdateAuraGroup(
 	aurasBuffsSpacingY,
 	aurasBuffsMax)
 
-	auraFrame:ClearAllPoints()
-
 	-- anchor point
 	local parent = GladiusEx:GetAttachFrame(unit, aurasBuffsAttachTo)
+	auraFrame:ClearAllPoints()
 	auraFrame:SetPoint(aurasBuffsAnchor, parent, aurasBuffsRelativePoint, aurasBuffsOffsetX, aurasBuffsOffsetY)
 
 	-- size
@@ -284,7 +283,6 @@ function Auras:UpdateAuraGroup(
 
 	-- icon points
 	local anchor, parent, relativePoint, offsetX, offsetY
-	local start, startAnchor = 1, auraFrame
 
 	-- grow anchor
 	local grow1, grow2, grow3, startRelPoint
@@ -298,27 +296,26 @@ function Auras:UpdateAuraGroup(
 		grow1, grow2, grow3, startRelPoint = "BOTTOMRIGHT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT"
 	end
 
+	local start, startAnchor = 1, auraFrame
 	for i=1, 40 do
-		auraFrame[i]:ClearAllPoints()
-
 		if (aurasBuffsMax >= i) then
 			if (start == 1) then
 				anchor, parent, relativePoint, offsetX, offsetY = grow1, startAnchor, startRelPoint, 0, strfind(aurasBuffsGrow, "DOWN") and -aurasBuffsSpacingY or aurasBuffsSpacingY
 			else
 				anchor, parent, relativePoint, offsetX, offsetY = grow1, auraFrame[i-1], grow3, strfind(aurasBuffsGrow, "LEFT") and -aurasBuffsSpacingX or aurasBuffsSpacingX, 0
+			end
 
-				if (start == aurasBuffsPerColumn) then
-					start = 0
-					startAnchor = auraFrame[i - aurasBuffsPerColumn + 1]
-					startRelPoint = grow2
-				end
+			if (start == aurasBuffsPerColumn) then
+				start = 0
+				startAnchor = auraFrame[i - aurasBuffsPerColumn + 1]
+				startRelPoint = grow2
 			end
 
 			start = start + 1
 		end
 
+		auraFrame[i]:ClearAllPoints()
 		auraFrame[i]:SetPoint(anchor, parent, relativePoint, offsetX, offsetY)
-
 		UpdateAuraFrame(auraFrame[i], aurasBuffsSize)
 	end
 end
