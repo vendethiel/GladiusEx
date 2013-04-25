@@ -804,7 +804,7 @@ function Cooldowns:GetOptions()
 		local cat = GladiusEx.db.cooldownsCatPriority[i]
 		local option = {
 			type="group",
-			name=L[cat],
+			name=L["cat:" .. cat],
 			order=function()
 				for i = 1, #GladiusEx.db.cooldownsCatPriority do
 					if GladiusEx.db.cooldownsCatPriority[i] == cat then return i end
@@ -938,18 +938,18 @@ function Cooldowns:GetOptions()
 		if type(spelldata) == "table" then
 			local basecd = GetSpellBaseCooldown(spellid)
 			local cats = {}
-			if spelldata.pvp_trinket then tinsert(cats, L["pvp_trinket"]) end
-			if spelldata.cc then tinsert(cats, L["cc"]) end
-			if spelldata.offensive then tinsert(cats, L["offensive"]) end
-			if spelldata.defensive then tinsert(cats, L["defensive"]) end
-			if spelldata.silence then tinsert(cats, L["silence"]) end
-			if spelldata.interrupt then tinsert(cats, L["interrupt"]) end
-			if spelldata.dispel then tinsert(cats, L["dispel"]) end
-			if spelldata.mass_dispel then tinsert(cats, L["mass_dispel"]) end
-			if spelldata.heal then tinsert(cats, L["heal"]) end
-			if spelldata.knockback then tinsert(cats, L["knockback"]) end
-			if spelldata.stun then tinsert(cats, L["stun"]) end
-			if spelldata.immune then tinsert(cats, L["immune"]) end
+			if spelldata.pvp_trinket then tinsert(cats, L["cat:pvp_trinket"]) end
+			if spelldata.cc then tinsert(cats, L["cat:cc"]) end
+			if spelldata.offensive then tinsert(cats, L["cat:offensive"]) end
+			if spelldata.defensive then tinsert(cats, L["cat:defensive"]) end
+			if spelldata.silence then tinsert(cats, L["cat:silence"]) end
+			if spelldata.interrupt then tinsert(cats, L["cat:interrupt"]) end
+			if spelldata.dispel then tinsert(cats, L["cat:dispel"]) end
+			if spelldata.mass_dispel then tinsert(cats, L["cat:mass_dispel"]) end
+			if spelldata.heal then tinsert(cats, L["cat:heal"]) end
+			if spelldata.knockback then tinsert(cats, L["cat:knockback"]) end
+			if spelldata.stun then tinsert(cats, L["cat:stun"]) end
+			if spelldata.immune then tinsert(cats, L["cat:immune"]) end
 			local catstr
 			if #cats > 0 then
 				catstr = "|cff7f7f7f(" .. strjoin(", ", unpack(cats)) .. ")|r"
