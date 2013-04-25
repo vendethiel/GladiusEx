@@ -75,11 +75,23 @@ function Announcements:UNIT_AURA(event, unit)
 end
 
 local RES_SPELLS = {
-	[GetSpellInfo(2008)] = true, -- Ancestral Spirit
-	[GetSpellInfo(50769)] = true, -- Revive
-	[GetSpellInfo(2006)] = true, -- Resurrection
-	[GetSpellInfo(7328)] = true -- Redemption
+	[GetSpellInfo(2008)] = true,   -- Ancestral Spirit (shaman)
+	[GetSpellInfo(8342)] = true,   -- Defibrillate (item: Goblin Jumper Cables)
+	[GetSpellInfo(22999)] = true,  -- Defibrillate (item: Goblin Jumper Cables XL)
+	[GetSpellInfo(54732)] = true,  -- Defibrillate (item: Gnomish Army Knife)
+	[GetSpellInfo(126393)] = true, -- Eternal Guardian (hunter pet: quilien)
+	[GetSpellInfo(61999)] = true,  -- Raise Ally (death knight)
+	[GetSpellInfo(20484)] = true,  -- Rebirth (druid)
+	[GetSpellInfo(113269)] = true, -- Rebirth (prot/holy paladin symbiosis)
+	[GetSpellInfo(7328)] = true,   -- Redemption (paladin)
+	[GetSpellInfo(2006)] = true,   -- Resurrection (priest)
+	[GetSpellInfo(115178)] = true, -- Resuscitate (monk)
+	[GetSpellInfo(50769)] = true,  -- Revive (druid)
+	[GetSpellInfo(982)] = true,    -- Revive Pet (hunter)
+	[GetSpellInfo(20707)] = true,  -- Soulstone (warlock)
+	[GetSpellInfo(83968)] = true,  -- Mass Resurrection
 }
+
 function Announcements:UNIT_SPELLCAST_START(event, unit, spell, rank)
 	if (not strfind(unit, "arena") or strfind(unit, "pet") or not GladiusEx.db.announcements.resurrect) then return end
 
