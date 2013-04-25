@@ -35,47 +35,63 @@ do
 			["maxpowerTag"] = "Max Power",
 
 			-- Specs
-			["Unholy:short"] = "Unh",
-			["Frost:short"] = "Frost",
-			["Blood:short"] = "Blood",
-			["Fire:short"] = "Fire",
-			["Arcane:short"] = "Arcane",
-			["Marksmanship:short"] = "Marks",
-			["Survival:short"] = "Surv",
-			["Beast Mastery:short"] = "BM",
-			["Elemental:short"] = "Ele",
-			["Enhancement:short"] = "Enh",
-			["Restoration:short"] = "Resto",
-			["Feral:short"] = "Feral",
-			["Balance:short"] = "Balance",
-			["Demonology:short"] = "Demo",
-			["Destruction:short"] = "Destro",
-			["Affliction:short"] = "Affli",
-			["Subletly:short"] = "Sub",
-			["Combat:short"] = "Combat",
-			["Assassination:short"] = "Assa",
-			["Shadow:short"] = "Shadow",
-			["Discipline:short"] = "Disc",
-			["Holy:short"] = "Holy",
-			["Retribution:short"] = "Ret",
-			["Protection:short"] = "Prot",
-			["Arms:short"] = "Arms",
-			["Fury:short"] = "Fury",
-			["Brewmaster:short"] = "Brew",
-			["Mistweaver:short"] = "Mist",
-			["Windwalker:short"] = "Wind",
+			["specID:250:short"] = "Blood",
+			["specID:251:short"] = "Frost",
+			["specID:252:short"] = "Unholy",
 
-			["Warrior:short"] = "Warr",
-			["Death Knight:short"] = "DK",
-			["Warlock:short"] = "Lock",
-			["Priest:short"] = "Priest",
-			["Hunter:short"] = "Hunter",
-			["Rogue:short"] = "Rogue",
-			["Shaman:short"] = "Shaman",
-			["Druid:short"] = "Druid",
-			["Paladin:short"] = "Pala",
-			["Mage:short"] = "Mage",
-			["Monk:short"] = "Monk"
+			["specID:102:short"] = "Balance",
+			["specID:103:short"] = "Feral",
+			["specID:104:short"] = "Guardian",
+			["specID:105:short"] = "Resto",
+
+			["specID:253:short"] = "BM",
+			["specID:254:short"] = "Marks",
+			["specID:255:short"] = "Surv",
+
+			["specID:62:short"] = "Arcane",
+			["specID:63:short"] = "Fire",
+			["specID:64:short"] = "Frost",
+
+			["specID:268:short"] = "Brew",
+			["specID:269:short"] = "Wind",
+			["specID:270:short"] = "Mist",
+
+			["specID:65:short"] = "Holy",
+			["specID:66:short"] = "Prot",
+			["specID:70:short"] = "Retri",
+
+			["specID:256:short"] = "Disc",
+			["specID:257:short"] = "Holy",
+			["specID:258:short"] = "Shadow",
+
+			["specID:259:short"] = "Assa",
+			["specID:260:short"] = "Combat",
+			["specID:261:short"] = "Subtl",
+
+			["specID:262:short"] = "Ele",
+			["specID:263:short"] = "Enha",
+			["specID:264:short"] = "Resto",
+
+			["specID:265:short"] = "Affli",
+			["specID:266:short"] = "Demo",
+			["specID:267:short"] = "Destru",
+
+			["specID:71:short"] = "Arms",
+			["specID:72:short"] = "Fury",
+			["specID:73:short"] = "Prot",
+
+			-- Classes
+			["WARRIOR:short"] = "Warr",
+			["DEATHKNIGHT:short"] = "DK",
+			["WARLOCK:short"] = "Lock",
+			["PRIEST:short"] = "Priest",
+			["HUNTER:short"] = "Hunter",
+			["ROGUE:short"] = "Rogue",
+			["SHAMAN:short"] = "Shaman",
+			["DRUID:short"] = "Druid",
+			["PALADIN:short"] = "Pala",
+			["MAGE:short"] = "Mage",
+			["MONK:short"] = "Monk"
 		}, {
 			__index = function(t, index)
 				return index end

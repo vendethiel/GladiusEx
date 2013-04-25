@@ -805,20 +805,20 @@ function Tags:GetBuiltinTags()
 			return not GladiusEx:IsTesting(unit) and UnitClass(unit) or LOCALIZED_CLASS_NAMES_MALE[GladiusEx.testing[unit].unitClass]
 		end,
 		["class:short"] = function(unit)
-			return not GladiusEx:IsTesting(unit) and GladiusEx.L[(UnitClass(unit) or GladiusEx.buttons[unit].clas or "") .. ":short"] or GladiusEx.L[LOCALIZED_CLASS_NAMES_MALE[GladiusEx.testing[unit].unitClass] .. ":short"]
+			return not GladiusEx:IsTesting(unit) and GladiusEx.L[(select(2, UnitClass(unit)) or GladiusEx.buttons[unit].class or "") .. ":short"] or GladiusEx.L[GladiusEx.testing[unit].unitClass .. ":short"]
 		end,
 		["race"] = function(unit)
 			return not GladiusEx:IsTesting(unit) and UnitRace(unit) or GladiusEx.testing[unit].unitRace
 		end,
 		["spec"] = function(unit)
-			return GladiusEx:IsTesting(unit) and GladiusEx.testing[unit].unitSpec or GladiusEx.buttons[unit].spec
+			return GladiusEx:IsTesting(unit) and GladiusEx.testing[unit].unitSpec or GladiusEx.buttons[unit].spec or ""
 		end,
 		["spec:short"] = function(unit)
-			local spec = GladiusEx:IsTesting(unit) and GladiusEx.testing[unit].unitSpec or GladiusEx.buttons[unit].spec
-			if (spec == nil or spec == "") then
+			local spec = GladiusEx:IsTesting(unit) and GladiusEx.testing[unit].specID or GladiusEx.buttons[unit].specID or 0
+			if (spec == nil or spec == 0) then
 				return ""
 			end
-			return GladiusEx.L[spec .. ":short"]
+			return GladiusEx.L["specID:" .. spec .. ":short"]
 		end,
 		["health"] = function(unit)
 			return not GladiusEx:IsTesting(unit) and UnitHealth(unit) or GladiusEx.testing[unit].health
