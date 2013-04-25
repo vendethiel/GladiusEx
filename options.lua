@@ -75,9 +75,7 @@ local function setOption(info, value)
 
 	info = info.arg and info.arg or info[1]
 
-	GladiusEx:HideFrames()
 	GladiusEx:UpdateFrames()
-	GladiusEx:ShowFrames()
 end
 
 function GladiusEx:GetColorOption(info)
@@ -89,9 +87,7 @@ function GladiusEx:SetColorOption(info, r, g, b, a)
 	local key = info.arg or info[#info]
 	self.dbi.profile[key].r, self.dbi.profile[key].g, self.dbi.profile[key].b, self.dbi.profile[key].a = r, g, b, a
 
-	GladiusEx:HideFrames()
 	GladiusEx:UpdateFrames()
-	GladiusEx:ShowFrames()
 end
 
 function GladiusEx:GetPositions()
@@ -216,6 +212,14 @@ function GladiusEx:SetupOptions()
 							showParty = {
 								type="toggle",
 								name=L["Show party frames"],
+								set=function(info, value)
+									setOption(info, value)
+									-- todo: this shouldn't be so.. awkward
+									if GladiusEx:IsArenaShown() then
+										GladiusEx:HideFrames()
+										GladiusEx:ShowFrames()
+									end
+								end,
 								order=11,
 							},
 							advancedOptions = {
