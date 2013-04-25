@@ -49,15 +49,16 @@ function Announcements:Show(unit)
 end
 
 function Announcements:GLADIUS_SPEC_UPDATE(event, unit)
-	if (not strfind(unit, "arena") or strfind(unit, "pet") or not GladiusEx.db.announcements.spec) then return end
+	if (not GladiusEx.db.announcements.spec or not GladiusEx:IsArenaUnit(unit)) then return end
 
 	if GladiusEx.buttons[unit].spec then
-		self:Send(string.format(L["SPEC DETECTED: %s (%s/%s)"], UnitName(unit) or unit, GladiusEx.buttons[unit].class, GladiusEx.buttons[unit].spec), 2, unit)
+		local class = UnitClass(unit) or LOCALIZED_CLASS_NAMES_MALE[GladiusEx.buttons[unit].class] or "??"
+		self:Send(string.format(L["SPEC DETECTED: %s (%s/%s)"], UnitName(unit) or unit, class, GladiusEx.buttons[unit].spec), 15, unit)
 	end
 end
 
 function Announcements:UNIT_HEALTH(event, unit)
-	if (not strfind(unit, "arena") or strfind(unit, "pet") or not GladiusEx.db.announcements.health) then return end
+	if (not GladiusEx.db.announcements.health or not GladiusEx:IsArenaUnit(unit)) then return end
 
 	local healthPercent = math.floor((UnitHealth(unit) / UnitHealthMax(unit)) * 100)
 	if (healthPercent < GladiusEx.db.announcements.healthThreshold) then
@@ -67,7 +68,7 @@ end
 
 local DRINK_SPELL = GetSpellInfo(57073)
 function Announcements:UNIT_AURA(event, unit)
-	if (not strfind(unit, "arena") or strfind(unit, "pet") or not GladiusEx.db.announcements.drinks) then return end
+	if (not GladiusEx.db.announcements.drinks or not GladiusEx:IsArenaUnit(unit)) then return end
 
 	if (UnitAura(unit, DRINK_SPELL)) then
 		self:Send(string.format(L["DRINKING: %s (%s)"], UnitName(unit), UnitClass(unit)), 2, unit)
@@ -93,7 +94,7 @@ local RES_SPELLS = {
 }
 
 function Announcements:UNIT_SPELLCAST_START(event, unit, spell, rank)
-	if (not strfind(unit, "arena") or strfind(unit, "pet") or not GladiusEx.db.announcements.resurrect) then return end
+	if (not GladiusEx.db.announcements.resurrect or not GladiusEx:IsArenaUnit(unit)) then return end
 
 	if (RES_SPELLS[spell]) then
 		self:Send(string.format(L["RESURRECTING: %s (%s)"], UnitName(unit), UnitClass(unit)), 2, unit)
