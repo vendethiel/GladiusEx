@@ -271,9 +271,10 @@ function GladiusEx:IsTesting(unit)
 	end
 end
 
-function GladiusEx:GetArenaSize()
+function GladiusEx:GetArenaSize(min)
 	-- try to guess the current arena size
-	local guess = max(2, GetNumArenaOpponents(), GetNumArenaOpponentSpecs(), GetNumGroupMembers())
+	log("GetArenaSize", GetNumArenaOpponents(), GetNumArenaOpponentSpecs(), GetNumGroupMembers())
+	local guess = max(min or 0, 2, GetNumArenaOpponents(), GetNumArenaOpponentSpecs(), GetNumGroupMembers())
 
 	if guess >= 4 then
 		guess = 5
@@ -443,7 +444,7 @@ function GladiusEx:ARENA_OPPONENT_UPDATE(event, unit, type)
 	if type == "seen" or type == "destroyed" then
 		self:UpdateShowUnit(unit)
 		if self.db.growDirection == "HCENTER" then
-			self:CenterUnitPosition("arena1", GetNumArenaOpponents())
+			self:CenterUnitPosition("arena1", self:GetArenaSize(string.match(unit, "^arena(%d+)$")))
 		end
 	elseif type == "unseen" then
 		if self.buttons[unit] then
