@@ -242,7 +242,7 @@ function Cooldowns:UpdateIcons(unit)
 		faction = (UnitFactionGroup("player") == "Alliance" and GladiusEx:IsPartyUnit(unit)) and "Alliance" or "Horde"
 	else
 		specID = GladiusEx.buttons[unit].specID
-		class = GladiusEx.buttons[unit].class
+		class = GladiusEx.buttons[unit].class or select(2, UnitClass(unit))
 		race = select(2, UnitRace(unit))
 		faction = UnitFactionGroup(unit)
 	end
