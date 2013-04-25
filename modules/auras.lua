@@ -1046,6 +1046,7 @@ function Auras:GetAuraList()
 		[GetSpellInfo(1776)]	= 3, 	-- Gouge
 		[GetSpellInfo(44572)]	= 3, 	-- Deep Freeze
 		[GetSpellInfo(19386)]	= 3, 	-- Wyvern Sting
+		[GetSpellInfo(126246)]  = 3,    -- Lullaby
 		[GetSpellInfo(19503)] 	= 3, 	-- Scatter Shot
 		[GetSpellInfo(9005)]	= 3, 	-- Pounce
 		[GetSpellInfo(22570)]	= 3, 	-- Maim
