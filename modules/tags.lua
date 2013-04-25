@@ -220,7 +220,7 @@ function Tags:Update(unit)
 	end
 
 	for text, _ in pairs(GladiusEx.db.tagsTexts) do
-		local attachframe = GladiusEx:GetAttachFrame(unit, GladiusEx.db.tagsTexts[text].attachTo)
+		local attachframe = GladiusEx:GetAttachFrame(unit, GladiusEx.db.tagsTexts[text].attachTo, true)
 
 		if attachframe then
 			-- create frame

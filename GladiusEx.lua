@@ -119,7 +119,7 @@ function GladiusEx:NewGladiusExModule(name, isbar, defaults, ...)
 	return module
 end
 
-function GladiusEx:GetAttachFrame(unit, point)
+function GladiusEx:GetAttachFrame(unit, point, nodefault)
 	-- get parent frame
 	if (point == "Frame") then
 		return self.buttons[unit]
@@ -136,7 +136,7 @@ function GladiusEx:GetAttachFrame(unit, point)
 	end
 	log("Attach point", point, "not found")
 	-- default to frame
-	return self.buttons[unit]
+	return not nodefault and self.buttons[unit]
 end
 
 function GladiusEx:OnInitialize()
