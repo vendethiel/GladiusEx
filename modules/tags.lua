@@ -828,7 +828,6 @@ function Tags:GetBuiltinTags()
 		end,
 		["health:short"] = function(unit)
 			local health = not GladiusEx:IsTesting(unit) and UnitHealth(unit) or GladiusEx.testing[unit].health
-
 			if (health > 999) then
 				return strformat("%.1fk", (health / 1000))
 			else
@@ -837,7 +836,6 @@ function Tags:GetBuiltinTags()
 		end,
 		["maxhealth:short"] = function(unit)
 			local health = not GladiusEx:IsTesting(unit) and UnitHealthMax(unit) or GladiusEx.testing[unit].maxHealth
-
 			if (health > 999) then
 				return strformat("%.1fk", (health / 1000))
 			else
@@ -847,8 +845,7 @@ function Tags:GetBuiltinTags()
 		["health:percentage"] = function(unit)
 			local health = not GladiusEx:IsTesting(unit) and UnitHealth(unit) or GladiusEx.testing[unit].health
 			local maxHealth = not GladiusEx:IsTesting(unit) and UnitHealthMax(unit) or GladiusEx.testing[unit].maxHealth
-
-			return strformat("%.1f%%", (health / maxHealth * 100))
+			return (maxHealth and maxHealth > 0) and strformat("%.1f%%", (health / maxHealth * 100)) or ""
 		end,
 
 		["power"] = function(unit)
@@ -878,8 +875,7 @@ function Tags:GetBuiltinTags()
 		["power:percentage"] = function(unit)
 			local power = not GladiusEx:IsTesting(unit) and UnitPower(unit) or GladiusEx.testing[unit].power
 			local maxPower = not GladiusEx:IsTesting(unit) and UnitPowerMax(unit) or GladiusEx.testing[unit].maxPower
-
-			return strformat("%.1f%%", (power / maxPower * 100))
+			return (maxPower and maxPower > 0) and strformat("%.1f%%", (power / maxPower * 100)) or ""
 		end,
 	}
 end
