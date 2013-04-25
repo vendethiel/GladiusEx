@@ -23,7 +23,7 @@ local party_units = {
 	["party4"] = true,
 }
 
-local L
+local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 
 -- debugging output
 local log_frame
@@ -153,9 +153,6 @@ function GladiusEx:OnInitialize()
 			rawset(t, index, value)
 		end
 	})
-
-	-- localization
-	L = self.L
 
 	-- libsharedmedia
 	self.LSM = LibStub("LibSharedMedia-3.0")

@@ -1,5 +1,5 @@
 local GladiusEx = _G.GladiusEx
-local L = GladiusEx.L
+local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local LSM
 
 -- global functions
@@ -799,13 +799,13 @@ function Tags:GetBuiltinTags()
 			return UnitName(unit) or unit
 		end,
 		["name:status"] = function(unit)
-			return UnitIsDeadOrGhost(unit) and GladiusEx.L["DEAD"] or (UnitName(unit) or unit)
+			return UnitIsDeadOrGhost(unit) and L["DEAD"] or (UnitName(unit) or unit)
 		end,
 		["class"] = function(unit)
 			return not GladiusEx:IsTesting(unit) and UnitClass(unit) or LOCALIZED_CLASS_NAMES_MALE[GladiusEx.testing[unit].unitClass]
 		end,
 		["class:short"] = function(unit)
-			return not GladiusEx:IsTesting(unit) and GladiusEx.L[(select(2, UnitClass(unit)) or GladiusEx.buttons[unit].class or "") .. ":short"] or GladiusEx.L[GladiusEx.testing[unit].unitClass .. ":short"]
+			return not GladiusEx:IsTesting(unit) and L[(select(2, UnitClass(unit)) or GladiusEx.buttons[unit].class or "") .. ":short"] or L[GladiusEx.testing[unit].unitClass .. ":short"]
 		end,
 		["race"] = function(unit)
 			return not GladiusEx:IsTesting(unit) and UnitRace(unit) or GladiusEx.testing[unit].unitRace
@@ -818,7 +818,7 @@ function Tags:GetBuiltinTags()
 			if (spec == nil or spec == 0) then
 				return ""
 			end
-			return GladiusEx.L["specID:" .. spec .. ":short"]
+			return L["specID:" .. spec .. ":short"]
 		end,
 		["health"] = function(unit)
 			return not GladiusEx:IsTesting(unit) and UnitHealth(unit) or GladiusEx.testing[unit].health

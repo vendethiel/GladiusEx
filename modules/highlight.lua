@@ -1,5 +1,5 @@
 local GladiusEx = _G.GladiusEx
-local L = GladiusEx.L
+local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local LSM
 
 -- global functions
@@ -402,14 +402,14 @@ function Highlight:GetOptions()
 	for i=1, 8 do
 		options.raidTargets.args["raidTarget" .. i] = {
 			type="group",
-			name="|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_" .. i .. ".blp:0|t " .. L["Raid Icon Target " .. i],
+			name="|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_" .. i .. ".blp:0|t " .. string.format(L["Raid Icon Target %i"], i),
 			inline=true,
 			order=i,
 			args = {
 				highlightRaidIcon = {
 					type="toggle",
 					name=L["Highlight"],
-					desc=L["Show border around raid target " .. i],
+					desc=string.format(L["Show border around raid target %i"],  i),
 					disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
 					arg="highlightRaidIcon" .. i,
 					order=5,

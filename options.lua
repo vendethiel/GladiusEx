@@ -3,7 +3,7 @@ local fn = LibStub("LibFunctional-1.0")
 local pairs = pairs
 local type = type
 
-local L = GladiusEx.L
+local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 
 GladiusEx.defaults = {
 	profile = {
