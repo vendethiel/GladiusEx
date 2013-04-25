@@ -608,7 +608,7 @@ function Auras:GetOptions()
 								aurasBuffsOffsetY = {
 									type="range",
 									name=L["Auras Offset Y"],
-									desc=L["Y  offset of the auras"],
+									desc=L["Y offset of the auras"],
 									disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
 									min=-50, max=50, step=1,
 									order=25,
@@ -834,7 +834,7 @@ function Auras:GetOptions()
 								aurasDebuffsOffsetY = {
 									type="range",
 									name=L["Auras Offset Y"],
-									desc=L["Y  offset of the auras"],
+									desc=L["Y offset of the auras"],
 									disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
 									min=-50, max=50, step=1,
 									order=25,

@@ -559,7 +559,7 @@ function DRTracker:GetOptions()
 						drTrackerOffsetY = {
 							type="range",
 							name=L["DRTracker Offset Y"],
-							desc=L["Y  offset of the drTracker"],
+							desc=L["Y offset of the drTracker"],
 							disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
 							min=-50, max=50, step=1,
 							order=25,

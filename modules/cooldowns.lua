@@ -717,7 +717,7 @@ function Cooldowns:GetOptions()
 							cooldownsOffsetY = {
 								type="range",
 								name=L["Cooldowns Offset Y"],
-								desc=L["Y  offset of the cooldowns"],
+								desc=L["Y offset of the cooldowns"],
 								disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
 								min=-50, max=50, step=1,
 								order=25,
