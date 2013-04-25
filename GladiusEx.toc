@@ -3,8 +3,6 @@
 ## Notes: Arena unit frames
 ## SavedVariables: GladiusExDB
 ## OptionalDeps: LibStub, LibFunctional-1.0, Ace3, DRData-1.0, LibSharedMedia-3.0, LibSpecRoster-1.0, LibCooldownTracker-1.0, Clique
-## LoadManagers: AddonLoader
-## X-LoadOn-Always: delayed
 
 embeds.xml
 localization\enUS.lua
