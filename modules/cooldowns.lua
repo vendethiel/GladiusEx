@@ -76,8 +76,8 @@ local Cooldowns = GladiusEx:NewGladiusExModule("Cooldowns", false, {
 local MAX_ICONS = 40
 
 function Cooldowns:OnEnable()
-	CT.RegisterCallback(self, "CooldownUsed")
-	CT.RegisterCallback(self, "CooldownsReset")
+	CT.RegisterCallback(self, "LCT_CooldownUsed")
+	CT.RegisterCallback(self, "LCT_CooldownsReset")
 
 	self:RegisterEvent("UNIT_NAME_UPDATE")
 	self:RegisterMessage("GLADIUS_SPEC_UPDATE")
@@ -118,11 +118,15 @@ function Cooldowns:UNIT_NAME_UPDATE(event, unit)
 	self:UpdateIcons(unit)
 end
 
-function Cooldowns:CooldownsReset(event, unit)
+function Cooldowns:LCT_CooldownsReset(event, unit)
+	GladiusEx:Log(event, unit)
+
 	self:UpdateIcons(unit)
 end
 
-function Cooldowns:CooldownUsed(event, unit, spellId)
+function Cooldowns:LCT_CooldownUsed(event, unit, spellId)
+	GladiusEx:Log(event, unit, spellId)
+
 	self:UpdateIcons(unit)
 end
 
