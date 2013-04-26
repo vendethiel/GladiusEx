@@ -350,5 +350,6 @@ function GladiusEx:SetupOptions()
 end
 
 function GladiusEx:ShowOptionsDialog()
-	InterfaceOptionsFrame_OpenToCategory("GladiusEx")
+	-- InterfaceOptionsFrame_OpenToCategory("GladiusEx")
+	LibStub("AceConfigDialog-3.0"):Open("GladiusEx")
 end
