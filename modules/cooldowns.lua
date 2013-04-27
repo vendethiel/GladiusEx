@@ -98,7 +98,13 @@ local Cooldowns = GladiusEx:NewGladiusExModule("Cooldowns", false, {
 			cooldownsMax = 40,
 			cooldownsSize = 23,
 			cooldownsCrop = true,
-			cooldownsSpells = { ["*"] = true },
+			cooldownsSpells = (function()
+				local r = {}
+				for spellid, spelldata in pairs(CT:GetCooldownsData()) do
+					if (type(spelldata) == "table") and not (spelldata.dispel or spelldata.mass_dispel or spelldata.pvp_trinket) then r[spellid] = true end
+				end
+				return r
+			end)(),
 		},
 		["group_2"] = MakeGroupDb {
 			cooldownsGroupId = 2,
