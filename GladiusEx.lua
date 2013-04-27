@@ -176,7 +176,6 @@ function GladiusEx:OnInitialize()
 end
 
 function GladiusEx:OnEnable()
-	log("gexenable")
 	-- register the appropriate events
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("ARENA_OPPONENT_UPDATE")

@@ -346,10 +346,6 @@ local function GetSpellSortScore(group, spellid)
 	return score
 end
 
-function Cooldowns:UpdateAllIcons()
-	fn.each(fn.keys(GladiusEx.buttons), fn.bind(self.UpdateIcons, self))
-end
-
 function Cooldowns:UpdateIcons(unit)
 	for group = 1, GetNumGroups() do
 		self:UpdateGroupIcons(group, unit)
@@ -778,6 +774,8 @@ function Cooldowns:GetOptions()
 	return options
 end
 
+local FormatSpellDescription
+
 function Cooldowns:MakeGroupOptions(group)
 	local group_options = {
 		type = "group",
@@ -1187,7 +1185,6 @@ function Cooldowns:MakeGroupOptions(group)
 	local args = group_options.args.cooldowns.args
 	for spellid, spelldata in pairs(CT:GetCooldownsData()) do
 		if type(spelldata) == "table" then
-			local basecd = GetSpellBaseCooldown(spellid)
 			local cats = {}
 			if spelldata.pvp_trinket then tinsert(cats, L["cat:pvp_trinket"]) end
 			if spelldata.cc then tinsert(cats, L["cat:cc"]) end
@@ -1206,10 +1203,20 @@ function Cooldowns:MakeGroupOptions(group)
 				catstr = "|cff7f7f7f(" .. strjoin(", ", unpack(cats)) .. ")|r"
 			end
 
+			local namestr
+			local basecd = GetSpellBaseCooldown(spellid)
+			if GladiusEx:IsDebugging() then
+				namestr = string.format(" |T%s:20|t %s [%ss/Base: %ss] %s", spelldata.icon, spelldata.name, spelldata.cooldown or "??", basecd and basecd/1000 or "??", catstr or "")
+				if basecd and basecd/1000 ~= spelldata.cooldown then
+					GladiusEx:Log(namestr)
+				end
+			else
+				namestr = string.format(" |T%s:20|t %s [%ss] %s", spelldata.icon, spelldata.name, spelldata.cooldown or "??", catstr or "")
+			end
 			local spellconfig = {
 				type = "toggle",
-				name = string.format(" |T%s:20|t %s [%ss/%ss] %s", spelldata.icon, spelldata.name, spelldata.cooldown or "??", basecd and basecd/1000 or "??", catstr or ""),
-				desc = GetSpellDescription(spellid),
+				name = namestr,
+				desc = FormatSpellDescription(spellid),
 				descStyle = "inline",
 				width = "full",
 				arg = spellid,
@@ -1296,4 +1303,196 @@ function Cooldowns:MakeGroupOptions(group)
 	end
 
 	return group_options
+end
+
+-- Follows a ridiculous parser for GetSpellDescription()
+
+local function parse_desc(desc)
+	local input = desc
+	local output = ""
+	local pos = 1
+	local char
+
+	local emit, read, unread, read_number,
+		read_until, read_choice, read_muldiv, read_if, read_spelldesc, read_id, read_tag
+
+	emit = function(c)
+		output = output .. c
+	end
+
+	read = function(n)
+		if pos > #input then return nil end
+		n = n or 1
+		local str = string.sub(input, pos, pos + n  - 1)
+		pos = pos + n
+		return str
+	end
+
+	unread = function()
+		pos = pos - 1
+	end
+
+	read_number = function()
+		local accum = ""
+		while true do
+			local ch = read()
+			if ch and ch:match("%d") then
+				accum = accum .. ch
+			else
+				if ch then unread() end
+				return tonumber(accum)
+			end
+		end
+	end
+
+	read_until = function(u)
+		local accum = ""
+		while true do
+			local char = read()
+			if not char or char == u then
+				return accum
+			else
+				accum = accum .. char
+			end
+		end
+	end
+
+	read_choice = function()
+		local c1 = read_until(":")
+		local c2 = read_until(";")
+		return string.format("%s or %s", c1, c2)
+	end
+
+	read_muldiv = function()
+		read_until(";")
+		return read_tag()
+	end
+
+	read_if = function()
+		local op
+		while true do
+			local id = read()
+			if id == "!" or id == "?" then
+				id = read()
+			end
+			local id2 = read_number()
+			op = read()
+			if op == "&" then
+			elseif op == "|" then
+			else
+				break
+			end
+		end
+
+		if op == "[" then
+			local c1 = parse_desc(read_until("]"))
+			op = read()
+			local c2
+			if op == "[" then
+				c2 = parse_desc(read_until("]"))
+			elseif op ~= nil then
+				unread()
+				c2 = read_tag()
+			end
+			if c1 == c2 then
+				return c1
+			elseif c1 == "" then
+				return string.format("[%s]", c2)
+			elseif c2 == "" then
+				return string.format("[%s]", c1)
+			else
+				return string.format("{[%s] or [%s]}", c1, c2)
+			end
+		else
+			assert(false, "read_if: op " .. op)
+		end
+	end
+
+	read_spelldesc = function()
+		assert(read(9) == "spelldesc")
+		local spellid = read_number()
+		return FormatSpellDescription(spellid)
+	end
+
+	read_id = function()
+		unread()
+		local id = read_number()
+		return read_tag()
+	end
+
+	local op_table = {
+		["0"] = read_id,
+		["1"] = read_id,
+		["2"] = read_id,
+		["3"] = read_id,
+		["4"] = read_id,
+		["5"] = read_id,
+		["6"] = read_id,
+		["7"] = read_id,
+		["8"] = read_id,
+		["9"] = read_id,
+
+		["{"] = function() read_until("}") return "?" end,-- expr
+		["<"] = function() read_until(">") return "?" end, -- variable name
+
+		["g"] = read_choice, -- gender
+		["G"] = read_choice, -- gender
+		["l"] = read_choice, -- singular/plural
+		["L"] = read_choice, -- singular/plural
+
+		["?"] = read_if, -- if
+		["*"] = read_muldiv,
+		["/"] = read_muldiv,
+		["@"] = read_spelldesc, -- spelldesc
+
+		["m"] = function() read(); return "?" end, -- followed by a single digit, ends there
+		["M"] = function() read(); return "?" end, -- like m
+		["a"] = function() read(); return "?" end, -- like m
+		["A"] = function() read(); return "?" end, -- like m
+		["o"] = function() read(); return "?" end, -- like m
+		["s"] = function() read(); return "?" end, -- like m
+		["t"] = function() read(); return "?" end, -- like m
+		["T"] = function() read(); return "?" end, -- like m
+		["x"] = function() read(); return "?" end, -- like m
+
+		["d"] = function() return "?" end, -- ends there
+		["D"] = function() return "?" end, -- same as d
+		["i"] = function() return "?" end, -- same as d
+		["u"] = function() return "?" end, -- same as d
+		["n"] = function() return "?" end, -- same as d
+	}
+
+	read_tag = function()
+		local op = read()
+		assert(op, "op is a faggot")
+
+		local fn = op_table[op]
+		assert(fn, "no fn for " .. tostring(op))
+
+		return fn(op)
+	end
+
+	while true do
+		local ch = read()
+		if not ch then
+			break
+		elseif ch == "$" then
+			emit(read_tag())
+		else
+			emit(ch)
+		end
+	end
+
+	return output
+end
+
+FormatSpellDescription = function (spellid)
+	local text = GetSpellDescription(spellid)
+
+	if GladiusEx:IsDebugging() then
+		text = parse_desc(text)
+	else
+		pcall(function() text = parse_desc(text) end)
+	end
+	return text
 end
