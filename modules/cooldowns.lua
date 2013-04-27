@@ -240,6 +240,7 @@ local function CooldownFrame_OnUpdate(frame)
 
 	if tracked then
 		if tracked.used_start and ((not tracked.used_end and not tracked.cooldown_start) or (tracked.used_end and tracked.used_end > now)) then
+			-- using
 			if frame.state == 0 then
 				if tracked.used_end then
 					frame.cooldown:SetReverse(true)
@@ -256,6 +257,7 @@ local function CooldownFrame_OnUpdate(frame)
 			return
 		end
 		if tracked.used_start and not tracked.cooldown_start and frame.spelldata.active_until_cooldown_start then
+			-- waiting to be used (inner focus)
 			if frame.state ~= 2 then
 				frame.border:SetVertexColor(frame.color.r, frame.color.g, frame.color.b, 1.0)
 				frame:SetAlpha(1)
@@ -265,11 +267,12 @@ local function CooldownFrame_OnUpdate(frame)
 			return
 		end
 		if tracked.cooldown_end and tracked.cooldown_end > now then
+			-- in cooldown
 			if frame.state ~= 3 then
 				frame.cooldown:SetReverse(false)
 				frame.cooldown:SetCooldown(tracked.cooldown_start, tracked.cooldown_end - tracked.cooldown_start)
-				frame.border:SetVertexColor(frame.color.r, frame.color.g, frame.color.b, 0.5)
-				frame:SetAlpha(0.2)
+				frame.border:SetVertexColor(frame.color.r, frame.color.g, frame.color.b, 0.3)
+				frame:SetAlpha(0.8)
 				frame.cooldown:Show()
 				frame.state = 3
 			end
@@ -277,6 +280,7 @@ local function CooldownFrame_OnUpdate(frame)
 		end
 	end
 
+	-- not on cooldown or being used
 	frame.tracked = nil
 	frame.cooldown:Hide()
 	frame.border:SetVertexColor(frame.color.r, frame.color.g, frame.color.b, 0.3)
