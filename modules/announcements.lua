@@ -11,15 +11,13 @@ local GetSpellInfo = GetSpellInfo
 local GetRealNumPartyMembers, GetRealNumRaidMembers, IsRaidLeader, IsRaidOfficer = GetRealNumPartyMembers, GetRealNumRaidMembers, IsRaidLeader, IsRaidOfficer
 
 local Announcements = GladiusEx:NewGladiusExModule("Announcements", false, {
-	announcements = {
 		drinks = true,
 		health = true,
 		resurrect = true,
 		spec = true,
 		healthThreshold = 25,
 		dest = "party",
-	}
-})
+	})
 
 function Announcements:OnEnable()
 	-- Register events
@@ -49,7 +47,7 @@ function Announcements:Show(unit)
 end
 
 function Announcements:GLADIUS_SPEC_UPDATE(event, unit)
-	if (not GladiusEx.db.announcements.spec or not GladiusEx:IsArenaUnit(unit)) then return end
+	if (not self.db.spec or not GladiusEx:IsArenaUnit(unit)) then return end
 
 	if GladiusEx.buttons[unit].spec then
 		local class = UnitClass(unit) or LOCALIZED_CLASS_NAMES_MALE[GladiusEx.buttons[unit].class] or "??"
@@ -58,17 +56,17 @@ function Announcements:GLADIUS_SPEC_UPDATE(event, unit)
 end
 
 function Announcements:UNIT_HEALTH(event, unit)
-	if (not GladiusEx.db.announcements.health or not GladiusEx:IsArenaUnit(unit)) then return end
+	if (not self.db.health or not GladiusEx:IsArenaUnit(unit)) then return end
 
 	local healthPercent = math.floor((UnitHealth(unit) / UnitHealthMax(unit)) * 100)
-	if (healthPercent < GladiusEx.db.announcements.healthThreshold) then
+	if (healthPercent < self.db.healthThreshold) then
 		self:Send(string.format(L["LOW HEALTH: %s (%s)"], UnitName(unit), UnitClass(unit)), 10, unit)
 	end
 end
 
 local DRINK_SPELL = GetSpellInfo(57073)
 function Announcements:UNIT_AURA(event, unit)
-	if (not GladiusEx.db.announcements.drinks or not GladiusEx:IsArenaUnit(unit)) then return end
+	if (not self.db.drinks or not GladiusEx:IsArenaUnit(unit)) then return end
 
 	if (UnitAura(unit, DRINK_SPELL)) then
 		self:Send(string.format(L["DRINKING: %s (%s)"], UnitName(unit), UnitClass(unit)), 2, unit)
@@ -94,7 +92,7 @@ local RES_SPELLS = {
 }
 
 function Announcements:UNIT_SPELLCAST_START(event, unit, spell, rank)
-	if (not GladiusEx.db.announcements.resurrect or not GladiusEx:IsArenaUnit(unit)) then return end
+	if (not self.db.resurrect or not GladiusEx:IsArenaUnit(unit)) then return end
 
 	if (RES_SPELLS[spell]) then
 		self:Send(string.format(L["RESURRECTING: %s (%s)"], UnitName(unit), UnitClass(unit)), 2, unit)
@@ -104,8 +102,8 @@ end
 -- Sends an announcement
 -- Param unit is only used for class coloring of messages
 function Announcements:Send(msg, throttle, unit)
-	local color = unit and RAID_CLASS_COLORS[UnitClass(unit)] or { r=0, g=1, b=0 }
-	local dest = GladiusEx.db.announcements.dest
+	local color = unit and RAID_CLASS_COLORS[UnitClass(unit)] or { r = 0, g = 1, b = 0 }
+	local dest = self.db.dest
 
 	-- only send announcements inside arenas
 	if select(2, IsInInstance()) ~= "arena" then return end
@@ -164,14 +162,6 @@ function Announcements:Send(msg, throttle, unit)
 	end
 end
 
-local function getOption(info)
-	return GladiusEx.dbi.profile.announcements[info[#info]]
-end
-
-local function setOption(info, value)
-	GladiusEx.dbi.profile.announcements[info[#info]] = value
-end
-
 function Announcements:GetOptions()
 	local destValues = {
 		["self"] = L["Self"],
@@ -186,67 +176,65 @@ function Announcements:GetOptions()
 
 	return {
 		general = {
-			type="group",
-			name=L["General"],
-			order=1,
-			get=getOption,
-			set=setOption,
-			disabled=function() return not GladiusEx.db.modules[self:GetName()] end,
+			type = "group",
+			name = L["General"],
+			order = 1,
+			disabled = function() return not self:IsEnabled() end,
 			args = {
 				options = {
-					type="group",
-					name=L["Options"],
-					inline=true,
-					order=1,
+					type = "group",
+					name = L["Options"],
+					inline = true,
+					order = 1,
 					args = {
 						dest = {
-							type="select",
-							name=L["Destination"],
-							desc=L["Choose how your announcements are displayed."],
-							values=destValues,
-							order=5,
+							type = "select",
+							name = L["Destination"],
+							desc = L["Choose how your announcements are displayed."],
+							values = destValues,
+							order = 5,
 						},
 						healthThreshold = {
-							type="range",
-							name=L["Low health threshold"],
-							desc=L["Choose how low an enemy must be before low health is announced."],
-							disabled=function() return not GladiusEx.db.announcements.health end,
-							min=1,
-							max=100,
-							step=1,
-							order=10,
+							type = "range",
+							name = L["Low health threshold"],
+							desc = L["Choose how low an enemy must be before low health is announced."],
+							disabled = function() return not self.db.health end,
+							min = 1,
+							max = 100,
+							step = 1,
+							order = 10,
 						},
 					},
 				},
 				announcements = {
-					type="group",
-					name=L["Announcement toggles"],
-					inline=true,
-					order=5,
+					type = "group",
+					name = L["Announcement toggles"],
+					inline = true,
+					order = 5,
 					args = {
 						drinks = {
-							type="toggle",
-							name=L["Drinking"],
-							desc=L["Announces when enemies sit down to drink."],
-							order=20,
+							type = "toggle",
+							name = L["Drinking"],
+							desc = L["Announces when enemies sit down to drink."],
+							order = 20,
 						},
 						health = {
-							type="toggle",
-							name=L["Low health"],
-							desc=L["Announces when an enemy drops below a certain health threshold."],
-							order=30,
+							type = "toggle",
+							name = L["Low health"],
+							desc = L["Announces when an enemy drops below a certain health threshold."],
+							order = 30,
 						},
 						resurrect = {
-							type="toggle",
-							name=L["Resurrection"],
-							desc=L["Announces when an enemy tries to resurrect a teammate."],
-							order=40,
+							type = "toggle",
+							name = L["Resurrection"],
+							desc = L["Announces when an enemy tries to resurrect a teammate."],
+							order = 40,
 						},
 						spec = {
-							type="toggle",
-							name=L["Spec Detection"],
-							desc=L["Announces when the spec of an enemy was detected."],
-							order=40,
+							type = "toggle",
+							name = L["Spec Detection"],
+							desc = L["Announces when the spec of an enemy was detected."],
+							order = 40,
 						},
 					},
 				},

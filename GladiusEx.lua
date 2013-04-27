@@ -1,11 +1,10 @@
 ﻿-- globals
 local type, pairs = type, pairs
 local strfind, max = string.find, math.max
+local abs = math.abs
 local UnitIsDeadOrGhost, UnitGUID = UnitIsDeadOrGhost, UnitGUID
 
 GladiusEx = LibStub("AceAddon-3.0"):NewAddon("GladiusEx", "AceEvent-3.0")
-
-GladiusEx.defaults = {}
 
 local arena_units = {
 	["arena1"] = true,
@@ -23,6 +22,7 @@ local party_units = {
 	["party4"] = true,
 }
 
+local LSR = LibStub("LibSpecRoster-1.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 
 -- debugging output
@@ -102,6 +102,11 @@ function modulePrototype:GetAttachPoints()
 	return t
 end
 
+function modulePrototype:OnInitialize()
+	self.dbi = GladiusEx.dbi:RegisterNamespace(self:GetName(), { profile = self.defaults })
+	self.db = self.dbi.profile
+end
+
 GladiusEx:SetDefaultModulePrototype(modulePrototype)
 GladiusEx:SetDefaultModuleLibraries("AceEvent-3.0")
 
@@ -109,12 +114,6 @@ function GladiusEx:NewGladiusExModule(name, isbar, defaults, ...)
 	local module = self:NewModule(name, ...)
 	module.defaults = defaults
 	module.isBarOption = isbar
-
-	-- todo: fix this crap someday
-	-- set db defaults
-	for k, v in pairs(defaults) do
-		self.defaults.profile[k] = v
-	end
 
 	return module
 end
@@ -140,26 +139,16 @@ function GladiusEx:GetAttachFrame(unit, point, nodefault)
 end
 
 function GladiusEx:OnInitialize()
-	-- setup db
+	-- init db
 	self.dbi = LibStub("AceDB-3.0"):New("GladiusExDB", self.defaults)
 	self.dbi.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
 	self.dbi.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
 	self.dbi.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")
-	self.db = setmetatable(self.dbi.profile, {
-		__newindex = function(t, index, value)
-			if (type(value) == "table") then
-				rawset(self.defaults.profile, index, value)
-			end
-			rawset(t, index, value)
-		end
-	})
+	self.db = self.dbi.profile
 
 	-- libsharedmedia
 	self.LSM = LibStub("LibSharedMedia-3.0")
 	self.LSM:Register("statusbar", "Minimalist", "Interface\\Addons\\GladiusEx\\images\\Minimalist")
-
-	-- libspecroster
-	self.LSR = LibStub("LibSpecRoster-1.0")
 
 	-- test environment
 	self.test = false
@@ -184,12 +173,10 @@ function GladiusEx:OnInitialize()
 
 	-- buttons
 	self.buttons = {}
-
-	-- init optinos
-	self:SetupOptions()
 end
 
 function GladiusEx:OnEnable()
+	log("gexenable")
 	-- register the appropriate events
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("ARENA_OPPONENT_UPDATE")
@@ -199,7 +186,7 @@ function GladiusEx:OnEnable()
 	self:RegisterEvent("UNIT_HEALTH")
 	self:RegisterEvent("GROUP_ROSTER_UPDATE")
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
-	self.LSR.RegisterMessage(self, "LSR_SpecializationChanged")
+	LSR.RegisterMessage(self, "LSR_SpecializationChanged")
 
 	-- enable modules
 	for moduleName, module in self:IterateModules() do
@@ -210,6 +197,9 @@ function GladiusEx:OnEnable()
 		end
 	end
 
+	-- init options
+	self:SetupOptions()
+	
 	-- create frames
 	if #self.buttons == 0 then
 		for unit in pairs(party_units) do self:InitializeUnit(unit) end
@@ -496,7 +486,7 @@ end
 function GladiusEx:CheckUnitSpecialization(unit)
 	log("CheckUnitSpecialization", unit)
 
-	local _, specID = self.LSR:getSpecialization(UnitGUID(unit))
+	local _, specID = LSR:getSpecialization(UnitGUID(unit))
 
 	self:UpdateUnitSpecialization(unit, specID)
 end

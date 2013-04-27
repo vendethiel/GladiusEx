@@ -35,7 +35,7 @@ function HealthBar:OnEnable()
 	LSM = GladiusEx.LSM
 
 	-- set frame type
-	if (GladiusEx.db.healthBarAttachTo == "Frame" or strfind(GladiusEx.db.healthBarRelativePoint, "BOTTOM")) then
+	if (self.db.healthBarAttachTo == "Frame" or strfind(self.db.healthBarRelativePoint, "BOTTOM")) then
 		self.isBar = true
 	else
 		self.isBar = false
@@ -55,7 +55,7 @@ function HealthBar:OnDisable()
 end
 
 function HealthBar:GetAttachTo()
-	return GladiusEx.db.healthBarAttachTo
+	return self.db.healthBarAttachTo
 end
 
 function HealthBar:GetModuleAttachPoints()
@@ -92,7 +92,7 @@ function HealthBar:UpdateHealth(unit, health, maxHealth)
 	self.frame[unit]:SetMinMaxValues(0, maxHealth)
 
 	-- inverse bar
-	if (GladiusEx.db.healthBarInverse) then
+	if (self.db.healthBarInverse) then
 		self.frame[unit]:SetValue(maxHealth - health)
 	else
 		self.frame[unit]:SetValue(health)
@@ -116,9 +116,9 @@ function HealthBar:Update(unit)
 	end
 
 	-- set bar type
-	local parent = GladiusEx:GetAttachFrame(unit, GladiusEx.db.healthBarAttachTo)
+	local parent = GladiusEx:GetAttachFrame(unit, self.db.healthBarAttachTo)
 
-	if (GladiusEx.db.healthBarAttachTo == "Frame" or strfind(GladiusEx.db.healthBarRelativePoint, "BOTTOM")) then
+	if (self.db.healthBarAttachTo == "Frame" or strfind(self.db.healthBarRelativePoint, "BOTTOM")) then
 		self.isBar = true
 	else
 		self.isBar = false
@@ -127,24 +127,24 @@ function HealthBar:Update(unit)
 	-- update health bar
 	self.frame[unit]:ClearAllPoints()
 
-	local width = GladiusEx.db.healthBarAdjustWidth and GladiusEx.db.barWidth or GladiusEx.db.healthBarWidth
+	local width = self.db.healthBarAdjustWidth and GladiusEx.db.barWidth or self.db.healthBarWidth
 
 	-- add width of the widget if attached to an widget
-	if (GladiusEx.db.healthBarAttachTo ~= "Frame" and not strfind(GladiusEx.db.healthBarRelativePoint,"BOTTOM") and GladiusEx.db.healthBarAdjustWidth) then
-		if (not GladiusEx:GetModule(GladiusEx.db.healthBarAttachTo).frame[unit]) then
-			GladiusEx:GetModule(GladiusEx.db.healthBarAttachTo):Update(unit)
+	if (self.db.healthBarAttachTo ~= "Frame" and not strfind(self.db.healthBarRelativePoint,"BOTTOM") and self.db.healthBarAdjustWidth) then
+		if (not GladiusEx:GetModule(self.db.healthBarAttachTo).frame[unit]) then
+			GladiusEx:GetModule(self.db.healthBarAttachTo):Update(unit)
 		end
 
-		width = width + GladiusEx:GetModule(GladiusEx.db.healthBarAttachTo).frame[unit]:GetWidth()
+		width = width + GladiusEx:GetModule(self.db.healthBarAttachTo).frame[unit]:GetWidth()
 	end
 
-	self.frame[unit]:SetHeight(GladiusEx.db.healthBarHeight)
+	self.frame[unit]:SetHeight(self.db.healthBarHeight)
 	self.frame[unit]:SetWidth(width)
 
-	self.frame[unit]:SetPoint(GladiusEx.db.healthBarAnchor, parent, GladiusEx.db.healthBarRelativePoint, GladiusEx.db.healthBarOffsetX, GladiusEx.db.healthBarOffsetY)
+	self.frame[unit]:SetPoint(self.db.healthBarAnchor, parent, self.db.healthBarRelativePoint, self.db.healthBarOffsetX, self.db.healthBarOffsetY)
 	self.frame[unit]:SetMinMaxValues(0, 100)
 	self.frame[unit]:SetValue(100)
-	self.frame[unit]:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, GladiusEx.db.healthBarTexture))
+	self.frame[unit]:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db.healthBarTexture))
 
 	-- disable tileing
 	self.frame[unit]:GetStatusBarTexture():SetHorizTile(false)
@@ -157,10 +157,10 @@ function HealthBar:Update(unit)
 	self.frame[unit].background:SetWidth(self.frame[unit]:GetWidth())
 	self.frame[unit].background:SetHeight(self.frame[unit]:GetHeight())
 
-	self.frame[unit].background:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, GladiusEx.db.healthBarTexture))
+	self.frame[unit].background:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db.healthBarTexture))
 
-	self.frame[unit].background:SetVertexColor(GladiusEx.db.healthBarBackgroundColor.r, GladiusEx.db.healthBarBackgroundColor.g,
-		GladiusEx.db.healthBarBackgroundColor.b, GladiusEx.db.healthBarBackgroundColor.a)
+	self.frame[unit].background:SetVertexColor(self.db.healthBarBackgroundColor.r, self.db.healthBarBackgroundColor.g,
+		self.db.healthBarBackgroundColor.b, self.db.healthBarBackgroundColor.a)
 
 	-- disable tileing
 	self.frame[unit].background:SetHorizTile(false)
@@ -168,7 +168,7 @@ function HealthBar:Update(unit)
 
 	-- update highlight texture
 	self.frame[unit].highlight:SetAllPoints(self.frame[unit])
-	self.frame[unit].highlight:SetTexture([=[Interface\QuestFrame\UI-QuestTitleHighlight]=])
+	self.frame[unit].highlight:SetTexture([[Interface\QuestFrame\UI-QuestTitleHighlight]])
 	self.frame[unit].highlight:SetBlendMode("ADD")
 	self.frame[unit].highlight:SetVertexColor(1.0, 1.0, 1.0, 1.0)
 	self.frame[unit].highlight:SetAlpha(0)
@@ -182,7 +182,7 @@ function HealthBar:GetBarColor(class)
 end
 
 function HealthBar:GetBarHeight()
-	return GladiusEx.db.healthBarHeight
+	return self.db.healthBarHeight
 end
 
 function HealthBar:Show(unit)
@@ -200,8 +200,8 @@ function HealthBar:Show(unit)
 	end
 
 	-- set color
-	if (not GladiusEx.db.healthBarClassColor) then
-		local color = GladiusEx.db.healthBarColor
+	if (not self.db.healthBarClassColor) then
+		local color = self.db.healthBarColor
 		self.frame[unit]:SetStatusBarColor(color.r, color.g, color.b, color.a)
 	else
 		local color = self:GetBarColor(class)
@@ -235,132 +235,132 @@ end
 function HealthBar:GetOptions()
 	return {
 		general = {
-			type="group",
-			name=L["General"],
-			order=1,
+			type = "group",
+			name = L["General"],
+			order = 1,
 			args = {
 				bar = {
-					type="group",
-					name=L["Bar"],
-					desc=L["Bar settings"],
-					inline=true,
-					order=1,
+					type = "group",
+					name = L["Bar"],
+					desc = L["Bar settings"],
+					inline = true,
+					order = 1,
 					args = {
 						healthBarClassColor = {
-							type="toggle",
-							name=L["Health bar class color"],
-							desc=L["Toggle health bar class color"],
-							disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
-							order=5,
+							type = "toggle",
+							name = L["Health bar class color"],
+							desc = L["Toggle health bar class color"],
+							disabled = function() return not self:IsEnabled() end,
+							order = 5,
 						},
 						sep = {
 							type = "description",
-							name="",
-							width="full",
-							hidden=function() return not GladiusEx.db.advancedOptions end,
-							order=7,
+							name = "",
+							width = "full",
+							hidden = function() return not GladiusEx.db.advancedOptions end,
+							order = 7,
 						},
 						healthBarColor = {
-							type="color",
-							name=L["Health bar color"],
-							desc=L["Color of the health bar"],
-							hasAlpha=true,
-							get=function(info) return GladiusEx:GetColorOption(info) end,
-							set=function(info, r, g, b, a) return GladiusEx:SetColorOption(info, r, g, b, a) end,
-							disabled=function() return GladiusEx.dbi.profile.healthBarClassColor or not GladiusEx.dbi.profile.modules[self:GetName()] end,
-							order=10,
+							type = "color",
+							name = L["Health bar color"],
+							desc = L["Color of the health bar"],
+							hasAlpha = true,
+							get = function(info) return GladiusEx:GetColorOption(self.db, info) end,
+							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db, info, r, g, b, a) end,
+							disabled = function() return self.db.healthBarClassColor or not self:IsEnabled() end,
+							order = 10,
 						},
 						healthBarBackgroundColor = {
-							type="color",
-							name=L["Health bar background color"],
-							desc=L["Color of the health bar background"],
-							hasAlpha=true,
-							get=function(info) return GladiusEx:GetColorOption(info) end,
-							set=function(info, r, g, b, a) return GladiusEx:SetColorOption(info, r, g, b, a) end,
-							disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
-							hidden=function() return not GladiusEx.db.advancedOptions end,
-							order=15,
+							type = "color",
+							name = L["Health bar background color"],
+							desc = L["Color of the health bar background"],
+							hasAlpha = true,
+							get = function(info) return GladiusEx:GetColorOption(self.db, info) end,
+							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db, info, r, g, b, a) end,
+							disabled = function() return not self:IsEnabled() end,
+							hidden = function() return not GladiusEx.db.advancedOptions end,
+							order = 15,
 						},
 						sep2 = {
 							type = "description",
-							name="",
-							width="full",
-							order=17,
+							name = "",
+							width = "full",
+							order = 17,
 						},
 						healthBarInverse = {
-							type="toggle",
-							name=L["Health bar inverse"],
-							desc=L["Inverse the health bar"],
-							disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
-							hidden=function() return not GladiusEx.db.advancedOptions end,
-							order=20,
+							type = "toggle",
+							name = L["Health bar inverse"],
+							desc = L["Inverse the health bar"],
+							disabled = function() return not self:IsEnabled() end,
+							hidden = function() return not GladiusEx.db.advancedOptions end,
+							order = 20,
 						},
 						healthBarTexture = {
-							type="select",
-							name=L["Health bar texture"],
-							desc=L["Texture of the health bar"],
+							type = "select",
+							name = L["Health bar texture"],
+							desc = L["Texture of the health bar"],
 							dialogControl = "LSM30_Statusbar",
 							values = AceGUIWidgetLSMlists.statusbar,
-							disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
-							order=25,
+							disabled = function() return not self:IsEnabled() end,
+							order = 25,
 						},
 					},
 				},
 				size = {
-					type="group",
-					name=L["Size"],
-					desc=L["Size settings"],
-					inline=true,
-					order=2,
+					type = "group",
+					name = L["Size"],
+					desc = L["Size settings"],
+					inline = true,
+					order = 2,
 					args = {
 						healthBarAdjustWidth = {
-							type="toggle",
-							name=L["Health bar adjust width"],
-							desc=L["Adjust health bar width to the frame width"],
-							disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
-							order=5,
+							type = "toggle",
+							name = L["Health bar adjust width"],
+							desc = L["Adjust health bar width to the frame width"],
+							disabled = function() return not self:IsEnabled() end,
+							order = 5,
 						},
 						sep = {
 							type = "description",
-							name="",
-							width="full",
-							order=13,
+							name = "",
+							width = "full",
+							order = 13,
 						},
 						healthBarWidth = {
-							type="range",
-							name=L["Health bar width"],
-							desc=L["Width of the health bar"],
-							min=10, max=500, step=1,
-							disabled=function() return GladiusEx.dbi.profile.healthBarAdjustWidth or not GladiusEx.dbi.profile.modules[self:GetName()] end,
-							order=15,
+							type = "range",
+							name = L["Health bar width"],
+							desc = L["Width of the health bar"],
+							min = 10, max = 500, step = 1,
+							disabled = function() return self.db.healthBarAdjustWidth or not self:IsEnabled() end,
+							order = 15,
 						},
 						healthBarHeight = {
-							type="range",
-							name=L["Health bar height"],
-							desc=L["Height of the health bar"],
-							min=10, max=200, step=1,
-							disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
-							order=20,
+							type = "range",
+							name = L["Health bar height"],
+							desc = L["Height of the health bar"],
+							min = 10, max = 200, step = 1,
+							disabled = function() return not self:IsEnabled() end,
+							order = 20,
 						},
 					},
 				},
 				position = {
-					type="group",
-					name=L["Position"],
-					desc=L["Position settings"],
-					inline=true,
-					hidden=function() return not GladiusEx.db.advancedOptions end,
-					order=3,
+					type = "group",
+					name = L["Position"],
+					desc = L["Position settings"],
+					inline = true,
+					hidden = function() return not GladiusEx.db.advancedOptions end,
+					order = 3,
 					args = {
 						healthBarAttachTo = {
-							type="select",
-							name=L["Health Bar Attach To"],
-							desc=L["Attach health bar to the given frame"],
-							values=function() return HealthBar:GetAttachPoints() end,
-							set=function(info, value)
+							type = "select",
+							name = L["Health Bar Attach To"],
+							desc = L["Attach health bar to the given frame"],
+							values = function() return HealthBar:GetAttachPoints() end,
+							set = function(info, value)
 								local key = info.arg or info[#info]
 
-								if (strfind(GladiusEx.db.healthBarRelativePoint, "BOTTOM")) then
+								if (strfind(self.db.healthBarRelativePoint, "BOTTOM")) then
 									self.isBar = true
 								else
 									self.isBar = false
@@ -369,53 +369,53 @@ function HealthBar:GetOptions()
 								GladiusEx.dbi.profile[key] = value
 								GladiusEx:UpdateFrame()
 							end,
-							disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
-							width="double",
-							order=5,
+							disabled = function() return not self:IsEnabled() end,
+							width = "double",
+							order = 5,
 						},
 						sep = {
 							type = "description",
-							name="",
-							width="full",
-							order=7,
+							name = "",
+							width = "full",
+							order = 7,
 						},
 						healthBarAnchor = {
-							type="select",
-							name=L["Health Bar Anchor"],
-							desc=L["Anchor of the health bar"],
-							values=function() return GladiusEx:GetPositions() end,
-							disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
-							order=10,
+							type = "select",
+							name = L["Health Bar Anchor"],
+							desc = L["Anchor of the health bar"],
+							values = function() return GladiusEx:GetPositions() end,
+							disabled = function() return not self:IsEnabled() end,
+							order = 10,
 						},
 						healthBarRelativePoint = {
-							type="select",
-							name=L["Health Bar Relative Point"],
-							desc=L["Relative point of the health bar"],
-							values=function() return GladiusEx:GetPositions() end,
-							disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
-							order=15,
+							type = "select",
+							name = L["Health Bar Relative Point"],
+							desc = L["Relative point of the health bar"],
+							values = function() return GladiusEx:GetPositions() end,
+							disabled = function() return not self:IsEnabled() end,
+							order = 15,
 						},
 						sep2 = {
 							type = "description",
-							name="",
-							width="full",
-							order=17,
+							name = "",
+							width = "full",
+							order = 17,
 						},
 						healthBarOffsetX = {
-							type="range",
-							name=L["Health bar offset X"],
-							desc=L["X offset of the health bar"],
-							min=-100, max=100, step=1,
-							disabled=function() return  not GladiusEx.dbi.profile.modules[self:GetName()] end,
-							order=20,
+							type = "range",
+							name = L["Health bar offset X"],
+							desc = L["X offset of the health bar"],
+							min = -100, max = 100, step = 1,
+							disabled = function() return  not self:IsEnabled() end,
+							order = 20,
 						},
 						healthBarOffsetY = {
-							type="range",
-							name=L["Health bar offset Y"],
-							desc=L["Y offset of the health bar"],
-							disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
-							min=-100, max=100, step=1,
-							order=25,
+							type = "range",
+							name = L["Health bar offset Y"],
+							desc = L["Y offset of the health bar"],
+							disabled = function() return not self:IsEnabled() end,
+							min = -100, max = 100, step = 1,
+							order = 25,
 						},
 					},
 				},

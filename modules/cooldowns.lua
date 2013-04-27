@@ -1,79 +1,176 @@
 local GladiusEx = _G.GladiusEx
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local LSM
-
 local CT = LibStub("LibCooldownTracker-1.0")
+local fn = LibStub("LibFunctional-1.0")
 
 -- global functions
-local tinsert, tsort = table.insert, table.sort
-local pairs, ipairs, select, type = pairs, ipairs, select, type
-local min, max = math.min, math.max
+local tinsert, tremove, tsort = table.insert, table.remove, table.sort
+local pairs, ipairs, select, type, unpack = pairs, ipairs, select, type, unpack
+local min, max, ceil, random = math.min, math.max, math.ceil, math.random
 local GetTime, UnitExists, UnitFactionGroup, UnitRace, UnitGUID = GetTime, UnitExists, UnitFactionGroup, UnitRace, UnitGUID
 
+local function MakeGroupDb(settings)
+	local db = {
+		cooldownsAttachTo = "Frame",
+		cooldownsAnchor = "TOPLEFT",
+		cooldownsRelativePoint = "BOTTOMLEFT",
+		cooldownsOffsetX = 0,
+		cooldownsOffsetY = 0,
+		cooldownsGrow = "DOWNRIGHT",
+		cooldownsSpacingX = 0,
+		cooldownsSpacingY = 0,
+		cooldownsPerColumn = 9,
+		cooldownsMax = 40,
+		cooldownsSize = 23,
+		cooldownsCrop = true,
+		cooldownsSpells = {},
+		cooldownsCatPriority = {
+			"pvp_trinket",
+			"dispel",
+			"mass_dispel",
+			"immune",
+			"interrupt",
+			"silence",
+			"stun",
+			"knockback",
+			"cc",
+			"offensive",
+			"defensive",
+			"heal",
+			"uncat"
+		},
+		cooldownsCatColors = {
+			["pvp_trinket"] =  { r = 1.0, g = 1.0, b = 1.0 },
+			["dispel"] =       { r = 1.0, g = 1.0, b = 1.0 },
+			["mass_dispel"] =  { r = 1.0, g = 1.0, b = 1.0 },
+			["immune"] =       { r = 0.0, g = 0.0, b = 1.0 },
+			["interrupt"] =    { r = 1.0, g = 0.0, b = 1.0 },
+			["silence"] =      { r = 1.0, g = 0.0, b = 1.0 },
+			["stun"] =         { r = 0.0, g = 1.0, b = 1.0 },
+			["knockback"] =    { r = 0.0, g = 1.0, b = 1.0 },
+			["cc"] =           { r = 0.0, g = 1.0, b = 1.0 },
+			["offensive"] =    { r = 1.0, g = 0.0, b = 0.0 },
+			["defensive"] =    { r = 0.0, g = 1.0, b = 0.0 },
+			["heal"] =         { r = 0.0, g = 1.0, b = 0.0 },
+			["uncat"] =        { r = 1.0, g = 1.0, b = 1.0 },
+		},
+		cooldownsCatGroups = {
+			["pvp_trinket"] =  1,
+			["dispel"] =       1,
+			["mass_dispel"] =  1,
+			["immune"] =       1,
+			["interrupt"] =    1,
+			["silence"] =      1,
+			["stun"] =         1,
+			["knockback"] =    1,
+			["cc"] =           1,
+			["offensive"] =    1,
+			["defensive"] =    1,
+			["heal"] =         1,
+			["uncat"] =        1,
+		},
+		cooldownsHideTalentsUntilDetected = true,
+	}
+	if settings then
+		for k, v in pairs(settings) do
+			db[k] = v
+		end
+	end
+	return db
+end
+
 local Cooldowns = GladiusEx:NewGladiusExModule("Cooldowns", false, {
-	cooldownsAttachTo = "CastBarIcon",
-	cooldownsAnchor = "TOPLEFT",
-	cooldownsRelativePoint = "BOTTOMLEFT",
-	cooldownsOffsetX = 0,
-	cooldownsOffsetY = 0,
-	cooldownsGrow = "DOWNRIGHT",
-	cooldownsSpacingX = 0,
-	cooldownsSpacingY = 0,
-	cooldownsPerColumn = 9,
-	cooldownsMax = 40,
-	cooldownsSize = 23,
-	cooldownsGloss = false,
-	cooldownsGlossColor = { r = 1, g = 1, b = 1, a = 0.4 },
-	cooldownsSpells = { ["*"] = true },
-	cooldownsCatPriority = {
-		"pvp_trinket",
-		"dispel",
-		"mass_dispel",
-		"immune",
-		"interrupt",
-		"silence",
-		"stun",
-		"knockback",
-		"cc",
-		"offensive",
-		"defensive",
-		"heal",
-		"uncat"
+	num_groups = 2,
+	group_table = {
+		[1] = "group_1",
+		[2] = "group_2",
 	},
-	cooldownsCatColors = {
-		["pvp_trinket"] =  { r = 1.0, g = 1.0, b = 1.0 },
-		["dispel"] =       { r = 1.0, g = 1.0, b = 1.0 },
-		["mass_dispel"] =  { r = 1.0, g = 1.0, b = 1.0 },
-		["immune"] =       { r = 0.0, g = 0.0, b = 1.0 },
-		["interrupt"] =    { r = 1.0, g = 0.0, b = 1.0 },
-		["silence"] =      { r = 1.0, g = 0.0, b = 1.0 },
-		["stun"] =         { r = 0.0, g = 1.0, b = 1.0 },
-		["knockback"] =    { r = 0.0, g = 1.0, b = 1.0 },
-		["cc"] =           { r = 0.0, g = 1.0, b = 1.0 },
-		["offensive"] =    { r = 1.0, g = 0.0, b = 0.0 },
-		["defensive"] =    { r = 0.0, g = 1.0, b = 0.0 },
-		["heal"] =         { r = 0.0, g = 1.0, b = 0.0 },
-		["uncat"] =        { r = 1.0, g = 1.0, b = 1.0 },
-	},
-	cooldownsCatGroups = {
-		["pvp_trinket"] =  1,
-		["dispel"] =       1,
-		["mass_dispel"] =  1,
-		["immune"] =       1,
-		["interrupt"] =    1,
-		["silence"] =      1,
-		["stun"] =         1,
-		["knockback"] =    1,
-		["cc"] =           1,
-		["offensive"] =    1,
-		["defensive"] =    1,
-		["heal"] =         1,
-		["uncat"] =        1,
-	},
-	cooldownsHideTalentsUntilDetected = true,
+	groups = {
+		["*"] = MakeGroupDb(),
+		["group_1"] =  MakeGroupDb {
+			cooldownsGroupId = 1,
+			cooldownsAttachTo = "CastBarIcon",
+			cooldownsAnchor = "TOPLEFT",
+			cooldownsRelativePoint = "BOTTOMLEFT",
+			cooldownsGrow = "DOWNRIGHT",
+			cooldownsPerColumn = 9,
+			cooldownsMax = 40,
+			cooldownsSize = 23,
+			cooldownsCrop = true,
+			cooldownsSpells = { ["*"] = true },
+		},
+		["group_2"] = MakeGroupDb {
+			cooldownsGroupId = 2,
+			cooldownsAttachTo = "ClassIcon",
+			cooldownsAnchor = "BOTTOMRIGHT",
+			cooldownsRelativePoint = "BOTTOMLEFT",
+			cooldownsGrow = "UPLEFT",
+			cooldownsPerColumn = 1,
+			cooldownsMax = 10,
+			cooldownsSize = 40,
+			cooldownsCrop = false,
+			cooldownsSpells = (function()
+				local r = {}
+				for spellid, spelldata in pairs(CT:GetCooldownsData()) do
+					if (type(spelldata) == "table") and (spelldata.dispel or spelldata.mass_dispel or spelldata.pvp_trinket) then r[spellid] = true end
+				end
+				return r
+			end)(),
+		}
+	}
 })
 
 local MAX_ICONS = 40
+
+local group_state = {}
+local function GetGroupState(group)
+	local gs = group_state[group]
+	if not gs then
+		gs = { frame = {} }
+		group_state[group] = gs
+	end
+	return gs
+end
+
+local function MakeGroupId()
+	-- not ideal, but should be good enough for its purpose
+	return math.random(2^31-1)
+end
+
+local function GetNumGroups()
+	return Cooldowns.db.num_groups
+end
+
+local function GetGroupDB(group)
+	local k = Cooldowns.db.group_table[group]
+	return Cooldowns.db.groups[k]
+end
+
+local function GetGroupById(gid)
+	for group = 1, GetNumGroups() do
+		local gdb = GetGroupDB(group)
+		if gdb.cooldownsGroupId == gid then
+			return gdb, group
+		end
+	end
+end
+
+local function AddGroup(groupdb)
+	local group = GetNumGroups() + 1
+	Cooldowns.db.num_groups = group
+	Cooldowns.db.groups["group_" .. groupdb.cooldownsGroupId] = groupdb
+	Cooldowns.db.group_table[group] = "group_" .. groupdb.cooldownsGroupId
+	return GetNumGroups()
+end
+
+local function RemoveGroup(group)
+	local groupdb = GetGroupDB(group)
+	Cooldowns.db.num_groups = GetNumGroups() - 1
+	tremove(Cooldowns.db.group_table, group)
+	Cooldowns.db.groups["group_" .. groupdb.cooldownsGroupId] = nil
+end
+
 
 function Cooldowns:OnEnable()
 	CT.RegisterCallback(self, "LCT_CooldownUsed")
@@ -83,30 +180,31 @@ function Cooldowns:OnEnable()
 	self:RegisterMessage("GLADIUS_SPEC_UPDATE")
 
 	LSM = GladiusEx.LSM
-
-	self.frame = self.frame or {}
 end
 
 function Cooldowns:OnDisable()
+	CT.UnregisterAllCallbacks(self)
 	self:UnregisterAllEvents()
 	self:Reset()
 end
 
-function Cooldowns:GetAttachTo()
-	return GladiusEx.db.cooldownsAttachTo
-end
-
 function Cooldowns:GetModuleAttachPoints()
-	return {
-		["Cooldowns"] = L["Cooldowns"],
-	}
+	local t = {}
+	for group = 1, GetNumGroups() do
+		local db = GetGroupDB(group)
+		t["Cooldowns_" .. db.cooldownsGroupId] = string.format(L["Cooldowns Group %i"], group)
+	end
+	return t
 end
 
 function Cooldowns:GetAttachFrame(unit, point)
-	if not self.frame[unit] then
-		self:CreateFrame(unit)
-	end
-	return self.frame[unit]
+	local gid = string.match(point, "^Cooldowns_(%d+)$")
+	if not gid then return nil end
+
+	local group, gidx = GetGroupById(tonumber(gid))
+	if not group then return nil end
+
+	return GetGroupState(gidx).frame[unit]
 end
 
 function Cooldowns:GLADIUS_SPEC_UPDATE(event, unit)
@@ -124,8 +222,8 @@ function Cooldowns:LCT_CooldownsReset(event, unit)
 	self:UpdateIcons(unit)
 end
 
-function Cooldowns:LCT_CooldownUsed(event, unit, spellId)
-	GladiusEx:Log(event, unit, spellId)
+function Cooldowns:LCT_CooldownUsed(event, unit, spellid)
+	GladiusEx:Log(event, unit, spellid)
 
 	self:UpdateIcons(unit)
 end
@@ -180,14 +278,21 @@ local function CooldownFrame_OnUpdate(frame)
 	frame:SetScript("OnUpdate", nil)
 end
 
-local sortscore = {}
+local group_sortscore = {}
 
 local function SpellSortingChanged()
 	-- remove cached sorting info from spells
-	sortscore = {}
+	group_sortscore = {}
 end
 
-local function GetSpellSortScore(spellid)
+local function GetSpellSortScore(group, spellid)
+	local db = GetGroupDB(group)
+	local sortscore = group_sortscore[group]
+	if not sortscore then
+		sortscore = {}
+		group_sortscore[group] = sortscore
+	end
+
 	local spelldata = CT:GetCooldownData(spellid)
 
 	if spelldata.replaces then
@@ -199,7 +304,7 @@ local function GetSpellSortScore(spellid)
 		return sortscore[spellid]
 	end
 
-	local cat_priority = GladiusEx.db.cooldownsCatPriority
+	local cat_priority = db.cooldownsCatPriority
 
 	local score = 0
 	local value = 2^30
@@ -231,43 +336,58 @@ local function GetSpellSortScore(spellid)
 	return score
 end
 
+function Cooldowns:UpdateAllIcons()
+	fn.each(fn.keys(GladiusEx.buttons), fn.bind(self.UpdateIcons, self))
+end
+
 function Cooldowns:UpdateIcons(unit)
-	if not self.frame[unit] then return end
+	for group = 1, GetNumGroups() do
+		self:UpdateGroupIcons(group, unit)
+	end
+end
 
-	local _debugstart = GladiusEx:IsDebugging() and debugprofilestop()
-
-	local now = GetTime()
-
+local function GetUnitInfo(unit)
 	local specID, class, race, faction
 	if GladiusEx:IsTesting(unit) then
 		specID = GladiusEx.testing[unit].specID
 		class = GladiusEx.testing[unit].unitClass
 		race = GladiusEx.testing[unit].unitRace
-		faction = (UnitFactionGroup("player") == "Alliance" and GladiusEx:IsPartyUnit(unit)) and "Alliance" or "Horde"
 	else
 		specID = GladiusEx.buttons[unit].specID
 		class = GladiusEx.buttons[unit].class or select(2, UnitClass(unit))
 		race = select(2, UnitRace(unit))
-		faction = UnitFactionGroup(unit)
 	end
+	return specID, class, race, faction
+end
+
+local function GetUnitFaction(unit)
+	if GladiusEx:IsTesting(unit) then
+		return (UnitFactionGroup("player") == "Alliance" and GladiusEx:IsPartyUnit(unit)) and "Alliance" or "Horde"
+	else
+		return UnitFactionGroup(unit)
+	end
+end
+
+local function GetCooldownList(group, unit)
+	local db = GetGroupDB(group)
+
+	local specID, class, race, faction = GetUnitInfo(unit)
 
 	-- generate list of cooldowns available (and enabled) for this unit
 	local spell_list = {}
 	for spellid, spelldata in CT:IterateCooldowns(class, specID, race) do
-		if not GladiusEx.db.cooldownsSpells[spellid] then
-			return
-		end
+		if db.cooldownsSpells[spellid] then
+			local tracked = CT:GetUnitCooldownInfo(unit, spellid)
 
-		local tracked = CT:GetUnitCooldownInfo(unit, spellid)
-
-		if (not spelldata.glyph and not spelldata.talent) or (tracked and tracked.detected) or not GladiusEx.db.cooldownsHideTalentsUntilDetected then
-			if spelldata.replaces then
-				-- remove replaced spell if detected
-				spell_list[spelldata.replaces] = false
-			end
-			-- do not overwrite if this spell has been replaced
-			if spell_list[spellid] == nil then
-				spell_list[spellid] = true
+			if (not spelldata.glyph and not spelldata.talent) or (tracked and tracked.detected) or not db.cooldownsHideTalentsUntilDetected then
+				if spelldata.replaces then
+					-- remove replaced spell if detected
+					spell_list[spelldata.replaces] = false
+				end
+				-- do not overwrite if this spell has been replaced
+				if spell_list[spellid] == nil then
+					spell_list[spellid] = true
+				end
 			end
 		end
 	end
@@ -282,14 +402,21 @@ function Cooldowns:UpdateIcons(unit)
 
 	tsort(sorted_spells,
 		function(a, b)
-			return GetSpellSortScore(a) > GetSpellSortScore(b)
+			return GetSpellSortScore(group, a) > GetSpellSortScore(group, b)
 		end)
 
-	-- update icons
-	local cat_priority = GladiusEx.db.cooldownsCatPriority
-	local border_color = GladiusEx.db.cooldownsCatColors
-	local cat_groups = GladiusEx.db.cooldownsCatGroups
-	local cooldownsPerColumn = GladiusEx.db.cooldownsPerColumn
+	return sorted_spells
+end
+
+local function UpdateGroupIconFrames(group, unit, sorted_spells)
+	local gs = GetGroupState(group)
+	local db = GetGroupDB(group)
+	local faction = GetUnitFaction(unit)
+
+	local cat_priority = db.cooldownsCatPriority
+	local border_color = db.cooldownsCatColors
+	local cat_groups = db.cooldownsCatGroups
+	local cooldownsPerColumn = db.cooldownsPerColumn
 
 	local sidx = 1
 	local shown = 0
@@ -319,16 +446,17 @@ function Cooldowns:UpdateIcons(unit)
 			local skip = cooldownsPerColumn - ((sidx - 1) % cooldownsPerColumn)
 			if skip ~= cooldownsPerColumn then
 				for i = 1, skip do
-					self.frame[unit][sidx]:Hide()
+					gs.frame[unit][sidx]:Hide()
 					sidx = sidx + 1
-					if sidx > #self.frame[unit] then
+					if sidx > #gs.frame[unit] then
+						-- ran out of space
 						return
 					end
 				end
 			end
 		end
 		prev_group = group
-		local frame = self.frame[unit][sidx]
+		local frame = gs.frame[unit][sidx]
 
 		if spelldata.icon_alliance and faction == "Alliance" then
 			icon = spelldata.icon_alliance
@@ -361,26 +489,33 @@ function Cooldowns:UpdateIcons(unit)
 
 		sidx = sidx + 1
 		shown = shown + 1
-		if sidx > #self.frame[unit] or shown >= GladiusEx.db.cooldownsMax then
+		if sidx > #gs.frame[unit] or shown >= db.cooldownsMax then
 			break
 		end
 	end
 
 	-- hide unused icons
-	for i = sidx, #self.frame[unit] do
-		local frame = self.frame[unit][i]
-		frame:Hide()
-	end
-
-	if GladiusEx:IsDebugging() then
-		local _debugstop = GladiusEx:IsDebugging() and debugprofilestop()
-		GladiusEx:Log("UpdateIcons for", unit, "done in", _debugstop - _debugstart)
+	for i = sidx, #gs.frame[unit] do
+		gs.frame[unit][i]:Hide()
 	end
 end
 
-function Cooldowns:UpdateAllIcons()
-	for unitid, _ in pairs(self.frame) do
-		self:UpdateIcons(unitid)
+function Cooldowns:UpdateGroupIcons(group, unit)
+	local gs = GetGroupState(group)
+	local db = GetGroupDB(group)
+	if not gs.frame[unit] then return end
+
+	local _debugstart = GladiusEx:IsDebugging() and debugprofilestop()
+
+	-- get spells lists
+	local sorted_spells = GetCooldownList(group, unit)
+
+	-- update icon frames
+	UpdateGroupIconFrames(group, unit, sorted_spells)
+
+	if GladiusEx:IsDebugging() then
+		local _debugstop = GladiusEx:IsDebugging() and debugprofilestop()
+		GladiusEx:Log("UpdateIcons for", group, "/", unit, "done in", _debugstop - _debugstart)
 	end
 end
 
@@ -388,7 +523,6 @@ local function CreateCooldownFrame(name, parent)
 	local frame = CreateFrame("Frame", name, parent)
 	frame.icon = frame:CreateTexture(nil, "BORDER") -- bg
 	frame.icon:SetPoint("CENTER")
-	frame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
 
 	frame.border = frame:CreateTexture(nil, "BACKGROUND") -- overlay
 	frame.border:SetPoint("CENTER")
@@ -422,32 +556,45 @@ local function CreateCooldownFrame(name, parent)
 	return frame
 end
 
-local function UpdateCooldownFrame(frame, size)
-	local border_size = 3
+local function UpdateCooldownFrame(frame, size, crop)
+	local border_size = crop and 3 or 2
 	frame:SetSize(size, size)
 	frame.icon:SetSize(size - border_size - 0.5, size - border_size - 0.5)
+	if crop then
+		frame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+	else
+		frame.icon:SetTexCoord(0, 1, 0, 1)
+	end
 	frame.border:SetSize(size, size)
 end
 
 function Cooldowns:CreateFrame(unit)
+	for group = 1, GetNumGroups() do
+		self:CreateGroupFrame(group, unit)
+	end
+end
+
+function Cooldowns:CreateGroupFrame(group, unit)
 	local button = GladiusEx.buttons[unit]
 	if (not button) then return end
 
+	local gs = GetGroupState(group)
+	
 	-- create cooldown frame
-	if not self.frame[unit] then
-		self.frame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. "frame" .. unit, button)
-		self.frame[unit]:EnableMouse(false)
+	if not gs.frame[unit] then
+		gs.frame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. "frame" .. unit, button)
+		gs.frame[unit]:EnableMouse(false)
 
-		for i=1, MAX_ICONS do
-			self.frame[unit][i] = CreateCooldownFrame("GladiusEx" .. self:GetName() .. "frameIcon" .. i .. unit, self.frame[unit])
-			self.frame[unit][i]:SetScript("OnUpdate", CooldownFrame_OnUpdate)
-			self.frame[unit][i]:Hide()
+		for i = 1, MAX_ICONS do
+			gs.frame[unit][i] = CreateCooldownFrame("GladiusEx" .. self:GetName() .. "frameIcon" .. i .. unit, gs.frame[unit])
+			gs.frame[unit][i]:SetScript("OnUpdate", CooldownFrame_OnUpdate)
+			gs.frame[unit][i]:Hide()
 		end
 	end
 end
 
 -- yeah this parameter list sucks
-function Cooldowns:UpdateCooldownGroup(
+local function UpdateCooldownGroup(
 	cooldownFrame, unit,
 	cooldownAttachTo,
 	cooldownAnchor,
@@ -459,7 +606,8 @@ function Cooldowns:UpdateCooldownGroup(
 	cooldownSize,
 	cooldownSpacingX,
 	cooldownSpacingY,
-	cooldownMax)
+	cooldownMax,
+	cooldownCrop)
 
 	-- anchor point
 	local parent = GladiusEx:GetAttachFrame(unit, cooldownAttachTo)
@@ -468,7 +616,11 @@ function Cooldowns:UpdateCooldownGroup(
 
 	-- size
 	cooldownFrame:SetWidth(cooldownSize*cooldownPerColumn+cooldownSpacingX*cooldownPerColumn)
-	cooldownFrame:SetHeight(cooldownSize*math.ceil(cooldownMax/cooldownPerColumn)+(cooldownSpacingY*(math.ceil(cooldownMax/cooldownPerColumn)+1)))
+	cooldownFrame:SetHeight(cooldownSize*ceil(cooldownMax/cooldownPerColumn)+(cooldownSpacingY*(ceil(cooldownMax/cooldownPerColumn)+1)))
+
+	-- backdrop
+	-- cooldownFrame:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16,})
+	-- cooldownFrame:SetBackdropColor(0, 0, 1, 1)
 
 	-- icon points
 	local anchor, parent, relativePoint, offsetX, offsetY
@@ -486,7 +638,7 @@ function Cooldowns:UpdateCooldownGroup(
 	end
 
 	local start, startAnchor = 1, cooldownFrame
-	for i=1, #cooldownFrame do
+	for i = 1, #cooldownFrame do
 		if (cooldownMax >= i) then
 			if (start == 1) then
 				anchor, parent, relativePoint, offsetX, offsetY = grow1, startAnchor, startRelPoint, 0, string.find(cooldownGrow, "DOWN") and -cooldownSpacingY or cooldownSpacingY
@@ -505,55 +657,75 @@ function Cooldowns:UpdateCooldownGroup(
 
 		cooldownFrame[i]:ClearAllPoints()
 		cooldownFrame[i]:SetPoint(anchor, parent, relativePoint, offsetX, offsetY)
-		UpdateCooldownFrame(cooldownFrame[i], cooldownSize)
+		UpdateCooldownFrame(cooldownFrame[i], cooldownSize, cooldownCrop)
 	end
 end
 
 function Cooldowns:Update(unit)
-	-- create frame
-	if not self.frame[unit] then
-		self:CreateFrame(unit)
+	for group = 1, GetNumGroups() do
+		self:UpdateGroup(group, unit)
 	end
+	-- hide excess groups after one is deleted
+	for group = GetNumGroups() + 1, #group_state do
+		if group_state[group].frame[unit] then
+			group_state[group].frame[unit]:Hide()
+		end
+	end
+end
+
+function Cooldowns:UpdateGroup(group, unit)
+	-- create frame
+	self:CreateGroupFrame(group, unit)
+
+	local db = GetGroupDB(group)
+	local gs = GetGroupState(group)
 
 	-- update cooldown frame
-	self:UpdateCooldownGroup(self.frame[unit], unit,
-		GladiusEx.db.cooldownsAttachTo,
-		GladiusEx.db.cooldownsAnchor,
-		GladiusEx.db.cooldownsRelativePoint,
-		GladiusEx.db.cooldownsOffsetX,
-		GladiusEx.db.cooldownsOffsetY,
-		GladiusEx.db.cooldownsPerColumn,
-		GladiusEx.db.cooldownsGrow,
-		GladiusEx.db.cooldownsSize,
-		GladiusEx.db.cooldownsSpacingX,
-		GladiusEx.db.cooldownsSpacingY,
-		GladiusEx.db.cooldownsMax)
+	UpdateCooldownGroup(gs.frame[unit], unit,
+		db.cooldownsAttachTo,
+		db.cooldownsAnchor,
+		db.cooldownsRelativePoint,
+		db.cooldownsOffsetX,
+		db.cooldownsOffsetY,
+		db.cooldownsPerColumn,
+		db.cooldownsGrow,
+		db.cooldownsSize,
+		db.cooldownsSpacingX,
+		db.cooldownsSpacingY,
+		db.cooldownsMax,
+		db.cooldownsCrop)
 
 	-- update icons
 	self:UpdateIcons(unit)
 
 	-- hide
-	self.frame[unit]:Hide()
+	gs.frame[unit]:Hide()
 end
 
 function Cooldowns:Show(unit)
-	if self.frame[unit] then
-		self.frame[unit]:Show()
-		CT:RegisterUnit(unit)
+	for group = 1, GetNumGroups() do
+		local gs = GetGroupState(group)
+		if gs.frame[unit] and not gs.frame[unit]:IsShown() then
+			gs.frame[unit]:Show()
+			CT:RegisterUnit(unit)
+		end
 	end
 end
 
 function Cooldowns:Reset(unit)
-	if self.frame[unit] then
-		if self.frame[unit]:IsShown() then
-			CT:UnregisterUnit(unit)
-		end
+	for group = 1, GetNumGroups() do
+		local gs = GetGroupState(group)
+		if gs.frame[unit] then
+			if gs.frame[unit]:IsShown() then
+				CT:UnregisterUnit(unit)
+			end
 
-		-- hide cooldown frame
-		self.frame[unit]:Hide()
+			-- hide cooldown frame
+			gs.frame[unit]:Hide()
 
-		for i = 1, #self.frame[unit] do
-			self.frame[unit][i]:Hide()
+			for i = 1, #gs.frame[unit] do
+				gs.frame[unit][i]:Hide()
+			end
 		end
 	end
 end
@@ -563,238 +735,303 @@ function Cooldowns:Test(unit)
 end
 
 function Cooldowns:GetOptions()
-	local options = {
-		cooldowns = {
-			type="group",
-			name=L["Cooldowns"],
-			childGroups="tab",
-			order=1,
+	local options = {}
+
+	options.sep = {
+		type = "description",
+		name = "",
+		width = "full",
+		order = 1,
+	}
+	options.addgroup = {
+		type = "execute",
+		name = L["Add Cooldowns Group"],
+		desc = L["Add Cooldowns Group"],
+		func = function()
+			local gdb = MakeGroupDb({
+				cooldownsGroupId = MakeGroupId(),
+				cooldownsSpells = { [42292] = true },
+			})
+			local group_idx = AddGroup(gdb)
+			options["group" .. group_idx] = self:MakeGroupOptions(group_idx)
+			GladiusEx:UpdateFrames()
+		end,
+		order = 2,
+	}
+
+	-- fill groups so that even if the module is reset there are enough
+	-- options tables created (unsed ones are hidden)
+	for group = 1, max(2, GetNumGroups()) do
+		options["group" .. group] = self:MakeGroupOptions(group)
+	end
+
+	return options
+end
+
+function Cooldowns:MakeGroupOptions(group)
+	local group_options = {
+		type = "group",
+		name = L["Group"] .. group,
+		childGroups = "tab",
+		order = 10 + group,
+		hidden = function() return GetNumGroups() < group end,
+		get = function(info)
+			return (info.arg and GetGroupDB(group)[info.arg] or GetGroupDB(group)[info[#info]])
+		end,
+		set = function(info, value)
+			local key = info[#info]
+			GetGroupDB(group)[key] = value
+			GladiusEx:UpdateFrames()
+		end,
+		args = {
+		general = {
+			type = "group",
+			name = L["General"],
+			order = 1,
 			args = {
-			general = {
-				type="group",
-				name=L["General"],
-				order=1,
-				args = {
-						widget = {
-						type="group",
-						name=L["Widget"],
-						desc=L["Widget settings"],
-						inline=true,
-						order=1,
-						args = {
-						cooldownsGrow = {
-							type="select",
-							name=L["Cooldowns Column Grow"],
-							desc=L["Grow direction of the cooldowns"],
-							values=function() return {
-									["UPLEFT"] = L["Up Left"],
-									["UPRIGHT"] = L["Up Right"],
-									["DOWNLEFT"] = L["Down Left"],
-									["DOWNRIGHT"] = L["Down Right"],
-							}
-							end,
-							disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
-							order=10,
-						},
-						sep = {
-							type = "description",
-							name="",
-							width="full",
-							order=13,
-						},
-						cooldownsPerColumn = {
-							type="range",
-							name=L["Cooldown Icons Per Column"],
-							desc=L["Number of cooldown icons per column"],
-							min=1, max=50, step=1,
-							disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
-							order=15,
-						},
-						cooldownsMax = {
-							type="range",
-							name=L["Cooldown Icons Max"],
-							desc=L["Number of max cooldowns"],
-							min=1, max=MAX_ICONS, step=1,
-							disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
-							order=20,
-						},
-						sep2 = {
-							type = "description",
-							name="",
-							width="full",
-							order=23,
-						},
+					remgroup = {
+						type = "execute",
+						name = L["Remove This Group"],
+						desc = L["Remove This Group"],
+						func = function()
+							RemoveGroup(group)
+							GladiusEx:UpdateFrames()
+						end,
+						order = 0,
 					},
-				},
-				size = {
-					type="group",
-					name=L["Size"],
-					desc=L["Size settings"],
-					inline=true,
-					order=2,
-					args = {
-							cooldownsSize = {
-								type="range",
-								name=L["Cooldown Icon Size"],
-								desc=L["Size of the cooldown icons"],
-								min=10, max=100, step=1,
-								disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
-								order=5,
+					widget = {
+						type = "group",
+						name = L["Widget"],
+						desc = L["Widget settings"],
+						inline = true,
+						order = 1,
+						args = {
+							cooldownsGrow = {
+								type = "select",
+								name = L["Cooldowns Column Grow"],
+								desc = L["Grow direction of the cooldowns"],
+								values = function() return {
+										["UPLEFT"] = L["Up Left"],
+										["UPRIGHT"] = L["Up Right"],
+										["DOWNLEFT"] = L["Down Left"],
+										["DOWNRIGHT"] = L["Down Right"],
+								}
+								end,
+								disabled = function() return not self:IsEnabled() end,
+								order = 10,
 							},
 							sep = {
 								type = "description",
-								name="",
-								width="full",
-								order=13,
+								name = "",
+								width = "full",
+								order = 13,
 							},
-							cooldownsSpacingY = {
-								type="range",
-								name=L["Cooldowns Spacing Vertical"],
-								desc=L["Vertical spacing of the cooldowns"],
-								min=0, max=30, step=1,
-								disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
-								order=15,
-							},
-							cooldownsSpacingX = {
-								type="range",
-								name=L["Cooldowns Spacing Horizontal"],
-								desc=L["Horizontal spacing of the cooldowns"],
-								disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
-								min=0, max=30, step=1,
-								order=20,
-							},
-						},
-					},
-					position = {
-						type="group",
-						name=L["Position"],
-						desc=L["Position settings"],
-						inline=true,
-						hidden=function() return not GladiusEx.db.advancedOptions end,
-						order=3,
-						args = {
-							cooldownsAttachTo = {
-								type="select",
-								name=L["Cooldowns Attach To"],
-								desc=L["Attach cooldowns to the given frame"],
-								values=function() return Cooldowns:GetAttachPoints() end,
-								disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
-								width="double",
-								order=5,
-							},
-							sep = {
-								type = "description",
-								name="",
-								width="full",
-								order=7,
-							},
-							cooldownsAnchor = {
-								type="select",
-								name=L["Cooldowns Anchor"],
-								desc=L["Anchor of the cooldowns"],
-								values=function() return GladiusEx:GetPositions() end,
-								disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
-								order=10,
-							},
-							cooldownsRelativePoint = {
-								type="select",
-								name=L["Cooldowns Relative Point"],
-								desc=L["Relative point of the cooldowns"],
-								values=function() return GladiusEx:GetPositions() end,
-								disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
-								order=15,
+							cooldownsCrop = {
+								type = "toggle",
+								name = L["Crop Borders"],
+								desc = L["Toggle if the class icon borders should be cropped or not."],
+								disabled = function() return not self:IsEnabled() end,
+								hidden = function() return not GladiusEx.db.advancedOptions end,
+								order = 14,
 							},
 							sep2 = {
 								type = "description",
-								name="",
-								width="full",
-								order=17,
+								name = "",
+								width = "full",
+								order = 14.5,
 							},
-							cooldownsOffsetX = {
-								type="range",
-								name=L["Cooldowns Offset X"],
-								desc=L["X offset of the cooldowns"],
-								min=-100, max=100, step=1,
-								disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
-								order=20,
+							cooldownsPerColumn = {
+								type = "range",
+								name = L["Cooldown Icons Per Column"],
+								desc = L["Number of cooldown icons per column"],
+								min = 1, max = 50, step = 1,
+								disabled = function() return not self:IsEnabled() end,
+								order = 15,
 							},
-							cooldownsOffsetY = {
-								type="range",
-								name=L["Cooldowns Offset Y"],
-								desc=L["Y offset of the cooldowns"],
-								disabled=function() return not GladiusEx.dbi.profile.modules[self:GetName()] end,
-								min=-50, max=50, step=1,
-								order=25,
+							cooldownsMax = {
+								type = "range",
+								name = L["Cooldown Icons Max"],
+								desc = L["Number of max cooldowns"],
+								min = 1, max = MAX_ICONS, step = 1,
+								disabled = function() return not self:IsEnabled() end,
+								order = 20,
 							},
+							sep3 = {
+								type = "description",
+								name = "",
+								width = "full",
+								order = 23,
 							},
-							},
-					},
-				},
-				category_options = {
-					type="group",
-					name=L["Category"],
-					order=2,
-					args = {
-						cooldownsHideTalentsUntilDetected = {
-							type="toggle",
-							name=L["Hide talents until detected"],
-							width="full",
-							order=1
-						},
-						priorities = {
-							type="group",
-							name=L["Categories"],
-							inline=true,
-							order=4,
-							args={},
 						},
 					},
+					size = {
+						type = "group",
+						name = L["Size"],
+						desc = L["Size settings"],
+						inline = true,
+						order = 2,
+						args = {
+								cooldownsSize = {
+									type = "range",
+									name = L["Cooldown Icon Size"],
+									desc = L["Size of the cooldown icons"],
+									min = 10, max = 100, step = 1,
+									disabled = function() return not self:IsEnabled() end,
+									order = 5,
+								},
+								sep = {
+									type = "description",
+									name = "",
+									width = "full",
+									order = 13,
+								},
+								cooldownsSpacingY = {
+									type = "range",
+									name = L["Cooldowns Spacing Vertical"],
+									desc = L["Vertical spacing of the cooldowns"],
+									min = 0, max = 30, step = 1,
+									disabled = function() return not self:IsEnabled() end,
+									order = 15,
+								},
+								cooldownsSpacingX = {
+									type = "range",
+									name = L["Cooldowns Spacing Horizontal"],
+									desc = L["Horizontal spacing of the cooldowns"],
+									disabled = function() return not self:IsEnabled() end,
+									min = 0, max = 30, step = 1,
+									order = 20,
+								},
+							},
+						},
+						position = {
+							type = "group",
+							name = L["Position"],
+							desc = L["Position settings"],
+							inline = true,
+							hidden = function() return not GladiusEx.db.advancedOptions end,
+							order = 3,
+							args = {
+								cooldownsAttachTo = {
+									type = "select",
+									name = L["Cooldowns Attach To"],
+									desc = L["Attach cooldowns to the given frame"],
+									values = function() return Cooldowns:GetAttachPoints() end,
+									disabled = function() return not self:IsEnabled() end,
+									width = "double",
+									order = 5,
+								},
+								sep = {
+									type = "description",
+									name = "",
+									width = "full",
+									order = 7,
+								},
+								cooldownsAnchor = {
+									type = "select",
+									name = L["Cooldowns Anchor"],
+									desc = L["Anchor of the cooldowns"],
+									values = function() return GladiusEx:GetPositions() end,
+									disabled = function() return not self:IsEnabled() end,
+									order = 10,
+								},
+								cooldownsRelativePoint = {
+									type = "select",
+									name = L["Cooldowns Relative Point"],
+									desc = L["Relative point of the cooldowns"],
+									values = function() return GladiusEx:GetPositions() end,
+									disabled = function() return not self:IsEnabled() end,
+									order = 15,
+								},
+								sep2 = {
+									type = "description",
+									name = "",
+									width = "full",
+									order = 17,
+								},
+								cooldownsOffsetX = {
+									type = "range",
+									name = L["Cooldowns Offset X"],
+									desc = L["X offset of the cooldowns"],
+									min = -100, max = 100, step = 1,
+									disabled = function() return not self:IsEnabled() end,
+									order = 20,
+								},
+								cooldownsOffsetY = {
+									type = "range",
+									name = L["Cooldowns Offset Y"],
+									desc = L["Y offset of the cooldowns"],
+									disabled = function() return not self:IsEnabled() end,
+									min = -50, max = 50, step = 1,
+									order = 25,
+								},
+							},
+						},
 				},
-				cooldowns = {
-					type="group",
-					name=L["Cooldowns"],
-					order=3,
-					args = {
-						enableall = {
-							type="execute",
-							name=L["Enable all"],
-							desc=L["Enable all the spells"],
-							func=function()
-								for spellid, spelldata in pairs(CT:GetCooldownsData()) do
-									if type(spelldata) == "table" then
-										GladiusEx.db.cooldownsSpells[spellid] = true
-									end
+			},
+			category_options = {
+				type = "group",
+				name = L["Category"],
+				order = 2,
+				args = {
+					cooldownsHideTalentsUntilDetected = {
+						type = "toggle",
+						name = L["Hide talents until detected"],
+						width = "full",
+						order = 1
+					},
+					priorities = {
+						type = "group",
+						name = L["Categories"],
+						inline = true,
+						order = 4,
+						args = {},
+					},
+				},
+			},
+			cooldowns = {
+				type = "group",
+				name = L["Cooldowns"],
+				order = 3,
+				args = {
+					enableall = {
+						type = "execute",
+						name = L["Enable all"],
+						desc = L["Enable all the spells"],
+						func = function()
+							for spellid, spelldata in pairs(CT:GetCooldownsData()) do
+								if type(spelldata) == "table" then
+									GetGroupDB(group).cooldownsSpells[spellid] = true
 								end
-								self:UpdateAllIcons()
-							end,
-							order=0,
-						},
-						disableall = {
-							type="execute",
-							name=L["Disable all"],
-							desc=L["Disable all the spells"],
-							func=function()
-								for spellid, spelldata in pairs(CT:GetCooldownsData()) do
-									if type(spelldata) == "table" then
-										GladiusEx.db.cooldownsSpells[spellid] = false
-									end
+							end
+							GladiusEx:UpdateFrames()
+						end,
+						order = 0,
+					},
+					disableall = {
+						type = "execute",
+						name = L["Disable all"],
+						desc = L["Disable all the spells"],
+						func = function()
+							for spellid, spelldata in pairs(CT:GetCooldownsData()) do
+								if type(spelldata) == "table" then
+									GetGroupDB(group).cooldownsSpells[spellid] = false
 								end
-								self:UpdateAllIcons()
-							end,
-							order=0.5,
-						},
-						preracesep = {
-							type="group",
-							name="",
-							order=2,
-							args={}
-						},
-						preitemsep = {
-							type="group",
-							name="",
-							order=4,
-							args={}
-						},
+							end
+							GladiusEx:UpdateFrames()
+						end,
+						order = 0.5,
+					},
+					preracesep = {
+						type = "group",
+						name = "",
+						order = 2,
+						args = {}
+					},
+					preitemsep = {
+						type = "group",
+						name = "",
+						order = 4,
+						args = {}
 					},
 				},
 			},
@@ -803,120 +1040,120 @@ function Cooldowns:GetOptions()
 
 	-- fill spell priority list
 	-- yeah, all of this sucks
-	local pargs = options.cooldowns.args.category_options.args.priorities.args
-	for i = 1, #GladiusEx.db.cooldownsCatPriority do
-		local cat = GladiusEx.db.cooldownsCatPriority[i]
+	local pargs = group_options.args.category_options.args.priorities.args
+	for i = 1, #GetGroupDB(group).cooldownsCatPriority do
+		local cat = GetGroupDB(group).cooldownsCatPriority[i]
 		local option = {
-			type="group",
-			name=L["cat:" .. cat],
-			order=function()
-				for i = 1, #GladiusEx.db.cooldownsCatPriority do
-					if GladiusEx.db.cooldownsCatPriority[i] == cat then return i end
+			type = "group",
+			name = L["cat:" .. cat],
+			order = function()
+				for i = 1, #GetGroupDB(group).cooldownsCatPriority do
+					if GetGroupDB(group).cooldownsCatPriority[i] == cat then return i end
 				end
 			end,
-			inline=true,
+			inline = true,
 			args = {
 				color = {
-					type="color",
-					name=L["Color"],
-					desc=L["Border color for spells in this category"],
-					get=function()
-						local c = GladiusEx.db.cooldownsCatColors[cat]
+					type = "color",
+					name = L["Color"],
+					desc = L["Border color for spells in this category"],
+					get = function()
+						local c = GetGroupDB(group).cooldownsCatColors[cat]
 						return c.r, c.g, c.b
 					end,
-					set=function(self, r, g, b)
-						GladiusEx.db.cooldownsCatColors[cat] = { r = r, g = g, b = b }
-						Cooldowns:UpdateAllIcons()
+					set = function(self, r, g, b)
+						GetGroupDB(group).cooldownsCatColors[cat] = { r = r, g = g, b = b }
+						GladiusEx:UpdateFrames()
 					end,
 					order = 0,
 				},
 				group = {
-					type="range",
-					min=1,
-					max=20,
-					step=1,
-					name=L["Group"],
-					desc=L["Spells in each group have their own row or column"],
-					get=function() return GladiusEx.db.cooldownsCatGroups[cat] end,
-					set=function(self, value)
-						GladiusEx.db.cooldownsCatGroups[cat] = value
-						Cooldowns:UpdateAllIcons()
+					type = "range",
+					min = 1,
+					max = 20,
+					step = 1,
+					name = L["Group"],
+					desc = L["Spells in each group have their own row or column"],
+					get = function() return GetGroupDB(group).cooldownsCatGroups[cat] end,
+					set = function(self, value)
+						GetGroupDB(group).cooldownsCatGroups[cat] = value
+						GladiusEx:UpdateFrames()
 					end,
 					order = 1,
 				},
 				moveup = {
-					type="execute",
-					name=L["Up"],
-					desc=L["Increase the priority of spells in this category"],
-					func=function()
-						for i = 1, #GladiusEx.db.cooldownsCatPriority do
-							if GladiusEx.db.cooldownsCatPriority[i] == cat then
+					type = "execute",
+					name = L["Up"],
+					desc = L["Increase the priority of spells in this category"],
+					func = function()
+						for i = 1, #GetGroupDB(group).cooldownsCatPriority do
+							if GetGroupDB(group).cooldownsCatPriority[i] == cat then
 								if i ~= 1 then
-									local tmp = GladiusEx.db.cooldownsCatPriority[i - 1]
-									GladiusEx.db.cooldownsCatPriority[i - 1] = GladiusEx.db.cooldownsCatPriority[i]
-									GladiusEx.db.cooldownsCatPriority[i] = tmp
+									local tmp = GetGroupDB(group).cooldownsCatPriority[i - 1]
+									GetGroupDB(group).cooldownsCatPriority[i - 1] = GetGroupDB(group).cooldownsCatPriority[i]
+									GetGroupDB(group).cooldownsCatPriority[i] = tmp
 
 									SpellSortingChanged()
-									Cooldowns:UpdateAllIcons()
+									GladiusEx:UpdateFrames()
 								end
 								return
 							end
 						end
 					end,
-					order=10,
+					order = 10,
 				},
 				movedown = {
-					type="execute",
-					name=L["Down"],
-					desc=L["Decrease the priority of spells in this category"],
-					func=function()
-						for i = 1, #GladiusEx.db.cooldownsCatPriority do
-							if GladiusEx.db.cooldownsCatPriority[i] == cat then
-								if i ~= #GladiusEx.db.cooldownsCatPriority then
-									local tmp = GladiusEx.db.cooldownsCatPriority[i + 1]
-									GladiusEx.db.cooldownsCatPriority[i + 1] = GladiusEx.db.cooldownsCatPriority[i]
-									GladiusEx.db.cooldownsCatPriority[i] = tmp
+					type = "execute",
+					name = L["Down"],
+					desc = L["Decrease the priority of spells in this category"],
+					func = function()
+						for i = 1, #GetGroupDB(group).cooldownsCatPriority do
+							if GetGroupDB(group).cooldownsCatPriority[i] == cat then
+								if i ~= #GetGroupDB(group).cooldownsCatPriority then
+									local tmp = GetGroupDB(group).cooldownsCatPriority[i + 1]
+									GetGroupDB(group).cooldownsCatPriority[i + 1] = GetGroupDB(group).cooldownsCatPriority[i]
+									GetGroupDB(group).cooldownsCatPriority[i] = tmp
 
 									SpellSortingChanged()
-									Cooldowns:UpdateAllIcons()
+									GladiusEx:UpdateFrames()
 								end
 								return
 							end
 						end
 					end,
-					order=11,
+					order = 11,
 				},
 				enableall = {
-					type="execute",
-					name=L["Enable all"],
-					desc=L["Enable all the spells in this category"],
-					func=function()
+					type = "execute",
+					name = L["Enable all"],
+					desc = L["Enable all the spells in this category"],
+					func = function()
 						for spellid, spelldata in pairs(CT:GetCooldownsData()) do
 							if type(spelldata) == "table" then
 								if spelldata[cat] then
-									GladiusEx.db.cooldownsSpells[spellid] = true
+									GetGroupDB(group).cooldownsSpells[spellid] = true
 								end
 							end
 						end
-						self:UpdateAllIcons()
+						GladiusEx:UpdateFrames()
 					end,
-					order=20,
+					order = 20,
 				},
 				disableall = {
-					type="execute",
-					name=L["Disable all"],
-					desc=L["Disable all the spells in this category"],
-					func=function()
+					type = "execute",
+					name = L["Disable all"],
+					desc = L["Disable all the spells in this category"],
+					func = function()
 						for spellid, spelldata in pairs(CT:GetCooldownsData()) do
 							if type(spelldata) == "table" then
 								if spelldata[cat] then
-									GladiusEx.db.cooldownsSpells[spellid] = false
+									GetGroupDB(group).cooldownsSpells[spellid] = false
 								end
 							end
 						end
-						self:UpdateAllIcons()
+						GladiusEx:UpdateFrames()
 					end,
-					order=21,
+					order = 21,
 				},
 			}
 		}
@@ -926,18 +1163,18 @@ function Cooldowns:GetOptions()
 
 	-- fill spell data
 	local function getSpell(info)
-		return GladiusEx.db.cooldownsSpells[info.arg]
+		return GetGroupDB(group).cooldownsSpells[info.arg]
 	end
 
 	local function setSpell(info, value)
-		GladiusEx.db.cooldownsSpells[info.arg] = value
-		self:UpdateAllIcons()
+		GetGroupDB(group).cooldownsSpells[info.arg] = value
+		GladiusEx:UpdateFrames()
 	end
 
 	local lclasses = {}
 	FillLocalizedClassList(lclasses)
 
-	local args = options.cooldowns.args.cooldowns.args
+	local args = group_options.args.cooldowns.args
 	for spellid, spelldata in pairs(CT:GetCooldownsData()) do
 		if type(spelldata) == "table" then
 			local basecd = GetSpellBaseCooldown(spellid)
@@ -960,37 +1197,37 @@ function Cooldowns:GetOptions()
 			end
 
 			local spellconfig = {
-				type="toggle",
-				name=string.format(" |T%s:20|t %s [%ss/%ss] %s", spelldata.icon, spelldata.name, spelldata.cooldown or "??", basecd and basecd/1000 or "??", catstr or ""),
-				desc=GetSpellDescription(spellid),
-				descStyle="inline",
-				width="full",
-				arg=spellid,
-				get=getSpell,
-				set=setSpell,
-				order=spelldata.name:byte(1) * 0xff + spelldata.name:byte(2),
+				type = "toggle",
+				name = string.format(" |T%s:20|t %s [%ss/%ss] %s", spelldata.icon, spelldata.name, spelldata.cooldown or "??", basecd and basecd/1000 or "??", catstr or ""),
+				desc = GetSpellDescription(spellid),
+				descStyle = "inline",
+				width = "full",
+				arg = spellid,
+				get = getSpell,
+				set = setSpell,
+				order = spelldata.name:byte(1) * 0xff + spelldata.name:byte(2),
 			}
 			if spelldata.class then
 				if not args[spelldata.class] then
 					args[spelldata.class] = {
-						type="group",
-						name=lclasses[spelldata.class],
-						icon=[[Interface\ICONS\ClassIcon_]] .. spelldata.class,
-						order=1,
-						args={}
+						type = "group",
+						name = lclasses[spelldata.class],
+						icon = [[Interface\ICONS\ClassIcon_]] .. spelldata.class,
+						order = 1,
+						args = {}
 					}
 				end
 				if spelldata.specID then
 					-- spec
-					for specID, _ in pairs(spelldata.specID) do
+					for _, specID in ipairs(spelldata.specID) do
 						if not args[spelldata.class].args["spec" .. specID] then
 							local _, name, description, icon, background, role, class = GetSpecializationInfoByID(specID)
 							args[spelldata.class].args["spec" .. specID] = {
-								type="group",
-								name=name,
-								icon=icon,
-								order=3 + specID,
-								args={}
+								type = "group",
+								name = name,
+								icon = icon,
+								order = 3 + specID,
+								args = {}
 							}
 						end
 						args[spelldata.class].args["spec" .. specID].args["spell"..spellid] = spellconfig
@@ -999,10 +1236,10 @@ function Cooldowns:GetOptions()
 					-- talent
 					if not args[spelldata.class].args.talents then
 						args[spelldata.class].args.talents = {
-							type="group",
-							name="Talents",
-							order=2,
-							args={}
+							type = "group",
+							name = "Talents",
+							order = 2,
+							args = {}
 						}
 					end
 					args[spelldata.class].args.talents.args["spell"..spellid] = spellconfig
@@ -1010,10 +1247,10 @@ function Cooldowns:GetOptions()
 					-- baseline
 					if not args[spelldata.class].args.base then
 						args[spelldata.class].args.base = {
-							type="group",
-							name="Baseline",
-							order=1,
-							args={}
+							type = "group",
+							name = "Baseline",
+							order = 1,
+							args = {}
 						}
 					end
 					args[spelldata.class].args.base.args["spell"..spellid] = spellconfig
@@ -1022,11 +1259,11 @@ function Cooldowns:GetOptions()
 				-- racial
 				if not args[spelldata.race] then
 					args[spelldata.race] = {
-						type="group",
-						name=spelldata.race,
-						icon=function() return [[Interface\CHARACTERFRAME\TEMPORARYPORTRAIT]] .. (math.random(0, 1) == 0 and "-FEMALE-" or "-MALE-") .. spelldata.race end,
-						order=3,
-						args={}
+						type = "group",
+						name = spelldata.race,
+						icon = function() return [[Interface\CHARACTERFRAME\TEMPORARYPORTRAIT]] .. (random(0, 1) == 0 and "-FEMALE-" or "-MALE-") .. spelldata.race end,
+						order = 3,
+						args = {}
 					}
 				end
 				args[spelldata.race].args["spell"..spellid] = spellconfig
@@ -1034,19 +1271,19 @@ function Cooldowns:GetOptions()
 				-- item
 				if not args.items then
 					args.items = {
-						type="group",
-						name=L["Items"],
-						icon=[[Interface\Icons\Trade_Engineering]],
-						order=5,
-						args={}
+						type = "group",
+						name = L["Items"],
+						icon = [[Interface\Icons\Trade_Engineering]],
+						order = 5,
+						args = {}
 					}
 				end
 				args.items.args["spell"..spellid] = spellconfig
 			else
-				print("Bad spelldata for", spellid, ": could not find type")
+				GladiusEx:Print("Bad spelldata for", spellid, ": could not find type")
 			end
 		end
 	end
 
-	return options
+	return group_options
 end
