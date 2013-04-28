@@ -99,7 +99,7 @@ function Layout:GetOptions()
 									end
 								end
 
-								GladiusEx:UpdateFrame()
+								GladiusEx:UpdateFrames()
 							end,
 							order = 10,
 						},

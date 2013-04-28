@@ -155,7 +155,6 @@ function GladiusEx:SetupModule(key, module, order)
 		name = L["Reset Module"],
 		func = function()
 			module.dbi:ResetProfile()
-
 			self:UpdateFrames()
 		end,
 		order = 0.5,
@@ -166,7 +165,6 @@ function GladiusEx:SetupOptions()
 	self.options = {
 		type = "group",
 		name = "GladiusEx",
-		plugins = {},
 		get = getOption,
 		set = setOption,
 		args = {
@@ -384,12 +382,20 @@ function GladiusEx:SetupOptions()
 		},
 	}
 
+	-- Add module options
 	local mods = fn.sort(fn.from_iterator(self:IterateModules()), function(x, y) return x[1] < y[1] end)
 	for order, mod in ipairs(mods) do
 		self:SetupModule(mod[1], mod[2], order + 10)
 	end
 
-	self.options.plugins.profiles = { profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.dbi) }
+	-- Add profile options
+	self.options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.dbi)
+
+	-- Add dual-spec support
+	local LibDualSpec = LibStub("LibDualSpec-1.0")
+	LibDualSpec:EnhanceDatabase(self.dbi, "GladiusEx")
+	LibDualSpec:EnhanceOptions(self.options.args.profiles, self.dbi)
+
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("GladiusEx", self.options)
 	LibStub("AceConfigDialog-3.0"):SetDefaultSize("GladiusEx", 830, 530)
 	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("GladiusEx", "GladiusEx")

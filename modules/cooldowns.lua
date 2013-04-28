@@ -181,10 +181,6 @@ function Cooldowns:OnEnable()
 	CT.RegisterCallback(self, "LCT_CooldownUsed")
 	CT.RegisterCallback(self, "LCT_CooldownsReset")
 
-	self.dbi.RegisterCallback(self, "OnProfileChanged", "SpellSortingChanged")
-	self.dbi.RegisterCallback(self, "OnProfileCopied", "SpellSortingChanged")
-	self.dbi.RegisterCallback(self, "OnProfileReset", "SpellSortingChanged")
-
 	self:RegisterEvent("UNIT_NAME_UPDATE")
 	self:RegisterMessage("GLADIUS_SPEC_UPDATE")
 
@@ -195,9 +191,13 @@ end
 
 function Cooldowns:OnDisable()
 	CT.UnregisterAllCallbacks(self)
-	self.dbi.UnregisterAllCallbacks(self)
 	self:UnregisterAllEvents()
 	self:UnregisterAllMessages()
+end
+
+function Cooldowns:OnProfileChanged()
+	self.super.OnProfileChanged(self)
+	self:SpellSortingChanged()
 end
 
 function Cooldowns:GetModuleAttachPoints()

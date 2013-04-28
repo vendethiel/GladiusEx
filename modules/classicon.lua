@@ -230,10 +230,6 @@ function ClassIcon:OnEnable()
 	self:RegisterEvent("UNIT_AURA")
 	self:RegisterMessage("GLADIUS_SPEC_UPDATE")
 
-	self.dbi.RegisterCallback(self, "OnProfileChanged", "SetupAllAurasOptions")
-	self.dbi.RegisterCallback(self, "OnProfileCopied", "SetupAllAurasOptions")
-	self.dbi.RegisterCallback(self, "OnProfileReset", "SetupAllAurasOptions")
-
 	LSM = GladiusEx.LSM
 
 	if (not self.frame) then
@@ -244,11 +240,15 @@ end
 function ClassIcon:OnDisable()
 	self:UnregisterAllEvents()
 	self:UnregisterAllMessages()
-	self.dbi.UnregisterAllCallbacks(self)
 
 	for unit in pairs(self.frame) do
 		self.frame[unit]:SetAlpha(0)
 	end
+end
+
+function ClassIcon:OnProfileChanged()
+	self.super.OnProfileChanged(self)
+	self:SetupAllAurasOptions()
 end
 
 function ClassIcon:GetAttachTo()

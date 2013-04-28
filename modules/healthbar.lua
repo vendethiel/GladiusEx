@@ -366,8 +366,8 @@ function HealthBar:GetOptions()
 									self.isBar = false
 								end
 
-								GladiusEx.dbi.profile[key] = value
-								GladiusEx:UpdateFrame()
+								self.db[key] = value
+								GladiusEx:UpdateFrames()
 							end,
 							disabled = function() return not self:IsEnabled() end,
 							width = "double",

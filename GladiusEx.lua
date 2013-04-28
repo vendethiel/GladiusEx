@@ -104,6 +104,13 @@ end
 
 function modulePrototype:OnInitialize()
 	self.dbi = GladiusEx.dbi:RegisterNamespace(self:GetName(), { profile = self.defaults })
+	self.dbi.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
+	self.dbi.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
+	self.dbi.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")
+	self.db = self.dbi.profile
+end
+
+function modulePrototype:OnProfileChanged()
 	self.db = self.dbi.profile
 end
 
@@ -112,9 +119,9 @@ GladiusEx:SetDefaultModuleLibraries("AceEvent-3.0")
 
 function GladiusEx:NewGladiusExModule(name, isbar, defaults, ...)
 	local module = self:NewModule(name, ...)
+	module.super = modulePrototype
 	module.defaults = defaults
 	module.isBarOption = isbar
-
 	return module
 end
 
@@ -233,7 +240,6 @@ end
 function GladiusEx:OnProfileChanged(event, database, newProfileKey)
 	-- update frame on profile change
 	self.db = self.dbi.profile
-
 	self:UpdateFrames()
 end
 

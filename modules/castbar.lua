@@ -57,12 +57,6 @@ function CastBar:OnEnable()
 
 	LSM = GladiusEx.LSM
 
-	--[[ set frame type
-	if (self.db.castBarAttachTo == "Frame" or GladiusEx:GetModule(self.db.castBarAttachTo).isBar) then
-		self.isBar = true
-	else
-		self.isBar = false
-	end]]
 	self.isBar = true
 
 	if (not self.frame) then
@@ -235,12 +229,6 @@ function CastBar:Update(unit)
 
 	-- set bar type
 	local parent = GladiusEx:GetAttachFrame(unit, self.db.castBarAttachTo)
-
-  --[[ if (self.db.castBarAttachTo == "Frame" or GladiusEx:GetModule(self.db.castBarAttachTo).isBar) then
-		self.isBar = true
-	else
-		self.isBar = false
-	end]]
 
 	-- update bar
 	self.frame[unit]:ClearAllPoints()

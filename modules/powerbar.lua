@@ -389,7 +389,7 @@ function PowerBar:GetOptions()
 								end
 
 								self.db[key] = value
-								GladiusEx:UpdateFrame()
+								GladiusEx:UpdateFrames()
 							end,
 							disabled = function() return not self:IsEnabled() end,
 							width = "double",
