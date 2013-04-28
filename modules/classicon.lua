@@ -25,11 +25,109 @@ local ClassIcon = GladiusEx:NewGladiusExModule("ClassIcon", false, {
 	classIconCrop = false,
 	classIconCooldown = false,
 	classIconCooldownReverse = false,
+
+	-- NOTE: this list can be modified from the ClassIcon module options, no need to edit it here
+	-- Nonetheless, if you think that we missed an important aura, please post it on the addon site at curse or wowace
+	classIconAuras = {
+		-- Spell NamePriority (higher = more priority)
+		-- Crowd control
+		[GetSpellInfo(33786)] = 3, -- Cyclone
+		[GetSpellInfo(2637)] = 3, -- Hibernate
+		[GetSpellInfo(55041)] = 3, -- Freezing Trap Effect
+		[GetSpellInfo(3355)] = 3, -- Freezing Trap (from trap launcher)
+		[GetSpellInfo(6770)] = 3, -- Sap
+		[GetSpellInfo(2094)] = 3, -- Blind
+		[GetSpellInfo(5782)] = 3, -- Fear
+		[GetSpellInfo(6789)] = 3, -- Death Coil Warlock
+		[GetSpellInfo(64044)] = 3, -- Psychic Horror
+		[GetSpellInfo(6358)] = 3, -- Seduction
+		[GetSpellInfo(5484)] = 3, -- Howl of Terror
+		[GetSpellInfo(5246)] = 3, -- Intimidating Shout
+		[GetSpellInfo(8122)] = 3, -- Psychic Scream
+		[GetSpellInfo(118)]  = 3, -- Polymorph
+		[GetSpellInfo(28272)] = 3, -- Polymorph pig
+		[GetSpellInfo(28271)] = 3, -- Polymorph turtle
+		[GetSpellInfo(61305)] = 3, -- Polymorph black cat
+		[GetSpellInfo(61025)] = 3, -- Polymorph serpent
+		[GetSpellInfo(51514)] = 3, -- Hex
+		[GetSpellInfo(710)] = 3, -- Banish
+		[GetSpellInfo(1499)] = 3, -- Freezing Trap Effect
+		[GetSpellInfo(60192)] = 3, -- Freezing Trap (from trap launcher)
+
+		-- Roots
+		[GetSpellInfo(339)] = 3, -- Entangling Roots
+		[GetSpellInfo(122)] = 3, -- Frost Nova
+		[GetSpellInfo(16979)] = 3, -- Feral Charge
+		[GetSpellInfo(13809)] = 1, -- Frost Trap
+		[GetSpellInfo(113724)]  = 3, -- Ring of Frost
+		[GetSpellInfo(120)]  = 1, -- Cone of Cold
+
+		-- Stuns and incapacitates
+		[GetSpellInfo(5211)] = 3, -- Bash
+		[GetSpellInfo(1833)] = 3, -- Cheap Shot
+		[GetSpellInfo(408)] = 3, -- Kidney Shot
+		[GetSpellInfo(1776)] = 3, -- Gouge
+		[GetSpellInfo(44572)] = 3, -- Deep Freeze
+		[GetSpellInfo(19386)] = 3, -- Wyvern Sting
+		[GetSpellInfo(126246)]  = 3,    -- Lullaby
+		[GetSpellInfo(19503)] = 3, -- Scatter Shot
+		[GetSpellInfo(9005)] = 3, -- Pounce
+		[GetSpellInfo(22570)] = 3, -- Maim
+		[GetSpellInfo(853)] = 3, -- Hammer of Justice
+		[GetSpellInfo(20066)] = 3, -- Repentance
+		[GetSpellInfo(46968)] = 3, -- Shockwave
+		[GetSpellInfo(47481)] = 3, -- Gnaw (dk pet stun)
+		[GetSpellInfo(90337)]  = 3, -- Bad Manner (monkey blind)
+		[GetSpellInfo(118905)] = 3, -- Static Charge - Capacitor Totem
+
+		-- Silences
+		[GetSpellInfo(55021)] = 1, -- Improved Counterspell
+		[GetSpellInfo(15487)] = 1, -- Silence
+		[GetSpellInfo(34490)] = 1, -- Silencing Shot
+		[GetSpellInfo(47476)] = 1, -- Strangulate
+		[GetSpellInfo(96231)] = 1, -- Rebuke unsure
+		[GetSpellInfo(80964)] = 1, -- Skull Bash
+		[GetSpellInfo(703)]  = 1, -- Garrote
+
+		-- Disarms
+		[GetSpellInfo(676)] = 1, -- Disarm
+		[GetSpellInfo(51722)] = 1, -- Dismantle
+
+		-- Buffs
+		[GetSpellInfo(1022)] = 1, -- Blessing of Protection
+		[GetSpellInfo(1044)] = 1, -- Blessing of Freedom
+		[GetSpellInfo(33206)] = 1, -- Pain Suppression
+		[GetSpellInfo(29166)] = 1, -- Innervate
+		[GetSpellInfo(54428)] = 1, -- Divine Plea
+		[GetSpellInfo(31821)] = 1, -- Aura mastery
+		[GetSpellInfo(118009)] = 1, -- Desecrated Ground (DK lvl90 anti-CC)
+		[GetSpellInfo(12292)] = 1, -- Death Wish
+		[GetSpellInfo(49016)] = 1, -- Unholy Frenzy
+
+		-- Turtling abilities
+		[GetSpellInfo(871)] = 1, -- Shield Wall
+		[GetSpellInfo(48707)] = 1, -- Anti-Magic Shell
+		[GetSpellInfo(31224)] = 1, -- Cloak of Shadows
+		[GetSpellInfo(19263)] = 1, -- Deterrence
+		[GetSpellInfo(76577)] = 1, -- Smoke Bomb
+		[GetSpellInfo(74001)] = 1, -- Combat Readiness
+		[GetSpellInfo(49039)] = 1, -- Lichborn
+		[GetSpellInfo(47585)] = 1, -- Dispersion
+
+		-- Immunities
+		[GetSpellInfo(34692)] = 1, -- The Beast Within
+		[GetSpellInfo(45438)] = 2, -- Ice Block
+		[GetSpellInfo(642)] = 2, -- Divine Shield
+	}	
 })
 
 function ClassIcon:OnEnable()
 	self:RegisterEvent("UNIT_AURA")
 	self:RegisterMessage("GLADIUS_SPEC_UPDATE")
+
+	self.dbi.RegisterCallback(self, "OnProfileChanged", "SetupAllAurasOptions")
+	self.dbi.RegisterCallback(self, "OnProfileCopied", "SetupAllAurasOptions")
+	self.dbi.RegisterCallback(self, "OnProfileReset", "SetupAllAurasOptions")
 
 	LSM = GladiusEx.LSM
 
@@ -41,6 +139,7 @@ end
 function ClassIcon:OnDisable()
 	self:UnregisterAllEvents()
 	self:UnregisterAllMessages()
+	self.dbi.UnregisterAllCallbacks(self)
 
 	for unit in pairs(self.frame) do
 		self.frame[unit]:SetAlpha(0)
@@ -297,11 +396,16 @@ function ClassIcon:Test(unit)
 end
 
 function ClassIcon:GetImportantAura(name)
-	return GladiusEx:GetModule("Auras").db.aurasFrameAuras[name]
+	return self.db.classIconAuras[name]
 end
 
+local function HasAuraEditBox()
+	return not not LibStub("AceGUI-3.0").WidgetVersions["Aura_EditBox"]
+end
+
+local options
 function ClassIcon:GetOptions()
-	return {
+	options = {
 		general = {
 			type = "group",
 			name = L["General"],
@@ -513,6 +617,139 @@ function ClassIcon:GetOptions()
 						},
 					},
 				},
+			},
+		},
+		auraList = {
+			type = "group",
+			name = L["Important Auras"],
+			childGroups = "tree",
+			order = 3,
+			args = {
+				newAura = {
+					type = "group",
+					name = L["New Aura"],
+					desc = L["New Aura"],
+					inline = true,
+					order = 1,
+					args = {
+						name = {
+							type = "input",
+							dialogControl = HasAuraEditBox() and "Aura_EditBox" or nil,
+							name = L["Name"],
+							desc = L["Name of the aura"],
+							get = function() return self.newAuraName or "" end,
+							set = function(info, value) self.newAuraName = value end,
+							order = 1,
+						},
+						priority = {
+							type= "range",
+							name = L["Priority"],
+							desc = L["Select what priority the aura should have - higher equals more priority"],
+							get = function() return self.newAuraPriority or "" end,
+							set = function(info, value) self.newAuraPriority = value end,
+							min = 0,
+							max = 10,
+							step = 1,
+							order = 2,
+						},
+						add = {
+							type = "execute",
+							name = L["Add new Aura"],
+							func = function(info)
+								self.db.classIconAuras[self.newAuraName] = self.newAuraPriority
+								options.auraList.args[self.newAuraName] = self:SetupAuraOptions(self.newAuraName)
+								self.newAuraName = nil
+								GladiusEx:UpdateFrames()
+							end,
+							disabled = function() return not (self.newAuraName and self.newAuraPriority) end,
+							order = 3,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	-- put some initial value for the auras priority
+	self.newAuraPriority = 5
+
+	-- set auras
+	self:SetupAllAurasOptions()
+
+	return options
+end
+
+function ClassIcon:SetupAllAurasOptions()
+	local tmp = options.auraList.args.newAura
+	options.auraList.args = { newAura = tmp }
+	for aura, priority in pairs(self.db.classIconAuras) do
+		options.auraList.args[aura] = self:SetupAuraOptions(aura)
+	end
+end
+
+function ClassIcon:SetupAuraOptions(aura)
+	local function setAura(info, value)
+		if (info[#(info)] == "name") then
+			local old_name = info[#(info) - 1]
+
+			-- create new aura
+			self.db.classIconAuras[value] = self.db.classIconAuras[old_name]
+			options.auraList.args[value] = self:SetupAuraOptions(value)
+
+			-- delete old aura
+			self.db.classIconAuras[old_name] = nil
+			options.auraList.args[old_name] = nil
+		else
+			self.db.classIconAuras[info[#(info) - 1]] = value
+		end
+
+		GladiusEx:UpdateFrames()
+	end
+
+	local function getAura(info)
+		if (info[#(info)] == "name") then
+			return info[#(info) - 1]
+		else
+			return self.db.classIconAuras[info[#(info) - 1]]
+		end
+
+		GladiusEx:UpdateFrames()
+	end
+
+	return {
+		type = "group",
+		name = aura,
+		desc = aura,
+		get = getAura,
+		set = setAura,
+		args = {
+			name = {
+				type = "input",
+				dialogControl = HasAuraEditBox() and "Aura_EditBox" or nil,
+				name = L["Name"],
+				desc = L["Name of the aura"],
+				order = 1,
+			},
+			priority = {
+				type= "range",
+				name = L["Priority"],
+				desc = L["Select what priority the aura should have - higher equals more priority"],
+				min = 0,
+				max = 5,
+				step = 1,
+				order = 2,
+			},
+			delete = {
+				type = "execute",
+				name = L["Delete"],
+				func = function(info)
+					local aura = info[#(info) - 1]
+					self.db.classIconAuras[aura] = nil
+					options.auraList.args[aura] = nil
+
+					GladiusEx:UpdateFrames()
+				end,
+				order = 3,
 			},
 		},
 	}

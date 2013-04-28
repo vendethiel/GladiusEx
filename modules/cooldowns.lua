@@ -177,21 +177,27 @@ local function RemoveGroup(group)
 	Cooldowns.db.groups["group_" .. groupdb.cooldownsGroupId] = nil
 end
 
-
 function Cooldowns:OnEnable()
 	CT.RegisterCallback(self, "LCT_CooldownUsed")
 	CT.RegisterCallback(self, "LCT_CooldownsReset")
 
+	self.dbi.RegisterCallback(self, "OnProfileChanged", "SpellSortingChanged")
+	self.dbi.RegisterCallback(self, "OnProfileCopied", "SpellSortingChanged")
+	self.dbi.RegisterCallback(self, "OnProfileReset", "SpellSortingChanged")
+
 	self:RegisterEvent("UNIT_NAME_UPDATE")
 	self:RegisterMessage("GLADIUS_SPEC_UPDATE")
+
+	self:SpellSortingChanged()
 
 	LSM = GladiusEx.LSM
 end
 
 function Cooldowns:OnDisable()
 	CT.UnregisterAllCallbacks(self)
+	self.dbi.UnregisterAllCallbacks(self)
 	self:UnregisterAllEvents()
-	self:Reset()
+	self:UnregisterAllMessages()
 end
 
 function Cooldowns:GetModuleAttachPoints()
@@ -290,7 +296,7 @@ end
 
 local group_sortscore = {}
 
-local function SpellSortingChanged()
+function Cooldowns:SpellSortingChanged()
 	-- remove cached sorting info from spells
 	group_sortscore = {}
 end
@@ -380,6 +386,16 @@ local function GetCooldownList(group, unit)
 	local specID, class, race, faction = GetUnitInfo(unit)
 
 	-- generate list of cooldowns available (and enabled) for this unit
+	--[[
+	local eq = fn.equal(
+		fn.sort(fn.from_iterator(CT:IterateCooldowns(class, specID, race, true)), function(a,b) return a[1] < b[1] end),
+		fn.sort(fn.from_iterator(CT:IterateCooldowns(class, specID, race, false)), function(a,b) return a[1] < b[1] end), true
+	)
+	if not eq then
+		print(specID, class, race)
+	end
+	]]
+
 	local spell_list = {}
 	for spellid, spelldata in CT:IterateCooldowns(class, specID, race) do
 		if db.cooldownsSpells[spellid] then
@@ -515,6 +531,10 @@ function Cooldowns:UpdateGroupIcons(group, unit)
 
 	-- get spells lists
 	local sorted_spells = GetCooldownList(group, unit)
+
+	local _debugstop = GladiusEx:IsDebugging() and debugprofilestop()
+	GladiusEx:Log("GetCooldownList for", group, "/", unit, "done in", _debugstop - _debugstart)
+	_debugstart = GladiusEx:IsDebugging() and debugprofilestop()
 
 	-- update icon frames
 	UpdateGroupIconFrames(group, unit, sorted_spells)
@@ -1101,7 +1121,7 @@ function Cooldowns:MakeGroupOptions(group)
 									GetGroupDB(group).cooldownsCatPriority[i - 1] = GetGroupDB(group).cooldownsCatPriority[i]
 									GetGroupDB(group).cooldownsCatPriority[i] = tmp
 
-									SpellSortingChanged()
+									self:SpellSortingChanged()
 									GladiusEx:UpdateFrames()
 								end
 								return
@@ -1122,7 +1142,7 @@ function Cooldowns:MakeGroupOptions(group)
 									GetGroupDB(group).cooldownsCatPriority[i + 1] = GetGroupDB(group).cooldownsCatPriority[i]
 									GetGroupDB(group).cooldownsCatPriority[i] = tmp
 
-									SpellSortingChanged()
+									self:SpellSortingChanged()
 									GladiusEx:UpdateFrames()
 								end
 								return
@@ -1377,9 +1397,7 @@ local function parse_desc(desc)
 			end
 			local id2 = read_number()
 			op = read()
-			if op == "&" then
-			elseif op == "|" then
-			else
+			if op ~= "&" and op ~= "|" then
 				break
 			end
 		end
@@ -1432,7 +1450,7 @@ local function parse_desc(desc)
 		["8"] = read_id,
 		["9"] = read_id,
 
-		["{"] = function() read_until("}") return "?" end,-- expr
+		["{"] = function() read_until("}") return "?" end, -- expr
 		["<"] = function() read_until(">") return "?" end, -- variable name
 
 		["g"] = read_choice, -- gender
@@ -1445,15 +1463,15 @@ local function parse_desc(desc)
 		["/"] = read_muldiv,
 		["@"] = read_spelldesc, -- spelldesc
 
-		["m"] = function() read(); return "?" end, -- followed by a single digit, ends there
-		["M"] = function() read(); return "?" end, -- like m
-		["a"] = function() read(); return "?" end, -- like m
-		["A"] = function() read(); return "?" end, -- like m
-		["o"] = function() read(); return "?" end, -- like m
-		["s"] = function() read(); return "?" end, -- like m
-		["t"] = function() read(); return "?" end, -- like m
-		["T"] = function() read(); return "?" end, -- like m
-		["x"] = function() read(); return "?" end, -- like m
+		["m"] = function() read() return "?" end, -- followed by a single digit, ends there
+		["M"] = function() read() return "?" end, -- like m
+		["a"] = function() read() return "?" end, -- like m
+		["A"] = function() read() return "?" end, -- like m
+		["o"] = function() read() return "?" end, -- like m
+		["s"] = function() read() return "?" end, -- like m
+		["t"] = function() read() return "?" end, -- like m
+		["T"] = function() read() return "?" end, -- like m
+		["x"] = function() read() return "?" end, -- like m
 
 		["d"] = function() return "?" end, -- ends there
 		["D"] = function() return "?" end, -- same as d
