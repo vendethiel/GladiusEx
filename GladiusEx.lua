@@ -670,7 +670,7 @@ function GladiusEx:CreateUnit(unit)
 	-- secure button
 	button.secure = CreateFrame("Button", "GladiusExSecureButton" .. unit, button, "SecureActionButtonTemplate")
 	button.secure:SetAttribute("unit", unit)
-	button.secure:RegisterForClicks("AnyUp")
+	button.secure:RegisterForClicks("AnyDown")
 	button.secure:SetAttribute("*type1", "target")
 	button.secure:SetAttribute("*type2", "focus")
 

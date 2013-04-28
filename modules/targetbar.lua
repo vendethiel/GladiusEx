@@ -225,7 +225,7 @@ function TargetBar:Update(unit)
 	self.frame[unit].secure:SetWidth(self.frame[unit]:GetWidth())
 	self.frame[unit].secure:SetHeight(self.frame[unit]:GetHeight())
 	self.frame[unit].secure:SetFrameStrata("LOW")
-	self.frame[unit].secure:RegisterForClicks("AnyUp")
+	self.frame[unit].secure:RegisterForClicks("AnyDown")
 	self.frame[unit].secure:SetAttribute("unit", unit .. "target")
 	self.frame[unit].secure:SetAttribute("type1", "target")
 
