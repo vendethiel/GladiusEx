@@ -23,7 +23,7 @@ local ClassIcon = GladiusEx:NewGladiusExModule("ClassIcon", false, {
 	classIconGlossColor = { r = 1, g = 1, b = 1, a = 0.4 },
 	classIconImportantAuras = true,
 	classIconCrop = false,
-	classIconCooldown = false,
+	classIconCooldown = true,
 	classIconCooldownReverse = false,
 
 	-- NOTE: this list can be modified from the ClassIcon module options, no need to edit it here
@@ -277,7 +277,6 @@ function ClassIcon:UNIT_AURA(event, unit)
 end
 
 function ClassIcon:GLADIUS_SPEC_UPDATE(event, unit)
-	self:SetClassIcon(unit)
 	self:UpdateAura(unit)
 end
 
@@ -335,8 +334,10 @@ function ClassIcon:SetAura(unit, name, icon, duration, expires)
 		self.frame[unit].texture:SetTexCoord(0, 1, 0, 1)
 	end
 
-	self.frame[unit].cooldown:SetCooldown(expires - duration, duration)
-	self.frame[unit].cooldown:Show()
+	if self.db.classIconCooldown then
+		self.frame[unit].cooldown:SetCooldown(expires - duration, duration)
+		self.frame[unit].cooldown:Show()
+	end
 end
 
 function ClassIcon:SetClassIcon(unit)
@@ -361,12 +362,12 @@ function ClassIcon:SetClassIcon(unit)
 	local needs_crop
 
 	if not class then
-		texture = "Interface\\Icons\\INV_Misc_QuestionMark"
+		texture = [[Interface\Icons\INV_Misc_QuestionMark]]
 		left, right, top, bottom = 0, 1, 0, 1
 		needs_crop = true
 	elseif self.db.classIconMode == "ROLE" and specID then
 		local _, _, _, _, _, role = GetSpecializationInfoByID(specID)
-		texture = "Interface\\LFGFrame\\UI-LFG-ICON-ROLES"
+		texture = [[Interface\LFGFrame\UI-LFG-ICON-ROLES]]
 		left, right, top, bottom = GetTexCoordsForRole(role)
 		needs_crop = false
 	elseif self.db.classIconMode == "SPEC" and specID then
@@ -374,7 +375,7 @@ function ClassIcon:SetClassIcon(unit)
 		left, right, top, bottom = 0, 1, 0, 1
 		needs_crop = true
 	else
-		texture ="Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes"
+		texture =[[Interface\Glues\CharacterCreate\UI-CharacterCreate-Classes]]
 		left, right, top, bottom = unpack(CLASS_BUTTONS[class])
 		needs_crop = true
 	end
@@ -387,9 +388,11 @@ function ClassIcon:SetClassIcon(unit)
 		bottom = bottom - (bottom - top) * 0.07
 	end
 
+	-- set texture
 	self.frame[unit].texture:SetTexture(texture)
 	self.frame[unit].texture:SetTexCoord(left, right, top, bottom)
 
+	-- hide cooldown frame
 	self.frame[unit].cooldown:Hide()
 end
 
@@ -400,7 +403,6 @@ function ClassIcon:CreateFrame(unit)
 	-- create frame
 	self.frame[unit] = CreateFrame("CheckButton", "GladiusEx" .. self:GetName() .. "Frame" .. unit, button, "ActionButtonTemplate")
 	self.frame[unit]:EnableMouse(false)
-	self.frame[unit]:SetNormalTexture("Interface\\AddOns\\GladiusEx\\images\\gloss")
 	self.frame[unit].texture = _G[self.frame[unit]:GetName().."Icon"]
 	self.frame[unit].normalTexture = _G[self.frame[unit]:GetName().."NormalTexture"]
 	self.frame[unit].cooldown = _G[self.frame[unit]:GetName().."Cooldown"]
@@ -454,7 +456,7 @@ function ClassIcon:Update(unit)
 
 	self.frame[unit].normalTexture:ClearAllPoints()
 	self.frame[unit].normalTexture:SetPoint("CENTER", 0, 0)
-	self.frame[unit]:SetNormalTexture("Interface\\AddOns\\GladiusEx\\images\\gloss")
+	self.frame[unit]:SetNormalTexture([[Interface\AddOns\GladiusEx\images\gloss]])
 
 	self.frame[unit].texture:ClearAllPoints()
 	self.frame[unit].texture:SetPoint("TOPLEFT", self.frame[unit], "TOPLEFT")
@@ -462,13 +464,6 @@ function ClassIcon:Update(unit)
 
 	self.frame[unit].normalTexture:SetVertexColor(self.db.classIconGlossColor.r, self.db.classIconGlossColor.g,
 		self.db.classIconGlossColor.b, self.db.classIconGloss and self.db.classIconGlossColor.a or 0)
-
-	-- cooldown
-	if (self.db.classIconCooldown) then
-		self.frame[unit].cooldown:Show()
-	else
-		self.frame[unit].cooldown:Hide()
-	end
 
 	self.frame[unit].cooldown:SetReverse(self.db.classIconCooldownReverse)
 
@@ -486,18 +481,11 @@ function ClassIcon:Show(unit)
 end
 
 function ClassIcon:Reset(unit)
-	-- reset cooldown
-	self.frame[unit].cooldown:SetCooldown(GetTime(), 0)
-
-	-- reset texture
-	self.frame[unit].texture:SetTexture("")
-
 	-- hide
 	self.frame[unit]:SetAlpha(0)
 end
 
 function ClassIcon:Test(unit)
-	local aura
 end
 
 function ClassIcon:GetImportantAura(name)
