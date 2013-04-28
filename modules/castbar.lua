@@ -135,7 +135,7 @@ function CastBar:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 		self.frame[unit]:SetMinMaxValues(0, (endTime - startTime) / 1000)
 		self.frame[unit].icon:SetTexture(icon)
 
-		if( rank ~= "" ) then
+		if rank ~= "" then
 			self.frame[unit].castText:SetFormattedText("%s (%s)", spell, rank)
 		else
 			self.frame[unit].castText:SetText(spell)
@@ -242,7 +242,7 @@ function CastBar:Update(unit)
 		self.isBar = false
 	end]]
 
-	-- update power bar
+	-- update bar
 	self.frame[unit]:ClearAllPoints()
 
 	local width = self.db.castBarAdjustWidth and GladiusEx.db.barWidth or self.db.castBarWidth
@@ -293,6 +293,12 @@ function CastBar:Update(unit)
 	self.frame[unit]:SetStatusBarColor(color.r, color.g, color.b, color.a)
 
 	-- update cast text
+	if self.db.castText then
+		self.frame[unit].castText:Show()
+	else
+		self.frame[unit].castText:Hide()
+	end
+
 	self.frame[unit].castText:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.globalFont), self.db.castTextSize)
 
 	local color = self.db.castTextColor
@@ -304,6 +310,12 @@ function CastBar:Update(unit)
 	self.frame[unit].castText:SetPoint(self.db.castTextAlign, self.db.castTextOffsetX, self.db.castTextOffsetY)
 
 	-- update cast time text
+	if self.db.castTimeText then
+		self.frame[unit].timeText:Show()
+	else
+		self.frame[unit].timeText:Hide()
+	end
+	
 	self.frame[unit].timeText:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.globalFont), self.db.castTimeTextSize)
 
 	local color = self.db.castTimeTextColor
@@ -395,23 +407,14 @@ function CastBar:Reset(unit)
 end
 
 function CastBar:Test(unit)
-		self.frame[unit]:SetMinMaxValues(0, 100)
-		self.frame[unit]:SetValue(70)
+	self.frame[unit]:SetMinMaxValues(0, 100)
+	self.frame[unit]:SetValue(70)
 
-		if (self.db.castTimeText) then
-			self.frame[unit].timeText:SetFormattedText("+1.5 %.1f", 1.379)
-		else
-			self.frame[unit].timeText:SetText("")
-		end
+	self.frame[unit].timeText:SetFormattedText("+1.5 %.1f", 1.379)
 
-		local texture = select(3, GetSpellInfo(1))
-		self.frame[unit].icon:SetTexture(texture)
-
-		if (self.db.castText) then
-			self.frame[unit].castText:SetText(L["Example Spell Name"])
-		else
-			self.frame[unit].castText:SetText("")
-		end
+	local texture = select(3, GetSpellInfo(1))
+	self.frame[unit].icon:SetTexture(texture)
+	self.frame[unit].castText:SetText(L["Example Spell Name"])
 end
 
 function CastBar:GetOptions()
