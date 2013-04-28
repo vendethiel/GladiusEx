@@ -532,10 +532,6 @@ function Cooldowns:UpdateGroupIcons(group, unit)
 	-- get spells lists
 	local sorted_spells = GetCooldownList(group, unit)
 
-	local _debugstop = GladiusEx:IsDebugging() and debugprofilestop()
-	GladiusEx:Log("GetCooldownList for", group, "/", unit, "done in", _debugstop - _debugstart)
-	_debugstart = GladiusEx:IsDebugging() and debugprofilestop()
-
 	-- update icon frames
 	UpdateGroupIconFrames(group, unit, sorted_spells)
 
