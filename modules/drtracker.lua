@@ -1,14 +1,12 @@
-local GladiusEx = _G.GladiusEx
+﻿local GladiusEx = _G.GladiusEx
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local LSM
-
 local DRData = LibStub("DRData-1.0")
 
 -- global functions
 local strfind = string.find
-local pairs = pairs
-local GetTime = GetTime
-local UnitGUID = UnitGUID
+local pairs, unpack = pairs, unpack
+local GetTime, GetSpellTexture, UnitGUID = GetTime, GetSpellTexture, UnitGUID
 
 local DRTracker = GladiusEx:NewGladiusExModule("DRTracker", false, {
 	drTrackerAttachTo = "Cooldowns_2",
@@ -23,12 +21,10 @@ local DRTracker = GladiusEx:NewGladiusExModule("DRTracker", false, {
 	drTrackerFrameLevel = 2,
 	drTrackerGloss = false,
 	drTrackerGlossColor = { r = 1, g = 1, b = 1, a = 0.4 },
-	drTrackerCooldown = false,
+	drTrackerCooldown = true,
 	drTrackerCooldownReverse = false,
-
 	drFontSize = 18,
 	drFontColor = { r = 0, g = 1, b = 0, a = 1 },
-
 	drCategories = {},
 })
 
@@ -46,7 +42,7 @@ function DRTracker:OnDisable()
 	self:UnregisterAllEvents()
 
 	for _, frame in pairs(self.frame) do
-		frame:SetAlpha(0)
+		frame:Hide()
 	end
 end
 
@@ -68,28 +64,39 @@ function DRTracker:GetAttachFrame(unit)
 	return self.frame[unit]
 end
 
+function DRTracker:CreateIcon(unit, drCat)
+	local f = CreateFrame("CheckButton", "GladiusEx" .. self:GetName() .. "FrameCat" .. drCat .. unit, self.frame[unit], "ActionButtonTemplate")
+	f.texture = _G[f:GetName().."Icon"]
+	f.normalTexture = _G[f:GetName().."NormalTexture"]
+	f.cooldown = _G[f:GetName().."Cooldown"]
+	
+	self.frame[unit].tracker[drCat] = f
+end
+
 function DRTracker:UpdateIcon(unit, drCat)
 	local tracked = self.frame[unit].tracker[drCat]
 
 	tracked:EnableMouse(false)
-	tracked.reset = 0
+	tracked.reset_time = 0
 
 	tracked:SetWidth(self.frame[unit]:GetHeight())
 	tracked:SetHeight(self.frame[unit]:GetHeight())
 
-	tracked:SetNormalTexture("Interface\\AddOns\\GladiusEx\\images\\gloss")
+	tracked:SetNormalTexture([[Interface\AddOns\GladiusEx\images\gloss]])
 	tracked.normalTexture:SetVertexColor(self.db.drTrackerGlossColor.r, self.db.drTrackerGlossColor.g,
 		self.db.drTrackerGlossColor.b, self.db.drTrackerGloss and self.db.drTrackerGlossColor.a or 0)
 
 	-- cooldown
-	if (self.db.drTrackerCooldown) then
+	tracked.cooldown:SetReverse(self.db.drTrackerCooldownReverse)
+	if self.db.drTrackerCooldown then
+		-- print("showcd")
 		tracked.cooldown:Show()
 	else
+		-- print("hidecd")
 		tracked.cooldown:Hide()
 	end
 
-	tracked.cooldown:SetReverse(self.db.drTrackerCooldownReverse)
-
+	-- text
 	tracked.text = tracked:CreateFontString(nil, "OVERLAY")
 	tracked.text:SetDrawLayer("OVERLAY")
 	tracked.text:SetJustifyH("RIGHT")
@@ -103,7 +110,6 @@ function DRTracker:UpdateIcon(unit, drCat)
 
 	tracked.normalTexture:ClearAllPoints()
 	tracked.normalTexture:SetPoint("CENTER", 0, 0)
-	tracked:SetNormalTexture("Interface\\AddOns\\GladiusEx\\images\\gloss")
 
 	tracked.texture:ClearAllPoints()
 	tracked.texture:SetPoint("TOPLEFT", tracked, "TOPLEFT")
@@ -116,60 +122,47 @@ function DRTracker:DRFaded(unit, spellID)
 	if (self.db.drCategories[drCat] == false) then return end
 
 	local drTexts = {
-		[1] = { "\194\189", 0, 1, 0 },
-		[0.5] = { "\194\188", 1, 0.65,0 },
-		[0.25] = { "%", 1, 0, 0 },
-		[0] = { "%", 1, 0, 0 },
+		[1] =    { "½", 0, 1, 0 },
+		[0.5] =  { "¼", 1, 0.65,0 },
+		[0.25] = { "Ø", 1, 0, 0 },
+		[0] =    { "Ø", 1, 0, 0 },
 	}
 
 	if (not self.frame[unit].tracker[drCat]) then
-		self.frame[unit].tracker[drCat] = CreateFrame("CheckButton", "GladiusEx" .. self:GetName() .. "FrameCat" .. drCat .. unit, self.frame[unit], "ActionButtonTemplate")
-		local f = self.frame[unit].tracker[drCat]
-		f.texture = _G[f:GetName().."Icon"]
-		f.normalTexture = _G[f:GetName().."NormalTexture"]
-		f.cooldown = _G[f:GetName().."Cooldown"]
-
+		self:CreateIcon(unit, drCat)
 		self:UpdateIcon(unit, drCat)
 	end
 
 	local tracked = self.frame[unit].tracker[drCat]
 
-	tracked.active = true
-	if (tracked and tracked.reset <= GetTime()) then
-		tracked.diminished = 1
-	else
+	if tracked.active then
 		tracked.diminished = DRData:NextDR(tracked.diminished)
-	end
-
-	if (GladiusEx:IsTesting() and tracked.diminished == 0) then
+	else
+		tracked.active = true
 		tracked.diminished = 1
 	end
 
-	tracked.timeLeft = DRData:GetResetTime()
-	tracked.reset = tracked.timeLeft + GetTime()
+	local time_left = DRData:GetResetTime()
+	tracked.reset_time = time_left + GetTime()
 
 	local text, r, g, b = unpack(drTexts[tracked.diminished])
 	tracked.text:SetText(text)
 	tracked.text:SetTextColor(r,g,b)
-
 	tracked.texture:SetTexture(GetSpellTexture(spellID))
-	tracked.cooldown:SetCooldown(GetTime(), tracked.timeLeft)
 
-
-	-- todo: this is so retarded i don't even have words for it
+	if self.db.drTrackerCooldown then
+		tracked.cooldown:SetCooldown(GetTime(), time_left)
+	end
+	
 	tracked:SetScript("OnUpdate", function(f, elapsed)
-		f.timeLeft = f.timeLeft - elapsed
-		if (f.timeLeft <= 0) then
-			if (GladiusEx:IsTesting()) then return end
-
-			f.active = false
-
-			-- position icons
+		if GetTime() >= f.reset_time then
+			tracked.active = false
 			self:SortIcons(unit)
+			f:SetScript("OnUpdate", nil)
 		end
 	end)
 
-	tracked:SetAlpha(1)
+	tracked:Show()
 	self:SortIcons(unit)
 end
 
@@ -178,7 +171,6 @@ function DRTracker:SortIcons(unit)
 
 	for cat, frame in pairs(self.frame[unit].tracker) do
 		frame:ClearAllPoints()
-		frame:SetAlpha(0)
 
 		if (frame.active) then
 			if not lastFrame then
@@ -196,29 +188,30 @@ function DRTracker:SortIcons(unit)
 
 			lastFrame = frame
 
-			frame:SetAlpha(1)
+			frame:Show()
+		else
+			frame:Hide()
+		end
+	end
+end
+
+local function GetUnitByGUID(guid)
+	for unit, _ in pairs(GladiusEx.buttons) do
+		if UnitGUID(unit) == guid then
+			return unit
 		end
 	end
 end
 
 function DRTracker:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, auraType)
-	local unit
-	for u, _ in pairs(GladiusEx.buttons) do
-		if (UnitGUID(u) == destGUID) then
-			unit = u
-		end
-	end
-	if (not unit) then return end
-
-	-- Enemy had a debuff refreshed before it faded, so fade + gain it quickly
-	if (eventType == "SPELL_AURA_REFRESH") then
-		if (auraType == "DEBUFF" and DRData:GetSpellCategory(spellID)) then
-			self:DRFaded(unit, spellID)
-		end
+	-- Enemy had a debuff refreshed before it faded
 	-- Buff or debuff faded from an enemy
-	elseif (eventType == "SPELL_AURA_REMOVED") then
-		if (auraType == "DEBUFF" and DRData:GetSpellCategory(spellID)) then
-			self:DRFaded(unit, spellID)
+	if eventType == "SPELL_AURA_REFRESH" or eventType == "SPELL_AURA_REMOVED" then
+		if auraType == "DEBUFF" and DRData:GetSpellCategory(spellID) then
+			local unit = GetUnitByGUID(destGUID)
+			if unit then
+				self:DRFaded(unit, spellID)
+			end
 		end
 	end
 end
@@ -249,25 +242,13 @@ function DRTracker:Update(unit)
 
 	if (self.db.drTrackerAdjustSize) then
 		if (self:GetAttachTo() == "Frame") then
-			local height = false
-			--[[ need to rethink that
-			for _, module in GladiusEx:IterateModules() do
-				if (module:GetAttachTo() == self:GetName()) then
-					height = false
-				end
-			end]]
-
-			if (height) then
-				self.frame[unit]:SetWidth(GladiusEx.buttons[unit].height)
-				self.frame[unit]:SetHeight(GladiusEx.buttons[unit].height)
-			else
-				self.frame[unit]:SetWidth(GladiusEx.buttons[unit].frameHeight)
-				self.frame[unit]:SetHeight(GladiusEx.buttons[unit].frameHeight)
-			end
+			self.frame[unit]:SetWidth(GladiusEx.buttons[unit].frameHeight)
+			self.frame[unit]:SetHeight(GladiusEx.buttons[unit].frameHeight)
 		else
 			-- todo: fix this (should use GetAttachFrame instead)
-			self.frame[unit]:SetWidth(GladiusEx:GetModule(self:GetAttachTo()).frame[unit]:GetHeight() or 1)
-			self.frame[unit]:SetHeight(GladiusEx:GetModule(self:GetAttachTo()).frame[unit]:GetHeight() or 1)
+			local f = GladiusEx:GetAttachFrame(unit, self.db.drTrackerAttachTo)
+			self.frame[unit]:SetWidth(f and f:GetHeight() or 1)
+			self.frame[unit]:SetHeight(f and f:GetHeight() or 1)
 		end
 	else
 		self.frame[unit]:SetWidth(self.db.drTrackerSize)
@@ -287,17 +268,16 @@ function DRTracker:Update(unit)
 
 			self:UpdateIcon(unit, cat)
 		end
-
 		self:SortIcons(unit)
 	end
 
 	-- hide
-	self.frame[unit]:SetAlpha(0)
+	self.frame[unit]:Hide()
 end
 
 function DRTracker:Show(unit)
 	-- show frame
-	self.frame[unit]:SetAlpha(1)
+	self.frame[unit]:Show()
 end
 
 function DRTracker:Reset(unit)
@@ -305,30 +285,24 @@ function DRTracker:Reset(unit)
 
 	-- hide icons
 	for _, frame in pairs(self.frame[unit].tracker) do
-		frame.active = false
-		frame.diminished = 1
-
+		-- frame.active = false
+		-- frame.diminished = 1
 		frame:SetScript("OnUpdate", nil)
-
-		frame:SetAlpha(0)
+		frame:Hide()
 	end
 
 	-- hide
-	self.frame[unit]:SetAlpha(0)
+	self.frame[unit]:Hide()
 end
 
 function DRTracker:Test(unit)
-	if (not self.frame[unit].tracker[DRData:GetSpellCategory(64058)] or self.frame[unit].tracker[DRData:GetSpellCategory(64058)].active == false) then
-		self:DRFaded(unit, 64058)
-		self:DRFaded(unit, 118)
-		self:DRFaded(unit, 118)
-	end
+	self:DRFaded(unit, 64058)
+	self:DRFaded(unit, 118)
+	self:DRFaded(unit, 118)
 
-	if (not self.frame[unit].tracker[DRData:GetSpellCategory(33786)] or self.frame[unit].tracker[DRData:GetSpellCategory(33786)].active == false) then
-		self:DRFaded(unit, 33786)
-		self:DRFaded(unit, 33786)
-		self:DRFaded(unit, 33786)
-	end
+	self:DRFaded(unit, 33786)
+	self:DRFaded(unit, 33786)
+	self:DRFaded(unit, 33786)
 end
 
 function DRTracker:GetOptions()
@@ -362,7 +336,7 @@ function DRTracker:GetOptions()
 						drTrackerCooldown = {
 							type = "toggle",
 							name = L["DRTracker Cooldown Spiral"],
-							desc = L["Display the cooldown spiral for important auras"],
+							desc = L["Display the cooldown spiral for the drTracker icons"],
 							disabled = function() return not self:IsEnabled() end,
 							hidden = function() return not GladiusEx.db.advancedOptions end,
 							order = 10,
@@ -587,7 +561,7 @@ function DRTracker:GetOptions()
 	}
 
 	local index = 1
-	for key, name in pairs(DRData.categoryNames) do
+	for key, name in pairs(DRData:GetCategories()) do
 		t.categories.args.categories.args[key] = {
 			type = "toggle",
 			name = name,

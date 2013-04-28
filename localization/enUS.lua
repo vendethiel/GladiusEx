@@ -167,6 +167,7 @@ L["Disable all the spells in this category"] = true
 L["Disable all the spells"] = true
 L["Disable all"] = true
 L["Display the cooldown spiral for important auras"] = true
+L["Display the cooldown spiral for the drTracker icons"] = true
 L["Down Left"] = true
 L["Down Right"] = true
 L["Down"] = true
