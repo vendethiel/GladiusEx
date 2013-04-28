@@ -190,6 +190,7 @@ function GladiusEx:OnEnable()
 	self:RegisterEvent("SCRIPT_ARENA_PREP_OPPONENT_SPECIALIZATIONS", "ARENA_PREP_OPPONENT_SPECIALIZATIONS")
 	self:RegisterEvent("UNIT_NAME_UPDATE")
 	self:RegisterEvent("UNIT_HEALTH")
+	self:RegisterEvent("UNIT_MAXHEALTH", "UNIT_HEALTH")	
 	self:RegisterEvent("GROUP_ROSTER_UPDATE")
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	LSR.RegisterMessage(self, "LSR_SpecializationChanged")
@@ -434,7 +435,7 @@ end
 function GladiusEx:ARENA_OPPONENT_UPDATE(event, unit, type)
 	log(event, unit, type)
 	if type == "seen" or type == "destroyed" then
-		self:UpdateShowUnit(unit)
+		self:CheckedShowUnit(unit)
 		if self.db.growDirection == "HCENTER" then
 			self:CenterUnitPosition("arena1", self:GetArenaSize(string.match(unit, "^arena(%d+)$")))
 		end
@@ -466,12 +467,17 @@ function GladiusEx:UNIT_NAME_UPDATE(event, unit)
 
 	log("UNIT_NAME_UPDATE", unit)
 
-	self:UpdateShowUnit(unit)
+	self:CheckedShowUnit(unit)
+	self:UpdateUnitState(unit)
 end
 
 function GladiusEx:UNIT_HEALTH(event, unit)
 	if not self.buttons[unit] then return end
 
+	self:UpdateUnitState(unit)
+end
+
+function GladiusEx:UpdateUnitState(unit)
 	if UnitIsDeadOrGhost(unit) then
 		self.buttons[unit]:SetAlpha(self.db.deadAlpha)
 	end
@@ -555,7 +561,7 @@ function GladiusEx:TestUnit(unit)
 	self.buttons[unit].secure:SetFrameStrata("BACKGROUND")
 end
 
-function GladiusEx:UpdateShowUnit(unit)
+function GladiusEx:CheckedShowUnit(unit)
 	if UnitGUID(unit) then
 		self:ShowUnit(unit)
 	end

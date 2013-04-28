@@ -255,6 +255,7 @@ function GladiusEx:SetupOptions()
 							showParty = {
 								type = "toggle",
 								name = L["Show party frames"],
+								desc = L["Toggle to show your party frames"],
 								set = function(info, value)
 									setOption(info, value)
 									-- todo: this shouldn't be so.. awkward
@@ -270,6 +271,29 @@ function GladiusEx:SetupOptions()
 								name = L["Advanced Options"],
 								desc = L["Toggle advanced options"],
 								order = 15,
+							},
+						},
+					},
+					units = {
+						type = "group",
+						name = L["Units"],
+						desc = L["Unit settings"],
+						inline = true,
+						order = 1.5,
+						args = {
+							stealthAlpha = {
+								type = "range",
+								name = L["Stealth Alpha"],
+								desc = L["Transparency for units in stealth"],
+								min = 0, max = 1, step = 0.1,
+								order = 1,
+							},
+							deadAlpha = {
+								type = "range",
+								name = L["Dead Alpha"],
+								desc = L["Transparency for dead units"],
+								min = 0, max = 1, step = 0.1,
+								order = 2,
 							},
 						},
 					},
