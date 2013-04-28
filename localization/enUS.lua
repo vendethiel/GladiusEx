@@ -380,6 +380,7 @@ L["Spec Detection"] = true
 L["Spec"] = true
 L["Spell Name / Macro Text"] = true
 L["Spells in each group have their own row or column"] = true
+L["Stop Testing"] = true
 L["Tag settings"] = true
 L["Tag"] = true
 L["Tag: %s"] = true
@@ -402,6 +403,10 @@ L["Target bar texture"] = true
 L["Target bar width"] = true
 L["TargetBar settings"] = true
 L["TargetBar"] = true
+L["Test 2v2"] = true
+L["Test 3v3"] = true
+L["Test 5v5"] = true
+L["Test Frames"] = true
 L["Text align of the cast text"] = true
 L["Text align of the cast time text"] = true
 L["Text align of the text"] = true
@@ -481,7 +486,7 @@ L["Y offset of the drTracker"] = true
 L["Y offset of the health bar"] = true
 L["Y offset of the text"] = true
 
-		-- cooldowns module
+-- cooldowns module
 L["cat:pvp_trinket"] = "PvP Trinket"
 L["cat:mass_dispel"] = "Mass Dispel"
 L["cat:cc"] = "CC"
@@ -514,7 +519,7 @@ L["healthTag"] = "Health"
 L["maxhealth:shortTag"] = "Max Health (Short)"
 L["maxpowerTag"] = "Max Power"
 
-		-- Specs
+-- Specs
 L["specID:250:short"] = "Blood"
 L["specID:251:short"] = "Frost"
 L["specID:252:short"] = "Unholy"
@@ -560,7 +565,7 @@ L["specID:71:short"] = "Arms"
 L["specID:72:short"] = "Fury"
 L["specID:73:short"] = "Prot"
 
-		-- Classes
+-- Classes
 L["WARRIOR:short"] = "Warr"
 L["DEATHKNIGHT:short"] = "DK"
 L["WARLOCK:short"] = "Lock"

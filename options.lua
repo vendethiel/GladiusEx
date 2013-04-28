@@ -170,6 +170,45 @@ function GladiusEx:SetupOptions()
 		get = getOption,
 		set = setOption,
 		args = {
+			test = {
+				type = "group",
+				name = L["Test Frames"],
+				inline = true,
+				order = 0,
+				args = {
+					test2 = {
+						type = "execute",
+						name = L["Test 2v2"],
+						order = 0.2,
+						width = "half",
+						func = function() self:SetTesting(2) end,
+						disabled = function() return self:IsTesting() == 2 end,
+					},
+					test3 = {
+						type = "execute",
+						name = L["Test 3v3"],
+						width = "half",
+						order = 0.3,
+						func = function() self:SetTesting(3) end,
+						disabled = function() return self:IsTesting() == 3 end,
+					},
+					test5 = {
+						type = "execute",
+						name = L["Test 5v5"],
+						width = "half",
+						order = 0.5,
+						func = function() self:SetTesting(5) end,
+						disabled = function() return self:IsTesting() == 5 end,
+					},
+					hide = {
+						type = "execute",
+						name = L["Stop Testing"],
+						order = 1,
+						func = function() self:SetTesting() end,
+						disabled = function() return not self:IsTesting() end,
+					},
+				},
+			},
 			general = {
 				type = "group",
 				name = L["General"],
