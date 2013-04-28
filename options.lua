@@ -172,7 +172,7 @@ function GladiusEx:SetupOptions()
 		args = {
 			test = {
 				type = "group",
-				name = L["Test Frames"],
+				name = "", --L["Test Frames"],
 				inline = true,
 				order = 0,
 				args = {
