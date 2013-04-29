@@ -28,20 +28,15 @@ local PowerBar = GladiusEx:NewGladiusExModule("PowerBar", true, {
 })
 
 function PowerBar:OnEnable()
-	self:RegisterEvent("UNIT_POWER")
-	self:RegisterEvent("UNIT_POWER_FREQUENT", "UNIT_POWER")
-	self:RegisterEvent("UNIT_MAXPOWER", "UNIT_POWER")
-	self:RegisterEvent("UNIT_MANA", "UNIT_POWER")
-	self:RegisterEvent("UNIT_RAGE", "UNIT_POWER")
-	self:RegisterEvent("UNIT_ENERGY", "UNIT_POWER")
-	self:RegisterEvent("UNIT_FOCUS", "UNIT_POWER")
-	self:RegisterEvent("UNIT_RUNIC_POWER", "UNIT_POWER")
-	self:RegisterEvent("UNIT_MAXMANA", "UNIT_POWER")
-	self:RegisterEvent("UNIT_MAXRAGE", "UNIT_POWER")
-	self:RegisterEvent("UNIT_MAXENERGY", "UNIT_POWER")
-	self:RegisterEvent("UNIT_MAXFOCUS", "UNIT_POWER")
-	self:RegisterEvent("UNIT_MAXRUNIC_POWER", "UNIT_POWER")
-	self:RegisterEvent("UNIT_DISPLAYPOWER", "UNIT_POWER")
+	self:RegisterEvent("UNIT_POWER", "UpdatePowerEvent")
+	self:RegisterEvent("UNIT_POWER_FREQUENT", "UpdatePowerEvent")
+	self:RegisterEvent("UNIT_MAXPOWER", "UpdatePowerEvent")
+	self:RegisterEvent("UNIT_CONNECTION", "UpdatePowerEvent")
+	self:RegisterEvent("UNIT_POWER_BAR_SHOW", "UpdatePowerEvent")
+	self:RegisterEvent("UNIT_POWER_BAR_HIDE","UpdatePowerEvent")
+	self:RegisterEvent("UNIT_CLASSIFICATION_CHANGED","UpdateColor")
+	self:RegisterEvent("UNIT_DISPLAYPOWER", "UpdateColor")
+
 
 	LSM = GladiusEx.LSM
 
@@ -83,14 +78,26 @@ function PowerBar:GetAttachFrame(unit)
 	return self.frame[unit]
 end
 
-function PowerBar:UNIT_POWER(event, unit)
+function PowerBar:UpdateColor(event, unit)
 	if not GladiusEx:IsHandledUnit(unit) then return end
 
-	local power, maxPower, powerType = UnitPower(unit), UnitPowerMax(unit), UnitPowerType(unit)
-	self:UpdatePower(unit, power, maxPower, powerType)
+	local powerType = UnitPowerType(unit)
+
+	-- update bar color
+	if self.db.powerBarDefaultColor then
+		local color = self:GetBarColor(powerType)
+		self.frame[unit]:SetStatusBarColor(color.r, color.g, color.b)
+	end
+
+	self:UpdatePower(event, unit)
 end
 
-function PowerBar:UpdatePower(unit, power, maxPower, powerType)
+function PowerBar:UpdatePowerEvent(event, unit)
+	local power, maxPower = UnitPower(unit), UnitPowerMax(unit)
+	self:UpdatePower(unit, power, maxPower)
+end
+
+function PowerBar:UpdatePower(unit, power, maxPower)
 	if (not self.frame[unit]) then return end
 
 	-- update min max values
@@ -101,12 +108,6 @@ function PowerBar:UpdatePower(unit, power, maxPower, powerType)
 		self.frame[unit]:SetValue(maxPower - power)
 	else
 		self.frame[unit]:SetValue(power)
-	end
-
-	-- update bar color
-	if self.db.powerBarDefaultColor then
-		local color = self:GetBarColor(powerType)
-		self.frame[unit]:SetStatusBarColor(color.r, color.g, color.b)
 	end
 end
 
@@ -243,7 +244,7 @@ function PowerBar:Test(unit)
 	maxPower = GladiusEx.testing[unit].maxPower
 	power = GladiusEx.testing[unit].power
 
-	self:UpdatePower(unit, power, maxPower, powerType)
+	self:UpdatePower(unit, power, maxPower)
 end
 
 function PowerBar:GetOptions()
