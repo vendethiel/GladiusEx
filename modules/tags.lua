@@ -186,20 +186,19 @@ end
 
 -- Takes a tag text and returns a function that receives a unit parameter and returns the formatted text
 function Tags:ParseText(text)
-	local texts = {}
-	local tags = {}
 	local out = {}
+	local arg_values = {}
 	
 	local function output_text(otext)
 		if otext ~= "" then
-			tinsert(texts, otext)
-			tinsert(out, "text" .. tostring(#texts))
+			tinsert(arg_values, otext)
+			tinsert(out, "args[" .. tostring(#out + 1) .. "]")
 		end
 	end
 
 	local function output_tag(tag)
-		tinsert(tags, tag)
-		tinsert(out, "tostring(tag" .. tostring(#tags) .. "(unit))")
+		tinsert(arg_values, self:GetTagFunc(tag))
+		tinsert(out, "args[" .. tostring(#out + 1) .. "](unit) or default")
 	end
 
 	while true do
@@ -214,20 +213,14 @@ function Tags:ParseText(text)
 		text = string.sub(text, pose)
 	end
 
-	local args = { "unit" }
-	args = fn.concat(args, fn.map(fn.range(#texts), function(n) return "text" .. n end), fn.map(fn.range(#tags), function(n) return "tag" .. n end))
-	local fntext = "return function(" .. table.concat(args, ", ") .. ") " ..
-		" return " .. table.concat(out, " .. ") ..
-		" end"
+	local fntext = [[local strjoin, default = strjoin, ""; return function(args, unit) ]] ..
+		[[ return strjoin("", ]] .. table.concat(out, ", ") .. [[)]] ..
+		[[ end]]
 	local text_fn = loadstring(fntext)()
-	local arg_values = fn.concat(texts, fn.map(tags, fn.bind(self.GetTagFunc, self)))
-	local unit_fn = function(unit)
-		return text_fn(unit, unpack(arg_values))
-	end
-	return unit_fn
+	return fn.bind(text_fn, arg_values)
 end
 
-function Tags:GetParsedText(tagText)
+function Tags:GetTextFunction(tagText)
 	local fn = self.text_cache[tagText]
 	if not fn then
 		fn = self:ParseText(tagText)
@@ -245,7 +238,7 @@ function Tags:GetTagFunc(tag)
 		elseif builtins[tag] then
 			func = builtins[tag]
 		else
-			func = function() return "[Unknown tag " .. tag .. "]" end
+			func = function() return "[" .. tag .. "]" end
 		end
 		self.func_cache[tag] = func
 	end
@@ -267,14 +260,12 @@ function Tags:UpdateText(unit, text)
 	-- update tag
 	local tagText = self.db.tagsTexts[text].text
 
-	local fn = self:GetParsedText(tagText)
+	local fn = self:GetTextFunction(tagText)
 	local formattedText = fn(unit)
 
 	--[[
 	local formattedText = strgsub(self.db.tagsTexts[text].text, "%[(.-)%]", function(tag)
-		local func = self:GetTagFunc(tag)
-		if func then
-			return func(unit_parameter)
+			return self:GetTagFunc(tag)(unit_parameter)
 		end
 	end)
 	]]
