@@ -193,21 +193,13 @@ function DRTracker:SortIcons(unit)
 	end
 end
 
-local function GetUnitByGUID(guid)
-	for unit, _ in pairs(GladiusEx.buttons) do
-		if UnitGUID(unit) == guid then
-			return unit
-		end
-	end
-end
-
 function DRTracker:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, auraType)
 	-- Enemy had a debuff refreshed before it faded
 	-- Buff or debuff faded from an enemy
 	if eventType == "SPELL_AURA_REFRESH" or eventType == "SPELL_AURA_REMOVED" then
 		if auraType == "DEBUFF" and DRData:GetSpellCategory(spellID) then
-			local unit = GetUnitByGUID(destGUID)
-			if unit then
+			local unit = GladiusEx:GetUnitIdByGUID(destGUID)
+			if unit and self.frame[unit] then
 				self:DRFaded(unit, spellID)
 			end
 		end

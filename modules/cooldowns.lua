@@ -8,7 +8,7 @@ local fn = LibStub("LibFunctional-1.0")
 local tinsert, tremove, tsort = table.insert, table.remove, table.sort
 local pairs, ipairs, select, type, unpack = pairs, ipairs, select, type, unpack
 local min, max, ceil, random = math.min, math.max, math.ceil, math.random
-local GetTime, UnitExists, UnitFactionGroup, UnitRace, UnitGUID = GetTime, UnitExists, UnitFactionGroup, UnitRace, UnitGUID
+local GetTime, UnitExists, UnitFactionGroup, UnitRace = GetTime, UnitExists, UnitFactionGroup, UnitRace
 
 local function MakeGroupDb(settings)
 	local db = {
@@ -88,7 +88,7 @@ local Cooldowns = GladiusEx:NewGladiusExModule("Cooldowns", false, {
 	},
 	groups = {
 		["*"] = MakeGroupDb(),
-		["group_1"] =  MakeGroupDb {
+		["group_1"] = MakeGroupDb {
 			cooldownsGroupId = 1,
 			cooldownsAttachTo = "CastBarIcon",
 			cooldownsAnchor = "TOPLEFT",

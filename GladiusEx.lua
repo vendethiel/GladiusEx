@@ -193,6 +193,9 @@ function GladiusEx:OnEnable()
 	self:RegisterEvent("UNIT_MAXHEALTH", "UNIT_HEALTH")
 	self:RegisterEvent("GROUP_ROSTER_UPDATE")
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
+	self:RegisterEvent("UNIT_PET", "UpdateUnitGUID")
+	self:RegisterEvent("UNIT_PORTRAIT_UPDATE", "UpdateUnitGUID")
+
 	LSR.RegisterMessage(self, "LSR_SpecializationChanged")
 
 	-- enable modules
@@ -206,6 +209,9 @@ function GladiusEx:OnEnable()
 
 	-- init options
 	self:SetupOptions()
+
+	-- update roster
+	self:UpdateAllGUIDs()
 	
 	-- create frames
 	if #self.buttons == 0 then
@@ -454,6 +460,7 @@ function GladiusEx:GROUP_ROSTER_UPDATE()
 	--if self:IsPartyShown() then
 	--	self:UpdatePartyFrames()
 	--end
+	self:UpdateAllGUIDs()
 	self:UpdateFrames()
 end
 
@@ -467,8 +474,37 @@ function GladiusEx:UNIT_NAME_UPDATE(event, unit)
 
 	log("UNIT_NAME_UPDATE", unit)
 
+	self:UpdateUnitGUID(event, unit)
 	self:CheckedShowUnit(unit)
 	self:UpdateUnitState(unit)
+end
+
+local guid_to_unitid = {}
+
+function GladiusEx:GetUnitIdByGUID(guid)
+	return guid_to_unitid[guid]
+end
+
+function GladiusEx:UpdateAllGUIDs()
+	for unit in pairs(party_units) do self:UpdateUnitGUID("UpdateAllGUIDs", unit) end
+	for unit in pairs(arena_units) do self:UpdateUnitGUID("UpdateAllGUIDs", unit) end
+end
+
+function GladiusEx:UpdateUnitGUID(event, unit)
+	if self:IsHandledUnit(unit) then
+		-- find and delete old reference to that unit
+		for guid, unitid in pairs(guid_to_unitid) do
+			if unitid == unit then
+				guid_to_unitid[guid] = nil
+				break
+			end
+		end
+		-- add guid
+		local guid = UnitGUID(unit)
+		if guid then
+			guid_to_unitid[guid] = unit
+		end
+	end
 end
 
 function GladiusEx:UNIT_HEALTH(event, unit)

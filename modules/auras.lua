@@ -5,7 +5,7 @@ local LSM
 -- global functions
 local strfind = string.find
 local pairs = pairs
-local UnitAura, GetSpellInfo = UnitAura, GetSpellInfo
+local UnitAura, UnitBuff, UnitDebuff, GetSpellInfo = UnitAura, UnitBuff, UnitDebuff, GetSpellInfo
 local ceil = math.ceil
 
 local Auras = GladiusEx:NewGladiusExModule("Auras", false, {
@@ -199,7 +199,7 @@ local function CreateAuraFrame(name, parent)
 	frame.border:SetPoint("CENTER")
 	frame.border:SetTexture(1, 1, 1, 1)
 
-	frame.cooldown =  CreateFrame("Cooldown", nil, frame)
+	frame.cooldown = CreateFrame("Cooldown", nil, frame)
 	frame.cooldown:SetAllPoints(frame.icon)
 	frame.cooldown:SetReverse(true)
 	frame.cooldown:Hide()
@@ -279,7 +279,7 @@ local function UpdateAuraGroup(
 
 	-- size
 	auraFrame:SetWidth(aurasBuffsSize*aurasBuffsPerColumn+aurasBuffsSpacingX*aurasBuffsPerColumn)
-	auraFrame:SetHeight(aurasBuffsSize*math.ceil(aurasBuffsMax/aurasBuffsPerColumn)+(aurasBuffsSpacingY*(math.ceil(aurasBuffsMax/aurasBuffsPerColumn)+1)))
+	auraFrame:SetHeight(aurasBuffsSize*ceil(aurasBuffsMax/aurasBuffsPerColumn)+(aurasBuffsSpacingY*(ceil(aurasBuffsMax/aurasBuffsPerColumn)+1)))
 
 	-- icon points
 	local anchor, parent, relativePoint, offsetX, offsetY
