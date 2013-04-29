@@ -242,7 +242,7 @@ function HealthBar:GetOptions()
 					args = {
 						healthBarClassColor = {
 							type = "toggle",
-							name = L["Health bar class color"],
+							name = L["Class color"],
 							desc = L["Toggle health bar class color"],
 							disabled = function() return not self:IsEnabled() end,
 							order = 5,
@@ -256,7 +256,7 @@ function HealthBar:GetOptions()
 						},
 						healthBarColor = {
 							type = "color",
-							name = L["Health bar color"],
+							name = L["Color"],
 							desc = L["Color of the health bar"],
 							hasAlpha = true,
 							get = function(info) return GladiusEx:GetColorOption(self.db, info) end,
@@ -266,7 +266,7 @@ function HealthBar:GetOptions()
 						},
 						healthBarBackgroundColor = {
 							type = "color",
-							name = L["Health bar background color"],
+							name = L["Background color"],
 							desc = L["Color of the health bar background"],
 							hasAlpha = true,
 							get = function(info) return GladiusEx:GetColorOption(self.db, info) end,
@@ -283,15 +283,15 @@ function HealthBar:GetOptions()
 						},
 						healthBarInverse = {
 							type = "toggle",
-							name = L["Health bar inverse"],
-							desc = L["Inverse the health bar"],
+							name = L["Inverse"],
+							desc = L["Invert the bar colors"],
 							disabled = function() return not self:IsEnabled() end,
 							hidden = function() return not GladiusEx.db.advancedOptions end,
 							order = 20,
 						},
 						healthBarTexture = {
 							type = "select",
-							name = L["Health bar texture"],
+							name = L["Texture"],
 							desc = L["Texture of the health bar"],
 							dialogControl = "LSM30_Statusbar",
 							values = AceGUIWidgetLSMlists.statusbar,
@@ -309,8 +309,8 @@ function HealthBar:GetOptions()
 					args = {
 						healthBarAdjustWidth = {
 							type = "toggle",
-							name = L["Health bar adjust width"],
-							desc = L["Adjust health bar width to the frame width"],
+							name = L["Adjust width"],
+							desc = L["Adjust bar width to the frame width"],
 							disabled = function() return not self:IsEnabled() end,
 							order = 5,
 						},
@@ -322,7 +322,7 @@ function HealthBar:GetOptions()
 						},
 						healthBarWidth = {
 							type = "range",
-							name = L["Health bar width"],
+							name = L["Width"],
 							desc = L["Width of the health bar"],
 							min = 10, max = 500, step = 1,
 							disabled = function() return self.db.healthBarAdjustWidth or not self:IsEnabled() end,
@@ -330,7 +330,7 @@ function HealthBar:GetOptions()
 						},
 						healthBarHeight = {
 							type = "range",
-							name = L["Health bar height"],
+							name = L["Height"],
 							desc = L["Height of the health bar"],
 							min = 10, max = 200, step = 1,
 							disabled = function() return not self:IsEnabled() end,
@@ -348,7 +348,7 @@ function HealthBar:GetOptions()
 					args = {
 						healthBarAttachTo = {
 							type = "select",
-							name = L["Health Bar Attach To"],
+							name = L["Attach to"],
 							desc = L["Attach health bar to the given frame"],
 							values = function() return HealthBar:GetAttachPoints() end,
 							set = function(info, value)
@@ -375,7 +375,7 @@ function HealthBar:GetOptions()
 						},
 						healthBarAnchor = {
 							type = "select",
-							name = L["Health Bar Anchor"],
+							name = L["Anchor"],
 							desc = L["Anchor of the health bar"],
 							values = function() return GladiusEx:GetPositions() end,
 							disabled = function() return not self:IsEnabled() end,
@@ -383,7 +383,7 @@ function HealthBar:GetOptions()
 						},
 						healthBarRelativePoint = {
 							type = "select",
-							name = L["Health Bar Relative Point"],
+							name = L["Relative point"],
 							desc = L["Relative point of the health bar"],
 							values = function() return GladiusEx:GetPositions() end,
 							disabled = function() return not self:IsEnabled() end,
@@ -397,7 +397,7 @@ function HealthBar:GetOptions()
 						},
 						healthBarOffsetX = {
 							type = "range",
-							name = L["Health bar offset X"],
+							name = L["Offset X"],
 							desc = L["X offset of the health bar"],
 							min = -100, max = 100, step = 1,
 							disabled = function() return  not self:IsEnabled() end,
@@ -405,7 +405,7 @@ function HealthBar:GetOptions()
 						},
 						healthBarOffsetY = {
 							type = "range",
-							name = L["Health bar offset Y"],
+							name = L["Offset Y"],
 							desc = L["Y offset of the health bar"],
 							disabled = function() return not self:IsEnabled() end,
 							min = -100, max = 100, step = 1,

@@ -201,7 +201,7 @@ function Cooldowns:GetModuleAttachPoints()
 	local t = {}
 	for group = 1, GetNumGroups() do
 		local db = GetGroupDB(group)
-		t["Cooldowns_" .. db.cooldownsGroupId] = string.format(L["Cooldowns Group %i"], group)
+		t["Cooldowns_" .. db.cooldownsGroupId] = string.format(L["Cooldowns group %i"], group)
 	end
 	return t
 end
@@ -768,8 +768,8 @@ function Cooldowns:GetOptions()
 	}
 	options.addgroup = {
 		type = "execute",
-		name = L["Add Cooldowns Group"],
-		desc = L["Add Cooldowns Group"],
+		name = L["Add cooldowns group"],
+		desc = L["Add cooldowns group"],
 		func = function()
 			local gdb = MakeGroupDb({
 				cooldownsGroupId = MakeGroupId(),
@@ -816,8 +816,8 @@ function Cooldowns:MakeGroupOptions(group)
 			args = {
 					remgroup = {
 						type = "execute",
-						name = L["Remove This Group"],
-						desc = L["Remove This Group"],
+						name = L["Remove this group"],
+						desc = L["Remove this group"],
 						func = function()
 							RemoveGroup(group)
 							GladiusEx:UpdateFrames()
@@ -833,13 +833,13 @@ function Cooldowns:MakeGroupOptions(group)
 						args = {
 							cooldownsGrow = {
 								type = "select",
-								name = L["Cooldowns Column Grow"],
+								name = L["Column grow"],
 								desc = L["Grow direction of the cooldowns"],
 								values = function() return {
-										["UPLEFT"] = L["Up Left"],
-										["UPRIGHT"] = L["Up Right"],
-										["DOWNLEFT"] = L["Down Left"],
-										["DOWNRIGHT"] = L["Down Right"],
+										["UPLEFT"] = L["Up left"],
+										["UPRIGHT"] = L["Up right"],
+										["DOWNLEFT"] = L["Down left"],
+										["DOWNRIGHT"] = L["Down right"],
 								}
 								end,
 								disabled = function() return not self:IsEnabled() end,
@@ -853,8 +853,8 @@ function Cooldowns:MakeGroupOptions(group)
 							},
 							cooldownsCrop = {
 								type = "toggle",
-								name = L["Crop Borders"],
-								desc = L["Toggle if the class icon borders should be cropped or not."],
+								name = L["Crop borders"],
+								desc = L["Toggle if the icon borders should be cropped or not"],
 								disabled = function() return not self:IsEnabled() end,
 								hidden = function() return not GladiusEx.db.advancedOptions end,
 								order = 14,
@@ -867,16 +867,16 @@ function Cooldowns:MakeGroupOptions(group)
 							},
 							cooldownsPerColumn = {
 								type = "range",
-								name = L["Cooldown Icons Per Column"],
-								desc = L["Number of cooldown icons per column"],
+								name = L["Icons per column"],
+								desc = L["Number of icons per column"],
 								min = 1, max = 50, step = 1,
 								disabled = function() return not self:IsEnabled() end,
 								order = 15,
 							},
 							cooldownsMax = {
 								type = "range",
-								name = L["Cooldown Icons Max"],
-								desc = L["Number of max cooldowns"],
+								name = L["Icons max"],
+								desc = L["Number of max icons"],
 								min = 1, max = MAX_ICONS, step = 1,
 								disabled = function() return not self:IsEnabled() end,
 								order = 20,
@@ -898,7 +898,7 @@ function Cooldowns:MakeGroupOptions(group)
 						args = {
 								cooldownsSize = {
 									type = "range",
-									name = L["Cooldown Icon Size"],
+									name = L["Icon size"],
 									desc = L["Size of the cooldown icons"],
 									min = 10, max = 100, step = 1,
 									disabled = function() return not self:IsEnabled() end,
@@ -912,16 +912,16 @@ function Cooldowns:MakeGroupOptions(group)
 								},
 								cooldownsSpacingY = {
 									type = "range",
-									name = L["Cooldowns Spacing Vertical"],
-									desc = L["Vertical spacing of the cooldowns"],
+									name = L["Vertical spacing"],
+									desc = L["Vertical spacing of the icons"],
 									min = 0, max = 30, step = 1,
 									disabled = function() return not self:IsEnabled() end,
 									order = 15,
 								},
 								cooldownsSpacingX = {
 									type = "range",
-									name = L["Cooldowns Spacing Horizontal"],
-									desc = L["Horizontal spacing of the cooldowns"],
+									name = L["Horizontal spacing"],
+									desc = L["Horizontal spacing of the icons"],
 									disabled = function() return not self:IsEnabled() end,
 									min = 0, max = 30, step = 1,
 									order = 20,
@@ -938,8 +938,8 @@ function Cooldowns:MakeGroupOptions(group)
 							args = {
 								cooldownsAttachTo = {
 									type = "select",
-									name = L["Cooldowns Attach To"],
-									desc = L["Attach cooldowns to the given frame"],
+									name = L["Attach to"],
+									desc = L["Attach to the given frame"],
 									values = function() return Cooldowns:GetAttachPoints() end,
 									disabled = function() return not self:IsEnabled() end,
 									width = "double",
@@ -953,16 +953,16 @@ function Cooldowns:MakeGroupOptions(group)
 								},
 								cooldownsAnchor = {
 									type = "select",
-									name = L["Cooldowns Anchor"],
-									desc = L["Anchor of the cooldowns"],
+									name = L["Anchor"],
+									desc = L["Anchor of the frame"],
 									values = function() return GladiusEx:GetPositions() end,
 									disabled = function() return not self:IsEnabled() end,
 									order = 10,
 								},
 								cooldownsRelativePoint = {
 									type = "select",
-									name = L["Cooldowns Relative Point"],
-									desc = L["Relative point of the cooldowns"],
+									name = L["Relative point"],
+									desc = L["Relative point of the frame"],
 									values = function() return GladiusEx:GetPositions() end,
 									disabled = function() return not self:IsEnabled() end,
 									order = 15,
@@ -975,16 +975,16 @@ function Cooldowns:MakeGroupOptions(group)
 								},
 								cooldownsOffsetX = {
 									type = "range",
-									name = L["Cooldowns Offset X"],
-									desc = L["X offset of the cooldowns"],
+									name = L["Offset X"],
+									desc = L["X offset of the frame"],
 									min = -100, max = 100, step = 1,
 									disabled = function() return not self:IsEnabled() end,
 									order = 20,
 								},
 								cooldownsOffsetY = {
 									type = "range",
-									name = L["Cooldowns Offset Y"],
-									desc = L["Y offset of the cooldowns"],
+									name = L["Offset Y"],
+									desc = L["Y offset of the frame"],
 									disabled = function() return not self:IsEnabled() end,
 									min = -50, max = 50, step = 1,
 									order = 25,

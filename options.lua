@@ -98,12 +98,12 @@ end
 
 function GladiusEx:GetPositions()
 	return {
-		["TOPLEFT"] = L["Top Left"],
-		["TOPRIGHT"] = L["Top Right"],
-		["LEFT"] = L["Center Left"],
-		["RIGHT"] = L["Center Right"],
-		["BOTTOMLEFT"] = L["Bottom Left"],
-		["BOTTOMRIGHT"] = L["Bottom Right"],
+		["TOPLEFT"] = L["Top left"],
+		["TOPRIGHT"] = L["Top right"],
+		["LEFT"] = L["Center left"],
+		["RIGHT"] = L["Center right"],
+		["BOTTOMLEFT"] = L["Bottom left"],
+		["BOTTOMRIGHT"] = L["Bottom right"],
 	}
 end
 
@@ -111,7 +111,7 @@ function GladiusEx:SetupModule(key, module, order)
 	self.options.args[key] = {
 		type = "group",
 		name = L[key],
-		desc = L[key .. " settings"],
+		desc = string.format(L["%s settings"], key),
 		childGroups = "tab",
 		order = order,
 		get = fn.bind(getModuleOption, module),
@@ -129,7 +129,7 @@ function GladiusEx:SetupModule(key, module, order)
 	-- set enable module option
 	self.options.args[key].args.enable = {
 		type = "toggle",
-		name = L["Enable Module"],
+		name = L["Enable module"],
 		set = function(info, v)
 			local module = info[1]
 			self.db.modules[module] = v
@@ -152,7 +152,7 @@ function GladiusEx:SetupModule(key, module, order)
 	-- set reset module option
 	self.options.args[key].args.reset = {
 		type = "execute",
-		name = L["Reset Module"],
+		name = L["Reset module"],
 		func = function()
 			module.dbi:ResetProfile()
 			self:UpdateFrames()
@@ -170,7 +170,7 @@ function GladiusEx:SetupOptions()
 		args = {
 			test = {
 				type = "group",
-				name = "", --L["Test Frames"],
+				name = "", --L["Test frames"],
 				inline = true,
 				order = 0,
 				args = {
@@ -200,7 +200,7 @@ function GladiusEx:SetupOptions()
 					},
 					hide = {
 						type = "execute",
-						name = L["Stop Testing"],
+						name = L["Stop testing"],
 						order = 1,
 						func = function() self:SetTesting() end,
 						disabled = function() return not self:IsTesting() end,
@@ -230,8 +230,8 @@ function GladiusEx:SetupOptions()
 								order = 5,
 								type = "select",
 								name = "Direction",
-								desc = L["The Direction you want the frame to go in."],
-								name = L["Grow Direction"],
+								name = L["Grow direction"],
+								desc = L["The direction you want the frames to grow in"],
 								values = {
 									["HCENTER"] = L["Left and right"],
 									["LEFT"]    = L["Left"],
@@ -248,8 +248,8 @@ function GladiusEx:SetupOptions()
 							},
 							groupButtons = {
 								type = "toggle",
-								name = L["Group Buttons"],
-								desc = L["If this is toggle buttons can be moved separately"],
+								name = L["Group frames"],
+								desc = L["Disable this to be able to move the frames separately"],
 								order = 10,
 							},
 							showParty = {
@@ -268,8 +268,8 @@ function GladiusEx:SetupOptions()
 							},
 							advancedOptions = {
 								type = "toggle",
-								name = L["Advanced Options"],
-								desc = L["Toggle advanced options"],
+								name = L["Advanced options"],
+								desc = L["Toggle display of advanced options"],
 								order = 15,
 							},
 						},
@@ -283,14 +283,14 @@ function GladiusEx:SetupOptions()
 						args = {
 							stealthAlpha = {
 								type = "range",
-								name = L["Stealth Alpha"],
+								name = L["Stealth alpha"],
 								desc = L["Transparency for units in stealth"],
 								min = 0, max = 1, step = 0.1,
 								order = 1,
 							},
 							deadAlpha = {
 								type = "range",
-								name = L["Dead Alpha"],
+								name = L["Dead alpha"],
 								desc = L["Transparency for dead units"],
 								min = 0, max = 1, step = 0.1,
 								order = 2,
@@ -306,7 +306,7 @@ function GladiusEx:SetupOptions()
 						args = {
 							backgroundColor = {
 								type = "color",
-								name = L["Background Color"],
+								name = L["Background color"],
 								desc = L["Color of the frame background"],
 								hasAlpha = true,
 								get = function(info) return GladiusEx:GetColorOption(self.db, info) end,
@@ -316,7 +316,7 @@ function GladiusEx:SetupOptions()
 							},
 							backgroundPadding = {
 								type = "range",
-								name = L["Background Padding"],
+								name = L["Background padding"],
 								desc = L["Padding of the background"],
 								min = 0, max = 100, step = 1,
 								disabled = function() return not self.db.groupButtons end,
@@ -373,7 +373,7 @@ function GladiusEx:SetupOptions()
 						args = {
 							globalFont = {
 								type = "select",
-								name = L["Global Font"],
+								name = L["Global font"],
 								desc = L["Global font, used by the modules"],
 								dialogControl = "LSM30_Font",
 								values = AceGUIWidgetLSMlists.font,
@@ -381,7 +381,7 @@ function GladiusEx:SetupOptions()
 							},
 							globalFontSize = {
 								type = "range",
-								name = L["Global Font Size"],
+								name = L["Global font size"],
 								desc = L["Text size of the power info text"],
 								disabled = function() return not self.db.useGlobalFontSize end,
 								min = 1, max = 20, step = 1,
@@ -395,7 +395,7 @@ function GladiusEx:SetupOptions()
 							},
 							useGlobalFontSize = {
 								type = "toggle",
-								name = L["Use Global Font Size"],
+								name = L["Use global font size"],
 								desc = L["Toggle if you want to use the global font size"],
 								order = 10,
 							},

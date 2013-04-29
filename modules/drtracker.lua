@@ -319,7 +319,7 @@ function DRTracker:GetOptions()
 					args = {
 						drTrackerMargin = {
 							type = "range",
-							name = L["DRTracker Space"],
+							name = L["Spacing"],
 							desc = L["Space between the icons"],
 							min = 0, max = 100, step = 1,
 							disabled = function() return not self:IsEnabled() end,
@@ -333,7 +333,7 @@ function DRTracker:GetOptions()
 						},
 						drTrackerCooldown = {
 							type = "toggle",
-							name = L["DRTracker Cooldown Spiral"],
+							name = L["Cooldown spiral"],
 							desc = L["Display the cooldown spiral for the drTracker icons"],
 							disabled = function() return not self:IsEnabled() end,
 							hidden = function() return not GladiusEx.db.advancedOptions end,
@@ -341,7 +341,7 @@ function DRTracker:GetOptions()
 						},
 						drTrackerCooldownReverse = {
 							type = "toggle",
-							name = L["DRTracker Cooldown Reverse"],
+							name = L["Cooldown reverse"],
 							desc = L["Invert the dark/bright part of the cooldown spiral"],
 							disabled = function() return not self:IsEnabled() end,
 							hidden = function() return not GladiusEx.db.advancedOptions end,
@@ -355,16 +355,16 @@ function DRTracker:GetOptions()
 						},
 						drTrackerGloss = {
 							type = "toggle",
-							name = L["DRTracker Gloss"],
-							desc = L["Toggle gloss on the drTracker icon"],
+							name = L["Gloss"],
+							desc = L["Toggle gloss on the icon"],
 							disabled = function() return not self:IsEnabled() end,
 							hidden = function() return not GladiusEx.db.advancedOptions end,
 							order = 25,
 						},
 						drTrackerGlossColor = {
 							type = "color",
-							name = L["DRTracker Gloss Color"],
-							desc = L["Color of the drTracker icon gloss"],
+							name = L["Gloss color"],
+							desc = L["Color of the gloss"],
 							get = function(info) return GladiusEx:GetColorOption(self.db, info) end,
 							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db, info, r, g, b, a) end,
 							hasAlpha = true,
@@ -381,8 +381,8 @@ function DRTracker:GetOptions()
 						},
 						drTrackerFrameLevel = {
 							type = "range",
-							name = L["DRTracker Frame Level"],
-							desc = L["Frame level of the drTracker"],
+							name = L["Frame level"],
+							desc = L["Frame level of the frame"],
 							disabled = function() return not self:IsEnabled() end,
 							hidden = function() return not GladiusEx.db.advancedOptions end,
 							min = 1, max = 5, step = 1,
@@ -400,14 +400,14 @@ function DRTracker:GetOptions()
 					args = {
 						drTrackerAdjustSize = {
 							type = "toggle",
-							name = L["DRTracker Adjust Size"],
-							desc = L["Adjust drTracker size to the frame size"],
+							name = L["Adjust size"],
+							desc = L["Adjust size to the frame size"],
 							disabled = function() return not self:IsEnabled() end,
 							order = 5,
 						},
 						drTrackerSize = {
 							type = "range",
-							name = L["DRTracker Size"],
+							name = L["Size"],
 							desc = L["Size of the drTracker"],
 							min = 10, max = 100, step = 1,
 							disabled = function() return self.db.drTrackerAdjustSize or not self:IsEnabled() end,
@@ -425,7 +425,7 @@ function DRTracker:GetOptions()
 					args = {
 						drFontColor = {
 							type = "color",
-							name = L["DR Text Color"],
+							name = L["Text color"],
 							desc = L["Text color of the DR text"],
 							hasAlpha = true,
 							get = function(info) return GladiusEx:GetColorOption(self.db, info) end,
@@ -435,7 +435,7 @@ function DRTracker:GetOptions()
 						},
 						drFontSize = {
 							type = "range",
-							name = L["DR Text Size"],
+							name = L["Text size"],
 							desc = L["Text size of the DR text"],
 							min = 1, max = 20, step = 1,
 							disabled = function() return not self:IsEnabled() end,
@@ -452,7 +452,7 @@ function DRTracker:GetOptions()
 					args = {
 						drTrackerAttachTo = {
 							type = "select",
-							name = L["DRTracker Attach To"],
+							name = L["Attach to"],
 							desc = L["Attach drTracker to the given frame"],
 							values = function() return DRTracker:GetAttachPoints() end,
 							disabled = function() return not self:IsEnabled() end,
@@ -460,8 +460,8 @@ function DRTracker:GetOptions()
 						},
 						drTrackerPosition = {
 							type = "select",
-							name = L["DRTracker Position"],
-							desc = L["Position of the class icon"],
+							name = L["Position"],
+							desc = L["Position of the drTracker"],
 							values = { ["LEFT"] = L["Left"], ["RIGHT"] = L["Right"] },
 							get = function() return strfind(self.db.drTrackerAnchor, "RIGHT") and "LEFT" or "RIGHT" end,
 							set = function(info, value)
@@ -487,7 +487,7 @@ function DRTracker:GetOptions()
 						},
 						drTrackerGrowDirection = {
 							type = "select",
-							name = L["Grow Direction"],
+							name = L["Grow direction"],
 							values = {
 								["LEFT"]  = L["Left"],
 								["RIGHT"] = L["Right"],
@@ -497,8 +497,8 @@ function DRTracker:GetOptions()
 						},
 						drTrackerAnchor = {
 							type = "select",
-							name = L["DRTracker Anchor"],
-							desc = L["Anchor of the drTracker"],
+							name = L["Anchor"],
+							desc = L["Anchor of the frame"],
 							values = function() return GladiusEx:GetPositions() end,
 							disabled = function() return not self:IsEnabled() end,
 							hidden = function() return not GladiusEx.db.advancedOptions end,
@@ -506,8 +506,8 @@ function DRTracker:GetOptions()
 						},
 						drTrackerRelativePoint = {
 							type = "select",
-							name = L["DRTracker Relative Point"],
-							desc = L["Relative point of the drTracker"],
+							name = L["Relative point"],
+							desc = L["Relative point of the frame"],
 							values = function() return GladiusEx:GetPositions() end,
 							disabled = function() return not self:IsEnabled() end,
 							hidden = function() return not GladiusEx.db.advancedOptions end,
@@ -521,16 +521,16 @@ function DRTracker:GetOptions()
 						},
 						drTrackerOffsetX = {
 							type = "range",
-							name = L["DRTracker Offset X"],
-							desc = L["X offset of the drTracker"],
+							name = L["Offset X"],
+							desc = L["X offset of the frame"],
 							min = -100, max = 100, step = 1,
 							disabled = function() return not self:IsEnabled() end,
 							order = 20,
 						},
 						drTrackerOffsetY = {
 							type = "range",
-							name = L["DRTracker Offset Y"],
-							desc = L["Y offset of the drTracker"],
+							name = L["Offset Y"],
+							desc = L["Y offset of the frame"],
 							disabled = function() return not self:IsEnabled() end,
 							min = -50, max = 50, step = 1,
 							order = 25,

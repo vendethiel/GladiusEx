@@ -262,8 +262,8 @@ function PowerBar:GetOptions()
 					args = {
 						powerBarDefaultColor = {
 							type = "toggle",
-							name = L["Power Bar Default Color"],
-							desc = L["Toggle power bar default color"],
+							name = L["Default color"],
+							desc = L["Toggle default color"],
 							disabled = function() return not self:IsEnabled() end,
 							order = 5,
 						},
@@ -276,7 +276,7 @@ function PowerBar:GetOptions()
 						},
 						powerBarColor = {
 							type = "color",
-							name = L["Power Bar Color"],
+							name = L["Color"],
 							desc = L["Color of the power bar"],
 							hasAlpha = true,
 							get = function(info) return GladiusEx:GetColorOption(self.db, info) end,
@@ -286,7 +286,7 @@ function PowerBar:GetOptions()
 						},
 						powerBarBackgroundColor = {
 							type = "color",
-							name = L["Power Bar Background Color"],
+							name = L["Background color"],
 							desc = L["Color of the power bar background"],
 							hasAlpha = true,
 							get = function(info) return GladiusEx:GetColorOption(self.db, info) end,
@@ -303,15 +303,15 @@ function PowerBar:GetOptions()
 						},
 						powerBarInverse = {
 							type = "toggle",
-							name = L["Power Bar Inverse"],
-							desc = L["Inverse the power bar"],
+							name = L["Inverse"],
+							desc = L["Invert the bar colors"],
 							disabled = function() return not self:IsEnabled() end,
 							hidden = function() return not GladiusEx.db.advancedOptions end,
 							order = 20,
 						},
 						powerBarTexture = {
 							type = "select",
-							name = L["Power Bar Texture"],
+							name = L["Texture"],
 							desc = L["Texture of the power bar"],
 							dialogControl = "LSM30_Statusbar",
 							values = AceGUIWidgetLSMlists.statusbar,
@@ -329,8 +329,8 @@ function PowerBar:GetOptions()
 					args = {
 						powerBarAdjustWidth = {
 							type = "toggle",
-							name = L["Power Bar Adjust Width"],
-							desc = L["Adjust power bar width to the frame width"],
+							name = L["Adjust width"],
+							desc = L["Adjust bar width to the frame width"],
 							disabled = function() return not self:IsEnabled() end,
 							order = 5,
 						},
@@ -342,15 +342,15 @@ function PowerBar:GetOptions()
 						},
 						powerBarWidth = {
 							type = "range",
-							name = L["Power Bar Width"],
-							desc = L["Width of the power bar"],
+							name = L["Width"],
+							desc = L["Width of the bar"],
 							min = 10, max = 500, step = 1,
 							disabled = function() return self.db.powerBarAdjustWidth or not self:IsEnabled() end,
 							order = 15,
 						},
 						powerBarHeight = {
 							type = "range",
-							name = L["Power Bar Height"],
+							name = L["Height"],
 							desc = L["Height of the power bar"],
 							min = 10, max = 200, step = 1,
 							disabled = function() return not self:IsEnabled() end,
@@ -368,8 +368,8 @@ function PowerBar:GetOptions()
 					args = {
 						powerBarAttachTo = {
 							type = "select",
-							name = L["Power Bar Attach To"],
-							desc = L["Attach power bar to the given frame"],
+							name = L["Attach to"],
+							desc = L["Attach to the given frame"],
 							values = function() return PowerBar:GetAttachPoints() end,
 							set = function(info, value)
 								local key = info.arg or info[#info]
@@ -395,16 +395,16 @@ function PowerBar:GetOptions()
 						},
 						powerBarAnchor = {
 							type = "select",
-							name = L["Power Bar Anchor"],
-							desc = L["Anchor of the power bar"],
+							name = L["Anchor"],
+							desc = L["Anchor of the frame"],
 							values = function() return GladiusEx:GetPositions() end,
 							disabled = function() return not self:IsEnabled() end,
 							order = 10,
 						},
 						powerBarRelativePoint = {
 							type = "select",
-							name = L["Power Bar Relative Point"],
-							desc = L["Relative point of the power bar"],
+							name = L["Relative point"],
+							desc = L["Relative point of the frame"],
 							values = function() return GladiusEx:GetPositions() end,
 							disabled = function() return not self:IsEnabled() end,
 							order = 15,
@@ -417,16 +417,16 @@ function PowerBar:GetOptions()
 						},
 						powerBarOffsetX = {
 							type = "range",
-							name = L["Power Bar Offset X"],
-							desc = L["X offset of the power bar"],
+							name = L["Offset X"],
+							desc = L["X offset of the frame"],
 							min = -100, max = 100, step = 1,
 							disabled = function() return  not self:IsEnabled() end,
 							order = 20,
 						},
 						powerBarOffsetY = {
 							type = "range",
-							name = L["Power Bar Offset Y"],
-							desc = L["X offset of the power bar"],
+							name = L["Offset Y"],
+							desc = L["X offset of the frame"],
 							disabled = function() return not self:IsEnabled() end,
 							min = -100, max = 100, step = 1,
 							order = 25,

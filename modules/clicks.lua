@@ -81,7 +81,7 @@ function Clicks:GetOptions()
 	local options = {
 		attributeList = {
 			type = "group",
-			name = L["Click Actions"],
+			name = L["Click actions"],
 			order = 1,
 			args = {
 				add = {
@@ -156,7 +156,7 @@ function Clicks:GetAttributeOptionTable(attribute, order)
 		args = {
 			delete = {
 				type = "execute",
-				name = L["Delete Click Action"],
+				name = L["Delete click action"],
 				func = function()
 					-- remove from db
 					self.db.clickAttributes[attribute] = nil
@@ -180,8 +180,8 @@ function Clicks:GetAttributeOptionTable(attribute, order)
 					action = {
 						type = "select",
 						name = L["Action"],
-						desc = L["Select what this Click Action does"],
-						values = {["macro"] = MACRO, ["target"] = TARGET, ["focus"] = FOCUS, ["spell"] = L["Cast Spell"]},
+						desc = L["Select what this click action does"],
+						values = {["macro"] = MACRO, ["target"] = TARGET, ["focus"] = FOCUS, ["spell"] = L["Cast spell"]},
 						order = 10,
 					},
 					sep = {
@@ -193,8 +193,8 @@ function Clicks:GetAttributeOptionTable(attribute, order)
 					macro = {
 						type = "input",
 						multiline = true,
-						name = L["Spell Name / Macro Text"],
-						desc = L["Select what this Click Action does"],
+						name = L["Spell name / Macro text"],
+						desc = L["Select what this click action does"],
 						width = "double",
 						order = 20,
 					},

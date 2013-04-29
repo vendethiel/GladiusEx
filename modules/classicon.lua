@@ -527,23 +527,23 @@ function ClassIcon:GetOptions()
 						},
 						classIconImportantAuras = {
 							type = "toggle",
-							name = L["Important Auras"],
+							name = L["Important auras"],
 							desc = L["Show important auras instead of the class icon"],
 							disabled = function() return not self:IsEnabled() end,
 							order = 5,
 						},
 						classIconCrop = {
 							type = "toggle",
-							name = L["Crop Borders"],
-							desc = L["Toggle if the class icon borders should be cropped or not."],
+							name = L["Crop borders"],
+							desc = L["Toggle if the icon borders should be cropped or not"],
 							disabled = function() return not self:IsEnabled() end,
 							hidden = function() return not GladiusEx.db.advancedOptions end,
 							order = 6,
 						},
 						classIconCooldown = {
 							type = "toggle",
-							name = L["Class Icon Cooldown Spiral"],
-							desc = L["Display the cooldown spiral for important auras"],
+							name = L["Cooldown spiral"],
+							desc = L["Display the cooldown spiral for the important auras"],
 							width = "full",
 							disabled = function() return not self:IsEnabled() end,
 							hidden = function() return not GladiusEx.db.advancedOptions end,
@@ -551,7 +551,7 @@ function ClassIcon:GetOptions()
 						},
 						classIconCooldownReverse = {
 							type = "toggle",
-							name = L["Class Icon Cooldown Reverse"],
+							name = L["Cooldown reverse"],
 							desc = L["Invert the dark/bright part of the cooldown spiral"],
 							width = "full",
 							disabled = function() return not self:IsEnabled() end,
@@ -566,16 +566,16 @@ function ClassIcon:GetOptions()
 						},
 						classIconGloss = {
 							type = "toggle",
-							name = L["Class Icon Gloss"],
-							desc = L["Toggle gloss on the class icon"],
+							name = L["Gloss"],
+							desc = L["Toggle gloss on the icon"],
 							disabled = function() return not self:IsEnabled() end,
 							hidden = function() return not GladiusEx.db.advancedOptions end,
 							order = 20,
 						},
 						classIconGlossColor = {
 							type = "color",
-							name = L["Class Icon Gloss Color"],
-							desc = L["Color of the class icon gloss"],
+							name = L["Gloss color"],
+							desc = L["Color of the gloss"],
 							get = function(info) return GladiusEx:GetColorOption(self.db, info) end,
 							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db, info, r, g, b, a) end,
 							hasAlpha = true,
@@ -591,8 +591,8 @@ function ClassIcon:GetOptions()
 						},
 						classIconFrameLevel = {
 							type = "range",
-							name = L["Class Icon Frame Level"],
-							desc = L["Frame level of the class icon"],
+							name = L["Frame level"],
+							desc = L["Frame level of the frame"],
 							disabled = function() return not self:IsEnabled() end,
 							hidden = function() return not GladiusEx.db.advancedOptions end,
 							min = 1, max = 5, step = 1,
@@ -610,15 +610,15 @@ function ClassIcon:GetOptions()
 					args = {
 						classIconAdjustSize = {
 							type = "toggle",
-							name = L["Class Icon Adjust Size"],
-							desc = L["Adjust class icon size to the frame size"],
+							name = L["Adjust size"],
+							desc = L["Adjust size to the frame size"],
 							disabled = function() return not self:IsEnabled() end,
 							order = 5,
 						},
 						classIconSize = {
 							type = "range",
-							name = L["Class Icon Size"],
-							desc = L["Size of the class icon"],
+							name = L["Icon size"],
+							desc = L["Size of the icon"],
 							min = 10, max = 100, step = 1,
 							disabled = function() return self.db.classIconAdjustSize or not self:IsEnabled() end,
 							order = 10,
@@ -634,8 +634,8 @@ function ClassIcon:GetOptions()
 					args = {
 						classIconAttachTo = {
 							type = "select",
-							name = L["Class Icon Attach To"],
-							desc = L["Attach class icon to given frame"],
+							name = L["Attach to"],
+							desc = L["Attach to the given frame"],
 							values = function() return ClassIcon:GetAttachPoints() end,
 							disabled = function() return not self:IsEnabled() end,
 							hidden = function() return not GladiusEx.db.advancedOptions end,
@@ -643,8 +643,8 @@ function ClassIcon:GetOptions()
 						},
 						classIconPosition = {
 							type = "select",
-							name = L["Class Icon Position"],
-							desc = L["Position of the class icon"],
+							name = L["Position"],
+							desc = L["Position of the frame"],
 							values = { ["LEFT"] = L["Left"], ["RIGHT"] = L["Right"] },
 							get = function() return strfind(self.db.classIconAnchor, "RIGHT") and "LEFT" or "RIGHT" end,
 							set = function(info, value)
@@ -670,8 +670,8 @@ function ClassIcon:GetOptions()
 						},
 						classIconAnchor = {
 							type = "select",
-							name = L["Class Icon Anchor"],
-							desc = L["Anchor of the class icon"],
+							name = L["Anchor"],
+							desc = L["Anchor of the frame"],
 							values = function() return GladiusEx:GetPositions() end,
 							disabled = function() return not self:IsEnabled() end,
 							hidden = function() return not GladiusEx.db.advancedOptions end,
@@ -679,8 +679,8 @@ function ClassIcon:GetOptions()
 						},
 						classIconRelativePoint = {
 							type = "select",
-							name = L["Class Icon Relative Point"],
-							desc = L["Relative point of the class icon"],
+							name = L["Relative point"],
+							desc = L["Relative point of the frame"],
 							values = function() return GladiusEx:GetPositions() end,
 							disabled = function() return not self:IsEnabled() end,
 							hidden = function() return not GladiusEx.db.advancedOptions end,
@@ -694,16 +694,16 @@ function ClassIcon:GetOptions()
 						},
 						classIconOffsetX = {
 							type = "range",
-							name = L["Class Icon Offset X"],
-							desc = L["X offset of the class icon"],
+							name = L["Offset X"],
+							desc = L["X offset of the frame"],
 							min = -100, max = 100, step = 1,
 							disabled = function() return not self:IsEnabled() end,
 							order = 20,
 						},
 						classIconOffsetY = {
 							type = "range",
-							name = L["Class Icon Offset Y"],
-							desc = L["Y offset of the class icon"],
+							name = L["Offset Y"],
+							desc = L["Y offset of the frame"],
 							disabled = function() return not self:IsEnabled() end,
 							min = -50, max = 50, step = 1,
 							order = 25,
@@ -714,14 +714,14 @@ function ClassIcon:GetOptions()
 		},
 		auraList = {
 			type = "group",
-			name = L["Important Auras"],
+			name = L["Important auras"],
 			childGroups = "tree",
 			order = 3,
 			args = {
 				newAura = {
 					type = "group",
-					name = L["New Aura"],
-					desc = L["New Aura"],
+					name = L["New aura"],
+					desc = L["New aura"],
 					inline = true,
 					order = 1,
 					args = {
@@ -747,7 +747,7 @@ function ClassIcon:GetOptions()
 						},
 						add = {
 							type = "execute",
-							name = L["Add new Aura"],
+							name = L["Add new aura"],
 							func = function(info)
 								self.db.classIconAuras[self.newAuraName] = self.newAuraPriority
 								options.auraList.args[self.newAuraName] = self:SetupAuraOptions(self.newAuraName)

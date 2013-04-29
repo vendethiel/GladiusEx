@@ -421,7 +421,7 @@ function CastBar:GetOptions()
 					args = {
 						castBarColor = {
 							type = "color",
-							name = L["Cast Bar Color"],
+							name = L["Color"],
 							desc = L["Color of the cast bar"],
 							hasAlpha = true,
 							get = function(info) return GladiusEx:GetColorOption(self.db, info) end,
@@ -431,7 +431,7 @@ function CastBar:GetOptions()
 						},
 						castBarBackgroundColor = {
 							type = "color",
-							name = L["Cast Bar Background Color"],
+							name = L["Background color"],
 							desc = L["Color of the cast bar background"],
 							hasAlpha = true,
 							get = function(info) return GladiusEx:GetColorOption(self.db, info) end,
@@ -449,15 +449,15 @@ function CastBar:GetOptions()
 						},
 						castBarInverse = {
 							type = "toggle",
-							name = L["Cast Bar Inverse"],
-							desc = L["Inverse the cast bar"],
+							name = L["Inverse"],
+							desc = L["Invert the bar colors"],
 							disabled = function() return not self:IsEnabled() end,
 							hidden = function() return not GladiusEx.db.advancedOptions end,
 							order = 15,
 						},
 						castBarTexture = {
 							type = "select",
-							name = L["Cast Bar Texture"],
+							name = L["Texture"],
 							desc = L["Texture of the cast bar"],
 							dialogControl = "LSM30_Statusbar",
 							values = AceGUIWidgetLSMlists.statusbar,
@@ -472,16 +472,16 @@ function CastBar:GetOptions()
 						},
 						castIcon = {
 							type = "toggle",
-							name = L["Cast Bar Icon"],
-							desc = L["Toggle the cast icon"],
+							name = L["Icon"],
+							desc = L["Toggle the cast bar spell icon"],
 							disabled = function() return not self:IsEnabled() end,
 							order = 25,
 						},
 						castIconPosition = {
 							type = "select",
-							name = L["Cast Bar Icon Position"],
+							name = L["Icon position"],
 							desc = L["Position of the cast bar icon"],
-							values = { ["LEFT"] = L["LEFT"], ["RIGHT"] = L["RIGHT"] },
+							values = { ["LEFT"] = L["Left"], ["RIGHT"] = L["Right"] },
 							disabled = function() return not self.db.castIcon or not self:IsEnabled() end,
 							order = 30,
 						},
@@ -496,8 +496,8 @@ function CastBar:GetOptions()
 					args = {
 						castBarAdjustWidth = {
 							type = "toggle",
-							name = L["Cast Bar Adjust Width"],
-							desc = L["Adjust cast bar width to the frame width"],
+							name = L["Adjust width"],
+							desc = L["Adjust bar width to the frame width"],
 							disabled = function() return not self:IsEnabled() end,
 							order = 5,
 						},
@@ -509,7 +509,7 @@ function CastBar:GetOptions()
 						},
 						castBarWidth = {
 							type = "range",
-							name = L["Cast Bar Width"],
+							name = L["Bar width"],
 							desc = L["Width of the cast bar"],
 							min = 10, max = 500, step = 1,
 							disabled = function() return self.db.castBarAdjustWidth or not self:IsEnabled() end,
@@ -517,7 +517,7 @@ function CastBar:GetOptions()
 						},
 						castBarHeight = {
 							type = "range",
-							name = L["Cast Bar Height"],
+							name = L["Height"],
 							desc = L["Height of the cast bar"],
 							min = 10, max = 200, step = 1,
 							disabled = function() return not self:IsEnabled() end,
@@ -535,8 +535,8 @@ function CastBar:GetOptions()
 					args = {
 						castBarAttachTo = {
 							type = "select",
-							name = L["Cast Bar Attach To"],
-							desc = L["Attach cast bar to the given frame"],
+							name = L["Attach to"],
+							desc = L["Attach to the given frame"],
 							values = function() return CastBar:GetAttachPoints() end,
 							disabled = function() return not self:IsEnabled() end,
 							width = "double",
@@ -550,16 +550,16 @@ function CastBar:GetOptions()
 						},
 						castBarAnchor = {
 							type = "select",
-							name = L["Cast Bar Anchor"],
-							desc = L["Anchor of the cast bar"],
+							name = L["Anchor"],
+							desc = L["Anchor of the frame"],
 							values = function() return GladiusEx:GetPositions() end,
 							disabled = function() return not self:IsEnabled() end,
 							order = 10,
 						},
 						castBarRelativePoint = {
 							type = "select",
-							name = L["Cast Bar Relative Point"],
-							desc = L["Relative point of the cast bar"],
+							name = L["Relative point"],
+							desc = L["Relative point of the frame"],
 							values = function() return GladiusEx:GetPositions() end,
 							disabled = function() return not self:IsEnabled() end,
 							order = 15,
@@ -572,16 +572,16 @@ function CastBar:GetOptions()
 						},
 						castBarOffsetX = {
 							type = "range",
-							name = L["Cast Bar Offset X"],
-							desc = L["X offset of the cast bar"],
+							name = L["Offset X"],
+							desc = L["X offset of the frame"],
 							min = -100, max = 100, step = 1,
 							disabled = function() return  not self:IsEnabled() end,
 							order = 20,
 						},
 						castBarOffsetY = {
 							type = "range",
-							name = L["Cast Bar Offset Y"],
-							desc = L["Y offset of the castbar"],
+							name = L["Offset Y"],
+							desc = L["Y offset of the frame"],
 							disabled = function() return not self:IsEnabled() end,
 							min = -100, max = 100, step = 1,
 							order = 25,
@@ -592,7 +592,7 @@ function CastBar:GetOptions()
 		},
 		castText = {
 			type = "group",
-			name = L["Cast Text"],
+			name = L["Cast text"],
 			order = 2,
 			args = {
 				text = {
@@ -604,7 +604,7 @@ function CastBar:GetOptions()
 					args = {
 						castText = {
 							type = "toggle",
-							name = L["Cast Text"],
+							name = L["Cast text"],
 							desc = L["Toggle cast text"],
 							disabled = function() return not self:IsEnabled() end,
 							order = 5,
@@ -617,7 +617,7 @@ function CastBar:GetOptions()
 						},
 						castTextColor = {
 							type = "color",
-							name = L["Cast Text Color"],
+							name = L["Text color"],
 							desc = L["Text color of the cast text"],
 							hasAlpha = true,
 							get = function(info) return GladiusEx:GetColorOption(self.db, info) end,
@@ -627,7 +627,7 @@ function CastBar:GetOptions()
 						},
 						castTextSize = {
 							type = "range",
-							name = L["Cast Text Size"],
+							name = L["Text size"],
 							desc = L["Text size of the cast text"],
 							min = 1, max = 20, step = 1,
 							disabled = function() return not self.db.castText or not self:IsEnabled() end,
@@ -645,9 +645,9 @@ function CastBar:GetOptions()
 					args = {
 						castTextAlign = {
 							type = "select",
-							name = L["Cast Text Align"],
+							name = L["Text align"],
 							desc = L["Text align of the cast text"],
-							values = { ["LEFT"] = L["LEFT"], ["CENTER"] = L["CENTER"], ["RIGHT"] = L["RIGHT"] },
+							values = { ["LEFT"] = L["Left"], ["CENTER"] = L["Center"], ["RIGHT"] = L["Right"] },
 							disabled = function() return not self.db.castText or not self:IsEnabled() end,
 							width = "double",
 							order = 5,
@@ -660,7 +660,7 @@ function CastBar:GetOptions()
 						},
 						castTextOffsetX = {
 							type = "range",
-							name = L["Cast Text Offset X"],
+							name = L["Offset X"],
 							desc = L["X offset of the cast text"],
 							min = -100, max = 100, step = 1,
 							disabled = function() return not self.db.castText or not self:IsEnabled() end,
@@ -668,7 +668,7 @@ function CastBar:GetOptions()
 						},
 						castTextOffsetY = {
 							type = "range",
-							name = L["Cast Text Offset Y"],
+							name = L["Offset Y"],
 							desc = L["Y offset of the cast text"],
 							disabled = function() return not self.db.castText or not self:IsEnabled() end,
 							min = -100, max = 100, step = 1,
@@ -680,7 +680,7 @@ function CastBar:GetOptions()
 		},
 		castTimeText = {
 			type = "group",
-			name = L["Cast Time Text"],
+			name = L["Cast time text"],
 			order = 3,
 			args = {
 				text = {
@@ -692,7 +692,7 @@ function CastBar:GetOptions()
 					args = {
 						castTimeText = {
 							type = "toggle",
-							name = L["Cast Time Text"],
+							name = L["Cast time text"],
 							desc = L["Toggle cast time text"],
 							disabled = function() return not self:IsEnabled() end,
 							order = 5,
@@ -705,7 +705,7 @@ function CastBar:GetOptions()
 						},
 						castTimeTextColor = {
 							type = "color",
-							name = L["Cast Time Text Color"],
+							name = L["Text color"],
 							desc = L["Text color of the cast time text"],
 							hasAlpha = true,
 							get = function(info) return GladiusEx:GetColorOption(self.db, info) end,
@@ -715,7 +715,7 @@ function CastBar:GetOptions()
 						},
 						castTimeTextSize = {
 							type = "range",
-							name = L["Cast Time Text Size"],
+							name = L["Text size"],
 							desc = L["Text size of the cast time text"],
 							min = 1, max = 20, step = 1,
 							disabled = function() return not self.db.castTimeText or not self:IsEnabled() end,
@@ -734,9 +734,9 @@ function CastBar:GetOptions()
 					args = {
 						castTimeTextAlign = {
 							type = "select",
-							name = L["Cast Time Text Align"],
+							name = L["Text align"],
 							desc = L["Text align of the cast time text"],
-							values = { ["LEFT"] = L["LEFT"], ["CENTER"] = L["CENTER"], ["RIGHT"] = L["RIGHT"] },
+							values = { ["LEFT"] = L["Left"], ["CENTER"] = L["Center"], ["RIGHT"] = L["Right"] },
 							disabled = function() return not self.db.castTimeText or not self:IsEnabled() end,
 							width = "double",
 							order = 5,
@@ -749,16 +749,16 @@ function CastBar:GetOptions()
 						},
 						castTimeTextOffsetX = {
 							type = "range",
-							name = L["Cast Time Offset X"],
-							desc = L["X Offset of the cast time text"],
+							name = L["Offset X"],
+							desc = L["X offset of the cast time text"],
 							min = -100, max = 100, step = 1,
 							disabled = function() return not self.db.castTimeText or not self:IsEnabled() end,
 							order = 10,
 						},
 						castTimeTextOffsetY = {
 							type = "range",
-							name = L["Cast Time Offset Y"],
-							desc = L["Y Offset of the cast time text"],
+							name = L["Offset Y"],
+							desc = L["Y offset of the cast time text"],
 							disabled = function() return not self.db.castTimeText or not self:IsEnabled() end,
 							min = -100, max = 100, step = 1,
 							order = 15,

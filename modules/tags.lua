@@ -423,7 +423,7 @@ function Tags:GetOptions()
 					},
 					attachTo = {
 						type = "select",
-						name = L["Text Attach To"],
+						name = L["Attach to"],
 						desc = L["Attach text to module bar"],
 						values = function()
 							local t = {}
@@ -447,7 +447,7 @@ function Tags:GetOptions()
 					},
 					add = {
 						type = "execute",
-						name = L["Add Text"],
+						name = L["Add text"],
 						func = function()
 							local text = self.addTextAttachTo .. " " .. self.addTextName
 
@@ -509,7 +509,7 @@ function Tags:GetOptions()
 					},
 					add = {
 						type = "execute",
-						name = L["Add Tag"],
+						name = L["Add tag"],
 						func = function()
 							if (self.addTagName ~= "" and not self.db.tags[self.addTagName]) then
 								-- add to db
@@ -661,7 +661,7 @@ function Tags:GetTextOptionTable(text, order)
 		args = {
 			delete = {
 				type = "execute",
-				name = L["Delete Text"],
+				name = L["Delete text"],
 				func = function()
 					-- remove from db
 					self.db.tagsTexts[text] = nil
@@ -691,8 +691,8 @@ function Tags:GetTextOptionTable(text, order)
 				args = {
 					color = {
 						type = "color",
-						name = L["Text Color"],
-						desc = L["Text color of the text"],
+						name = L["Text color"],
+						desc = L["Color of the text"],
 						hasAlpha = true,
 						get = getColorOption,
 						set = setColorOption,
@@ -701,8 +701,8 @@ function Tags:GetTextOptionTable(text, order)
 					},
 					size = {
 						type = "range",
-						name = L["Text Size"],
-						desc = L["Text size of the text"],
+						name = L["Text size"],
+						desc = L["Size of the text"],
 						min = 1, max = 20, step = 1,
 						disabled = function() return not self:IsEnabled() or GladiusEx.db.useGlobalFontSize end,
 						order = 10,
@@ -718,17 +718,17 @@ function Tags:GetTextOptionTable(text, order)
 				args = {
 					position = {
 						type = "select",
-						name = L["Text Align"],
-						desc = L["Text align of the text"],
-						values = { ["LEFT"] = L["LEFT"], ["CENTER"] = L["CENTER"], ["RIGHT"] = L["RIGHT"] },
+						name = L["Text align"],
+						desc = L["Align of the text"],
+						values = { ["LEFT"] = L["Left"], ["CENTER"] = L["Center"], ["RIGHT"] = L["Right"] },
 						disabled = function() return not self:IsEnabled() end,
 						width = "double",
 						order = 5,
 					},
 					offsetX = {
 						type = "range",
-						name = L["Text Offset X"],
-						desc = L["X offset of the text"],
+						name = L["Offset X"],
+						desc = L["X offset of the frame"],
 						min = -100, max = 100, step = 1,
 						disabled = function() return not self:IsEnabled() end,
 						hidden = function() return not GladiusEx.db.advancedOptions end,
@@ -736,8 +736,8 @@ function Tags:GetTextOptionTable(text, order)
 					},
 					offsetY = {
 						type = "range",
-						name = L["Text Offset Y"],
-						desc = L["Y offset of the text"],
+						name = L["Offset Y"],
+						desc = L["Y offset of the frame"],
 						disabled = function() return not self:IsEnabled() end,
 						hidden = function() return not GladiusEx.db.advancedOptions end,
 						min = -100, max = 100, step = 1,
@@ -765,7 +765,7 @@ function Tags:GetTagOptionTable(tag, order)
 		args = {
 			delete = {
 				type = "execute",
-				name = L["Delete Tag"],
+				name = L["Delete tag"],
 				func = function()
 					-- remove from db
 					self.db.tags[tag] = nil

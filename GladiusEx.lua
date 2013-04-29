@@ -216,7 +216,7 @@ function GladiusEx:OnEnable()
 	-- display help message
 	if (not self.db.locked and not self.db.x["arena1"] and not self.db.y["arena1"] and not self.db.x["anchor_arena"] and not self.db.y["anchor_arena"]) then
 		self:Print(L["Welcome to GladiusEx!"])
-		self:Print(L["First run has been detected, displaying test frame."])
+		self:Print(L["First run has been detected, displaying test frame"])
 		self:Print(L["Valid slash commands are:"])
 		self:Print("/gex ui")
 		self:Print("/gex test 2-5")

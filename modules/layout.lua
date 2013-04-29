@@ -60,8 +60,8 @@ function Layout:GetOptions()
 					args = {
 						layoutInput = {
 							type = "input",
-							name = L["Layout Code"],
-							desc = L["Code of your layout."],
+							name = L["Layout code"],
+							desc = L["Code of your layout"],
 							get = function() return self.layout end,
 							set = function(info, value) self.layout = value end,
 							disabled = function() return not self:IsEnabled() end,
@@ -72,7 +72,7 @@ function Layout:GetOptions()
 						layoutImport = {
 							type = "execute",
 							name = L["Import layout"],
-							desc = L["Import your layout code."],
+							desc = L["Import your layout code"],
 							disabled = function() return not self:IsEnabled() end,
 							func = function()
 								if (self.layout == nil or self.layout == "") then return end
@@ -106,7 +106,7 @@ function Layout:GetOptions()
 						layoutExport = {
 							type = "execute",
 							name = L["Export layout"],
-							desc = L["Export your layout code."],
+							desc = L["Export your layout code"],
 							disabled = function() return not self:IsEnabled() end,
 							func = function()
 								local t = CopyTable(GladiusEx.dbi.profile)
