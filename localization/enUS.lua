@@ -1,65 +1,6 @@
 ﻿local L = LibStub("AceLocale-3.0"):NewLocale("GladiusEx", "enUS", true)
 
--- Specs
-L["specID:250:short"] = "Blood"
-L["specID:251:short"] = "Frost"
-L["specID:252:short"] = "Unholy"
-
-L["specID:102:short"] = "Balance"
-L["specID:103:short"] = "Feral"
-L["specID:104:short"] = "Guardian"
-L["specID:105:short"] = "Resto"
-
-L["specID:253:short"] = "BM"
-L["specID:254:short"] = "Marks"
-L["specID:255:short"] = "Surv"
-
-L["specID:62:short"] = "Arcane"
-L["specID:63:short"] = "Fire"
-L["specID:64:short"] = "Frost"
-
-L["specID:268:short"] = "Brew"
-L["specID:269:short"] = "Wind"
-L["specID:270:short"] = "Mist"
-
-L["specID:65:short"] = "Holy"
-L["specID:66:short"] = "Prot"
-L["specID:70:short"] = "Retri"
-
-L["specID:256:short"] = "Disc"
-L["specID:257:short"] = "Holy"
-L["specID:258:short"] = "Shadow"
-
-L["specID:259:short"] = "Assa"
-L["specID:260:short"] = "Combat"
-L["specID:261:short"] = "Subtl"
-
-L["specID:262:short"] = "Ele"
-L["specID:263:short"] = "Enha"
-L["specID:264:short"] = "Resto"
-
-L["specID:265:short"] = "Affli"
-L["specID:266:short"] = "Demo"
-L["specID:267:short"] = "Destru"
-
-L["specID:71:short"] = "Arms"
-L["specID:72:short"] = "Fury"
-L["specID:73:short"] = "Prot"
-
--- Classes
-L["WARRIOR:short"] = "Warr"
-L["DEATHKNIGHT:short"] = "DK"
-L["WARLOCK:short"] = "Lock"
-L["PRIEST:short"] = "Priest"
-L["HUNTER:short"] = "Hunter"
-L["ROGUE:short"] = "Rogue"
-L["SHAMAN:short"] = "Shaman"
-L["DRUID:short"] = "Druid"
-L["PALADIN:short"] = "Pala"
-L["MAGE:short"] = "Mage"
-L["MONK:short"] = "Monk"
-
--- cooldowns module
+-- Cooldowns module
 L["cat:pvp_trinket"] = "PvP Trinket"
 L["cat:mass_dispel"] = "Mass Dispel"
 L["cat:cc"] = "CC"
@@ -73,6 +14,54 @@ L["cat:knockback"] = "Knockback"
 L["cat:stun"] = "Stun"
 L["cat:immune"] = "Immune"
 L["cat:uncat"] = "Uncategorized"
+
+-- Tags module
+L["WARRIOR:short"] = "Warr"
+L["DEATHKNIGHT:short"] = "DK"
+L["WARLOCK:short"] = "Lock"
+L["PRIEST:short"] = "Priest"
+L["HUNTER:short"] = "Hunter"
+L["ROGUE:short"] = "Rogue"
+L["SHAMAN:short"] = "Shaman"
+L["DRUID:short"] = "Druid"
+L["PALADIN:short"] = "Pala"
+L["MAGE:short"] = "Mage"
+L["MONK:short"] = "Monk"
+
+L["specID:250:short"] = "Blood"
+L["specID:251:short"] = "Frost"
+L["specID:252:short"] = "Unholy"
+L["specID:102:short"] = "Balance"
+L["specID:103:short"] = "Feral"
+L["specID:104:short"] = "Guardian"
+L["specID:105:short"] = "Resto"
+L["specID:253:short"] = "BM"
+L["specID:254:short"] = "Marks"
+L["specID:255:short"] = "Surv"
+L["specID:62:short"] = "Arcane"
+L["specID:63:short"] = "Fire"
+L["specID:64:short"] = "Frost"
+L["specID:268:short"] = "Brew"
+L["specID:269:short"] = "Wind"
+L["specID:270:short"] = "Mist"
+L["specID:65:short"] = "Holy"
+L["specID:66:short"] = "Prot"
+L["specID:70:short"] = "Retri"
+L["specID:256:short"] = "Disc"
+L["specID:257:short"] = "Holy"
+L["specID:258:short"] = "Shadow"
+L["specID:259:short"] = "Assa"
+L["specID:260:short"] = "Combat"
+L["specID:261:short"] = "Subtl"
+L["specID:262:short"] = "Ele"
+L["specID:263:short"] = "Enha"
+L["specID:264:short"] = "Resto"
+L["specID:265:short"] = "Affli"
+L["specID:266:short"] = "Demo"
+L["specID:267:short"] = "Destru"
+L["specID:71:short"] = "Arms"
+L["specID:72:short"] = "Fury"
+L["specID:73:short"] = "Prot"
 
 L["maxhealthTag"] = "Max Health"
 L["maxpower:shortTag"] = "Max Power (Short)"
@@ -91,6 +80,14 @@ L["health:percentageTag"] = "Health (Percentage)"
 L["healthTag"] = "Health"
 L["maxhealth:shortTag"] = "Max Health (Short)"
 L["maxpowerTag"] = "Max Power"
+
+-- Module names
+L["CastBar"] = "Cast Bar"
+L["ClassIcon"] = "Class Icon"
+L["DRTracker"] = "DR Tracker"
+L["HealthBar"] = "Health Bar"
+L["PowerBar"] = "Power Bar"
+L["TargetBar"] = "Target Bar"
 
 -- Other
 L["%s settings"] = true
@@ -142,7 +139,6 @@ L["Cast spell"] = true
 L["Cast text"] = true
 L["Cast time text"] = true
 L["CastBar Icon"] = true
-L["CastBar"] = true
 L["Categories"] = true
 L["Category settings"] = true
 L["Category"] = true

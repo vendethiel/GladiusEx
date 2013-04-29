@@ -111,7 +111,7 @@ function GladiusEx:SetupModule(key, module, order)
 	self.options.args[key] = {
 		type = "group",
 		name = L[key],
-		desc = string.format(L["%s settings"], key),
+		desc = string.format(L["%s settings"], L[key]),
 		childGroups = "tab",
 		order = order,
 		get = fn.bind(getModuleOption, module),
