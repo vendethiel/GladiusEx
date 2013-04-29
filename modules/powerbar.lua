@@ -93,26 +93,18 @@ end
 function PowerBar:UpdatePower(unit, power, maxPower, powerType)
 	if (not self.frame[unit]) then return end
 
-	if (not self.frame[unit]) then
-		if (not GladiusEx.buttons[unit]) then
-			GladiusEx:UpdateUnit(unit)
-		else
-			self:Update(unit)
-		end
-	end
-
 	-- update min max values
 	self.frame[unit]:SetMinMaxValues(0, maxPower)
 
 	-- inverse bar
-	if (self.db.powerBarInverse) then
+	if self.db.powerBarInverse then
 		self.frame[unit]:SetValue(maxPower - power)
 	else
 		self.frame[unit]:SetValue(power)
 	end
 
 	-- update bar color
-	if (self.db.powerBarDefaultColor) then
+	if self.db.powerBarDefaultColor then
 		local color = self:GetBarColor(powerType)
 		self.frame[unit]:SetStatusBarColor(color.r, color.g, color.b)
 	end

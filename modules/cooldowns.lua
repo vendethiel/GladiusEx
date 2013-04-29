@@ -180,11 +180,8 @@ end
 function Cooldowns:OnEnable()
 	CT.RegisterCallback(self, "LCT_CooldownUsed")
 	CT.RegisterCallback(self, "LCT_CooldownsReset")
-
 	self:RegisterEvent("UNIT_NAME_UPDATE")
 	self:RegisterMessage("GLADIUS_SPEC_UPDATE")
-
-	self:SpellSortingChanged()
 
 	LSM = GladiusEx.LSM
 end
@@ -295,7 +292,6 @@ local function CooldownFrame_OnUpdate(frame)
 end
 
 local group_sortscore = {}
-
 function Cooldowns:SpellSortingChanged()
 	-- remove cached sorting info from spells
 	group_sortscore = {}
@@ -359,7 +355,7 @@ function Cooldowns:UpdateIcons(unit)
 end
 
 local function GetUnitInfo(unit)
-	local specID, class, race, faction
+	local specID, class, race
 	if GladiusEx:IsTesting(unit) then
 		specID = GladiusEx.testing[unit].specID
 		class = GladiusEx.testing[unit].unitClass
@@ -369,7 +365,7 @@ local function GetUnitInfo(unit)
 		class = GladiusEx.buttons[unit].class or select(2, UnitClass(unit))
 		race = select(2, UnitRace(unit))
 	end
-	return specID, class, race, faction
+	return specID, class, race
 end
 
 local function GetUnitFaction(unit)
@@ -380,10 +376,12 @@ local function GetUnitFaction(unit)
 	end
 end
 
+local spell_list = {}
+local sorted_spells = {}
 local function GetCooldownList(group, unit)
 	local db = GetGroupDB(group)
 
-	local specID, class, race, faction = GetUnitInfo(unit)
+	local specID, class, race = GetUnitInfo(unit)
 
 	-- generate list of cooldowns available (and enabled) for this unit
 	--[[
@@ -396,7 +394,7 @@ local function GetCooldownList(group, unit)
 	end
 	]]
 
-	local spell_list = {}
+	wipe(spell_list)
 	for spellid, spelldata in CT:IterateCooldowns(class, specID, race) do
 		if db.cooldownsSpells[spellid] then
 			local tracked = CT:GetUnitCooldownInfo(unit, spellid)
@@ -415,7 +413,7 @@ local function GetCooldownList(group, unit)
 	end
 
 	-- sort spells
-	local sorted_spells = {}
+	wipe(sorted_spells)
 	for spellid, valid in pairs(spell_list) do
 		if valid then
 			tinsert(sorted_spells, spellid)
@@ -490,7 +488,10 @@ local function UpdateGroupIconFrames(group, unit, sorted_spells)
 
 		-- set border color
 		local c
-		for _, key in ipairs(cat_priority) do
+
+		-- for _, key in ipairs(cat_priority) do
+		for i = 1, #cat_priority do
+			local key = cat_priority[i]
 			if spelldata[key] then
 				c = border_color[key]
 				break

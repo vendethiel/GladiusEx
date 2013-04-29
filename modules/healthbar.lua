@@ -80,13 +80,7 @@ function HealthBar:UNIT_HEALTH(event, unit)
 end
 
 function HealthBar:UpdateHealth(unit, health, maxHealth)
-	if (not self.frame[unit]) then
-		if (not GladiusEx.buttons[unit]) then
-			return
-		else
-			self:Update(unit)
-		end
-	end
+	if (not self.frame[unit]) then return end
 
 	-- update min max values
 	self.frame[unit]:SetMinMaxValues(0, maxHealth)

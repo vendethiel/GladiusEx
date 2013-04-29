@@ -89,10 +89,8 @@ function DRTracker:UpdateIcon(unit, drCat)
 	-- cooldown
 	tracked.cooldown:SetReverse(self.db.drTrackerCooldownReverse)
 	if self.db.drTrackerCooldown then
-		-- print("showcd")
 		tracked.cooldown:Show()
 	else
-		-- print("hidecd")
 		tracked.cooldown:Hide()
 	end
 
