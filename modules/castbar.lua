@@ -100,11 +100,12 @@ function CastBar:UNIT_SPELLCAST_START(event, unit)
 
 	local spell, rank, displayName, icon, startTime, endTime, isTradeSkill = UnitCastingInfo(unit)
 	if (spell) then
+		self.frame[unit].spellName = spell
 		self.frame[unit].isChanneling = false
 		self.frame[unit].isCasting = true
 		self.frame[unit].startTime = startTime / 1000
 		self.frame[unit].endTime = endTime / 1000
-		self.frame[unit].delay = nil
+		self.frame[unit].delay = 0
 		self.frame[unit]:SetMinMaxValues(0, (endTime - startTime) / 1000)
 		self.frame[unit].icon:SetTexture(icon)
 
@@ -121,11 +122,12 @@ function CastBar:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 
 	local spell, rank, displayName, icon, startTime, endTime, isTradeSkill = UnitChannelInfo(unit)
 	if (spell) then
+		self.frame[unit].spellName = spell
 		self.frame[unit].isChanneling = true
 		self.frame[unit].isCasting = false
 		self.frame[unit].startTime = startTime / 1000
 		self.frame[unit].endTime = endTime / 1000
-		self.frame[unit].delay = nil
+		self.frame[unit].delay = 0
 		self.frame[unit]:SetMinMaxValues(0, (endTime - startTime) / 1000)
 		self.frame[unit].icon:SetTexture(icon)
 
@@ -137,8 +139,10 @@ function CastBar:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	end
 end
 
-function CastBar:UNIT_SPELLCAST_STOP(event, unit)
+function CastBar:UNIT_SPELLCAST_STOP(event, unit, spell)
 	if not self.frame[unit] then return end
+
+	if self.frame[unit].spellName ~= spell or (event == "UNIT_SPELLCAST_FAILED" and self.frame[unit].isChanneling) then return end
 
 	self:CastEnd(self.frame[unit])
 end
@@ -157,9 +161,9 @@ function CastBar:UNIT_SPELLCAST_DELAYED(event, unit)
 	if not startTime or not endTime then return end
 
 	if event == "UNIT_SPELLCAST_DELAYED" then
-		self.frame[unit].delay = (self.frame[unit].delay or 0) + (startTime / 1000 - self.frame[unit].startTime)
+		self.frame[unit].delay = self.frame[unit].delay + (startTime / 1000 - self.frame[unit].startTime)
 	else
-		self.frame[unit].delay = (self.frame[unit].delay or 0) + (self.startTime - startTime / 1000)
+		self.frame[unit].delay = self.frame[unit].delay + (self.startTime - startTime / 1000)
 	end
 
 	self.frame[unit].startTime = startTime / 1000
@@ -178,7 +182,7 @@ local function CastUpdate(self)
 			self:SetValue(self.endTime - self.startTime - value)
 		end
 
-		if self.delay then
+		if self.delay > 0 then
 			self.timeText:SetFormattedText("+%.2f %.2f", self.delay, value)
 		else
 			self.timeText:SetFormattedText("%.2f", value)
@@ -187,8 +191,8 @@ local function CastUpdate(self)
 end
 
 function CastBar:CastEnd(bar)
-	bar.isCasting = nil
-	bar.isChanneling = nil
+	bar.isCasting = false
+	bar.isChanneling = false
 	bar.timeText:SetText("")
 	bar.castText:SetText("")
 	bar.icon:SetTexture("")
