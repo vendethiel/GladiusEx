@@ -4,11 +4,9 @@ local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local LSM
 
 -- global functions
-local strfind = string.find
-local pairs = pairs
-local strgsub = string.gsub
-local strgmatch = string.gmatch
-local strformat = string.format
+local strfind, strgsub, strgmatch, strformat = string.find, string.gsub, string.gmatch, string.format
+local tinsert = table.insert
+local pairs, select = pairs, select
 
 local UnitName, UnitIsDeadOrGhost, LOCALIZED_CLASS_NAMES_MALE = UnitName, UnitIsDeadOrGhost, LOCALIZED_CLASS_NAMES_MALE
 local UnitClass, UnitRace = UnitClass, UnitRace
@@ -97,9 +95,19 @@ function Tags:OnEnable()
 	end
 
 	-- cached functions
-	self.func = {}
+	self:ClearTagCache()
 
 	-- gather events
+	self:UpdateEvents()
+end
+
+function Tags:OnProfileChanged()
+	self.super.OnProfileChanged(self)
+	-- regenerate options
+	self:GetOptions()
+end
+
+function Tags:UpdateEvents()
 	self.events = {}
 
 	for k,v in pairs(self.db.tagsTexts) do
@@ -120,6 +128,9 @@ function Tags:OnEnable()
 	end
 
 	-- register events
+	self:UnregisterAllEvents()
+	self:UnregisterAllMessages()
+
 	for event in pairs(self.events) do
 		if (strfind(event, "GLADIUS")) then
 			self:RegisterMessage(event, "OnMessage")
@@ -131,6 +142,7 @@ end
 
 function Tags:OnDisable()
 	self:UnregisterAllEvents()
+	self:UnregisterAllMessages()
 
 	for unit in pairs(self.frame) do
 		for text in pairs(self.frame[unit]) do
@@ -172,6 +184,79 @@ function Tags:CreateFrame(unit, text)
 	self.frame[unit][text] = button:CreateFontString("GladiusEx" .. self:GetName() .. unit .. text, "OVERLAY")
 end
 
+-- Takes a tag text and returns a function that receives a unit parameter and returns the formatted text
+function Tags:ParseText(text)
+	local texts = {}
+	local tags = {}
+	local out = {}
+	
+	local function output_text(otext)
+		if otext ~= "" then
+			tinsert(texts, otext)
+			tinsert(out, "text" .. tostring(#texts))
+		end
+	end
+
+	local function output_tag(tag)
+		tinsert(tags, tag)
+		tinsert(out, "tostring(tag" .. tostring(#tags) .. "(unit))")
+	end
+
+	while true do
+		local posb, tag, pose = string.match(text, "()%[(.-)%]()")
+		if not posb then
+			output_text(text)
+			break
+		end
+		local otext = string.sub(text, 1, posb - 1)
+		output_text(otext)
+		output_tag(tag)
+		text = string.sub(text, pose)
+	end
+
+	local args = { "unit" }
+	args = fn.concat(args, fn.map(fn.range(#texts), function(n) return "text" .. n end), fn.map(fn.range(#tags), function(n) return "tag" .. n end))
+	local fntext = "return function(" .. table.concat(args, ", ") .. ") " ..
+		" return " .. table.concat(out, " .. ") ..
+		" end"
+	local text_fn = loadstring(fntext)()
+	local arg_values = fn.concat(texts, fn.map(tags, fn.bind(self.GetTagFunc, self)))
+	local unit_fn = function(unit)
+		return text_fn(unit, unpack(arg_values))
+	end
+	return unit_fn
+end
+
+function Tags:GetParsedText(tagText)
+	local fn = self.text_cache[tagText]
+	if not fn then
+		fn = self:ParseText(tagText)
+		self.text_cache[tagText] = fn
+	end
+	return fn
+end
+
+function Tags:GetTagFunc(tag)
+	local func = self.func_cache[tag]
+	if not func then
+		local builtins = self:GetBuiltinTags()
+		if self.db.tags[tag] then
+			func = loadstring("local strformat = string.format; return " .. self.db.tags[tag])()
+		elseif builtins[tag] then
+			func = builtins[tag]
+		else
+			func = function() return "[Unknown tag " .. tag .. "]" end
+		end
+		self.func_cache[tag] = func
+	end
+	return func
+end
+
+function Tags:ClearTagCache()
+	self.func_cache = {}
+	self.text_cache = {}
+end
+
 function Tags:UpdateText(unit, text)
 	if not self.frame[unit] or not self.frame[unit][text] then return end
 
@@ -182,29 +267,19 @@ function Tags:UpdateText(unit, text)
 	-- update tag
 	local tagText = self.db.tagsTexts[text].text
 
+	local fn = self:GetParsedText(tagText)
+	local formattedText = fn(unit)
+
+	--[[
 	local formattedText = strgsub(self.db.tagsTexts[text].text, "%[(.-)%]", function(tag)
-		local func = self.func[tag] or self:GetTagFunc(tag)
+		local func = self:GetTagFunc(tag)
 		if func then
-			self.func[tag] = func
-
-			local text = func(unit_parameter)
-
-			return text
+			return func(unit_parameter)
 		end
 	end)
+	]]
 
 	self.frame[unit][text]:SetText(formattedText or tagText)
-end
-
-function Tags:GetTagFunc(tag)
-	local builtins = self:GetBuiltinTags()
-	if self.db.tags[tag] then
-		return loadstring("local strformat = string.format; return " .. self.db.tags[tag])()
-	elseif builtins[tag] then
-		return builtins[tag]
-	else
-		return nil
-	end
 end
 
 function Tags:GetTagEvents(tag)
@@ -215,6 +290,9 @@ function Tags:Update(unit)
 	if (not self.frame[unit]) then
 		self.frame[unit] = {}
 	end
+
+	self:ClearTagCache()
+	self:UpdateEvents()
 
 	for text, _ in pairs(self.db.tagsTexts) do
 		local attachframe = GladiusEx:GetAttachFrame(unit, self.db.tagsTexts[text].attachTo, true)
@@ -310,6 +388,7 @@ local function setColorOption(info, r, g, b, a)
 	GladiusEx:UpdateFrames()
 end
 
+Tags.options = {}
 function Tags:GetOptions()
 	-- add text values
 	self.addTextAttachTo = "HealthBar"
@@ -318,174 +397,173 @@ function Tags:GetOptions()
 	-- add tag values
 	self.addTagName = ""
 
-	local options = {
-		textList = {
-			type = "group",
-			name = L["Texts"],
-			order = 1,
-			args = {
-				add = {
-					type = "group",
-					name = L["Add text"],
-					inline = true,
-					order = 1,
-					args = {
-						name = {
-							type = "input",
-							name = L["Name"],
-							desc = L["Name of the text element"],
-							get = function(info)
-								return self.addTextName
-							end,
-							set = function(info, value)
-								self.addTextName = value
-							end,
-							disabled = function() return not self:IsEnabled() end,
-							order = 5,
-						},
-						attachTo = {
-							type = "select",
-							name = L["Text Attach To"],
-							desc = L["Attach text to module bar"],
-							values = function()
-								local t = {}
+	self.options.textList = {
+		type = "group",
+		name = L["Texts"],
+		order = 1,
+		args = {
+			add = {
+				type = "group",
+				name = L["Add text"],
+				inline = true,
+				order = 1,
+				args = {
+					name = {
+						type = "input",
+						name = L["Name"],
+						desc = L["Name of the text element"],
+						get = function(info)
+							return self.addTextName
+						end,
+						set = function(info, value)
+							self.addTextName = value
+						end,
+						disabled = function() return not self:IsEnabled() end,
+						order = 5,
+					},
+					attachTo = {
+						type = "select",
+						name = L["Text Attach To"],
+						desc = L["Attach text to module bar"],
+						values = function()
+							local t = {}
 
-								for moduleName, module in GladiusEx:IterateModules() do
-									if (module.isBarOption) then
-										t[moduleName] = moduleName
-									end
+							for moduleName, module in GladiusEx:IterateModules() do
+								if (module.isBarOption) then
+									t[moduleName] = moduleName
 								end
+							end
 
-								return t
-							end,
-							get = function(info)
-								return self.addTextAttachTo
-							end,
-							set = function(info, value)
-								self.addTextAttachTo = value
-							end,
-							disabled = function() return not self:IsEnabled() end,
-							order = 10,
-						},
-						add = {
-							type = "execute",
-							name = L["Add Text"],
-							func = function()
-								local text = self.addTextAttachTo .. " " .. self.addTextName
+							return t
+						end,
+						get = function(info)
+							return self.addTextAttachTo
+						end,
+						set = function(info, value)
+							self.addTextAttachTo = value
+						end,
+						disabled = function() return not self:IsEnabled() end,
+						order = 10,
+					},
+					add = {
+						type = "execute",
+						name = L["Add Text"],
+						func = function()
+							local text = self.addTextAttachTo .. " " .. self.addTextName
 
-								if (self.addTextName ~= "" and not self.db.tagsTexts[text]) then
-									-- add to db
-									self.db.tagsTexts[text] = {
-										attachTo = self.addTextAttachTo,
-										position = "LEFT",
-										offsetX = 0,
-										offsetY = 0,
+							if (self.addTextName ~= "" and not self.db.tagsTexts[text]) then
+								-- add to db
+								self.db.tagsTexts[text] = {
+									attachTo = self.addTextAttachTo,
+									position = "LEFT",
+									offsetX = 0,
+									offsetY = 0,
 
-										size = 11,
-										color = { r = 1, g = 1, b = 1, a = 1 },
+									size = 11,
+									color = { r = 1, g = 1, b = 1, a = 1 },
 
-										text = ""
-									}
+									text = ""
+								}
 
-									-- add to options
-									GladiusEx.options.args[self:GetName()].args.textList.args[text] = self:GetTextOptionTable(text, 100)
+								-- add to options
+								self.options.textList.args[text] = self:GetTextOptionTable(text, 100)
 
-									-- set tags
-									GladiusEx.options.args[self:GetName()].args.textList.args[text].args.tag.args = self.optionTags
+								-- set tags
+								self.options.textList.args[text].args.tag.args = self.optionTags
 
-									-- update
-									GladiusEx:UpdateFrames()
-								end
-							end,
-							order = 15,
-						},
+								-- update
+								GladiusEx:UpdateFrames()
+							end
+						end,
+						order = 15,
 					},
 				},
 			},
-		},
-		tagList = {
-			type = "group",
-			name = L["Tags"],
-			hidden = function() return not GladiusEx.db.advancedOptions end,
-			order = 2,
-			args = {
-				add = {
-					type = "group",
-					name = L["Add tag"],
-					inline = true,
-					order = 1,
-					args = {
-						name = {
-							type = "input",
-							name = L["Name"],
-							desc = L["Name of the tag"],
-							get = function(info)
-								return self.addTagName
-							end,
-							set = function(info, value)
-								self.addTagName = value
-							end,
-							disabled = function() return not self:IsEnabled() end,
-							order = 5,
-						},
-						add = {
-							type = "execute",
-							name = L["Add Tag"],
-							func = function()
-								if (self.addTagName ~= "" and not self.db.tags[self.addTagName]) then
-									-- add to db
-									self.db.tags[self.addTagName] = "function(unit)\n  return UnitName(unit)\nend"
-									self.db.tagEvents[self.addTagName] = ""
+		}
+	}
 
-									-- add to options
-									GladiusEx.options.args[self:GetName()].args.tagList.args[self.addTagName] = self:GetTagOptionTable(self.addTagName, 100)
+	self.options.tagList = {
+		type = "group",
+		name = L["Tags"],
+		hidden = function() return not GladiusEx.db.advancedOptions end,
+		order = 2,
+		args = {
+			add = {
+				type = "group",
+				name = L["Add tag"],
+				inline = true,
+				order = 1,
+				args = {
+					name = {
+						type = "input",
+						name = L["Name"],
+						desc = L["Name of the tag"],
+						get = function(info)
+							return self.addTagName
+						end,
+						set = function(info, value)
+							self.addTagName = value
+						end,
+						disabled = function() return not self:IsEnabled() end,
+						order = 5,
+					},
+					add = {
+						type = "execute",
+						name = L["Add Tag"],
+						func = function()
+							if (self.addTagName ~= "" and not self.db.tags[self.addTagName]) then
+								-- add to db
+								self.db.tags[self.addTagName] = "function(unit)\n  return UnitName(unit)\nend"
+								self.db.tagEvents[self.addTagName] = ""
 
-									-- add to text option tags
-									for text, v in pairs(GladiusEx.options.args[self:GetName()].args.textList.args) do
-										if (v.args.tag) then
-											local tag = self.addTagName
-											local tagName = Tags:FormatTagName(tag)
+								-- add to options
+								self.options.tagList.args[self.addTagName] = self:GetTagOptionTable(self.addTagName, 100)
 
-											GladiusEx.options.args[self:GetName()].args.textList.args[text].args.tag.args[tag] = {
-												type = "toggle",
-												name = tagName,
-												get = function(info)
-													local key = info[#info - 2]
+								-- add to text option tags
+								for text, v in pairs(self.options.textList.args) do
+									if (v.args.tag) then
+										local tag = self.addTagName
+										local tagName = Tags:FormatTagName(tag)
 
-													-- check if the tag is in the text
-													if (strfind(self.db.tagsTexts[key].text, "%[" .. info[#info] .. "%]")) then
-														return true
-													else
-														return false
-													end
-												end,
-												set = function(info, v)
-													local key = info[#info - 2]
+										self.options.textList.args[text].args.tag.args[tag] = {
+											type = "toggle",
+											name = tagName,
+											get = function(info)
+												local key = info[#info - 2]
 
-													-- add/remove tag to the text
-													if (not v) then
-														self.db.tagsTexts[key].text = strgsub(self.db.tagsTexts[key].text, "%[" .. info[#info] .. "%]", "")
+												-- check if the tag is in the text
+												if (strfind(self.db.tagsTexts[key].text, "%[" .. info[#info] .. "%]")) then
+													return true
+												else
+													return false
+												end
+											end,
+											set = function(info, v)
+												local key = info[#info - 2]
 
-														-- trim right
-														self.db.tagsTexts[key].text = strgsub(self.db.tagsTexts[key].text, "^(.-)%s*$", "%1")
-													else
-														self.db.tagsTexts[key].text = self.db.tagsTexts[key].text .. " [" .. info[#info] .. "]"
-													end
+												-- add/remove tag to the text
+												if (not v) then
+													self.db.tagsTexts[key].text = strgsub(self.db.tagsTexts[key].text, "%[" .. info[#info] .. "%]", "")
 
-													-- update
-													GladiusEx:UpdateFrames()
-												end,
-												order = 100,
-											}
-										end
+													-- trim right
+													self.db.tagsTexts[key].text = strgsub(self.db.tagsTexts[key].text, "^(.-)%s*$", "%1")
+												else
+													self.db.tagsTexts[key].text = self.db.tagsTexts[key].text .. " [" .. info[#info] .. "]"
+												end
+
+												-- update
+												GladiusEx:UpdateFrames()
+											end,
+											order = 100,
+										}
 									end
-
-									-- update
-									GladiusEx:UpdateFrames()
 								end
-							end,
-							order = 10,
-						},
+
+								-- update
+								GladiusEx:UpdateFrames()
+							end
+						end,
+						order = 10,
 					},
 				},
 			},
@@ -554,10 +632,10 @@ function Tags:GetOptions()
 	order = 1
 	local sorted_texts = fn.sort(fn.keys(self.db.tagsTexts))
 	for _, text in ipairs(sorted_texts) do
-		options.textList.args[text] = self:GetTextOptionTable(text, order)
+		self.options.textList.args[text] = self:GetTextOptionTable(text, order)
 
 		-- set tags
-		options.textList.args[text].args.tag.args = self.optionTags
+		self.options.textList.args[text].args.tag.args = self.optionTags
 
 		order = order + 1
 	end
@@ -565,11 +643,11 @@ function Tags:GetOptions()
 	-- tags
 	order = 1
 	for tag, _ in pairs(self.db.tags) do
-		options.tagList.args[tag] = self:GetTagOptionTable(tag, order)
+		self.options.tagList.args[tag] = self:GetTagOptionTable(tag, order)
 		order = order + 1
 	end
 
-	return options
+	return self.options
 end
 
 function Tags:GetTextOptionTable(text, order)
@@ -589,7 +667,7 @@ function Tags:GetTextOptionTable(text, order)
 					self.db.tagsTexts[text] = nil
 
 					-- remove from options
-					GladiusEx.options.args[self:GetName()].args.textList.args[text] = nil
+					self.options.textList.args[text] = nil
 
 					-- update
 					GladiusEx:UpdateFrames()
@@ -694,12 +772,12 @@ function Tags:GetTagOptionTable(tag, order)
 					self.db.tagEvents[tag] = nil
 
 					-- remove from options
-					GladiusEx.options.args[self:GetName()].args.tagList.args[tag] = nil
+					self.options.tagList.args[tag] = nil
 
 					-- remove from text option tags
-					for text, v in pairs(GladiusEx.options.args[self:GetName()].args.textList.args) do
+					for text, v in pairs(self.options.textList.args) do
 						if (v.args.tag and v.args.tag.args[tag]) then
-							GladiusEx.options.args[self:GetName()].args.textList.args[text].args.tag.args[tag] = nil
+							self.options.textList.args[text].args.tag.args[tag] = nil
 						end
 					end
 
@@ -734,8 +812,8 @@ function Tags:GetTagOptionTable(tag, order)
 							self.db.tagEvents[key] = nil
 
 							-- options
-							GladiusEx.options.args[self:GetName()].args.tagList.args[key] = nil
-							GladiusEx.options.args[self:GetName()].args.tagList.args[value] = self:GetTagOptionTable(value, order)
+							self.options.tagList.args[key] = nil
+							self.options.tagList.args[value] = self:GetTagOptionTable(value, order)
 
 							-- update
 							GladiusEx:UpdateFrames()
@@ -773,9 +851,6 @@ function Tags:GetTagOptionTable(tag, order)
 						set = function(info, value)
 							local key = info[#info - 2]
 							self.db.tags[key] = value
-
-							-- delete cached function
-							self.func[key] = nil
 
 							-- update
 							GladiusEx:UpdateFrames()
