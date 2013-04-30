@@ -503,7 +503,7 @@ end
 
 function GladiusEx:PLAYER_REGEN_ENABLED()
 	log("PLAYER_REGEN_ENABLED")
-	if self:UpdatePending() then
+	if self:IsUpdatePending() then
 		self:UpdateFrames()
 	end
 end
