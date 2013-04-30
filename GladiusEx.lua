@@ -231,9 +231,7 @@ function GladiusEx:OnEnable()
 		self:Print(L["** If this is not your first run please lock or move the frame to prevent this from happening **"])
 
 		self:SetTesting(3)
-	end
-
-	if self.db.debug then
+	elseif self.db.debug then
 		self:SetTesting(3)
 	end
 

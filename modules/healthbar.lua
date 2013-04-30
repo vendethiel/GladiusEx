@@ -28,9 +28,10 @@ local HealthBar = GladiusEx:NewGladiusExModule("HealthBar", true, {
 })
 
 function HealthBar:OnEnable()
-	self:RegisterEvent("UNIT_HEALTH")
-	self:RegisterEvent("UNIT_HEALTH_FREQUENT", "UNIT_HEALTH")
-	self:RegisterEvent("UNIT_MAXHEALTH", "UNIT_HEALTH")
+	self:RegisterEvent("UNIT_HEALTH", "UpdateHealthEvent")
+	self:RegisterEvent("UNIT_HEALTH_FREQUENT", "UpdateHealthEvent")
+	self:RegisterEvent("UNIT_MAXHEALTH", "UpdateHealthEvent")
+	self:RegisterEvent("UNIT_NAME_UPDATE", "UpdateColorEvent")
 
 	LSM = GladiusEx.LSM
 
@@ -72,11 +73,33 @@ function HealthBar:GetAttachFrame(unit)
 	return self.frame[unit]
 end
 
-function HealthBar:UNIT_HEALTH(event, unit)
-	if not GladiusEx:IsHandledUnit(unit) then return end
+function HealthBar:UpdateColorEvent(event, unit)
+	self:UpdateColor(unit)
+end
 
+function HealthBar:UpdateHealthEvent(event, unit)
 	local health, maxHealth = UnitHealth(unit), UnitHealthMax(unit)
 	self:UpdateHealth(unit, health, maxHealth)
+end
+
+function HealthBar:UpdateColor(unit)
+	if (not self.frame[unit]) then return end
+
+	local class
+	if GladiusEx:IsTesting(unit) then
+		class = GladiusEx.testing[unit].unitClass
+	else
+		class = select(2, UnitClass(unit))
+	end
+	
+	-- set color
+	local color
+	if self.db.healthBarClassColor then
+		color = self:GetBarColor(class)
+	else
+		color = self.db.healthBarColor
+	end
+	self.frame[unit]:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
 end
 
 function HealthBar:UpdateHealth(unit, health, maxHealth)
@@ -180,32 +203,14 @@ function HealthBar:GetBarHeight()
 end
 
 function HealthBar:Show(unit)
-	local testing = GladiusEx:IsTesting(unit)
-
 	-- show frame
 	self.frame[unit]:SetAlpha(1)
 
-	-- get unit class
-	local class
-	if not testing then
-		class = select(2, UnitClass(unit))
-	else
-		class = GladiusEx.testing[unit].unitClass
-	end
-
-	-- set color
-	if (not self.db.healthBarClassColor) then
-		local color = self.db.healthBarColor
-		self.frame[unit]:SetStatusBarColor(color.r, color.g, color.b, color.a)
-	else
-		local color = self:GetBarColor(class)
-		self.frame[unit]:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
-	end
+	-- update color
+	self:UpdateColorEvent("Show", unit)
 
 	-- call event
-	if not testing then
-		self:UNIT_HEALTH("UNIT_HEALTH", unit)
-	end
+	self:UpdateHealthEvent("Show", unit)
 end
 
 function HealthBar:Reset(unit)
@@ -224,6 +229,7 @@ function HealthBar:Test(unit)
 	local maxHealth = GladiusEx.testing[unit].maxHealth
 	local health = GladiusEx.testing[unit].health
 	self:UpdateHealth(unit, health, maxHealth)
+	self:UpdateColorEvent("Test", unit)
 end
 
 function HealthBar:GetOptions()

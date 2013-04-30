@@ -1435,9 +1435,19 @@ local function parse_desc(desc)
 	end
 
 	read_spelldesc = function()
-		assert(read(9) == "spelldesc")
+		local op = read(9)
 		local spellid = read_number()
-		return FormatSpellDescription(spellid)
+		if op == "spelldesc" then
+			return FormatSpellDescription(spellid)
+		elseif op == "spellicon" then
+			local _, _, icon = GetSpellInfo(spellid)
+			return string.format("|T%s:24|t", icon)
+		elseif op == "spellname" then
+			local name = GetSpellInfo(spellid)
+			return name
+		else
+			assert(op, "op failed me once again")
+		end
 	end
 
 	read_id = function()
