@@ -212,7 +212,7 @@ function GladiusEx:OnEnable()
 
 	-- update roster
 	self:UpdateAllGUIDs()
-	
+
 	-- create frames
 	if #self.buttons == 0 then
 		for unit in pairs(party_units) do self:InitializeUnit(unit) end
@@ -285,6 +285,10 @@ function GladiusEx:GetArenaSize(min)
 end
 
 function GladiusEx:UpdatePartyFrames()
+	if InCombatLockdown() then
+		self:QueueUpdate()
+	end
+
 	local group_members = self:IsTesting() or self:GetArenaSize()
 
 	log("UpdatePartyFrames", group_members)
@@ -310,12 +314,17 @@ function GladiusEx:UpdatePartyFrames()
 
 	if self.db.growDirection == "HCENTER" then
 		self:CenterUnitPosition("player", group_members)
+		self:CenterUnitPosition("arena1", group_members)
 	end
 
 	self:UpdateBackground(group_members)
 end
 
 function GladiusEx:UpdateArenaFrames()
+	if InCombatLockdown() then
+		self:QueueUpdate()
+	end
+
 	local numOpps = self:IsTesting() or self:GetArenaSize()
 
 	log("UpdateArenaFrames:", numOpps, GetNumArenaOpponents(), GetNumArenaOpponentSpecs())
@@ -351,15 +360,25 @@ end
 function GladiusEx:UpdateFrames()
 	log("UpdateFrames")
 
+	if InCombatLockdown() then
+		self:QueueUpdate()
+	end
+
 	self:UpdateUnit("player")
 	self:ShowUnit("player")
 
 	self:UpdatePartyFrames()
 	self:UpdateArenaFrames()
+
+	self:ClearUpdateQueue()
 end
 
 function GladiusEx:ShowFrames()
 	log("ShowFrames")
+
+	if InCombatLockdown() then
+		self:QueueUpdate()
+	end
 
 	-- background
 	if (self.db.groupButtons) then
@@ -383,6 +402,10 @@ end
 
 function GladiusEx:HideFrames()
 	log("HideFrames")
+
+	if InCombatLockdown() then
+		self:QueueUpdate()
+	end
 
 	-- hide frames instead of just setting alpha to 0
 	for unit, button in pairs(self.buttons) do
@@ -466,9 +489,23 @@ function GladiusEx:GROUP_ROSTER_UPDATE()
 	self:UpdateFrames()
 end
 
+function GladiusEx:QueueUpdate()
+	self.update_pending = true
+end
+
+function GladiusEx:IsUpdatePending()
+	return self.update_pending
+end
+
+function GladiusEx:ClearUpdateQueue()
+	self.update_pending = false
+end
+
 function GladiusEx:PLAYER_REGEN_ENABLED()
 	log("PLAYER_REGEN_ENABLED")
-	self:UpdateFrames()
+	if self:UpdatePending() then
+		self:UpdateFrames()
+	end
 end
 
 function GladiusEx:UNIT_NAME_UPDATE(event, unit)
@@ -625,6 +662,7 @@ function GladiusEx:ShowUnit(unit)
 		if not InCombatLockdown() then
 			self.buttons[unit]:Show()
 		else
+			self:QueueUpdate()
 			log("ShowUnit: tried to show, but InCombatLockdown")
 		end
 	end
@@ -801,6 +839,7 @@ function GladiusEx:UpdateUnit(unit, module)
 
 	-- todo: handle this properly
 	if (InCombatLockdown()) then
+		self:QueueUpdate()
 		log("UpdateUnit aborted due to InCombatLockdown")
 		return
 	end
@@ -953,6 +992,7 @@ end
 
 function GladiusEx:CenterUnitPosition(unit, numFrames)
 	if InCombatLockdown() then
+		self:QueueUpdate()
 		log("CenterUnitPosition: aborting due to InCombatLockdown")
 		return
 	end
