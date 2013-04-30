@@ -399,7 +399,7 @@ local function GetCooldownList(group, unit)
 		if db.cooldownsSpells[spellid] then
 			local tracked = CT:GetUnitCooldownInfo(unit, spellid)
 
-			if (spelldata.cooldown < 600)  and  ((not spelldata.glyph and not spelldata.talent and not spelldata.pet) or (tracked and tracked.detected) or not db.cooldownsHideTalentsUntilDetected) then
+			if (not spelldata.cooldown or spelldata.cooldown < 600) and ((not spelldata.glyph and not spelldata.talent and not spelldata.pet) or (tracked and tracked.detected) or not db.cooldownsHideTalentsUntilDetected) then
 				if spelldata.replaces then
 					-- remove replaced spell if detected
 					spell_list[spelldata.replaces] = false
