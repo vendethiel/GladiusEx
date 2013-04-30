@@ -90,6 +90,22 @@ L["PowerBar"] = "Power Bar"
 L["TargetBar"] = "Target Bar"
 
 -- General
+L["Active"] = true
+L["Alpha of the icon border while the spell is on cooldown"] = true
+L["Alpha of the icon border while the spell is being used"] = true
+L["Alpha of the icon border while the spell is not on cooldown"] = true
+L["Alpha of the icon while the spell is on cooldown"] = true
+L["Alpha of the icon while the spell is being used"] = true
+L["Alpha of the icon while the spell is not on cooldown"] = true
+L["Available"] = true
+L["Border transparency settings"] = true
+L["Border transparency"] = true
+L["Icon transparency settings"] = true
+L["Icon transparency"] = true
+L["On cooldown"] = true
+L["Icon border size"] = true
+L["Size of the cooldown icon borders"] = true
+
 L["%s settings"] = true
 L["** If this is not your first run please lock or move the frame to prevent this from happening **"] = true
 L["Action"] = true

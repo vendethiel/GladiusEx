@@ -38,7 +38,7 @@ local function log(...)
 		log_frame:SetScript("OnMouseWheel", FloatingChatFrame_OnMouseScroll)
 		log_frame:EnableMouseWheel(true)
 
-		log_frame:SetSize(500, 400)
+		log_frame:SetSize(500, 300)
 		log_frame:SetFont(STANDARD_TEXT_FONT, 9, "NONE")
 		log_frame:SetShadowColor(0, 0, 0, 1)
 		log_frame:SetShadowOffset(1, -1)
@@ -48,6 +48,8 @@ local function log(...)
 		log_frame:SetMaxLines(10000)
 		log_frame:SetBackdropColor(1, 1, 1, 0.2)
 		log_frame.starttime = GetTime()
+
+		log_frame:SetScale(0.6)
 	end
 	local p = ...
 	if p == "ENABLE LOGGING" then

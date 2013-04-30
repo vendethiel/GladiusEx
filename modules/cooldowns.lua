@@ -25,6 +25,13 @@ local function MakeGroupDb(settings)
 		cooldownsSize = 23,
 		cooldownsCrop = true,
 		cooldownsSpells = {},
+		cooldownsBorderSize = 1,
+		cooldownsBorderAvailAlpha = 0.7,
+		cooldownsBorderUsingAlpha = 1.0,
+		cooldownsBorderCooldownAlpha = 0.2,
+		cooldownsIconAvailAlpha = 0.5,
+		cooldownsIconUsingAlpha = 1.0,
+		cooldownsIconCooldownAlpha = 0.2,
 		cooldownsCatPriority = {
 			"pvp_trinket",
 			"dispel",
@@ -116,6 +123,13 @@ local Cooldowns = GladiusEx:NewGladiusExModule("Cooldowns", false, {
 			cooldownsMax = 10,
 			cooldownsSize = 40,
 			cooldownsCrop = false,
+			cooldownsBorderSize = 0,
+			cooldownsBorderAvailAlpha = 1.0,
+			cooldownsBorderUsingAlpha = 1.0,
+			cooldownsBorderCooldownAlpha = 1.0,
+			cooldownsIconAvailAlpha = 1.0,
+			cooldownsIconUsingAlpha = 1.0,
+			cooldownsIconCooldownAlpha = 1.0,
 			cooldownsSpells = (function()
 				local r = {}
 				for spellid, spelldata in pairs(CT:GetCooldownsData()) do
@@ -252,9 +266,10 @@ local function CooldownFrame_OnUpdate(frame)
 				else
 					frame.cooldown:Hide()
 				end
-
-				frame.border:SetVertexColor(frame.color.r, frame.color.g, frame.color.b, 1.0)
-				frame:SetAlpha(1)
+				local a = GetGroupDB(frame.group).cooldownsIconUsingAlpha
+				local ab = GetGroupDB(frame.group).cooldownsBorderUsingAlpha
+				frame:SetBackdropBorderColor(frame.color.r, frame.color.g, frame.color.b, ab)
+				frame.icon_frame:SetAlpha(a)
 				frame.state = 1
 			end
 			return
@@ -262,8 +277,10 @@ local function CooldownFrame_OnUpdate(frame)
 		if tracked.used_start and not tracked.cooldown_start and frame.spelldata.active_until_cooldown_start then
 			-- waiting to be used (inner focus)
 			if frame.state ~= 2 then
-				frame.border:SetVertexColor(frame.color.r, frame.color.g, frame.color.b, 1.0)
-				frame:SetAlpha(1)
+				local a = GetGroupDB(frame.group).cooldownsIconUsingAlpha
+				local ab = GetGroupDB(frame.group).cooldownsBorderUsingAlpha
+				frame:SetBackdropBorderColor(frame.color.r, frame.color.g, frame.color.b, ab)
+				frame.icon_frame:SetAlpha(a)
 				frame.cooldown:Hide()
 				frame.state = 2
 			end
@@ -274,8 +291,10 @@ local function CooldownFrame_OnUpdate(frame)
 			if frame.state ~= 3 then
 				frame.cooldown:SetReverse(false)
 				frame.cooldown:SetCooldown(tracked.cooldown_start, tracked.cooldown_end - tracked.cooldown_start)
-				frame.border:SetVertexColor(frame.color.r, frame.color.g, frame.color.b, 0.3)
-				frame:SetAlpha(0.8)
+				local a = GetGroupDB(frame.group).cooldownsIconCooldownAlpha
+				local ab = GetGroupDB(frame.group).cooldownsBorderCooldownAlpha
+				frame:SetBackdropBorderColor(frame.color.r, frame.color.g, frame.color.b, ab)
+				frame.icon_frame:SetAlpha(a)
 				frame.cooldown:Show()
 				frame.state = 3
 			end
@@ -286,8 +305,10 @@ local function CooldownFrame_OnUpdate(frame)
 	-- not on cooldown or being used
 	frame.tracked = nil
 	frame.cooldown:Hide()
-	frame.border:SetVertexColor(frame.color.r, frame.color.g, frame.color.b, 0.3)
-	frame:SetAlpha(1)
+	local a = GetGroupDB(frame.group).cooldownsIconAvailAlpha
+	local ab = GetGroupDB(frame.group).cooldownsBorderAvailAlpha
+	frame:SetBackdropBorderColor(frame.color.r, frame.color.g, frame.color.b, ab)
+	frame.icon_frame:SetAlpha(a)
 	frame:SetScript("OnUpdate", nil)
 end
 
@@ -428,6 +449,14 @@ local function GetCooldownList(group, unit)
 	return sorted_spells
 end
 
+local function ShowIcon(frame)
+	frame:Show()
+end
+
+local function HideIcon(frame)
+	frame:Hide()
+end
+
 local function UpdateGroupIconFrames(group, unit, sorted_spells)
 	local gs = GetGroupState(group)
 	local db = GetGroupDB(group)
@@ -466,7 +495,7 @@ local function UpdateGroupIconFrames(group, unit, sorted_spells)
 			local skip = cooldownsPerColumn - ((sidx - 1) % cooldownsPerColumn)
 			if skip ~= cooldownsPerColumn then
 				for i = 1, skip do
-					gs.frame[unit][sidx]:Hide()
+					HideIcon(gs.frame[unit][sidx])
 					sidx = sidx + 1
 					if sidx > #gs.frame[unit] then
 						-- ran out of space
@@ -489,7 +518,6 @@ local function UpdateGroupIconFrames(group, unit, sorted_spells)
 		-- set border color
 		local c
 
-		-- for _, key in ipairs(cat_priority) do
 		for i = 1, #cat_priority do
 			local key = cat_priority[i]
 			if spelldata[key] then
@@ -508,7 +536,7 @@ local function UpdateGroupIconFrames(group, unit, sorted_spells)
 
 		-- refresh
 		frame:SetScript("OnUpdate", CooldownFrame_OnUpdate)
-		frame:Show()
+		ShowIcon(frame)
 
 		sidx = sidx + 1
 		shown = shown + 1
@@ -519,7 +547,7 @@ local function UpdateGroupIconFrames(group, unit, sorted_spells)
 
 	-- hide unused icons
 	for i = sidx, #gs.frame[unit] do
-		gs.frame[unit][i]:Hide()
+		HideIcon(gs.frame[unit][i])
 	end
 end
 
@@ -544,14 +572,14 @@ end
 
 local function CreateCooldownFrame(name, parent)
 	local frame = CreateFrame("Frame", name, parent)
-	frame.icon = frame:CreateTexture(nil, "BORDER") -- bg
+
+	frame.icon_frame = CreateFrame("Frame", nil, frame)
+	frame.icon_frame:SetAllPoints()
+
+	frame.icon = frame.icon_frame:CreateTexture(nil, "BACKGROUND") -- bg
 	frame.icon:SetPoint("CENTER")
 
-	frame.border = frame:CreateTexture(nil, "BACKGROUND") -- overlay
-	frame.border:SetPoint("CENTER")
-	frame.border:SetTexture(1, 1, 1, 1)
-
-	frame.cooldown = CreateFrame("Cooldown", nil, frame)
+	frame.cooldown = CreateFrame("Cooldown", nil, frame.icon_frame)
 	frame.cooldown:SetAllPoints(frame.icon)
 	frame.cooldown:SetReverse(true)
 	frame.cooldown:Hide()
@@ -579,16 +607,25 @@ local function CreateCooldownFrame(name, parent)
 	return frame
 end
 
-local function UpdateCooldownFrame(frame, size, crop)
-	local border_size = crop and 3 or 2
+local function UpdateCooldownFrame(frame, size, border_size, crop)
 	frame:SetSize(size, size)
-	frame.icon:SetSize(size - border_size - 0.5, size - border_size - 0.5)
+	if border_size ~= 0 then
+		-- pixel perfect borders
+		local cs = GetCVar("uiScale")
+		local s = 768 / string.match(({GetScreenResolutions()})[GetCurrentResolution()], "%d+x(%d+)")
+		local border_size = border_size / (cs / s)
+		frame:SetBackdrop({ edgeFile = [[Interface\ChatFrame\ChatFrameBackground]], edgeSize = border_size })
+		frame.icon:SetSize(size - border_size * 2, size - border_size * 2)
+	else
+		frame:SetBackdrop(nil)
+		frame.icon:SetSize(size, size)
+	end
+
 	if crop then
 		frame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
 	else
 		frame.icon:SetTexCoord(0, 1, 0, 1)
 	end
-	frame.border:SetSize(size, size)
 end
 
 function Cooldowns:CreateFrame(unit)
@@ -611,7 +648,8 @@ function Cooldowns:CreateGroupFrame(group, unit)
 		for i = 1, MAX_ICONS do
 			gs.frame[unit][i] = CreateCooldownFrame("GladiusEx" .. self:GetName() .. "frameIcon" .. i .. unit, gs.frame[unit])
 			gs.frame[unit][i]:SetScript("OnUpdate", CooldownFrame_OnUpdate)
-			gs.frame[unit][i]:Hide()
+			gs.frame[unit][i].unit = unit
+			gs.frame[unit][i].group = group
 		end
 	end
 end
@@ -627,6 +665,7 @@ local function UpdateCooldownGroup(
 	cooldownPerColumn,
 	cooldownGrow,
 	cooldownSize,
+	cooldownBorderSize,
 	cooldownSpacingX,
 	cooldownSpacingY,
 	cooldownMax,
@@ -680,7 +719,7 @@ local function UpdateCooldownGroup(
 
 		cooldownFrame[i]:ClearAllPoints()
 		cooldownFrame[i]:SetPoint(anchor, parent, relativePoint, offsetX, offsetY)
-		UpdateCooldownFrame(cooldownFrame[i], cooldownSize, cooldownCrop)
+		UpdateCooldownFrame(cooldownFrame[i], cooldownSize, cooldownBorderSize, cooldownCrop)
 	end
 end
 
@@ -713,6 +752,7 @@ function Cooldowns:UpdateGroup(group, unit)
 		db.cooldownsPerColumn,
 		db.cooldownsGrow,
 		db.cooldownsSize,
+		db.cooldownsBorderSize,
 		db.cooldownsSpacingX,
 		db.cooldownsSpacingY,
 		db.cooldownsMax,
@@ -721,7 +761,7 @@ function Cooldowns:UpdateGroup(group, unit)
 	-- update icons
 	self:UpdateIcons(unit)
 
-	-- hide
+	-- hide group
 	gs.frame[unit]:Hide()
 end
 
@@ -889,6 +929,84 @@ function Cooldowns:MakeGroupOptions(group)
 							},
 						},
 					},
+					icon_transparency = {
+						type = "group",
+						name = L["Icon transparency"],
+						desc = L["Icon transparency settings"],
+						inline = true,
+						order = 1.1,
+						args = {
+							cooldownsIconAvailAlpha = {
+								type = "range",
+								name = L["Available"],
+								desc = L["Alpha of the icon while the spell is not on cooldown"],
+								min = 0, max = 1, step = 0.1,
+								disabled = function() return not self:IsEnabled() end,
+								order = 1,
+							},
+							cooldownsIconUsingAlpha = {
+								type = "range",
+								name = L["Active"],
+								desc = L["Alpha of the icon while the spell is being used"],
+								min = 0, max = 1, step = 0.1,
+								disabled = function() return not self:IsEnabled() end,
+								order = 2,
+							},
+							cooldownsIconCooldownAlpha = {
+								type = "range",
+								name = L["On cooldown"],
+								desc = L["Alpha of the icon while the spell is on cooldown"],
+								min = 0, max = 1, step = 0.1,
+								disabled = function() return not self:IsEnabled() end,
+								order = 3,
+							},
+							sep = {
+								type = "description",
+								name = "",
+								width = "full",
+								order = 4,
+							},
+						},
+					},
+					border_transparency = {
+						type = "group",
+						name = L["Border transparency"],
+						desc = L["Border transparency settings"],
+						inline = true,
+						order = 1.2,
+						args = {
+							cooldownsBorderAvailAlpha = {
+								type = "range",
+								name = L["Available"],
+								desc = L["Alpha of the icon border while the spell is not on cooldown"],
+								min = 0, max = 1, step = 0.1,
+								disabled = function() return not self:IsEnabled() end,
+								order = 1,
+							},
+							cooldownsBorderUsingAlpha = {
+								type = "range",
+								name = L["Active"],
+								desc = L["Alpha of the icon border while the spell is being used"],
+								min = 0, max = 1, step = 0.1,
+								disabled = function() return not self:IsEnabled() end,
+								order = 2,
+							},
+							cooldownsBorderCooldownAlpha = {
+								type = "range",
+								name = L["On cooldown"],
+								desc = L["Alpha of the icon border while the spell is on cooldown"],
+								min = 0, max = 1, step = 0.1,
+								disabled = function() return not self:IsEnabled() end,
+								order = 3,
+							},
+							sep = {
+								type = "description",
+								name = "",
+								width = "full",
+								order = 4,
+							},
+						},
+					},
 					size = {
 						type = "group",
 						name = L["Size"],
@@ -903,6 +1021,14 @@ function Cooldowns:MakeGroupOptions(group)
 									min = 10, max = 100, step = 1,
 									disabled = function() return not self:IsEnabled() end,
 									order = 5,
+								},
+								cooldownsBorderSize = {
+									type = "range",
+									name = L["Icon border size"],
+									desc = L["Size of the cooldown icon borders"],
+									min = 0, max = 10, step = 1,
+									disabled = function() return not self:IsEnabled() end,
+									order = 6,
 								},
 								sep = {
 									type = "description",
