@@ -1202,10 +1202,6 @@ function Cooldowns:MakeGroupOptions(group)
 	local args = group_options.args.cooldowns.args
 	for spellid, spelldata in pairs(CT:GetCooldownsData()) do
 		if type(spelldata) == "table" and (not spelldata.cooldown or spelldata.cooldown < 600) then
-			if not spelldata.cooldown then
-				print(spelldata.name)
-			end
-
 			local cats = {}
 			if spelldata.pvp_trinket then tinsert(cats, L["cat:pvp_trinket"]) end
 			if spelldata.cc then tinsert(cats, L["cat:cc"]) end
