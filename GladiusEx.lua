@@ -370,7 +370,9 @@ function GladiusEx:UpdateFrames()
 	self:UpdatePartyFrames()
 	self:UpdateArenaFrames()
 
-	self:ClearUpdateQueue()
+	if not InCombatLockdown() then
+		self:ClearUpdateQueue()
+	end
 end
 
 function GladiusEx:ShowFrames()
