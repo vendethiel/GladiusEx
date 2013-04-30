@@ -90,9 +90,6 @@ L["PowerBar"] = "Power Bar"
 L["TargetBar"] = "Target Bar"
 
 -- General
-L["Talent"] = true
-L["Pet"] = true
-
 L["%s settings"] = true
 L["** If this is not your first run please lock or move the frame to prevent this from happening **"] = true
 L["Action"] = true
@@ -293,6 +290,7 @@ L["Options"] = true
 L["Padding of the background"] = true
 L["Parrot"] = true
 L["Party"] = true
+L["Pet"] = true
 L["Player focus target settings"] = true
 L["Player focus target"] = true
 L["Player target settings"] = true
@@ -358,6 +356,7 @@ L["Tag settings"] = true
 L["Tag"] = true
 L["Tag: %s"] = true
 L["Tags"] = true
+L["Talent"] = true
 L["TargetBar"] = true
 L["Test 2v2"] = true
 L["Test 3v3"] = true

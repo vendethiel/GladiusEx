@@ -95,47 +95,74 @@ function CastBar:GetAttachFrame(unit, point)
 	end
 end
 
+local function CastUpdate(self)
+	if self.isCasting or self.isChanneling then
+		local currentTime = min(self.endTime, GetTime())
+		local value = self.endTime - currentTime
+
+		if (self.isChanneling and not CastBar.db.castBarInverse) or (self.isCasting and CastBar.db.castBarInverse) then
+			self:SetValue(value)
+		else
+			self:SetValue(self.endTime - self.startTime - value)
+		end
+
+		if self.delay > 0 then
+			self.timeText:SetFormattedText("+%.2f %.2f", self.delay, value)
+		else
+			self.timeText:SetFormattedText("%.2f", value)
+		end
+	else
+		self:SetScript("OnUpdate", nil)
+	end
+end
+
+local function UpdateCastText(f, spell, rank)
+	if rank ~= "" then
+		f.castText:SetFormattedText("%s (%s)", spell, rank)
+	else
+		f.castText:SetText(spell)
+	end
+end
+
 function CastBar:UNIT_SPELLCAST_START(event, unit)
-	if not self.frame[unit] then return end
+	local f = self.frame[unit]
+	if not f then return end
 
 	local spell, rank, displayName, icon, startTime, endTime, isTradeSkill = UnitCastingInfo(unit)
 	if (spell) then
-		self.frame[unit].spellName = spell
-		self.frame[unit].isChanneling = false
-		self.frame[unit].isCasting = true
-		self.frame[unit].startTime = startTime / 1000
-		self.frame[unit].endTime = endTime / 1000
-		self.frame[unit].delay = 0
-		self.frame[unit]:SetMinMaxValues(0, (endTime - startTime) / 1000)
-		self.frame[unit].icon:SetTexture(icon)
+		f.spellName = spell
+		f.isChanneling = false
+		f.isCasting = true
+		f.startTime = startTime / 1000
+		f.endTime = endTime / 1000
+		f.delay = 0
+		f:SetMinMaxValues(0, (endTime - startTime) / 1000)
+		f.icon:SetTexture(icon)
+		f:SetScript("OnUpdate", CastUpdate)
+		CastUpdate(f)
 
-		if( rank ~= "" ) then
-			self.frame[unit].castText:SetFormattedText("%s (%s)", spell, rank)
-		else
-			self.frame[unit].castText:SetText(spell)
-		end
+		UpdateCastText(f, spell, rank)
 	end
 end
 
 function CastBar:UNIT_SPELLCAST_CHANNEL_START(event, unit)
-	if not self.frame[unit] then return end
+	local f = self.frame[unit]
+	if not f then return end
 
 	local spell, rank, displayName, icon, startTime, endTime, isTradeSkill = UnitChannelInfo(unit)
 	if (spell) then
-		self.frame[unit].spellName = spell
-		self.frame[unit].isChanneling = true
-		self.frame[unit].isCasting = false
-		self.frame[unit].startTime = startTime / 1000
-		self.frame[unit].endTime = endTime / 1000
-		self.frame[unit].delay = 0
-		self.frame[unit]:SetMinMaxValues(0, (endTime - startTime) / 1000)
-		self.frame[unit].icon:SetTexture(icon)
+		f.spellName = spell
+		f.isChanneling = true
+		f.isCasting = false
+		f.startTime = startTime / 1000
+		f.endTime = endTime / 1000
+		f.delay = 0
+		f:SetMinMaxValues(0, (endTime - startTime) / 1000)
+		f.icon:SetTexture(icon)
+		f:SetScript("OnUpdate", CastUpdate)
+		CastUpdate(f)
 
-		if rank ~= "" then
-			self.frame[unit].castText:SetFormattedText("%s (%s)", spell, rank)
-		else
-			self.frame[unit].castText:SetText(spell)
-		end
+		UpdateCastText(f, spell, rank)
 	end
 end
 
@@ -169,25 +196,6 @@ function CastBar:UNIT_SPELLCAST_DELAYED(event, unit)
 	self.frame[unit].startTime = startTime / 1000
 	self.frame[unit].endTime = endTime / 1000
 	self.frame[unit]:SetMinMaxValues(0, (endTime - startTime) / 1000)
-end
-
-local function CastUpdate(self)
-	if self.isCasting or self.isChanneling then
-		local currentTime = min(self.endTime, GetTime())
-		local value = self.endTime - currentTime
-
-		if (self.isChanneling and not CastBar.db.castBarInverse) or (self.isCasting and CastBar.db.castBarInverse) then
-			self:SetValue(value)
-		else
-			self:SetValue(self.endTime - self.startTime - value)
-		end
-
-		if self.delay > 0 then
-			self.timeText:SetFormattedText("+%.2f %.2f", self.delay, value)
-		else
-			self.timeText:SetFormattedText("%.2f", value)
-		end
-	end
 end
 
 function CastBar:CastEnd(bar)
@@ -272,9 +280,6 @@ function CastBar:Update(unit)
 	self.frame[unit]:SetMinMaxValues(0, 100)
 	self.frame[unit]:SetValue(0)
 	self.frame[unit]:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db.castBarTexture))
-
-	-- updating
-	self.frame[unit]:SetScript("OnUpdate", CastUpdate)
 
 	-- disable tileing
 	self.frame[unit]:GetStatusBarTexture():SetHorizTile(false)
