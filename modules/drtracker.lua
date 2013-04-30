@@ -15,8 +15,9 @@ local DRTracker = GladiusEx:NewGladiusExModule("DRTracker", false, {
 	drTrackerGrowDirection = "DOWN",
 	drTrackerAdjustSize = false,
 	drTrackerMargin = 0,
-	drTrackerSize = 36,
-	drTrackerOffsetX = -2,
+	drTrackerSize = 40,
+	drTrackerCrop = false,
+	drTrackerOffsetX = 0,
 	drTrackerOffsetY = 0,
 	drTrackerFrameLevel = 2,
 	drTrackerGloss = false,
@@ -112,7 +113,11 @@ function DRTracker:UpdateIcon(unit, drCat)
 	tracked.texture:ClearAllPoints()
 	tracked.texture:SetPoint("TOPLEFT", tracked, "TOPLEFT")
 	tracked.texture:SetPoint("BOTTOMRIGHT", tracked, "BOTTOMRIGHT")
-	tracked.texture:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+	if self.db.drTrackerCrop then
+		tracked.texture:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+	else
+		tracked.texture:SetTexCoord(0, 1, 0, 1)
+	end
 end
 
 function DRTracker:DRFaded(unit, spellID)
@@ -338,6 +343,14 @@ function DRTracker:GetOptions()
 							disabled = function() return not self:IsEnabled() end,
 							hidden = function() return not GladiusEx.db.advancedOptions end,
 							order = 15,
+						},
+						drTrackerCrop = {
+							type = "toggle",
+							name = L["Crop borders"],
+							desc = L["Toggle if the icon borders should be cropped or not"],
+							disabled = function() return not self:IsEnabled() end,
+							hidden = function() return not GladiusEx.db.advancedOptions end,
+							order = 16,
 						},
 						sep2 = {
 							type = "description",
