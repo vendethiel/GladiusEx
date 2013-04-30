@@ -220,8 +220,8 @@ function PowerBar:Show(unit)
 	-- show frame
 	self.frame[unit]:SetAlpha(1)
 
-	if (not GladiusEx:IsTesting()) then
-		self:UNIT_POWER("UNIT_POWER", unit)
+	if not GladiusEx:IsTesting() then
+		self:UpdatePowerEvent("Show", unit)
 	end
 end
 
