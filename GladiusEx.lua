@@ -233,6 +233,10 @@ function GladiusEx:OnEnable()
 		self:SetTesting(3)
 	end
 
+	if self.db.debug then
+		self:SetTesting(3)
+	end
+
 	-- see if we are already in arena
 	if IsLoggedIn() then
 		GladiusEx:PLAYER_ENTERING_WORLD()
@@ -516,6 +520,8 @@ end
 function GladiusEx:UpdateUnitState(unit)
 	if UnitIsDeadOrGhost(unit) then
 		self.buttons[unit]:SetAlpha(self.db.deadAlpha)
+	elseif UnitExists(unit) then
+		self.buttons[unit]:SetAlpha(1)
 	end
 end
 

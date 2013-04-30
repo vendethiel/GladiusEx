@@ -89,7 +89,10 @@ L["HealthBar"] = "Health Bar"
 L["PowerBar"] = "Power Bar"
 L["TargetBar"] = "Target Bar"
 
--- Other
+-- General
+L["Talent"] = true
+L["Pet"] = true
+
 L["%s settings"] = true
 L["** If this is not your first run please lock or move the frame to prevent this from happening **"] = true
 L["Action"] = true

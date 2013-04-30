@@ -399,7 +399,7 @@ local function GetCooldownList(group, unit)
 		if db.cooldownsSpells[spellid] then
 			local tracked = CT:GetUnitCooldownInfo(unit, spellid)
 
-			if (not spelldata.glyph and not spelldata.talent) or (tracked and tracked.detected) or not db.cooldownsHideTalentsUntilDetected then
+			if (spelldata.cooldown < 600)  and  ((not spelldata.glyph and not spelldata.talent and not spelldata.pet) or (tracked and tracked.detected) or not db.cooldownsHideTalentsUntilDetected) then
 				if spelldata.replaces then
 					-- remove replaced spell if detected
 					spell_list[spelldata.replaces] = false
@@ -1201,7 +1201,11 @@ function Cooldowns:MakeGroupOptions(group)
 
 	local args = group_options.args.cooldowns.args
 	for spellid, spelldata in pairs(CT:GetCooldownsData()) do
-		if type(spelldata) == "table" then
+		if type(spelldata) == "table" and (not spelldata.cooldown or spelldata.cooldown < 600) then
+			if not spelldata.cooldown then
+				print(spelldata.name)
+			end
+
 			local cats = {}
 			if spelldata.pvp_trinket then tinsert(cats, L["cat:pvp_trinket"]) end
 			if spelldata.cc then tinsert(cats, L["cat:cc"]) end
@@ -1271,12 +1275,23 @@ function Cooldowns:MakeGroupOptions(group)
 					if not args[spelldata.class].args.talents then
 						args[spelldata.class].args.talents = {
 							type = "group",
-							name = "Talents",
+							name = L["Talent"],
 							order = 2,
 							args = {}
 						}
 					end
 					args[spelldata.class].args.talents.args["spell"..spellid] = spellconfig
+				elseif spelldata.pet then
+					-- pet
+					if not args[spelldata.class].args.pets then
+						args[spelldata.class].args.pets = {
+							type = "group",
+							name = L["Pet"],
+							order = 1000,
+							args = {}
+						}
+					end
+					args[spelldata.class].args.pets.args["spell"..spellid] = spellconfig
 				else
 					-- baseline
 					if not args[spelldata.class].args.base then
