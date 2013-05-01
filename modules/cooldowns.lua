@@ -8,7 +8,7 @@ local fn = LibStub("LibFunctional-1.0")
 local tinsert, tremove, tsort = table.insert, table.remove, table.sort
 local pairs, ipairs, select, type, unpack = pairs, ipairs, select, type, unpack
 local min, max, ceil, random = math.min, math.max, math.ceil, math.random
-local GetTime, UnitExists, UnitFactionGroup, UnitRace = GetTime, UnitExists, UnitFactionGroup, UnitRace
+local GetTime, UnitExists, UnitFactionGroup, UnitClass, UnitRace = GetTime, UnitExists, UnitFactionGroup, UnitClass, UnitRace
 
 local function MakeGroupDb(settings)
 	local db = {
@@ -607,13 +607,21 @@ local function CreateCooldownFrame(name, parent)
 	return frame
 end
 
+-- returns a size adjusted to the frame scale, so that it fits pixels perfectly
+local function GetAdjustedSize(frame, size)
+	if size == 0 then
+		return 0
+	end
+	-- local uiScale = GetCVar("uiScale")
+	local frameScale = frame:GetEffectiveScale()
+	local perfectScale = 768 / string.match(({GetScreenResolutions()})[GetCurrentResolution()], "%d+x(%d+)")
+	local size_adjusted = size / (frameScale / perfectScale)
+	return size_adjusted
+end
+
 local function UpdateCooldownFrame(frame, size, border_size, crop)
 	frame:SetSize(size, size)
 	if border_size ~= 0 then
-		-- pixel perfect borders
-		local cs = GetCVar("uiScale")
-		local s = 768 / string.match(({GetScreenResolutions()})[GetCurrentResolution()], "%d+x(%d+)")
-		local border_size = border_size / (cs / s)
 		frame:SetBackdrop({ edgeFile = [[Interface\ChatFrame\ChatFrameBackground]], edgeSize = border_size })
 		frame.icon:SetSize(size - border_size * 2, size - border_size * 2)
 	else
@@ -752,7 +760,7 @@ function Cooldowns:UpdateGroup(group, unit)
 		db.cooldownsPerColumn,
 		db.cooldownsGrow,
 		db.cooldownsSize,
-		db.cooldownsBorderSize,
+		GetAdjustedSize(gs.frame[unit], db.cooldownsBorderSize),
 		db.cooldownsSpacingX,
 		db.cooldownsSpacingY,
 		db.cooldownsMax,
@@ -873,7 +881,7 @@ function Cooldowns:MakeGroupOptions(group)
 						args = {
 							cooldownsGrow = {
 								type = "select",
-								name = L["Column grow"],
+								name = L["Grow direction"],
 								desc = L["Grow direction of the cooldowns"],
 								values = function() return {
 										["UPLEFT"] = L["Up left"],
