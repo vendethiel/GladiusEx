@@ -314,6 +314,17 @@ function DRTracker:GetOptions()
 					inline = true,
 					order = 1,
 					args = {
+						drTrackerGrowDirection = {
+							type = "select",
+							name = L["Grow direction"],
+							values = {
+								["LEFT"]  = L["Left"],
+								["RIGHT"] = L["Right"],
+								["UP"]    = L["Up"],
+								["DOWN"]  = L["Down"],
+							},
+							order = 1,
+						},
 						drTrackerMargin = {
 							type = "range",
 							name = L["Spacing"],
@@ -489,16 +500,6 @@ function DRTracker:GetOptions()
 							name = "",
 							width = "full",
 							order = 7,
-						},
-						drTrackerGrowDirection = {
-							type = "select",
-							name = L["Grow direction"],
-							values = {
-								["LEFT"]  = L["Left"],
-								["RIGHT"] = L["Right"],
-								["UP"]    = L["Up"],
-								["DOWN"]  = L["Down"],
-							},
 						},
 						drTrackerAnchor = {
 							type = "select",
