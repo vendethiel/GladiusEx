@@ -168,17 +168,17 @@ function GladiusEx:OnInitialize()
 	-- test environment
 	self.test = false
 	self.testing = setmetatable({
-		["arena1"] = { health = 32000, maxHealth = 32000, power = 18000, maxPower = 18000, powerType = 0, unitClass = "MAGE", unitRace = "Scourge", unitSpec = "Frost", specID = 64 },
-		["arena2"] = { health = 30000, maxHealth = 32000, power = 10000, maxPower = 12000, powerType = 2, unitClass = "HUNTER", unitRace = "NightElf", unitSpec = "Marksmanship", specID = 254 },
-		["arena3"] = { health = 24000, maxHealth = 35000, power = 90, maxPower = 120, powerType = 3, unitClass = "ROGUE", unitRace = "Human", unitSpec = "Combat", specID = 260 },
-		["arena4"] = { health = 20000, maxHealth = 40000, power = 80, maxPower = 130, powerType = 6, unitClass = "DEATHKNIGHT", unitRace = "Dwarf", unitSpec = "Unholy", specID = 252 },
-		["arena5"] = { health = 10000, maxHealth = 30000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Gnome", unitSpec = "Arms", specID = 71 },
+		["arena1"] = { health = 320000, maxHealth = 320000, power = 18000, maxPower = 18000, powerType = 0, unitClass = "MAGE", unitRace = "Scourge", unitSpec = "Frost", specID = 64 },
+		["arena2"] = { health = 300000, maxHealth = 320000, power = 10000, maxPower = 12000, powerType = 2, unitClass = "HUNTER", unitRace = "NightElf", unitSpec = "Beast Mastery", specID = 253 },
+		["arena3"] = { health = 240000, maxHealth = 350000, power = 90, maxPower = 120, powerType = 3, unitClass = "ROGUE", unitRace = "Human", unitSpec = "Subtlety", specID = 261 },
+		["arena4"] = { health = 200000, maxHealth = 400000, power = 80, maxPower = 130, powerType = 6, unitClass = "DEATHKNIGHT", unitRace = "Dwarf", unitSpec = "Unholy", specID = 252 },
+		["arena5"] = { health = 100000, maxHealth = 300000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Gnome", unitSpec = "Arms", specID = 71 },
 
-		["player"] = { health = 32000, maxHealth = 32000, power = 18000, maxPower = 18000, powerType = 0, unitClass = "PRIEST", unitRace = "Draenei", unitSpec = "Discipline" },
-		["party1"] = { health = 30000, maxHealth = 32000, power = 10000, maxPower = 12000, powerType = 3, unitClass = "MONK", unitRace = "Pandaren", unitSpec = "Windwalker", specID = 269 },
-		["party2"] = { health = 10000, maxHealth = 30000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Gnome", unitSpec = "Arms", specID = 71 },
-		["party3"] = { health = 20000, maxHealth = 40000, power = 80, maxPower = 130, powerType = 6, unitClass = "DEATHKNIGHT", unitRace = "Dwarf", unitSpec = "Unholy", specID = 252 },
-		["party4"] = { health = 10000, maxHealth = 30000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Gnome", unitSpec = "Arms", specID = 71 },
+		["player"] = { health = 320000, maxHealth = 320000, power = 18000, maxPower = 18000, powerType = 0, unitClass = "PRIEST", unitRace = "Draenei", unitSpec = "Discipline" },
+		["party1"] = { health = 300000, maxHealth = 320000, power = 10000, maxPower = 12000, powerType = 3, unitClass = "MONK", unitRace = "Pandaren", unitSpec = "Windwalker", specID = 269 },
+		["party2"] = { health = 100000, maxHealth = 300000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Gnome", unitSpec = "Arms", specID = 71 },
+		["party3"] = { health = 200000, maxHealth = 400000, power = 80, maxPower = 130, powerType = 6, unitClass = "DEATHKNIGHT", unitRace = "Dwarf", unitSpec = "Unholy", specID = 252 },
+		["party4"] = { health = 100000, maxHealth = 300000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Gnome", unitSpec = "Arms", specID = 71 },
 
 	}, {
 		__index = function(t, k)
