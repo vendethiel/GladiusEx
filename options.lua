@@ -222,8 +222,8 @@ function GladiusEx:SetupOptions()
 						args = {
 							locked = {
 								type = "toggle",
-								name = L["Lock frame"],
-								desc = L["Toggle if the frame can be moved"],
+								name = L["Lock frames"],
+								desc = L["Toggle if the frames can be moved"],
 								order = 1,
 							},
 							growDirection = {
@@ -234,11 +234,13 @@ function GladiusEx:SetupOptions()
 								desc = L["The direction you want the frames to grow in"],
 								values = {
 									["HCENTER"] = L["Left and right"],
+									["VCENTER"] = L["Up and down"],
 									["LEFT"]    = L["Left"],
 									["RIGHT"]   = L["Right"],
 									["UP"]      = L["Up"],
 									["DOWN"]    = L["Down"],
 								},
+								disabled = function() return not self.db.groupButtons end,
 							},
 							sep = {
 								type = "description",

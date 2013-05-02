@@ -234,7 +234,7 @@ function CastBar:Update(unit)
 		return
 	end
 
-	-- create power bar
+	-- create cast bar
 	if (not self.frame[unit]) then
 		self:CreateBar(unit)
 	end

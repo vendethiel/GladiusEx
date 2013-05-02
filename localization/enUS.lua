@@ -90,6 +90,8 @@ L["PowerBar"] = "Power Bar"
 L["TargetBar"] = "Target Bar"
 
 -- General
+L["Up and down"] = true
+
 L["%s settings"] = true
 L["** If this is not your first run please lock or move the frame to prevent this from happening **"] = true
 L["Action"] = true
@@ -277,7 +279,7 @@ L["Items"] = true
 L["Layout code"] = true
 L["Left and right"] = true
 L["Left"] = true
-L["Lock frame"] = true
+L["Lock frames"] = true
 L["Low health threshold"] = true
 L["Low health"] = true
 L["LOW HEALTH: %s (%s)"] = true
@@ -406,7 +408,7 @@ L["Toggle default color"] = true
 L["Toggle display of advanced options"] = true
 L["Toggle gloss on the icon"] = true
 L["Toggle health bar class color"] = true
-L["Toggle if the frame can be moved"] = true
+L["Toggle if the frames can be moved"] = true
 L["Toggle if the icon borders should be cropped or not"] = true
 L["Toggle if you want to use the global font size"] = true
 L["Toggle the cast bar spell icon"] = true

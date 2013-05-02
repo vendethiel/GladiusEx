@@ -313,7 +313,7 @@ function ClassIcon:ScanAuras(unit)
 end
 
 function ClassIcon:UpdateAura(unit)
-	if (not self.frame[unit] or not self.db.classIconImportantAuras) then return end
+	if not self.frame[unit] or not self.db.classIconImportantAuras then return end
 
 	local name, icon, duration, expires = self:ScanAuras(unit)
 
@@ -423,6 +423,7 @@ function ClassIcon:Update(unit)
 	-- frame level
 	self.frame[unit]:SetFrameLevel(self.db.classIconFrameLevel)
 
+	-- size
 	if (self.db.classIconAdjustSize) then
 		self.frame[unit]:SetWidth(GladiusEx.buttons[unit].frameHeight)
 		self.frame[unit]:SetHeight(GladiusEx.buttons[unit].frameHeight)
@@ -446,8 +447,8 @@ function ClassIcon:Update(unit)
 			bottom = -(self.frame[unit]:GetHeight() - GladiusEx.buttons[unit]:GetHeight()) + self.db.classIconOffsetY
 		end
 
-		GladiusEx.buttons[unit]:SetHitRectInsets(left, right, 0, 0)
-		GladiusEx.buttons[unit].secure:SetHitRectInsets(left, right, 0, 0)
+		GladiusEx.buttons[unit]:SetHitRectInsets(left, right, top, bottom)
+		GladiusEx.buttons[unit].secure:SetHitRectInsets(left, right, top, bottom)
 	end
 
 	-- style action button
@@ -455,7 +456,7 @@ function ClassIcon:Update(unit)
 	self.frame[unit].normalTexture:SetWidth(self.frame[unit]:GetWidth() + self.frame[unit]:GetWidth() * 0.4)
 
 	self.frame[unit].normalTexture:ClearAllPoints()
-	self.frame[unit].normalTexture:SetPoint("CENTER", 0, 0)
+	self.frame[unit].normalTexture:SetPoint("CENTER")
 	self.frame[unit]:SetNormalTexture([[Interface\AddOns\GladiusEx\images\gloss]])
 
 	self.frame[unit].texture:ClearAllPoints()
@@ -639,6 +640,7 @@ function ClassIcon:GetOptions()
 							values = function() return ClassIcon:GetAttachPoints() end,
 							disabled = function() return not self:IsEnabled() end,
 							hidden = function() return not GladiusEx.db.advancedOptions end,
+							width = "double",
 							order = 5,
 						},
 						classIconPosition = {

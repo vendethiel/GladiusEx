@@ -277,6 +277,13 @@ function Tags:GetTagEvents(tag)
 	return self.db.tagEvents[tag] or self:GetBuiltinTagsEvents()[tag]
 end
 
+function Tags:Refresh(unit)
+	for text, _ in pairs(self.db.tagsTexts) do
+		-- update text
+		self:UpdateText(unit, text)
+	end
+end
+
 function Tags:Update(unit)
 	if (not self.frame[unit]) then
 		self.frame[unit] = {}
@@ -314,9 +321,6 @@ function Tags:Update(unit)
 
 			self.frame[unit][text]:SetShadowOffset(1, -1)
 			self.frame[unit][text]:SetShadowColor(0, 0, 0, 1)
-
-			-- update text
-			self:UpdateText(unit, text)
 
 			-- hide
 			self.frame[unit][text]:SetAlpha(0)

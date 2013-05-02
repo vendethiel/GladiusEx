@@ -74,6 +74,7 @@ function HealthBar:GetAttachFrame(unit)
 end
 
 function HealthBar:UpdateColorEvent(event, unit)
+	GladiusEx:Log("UpdateColorEvent", event, unit)
 	self:UpdateColor(unit)
 end
 
@@ -83,13 +84,16 @@ function HealthBar:UpdateHealthEvent(event, unit)
 end
 
 function HealthBar:UpdateColor(unit)
-	if (not self.frame[unit]) then return end
+	if not self.frame[unit] then return end
 
 	local class
 	if GladiusEx:IsTesting(unit) then
 		class = GladiusEx.testing[unit].unitClass
 	else
 		class = select(2, UnitClass(unit))
+	end
+	if not class then
+		class = GladiusEx.testing[unit].unitClass
 	end
 	
 	-- set color
@@ -99,6 +103,7 @@ function HealthBar:UpdateColor(unit)
 	else
 		color = self.db.healthBarColor
 	end
+	GladiusEx:Log("UpdateColor", unit, class)
 	self.frame[unit]:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
 end
 
@@ -124,6 +129,11 @@ function HealthBar:CreateBar(unit)
 	self.frame[unit] = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. unit, button)
 	self.frame[unit].background = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "Background", "BACKGROUND")
 	self.frame[unit].highlight = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "Highlight" .. unit, "OVERLAY")
+end
+
+function HealthBar:Refresh(unit)
+	self:UpdateColorEvent("Refresh", unit)
+	self:UpdateHealthEvent("Refresh", unit)
 end
 
 function HealthBar:Update(unit)

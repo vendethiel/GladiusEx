@@ -34,8 +34,8 @@ function PowerBar:OnEnable()
 	self:RegisterEvent("UNIT_CONNECTION", "UpdatePowerEvent")
 	self:RegisterEvent("UNIT_POWER_BAR_SHOW", "UpdatePowerEvent")
 	self:RegisterEvent("UNIT_POWER_BAR_HIDE","UpdatePowerEvent")
-	self:RegisterEvent("UNIT_CLASSIFICATION_CHANGED","UpdateColor")
-	self:RegisterEvent("UNIT_DISPLAYPOWER", "UpdateColor")
+	self:RegisterEvent("UNIT_CLASSIFICATION_CHANGED","UpdateColorEvent")
+	self:RegisterEvent("UNIT_DISPLAYPOWER", "UpdateColorEvent")
 
 
 	LSM = GladiusEx.LSM
@@ -78,17 +78,31 @@ function PowerBar:GetAttachFrame(unit)
 	return self.frame[unit]
 end
 
-function PowerBar:UpdateColor(event, unit)
+function PowerBar:UpdateColorEvent(event, unit)
+	self:UpdateColor(unit)
+end
+
+function PowerBar:UpdateColor(unit)
 	if not GladiusEx:IsHandledUnit(unit) then return end
 
-	local powerType = UnitPowerType(unit)
-
-	-- update bar color
-	if self.db.powerBarDefaultColor then
-		local color = self:GetBarColor(powerType)
-		self.frame[unit]:SetStatusBarColor(color.r, color.g, color.b)
+	-- get unit powerType
+	local powerType
+	if GladiusEx:IsTesting(unit) then
+		powerType = GladiusEx.testing[unit].powerType
+	else
+		powerType = UnitPowerType(unit)
 	end
 
+	-- set color
+	local color
+	if self.db.powerBarDefaultColor then
+		color = self:GetBarColor(powerType)
+	else
+		color = self.db.powerBarColor
+	end
+	self.frame[unit]:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
+
+	-- update power
 	self:UpdatePower(event, unit)
 end
 
@@ -121,16 +135,13 @@ function PowerBar:CreateBar(unit)
 	self.frame[unit].highlight = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "Highlight" .. unit, "OVERLAY")
 end
 
+function PowerBar:Refresh(unit)
+	self:UpdateColorEvent("Refresh", unit)
+	self:UpdatePowerEvent("Refresh", unit)
+end
+
 function PowerBar:Update(unit)
 	local testing = GladiusEx:IsTesting(unit)
-
-	-- get unit powerType
-	local powerType
-	if (not testing) then
-		powerType = UnitPowerType(unit)
-	else
-		powerType = GladiusEx.testing[unit].powerType
-	end
 
 	-- create power bar
 	if (not self.frame[unit]) then
@@ -188,15 +199,6 @@ function PowerBar:Update(unit)
 	self.frame[unit].background:SetHorizTile(false)
 	self.frame[unit].background:SetVertTile(false)
 
-	-- set color
-	if (not self.db.powerBarDefaultColor) then
-		local color = self.db.powerBarColor
-		self.frame[unit]:SetStatusBarColor(color.r, color.g, color.b, color.a)
-	else
-		local color = self:GetBarColor(powerType)
-		self.frame[unit]:SetStatusBarColor(color.r, color.g, color.b)
-	end
-
 	-- update highlight texture
 	self.frame[unit].highlight:SetAllPoints(self.frame[unit])
 	self.frame[unit].highlight:SetTexture([[Interface\QuestFrame\UI-QuestTitleHighlight]])
@@ -234,13 +236,10 @@ end
 function PowerBar:Test(unit)
 	-- set test values
 	local maxPower, power
-
-	-- power type
-	local powerType = GladiusEx.testing[unit].powerType
-
 	maxPower = GladiusEx.testing[unit].maxPower
 	power = GladiusEx.testing[unit].power
 
+	self:UpdateColorEvent("Test", unit)
 	self:UpdatePower(unit, power, maxPower)
 end
 

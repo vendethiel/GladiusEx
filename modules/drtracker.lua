@@ -175,7 +175,7 @@ function DRTracker:SortIcons(unit)
 	for cat, frame in pairs(self.frame[unit].tracker) do
 		frame:ClearAllPoints()
 
-		if (frame.active) then
+		if frame.active then
 			if not lastFrame then
 				-- frame:SetPoint(self.db.drTrackerAnchor, self.frame[unit], self.db.drTrackerRelativePoint, self.db.drTrackerOffsetX, self.db.drTrackerOffsetY)
 				frame:SetPoint("TOPLEFT", self.frame[unit])
@@ -221,7 +221,7 @@ end
 
 function DRTracker:Update(unit)
 	-- create frame
-	if (not self.frame[unit]) then
+	if not self.frame[unit] then
 		self:CreateFrame(unit)
 	end
 
@@ -240,7 +240,6 @@ function DRTracker:Update(unit)
 			self.frame[unit]:SetWidth(GladiusEx.buttons[unit].frameHeight)
 			self.frame[unit]:SetHeight(GladiusEx.buttons[unit].frameHeight)
 		else
-			-- todo: fix this (should use GetAttachFrame instead)
 			local f = GladiusEx:GetAttachFrame(unit, self.db.drTrackerAttachTo)
 			self.frame[unit]:SetWidth(f and f:GetHeight() or 1)
 			self.frame[unit]:SetHeight(f and f:GetHeight() or 1)
@@ -276,12 +275,12 @@ function DRTracker:Show(unit)
 end
 
 function DRTracker:Reset(unit)
-	if (not self.frame[unit]) then return end
+	if not self.frame[unit] then return end
 
 	-- hide icons
 	for _, frame in pairs(self.frame[unit].tracker) do
-		-- frame.active = false
-		-- frame.diminished = 1
+		frame.active = false
+		frame.diminished = 1
 		frame:SetScript("OnUpdate", nil)
 		frame:Hide()
 	end
@@ -472,6 +471,7 @@ function DRTracker:GetOptions()
 							desc = L["Attach drTracker to the given frame"],
 							values = function() return DRTracker:GetAttachPoints() end,
 							disabled = function() return not self:IsEnabled() end,
+							width = "double",
 							order = 5,
 						},
 						drTrackerPosition = {
