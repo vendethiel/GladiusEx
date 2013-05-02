@@ -201,6 +201,13 @@ function Cooldowns:OnEnable()
 end
 
 function Cooldowns:OnDisable()
+	for group = 1, GetNumGroups() do
+		local gs = GetGroupState(group)
+		for _, frame in pairs(gs.frame) do
+			frame:Hide()
+		end
+	end
+
 	CT.UnregisterAllCallbacks(self)
 	self:UnregisterAllEvents()
 	self:UnregisterAllMessages()
@@ -240,14 +247,10 @@ function Cooldowns:UNIT_NAME_UPDATE(event, unit)
 end
 
 function Cooldowns:LCT_CooldownsReset(event, unit)
-	GladiusEx:Log(event, unit)
-
 	self:UpdateIcons(unit)
 end
 
 function Cooldowns:LCT_CooldownUsed(event, unit, spellid)
-	GladiusEx:Log(event, unit, spellid)
-
 	self:UpdateIcons(unit)
 end
 
@@ -553,21 +556,13 @@ end
 
 function Cooldowns:UpdateGroupIcons(group, unit)
 	local gs = GetGroupState(group)
-	local db = GetGroupDB(group)
 	if not gs.frame[unit] then return end
-
-	local _debugstart = GladiusEx:IsDebugging() and debugprofilestop()
 
 	-- get spells lists
 	local sorted_spells = GetCooldownList(group, unit)
 
 	-- update icon frames
 	UpdateGroupIconFrames(group, unit, sorted_spells)
-
-	if GladiusEx:IsDebugging() then
-		local _debugstop = GladiusEx:IsDebugging() and debugprofilestop()
-		GladiusEx:Log("UpdateIcons for", group, "/", unit, "done in", _debugstop - _debugstart)
-	end
 end
 
 local function CreateCooldownFrame(name, parent)
@@ -607,33 +602,51 @@ local function CreateCooldownFrame(name, parent)
 	return frame
 end
 
--- returns a size adjusted to the frame scale, so that it fits pixels perfectly
-local function GetAdjustedSize(frame, size)
-	if size == 0 then
-		return 0
+local perfect_scale
+local function GetPerfectScale()
+	if not perfect_scale then
+		perfect_scale = 768 / string.match(({GetScreenResolutions()})[GetCurrentResolution()], "%d+x(%d+)")
 	end
-	-- local uiScale = GetCVar("uiScale")
+	return perfect_scale
+end
+
+local function AdjustPixels(frame, size)
+	while not frame.GetEffectiveScale do frame = frame:GetParent() end
 	local frameScale = frame:GetEffectiveScale()
-	local perfectScale = 768 / string.match(({GetScreenResolutions()})[GetCurrentResolution()], "%d+x(%d+)")
+	local perfectScale = GetPerfectScale()
 	local size_adjusted = size / (frameScale / perfectScale)
 	return size_adjusted
 end
 
-local function UpdateCooldownFrame(frame, size, border_size, crop)
-	frame:SetSize(size, size)
-	if border_size ~= 0 then
-		frame:SetBackdrop({ edgeFile = [[Interface\ChatFrame\ChatFrameBackground]], edgeSize = border_size })
-		frame.icon:SetSize(size - border_size * 2, size - border_size * 2)
+local function AdjustPositionOffset(frame, p, pos)
+	while not frame.GetEffectiveScale do frame = frame:GetParent() end
+	local frameScale = frame:GetEffectiveScale()
+	local perfectScale = GetPerfectScale()
+	local pp = p * frameScale / perfectScale
+	local pa = pos and (math.ceil(pp) - pp) or (pp - math.floor(pp))
+	return p + pa * perfectScale / frameScale
+end
+
+local function AdjustFrameOffset(frame, relative_point)
+	local x, y
+	local ax, ay
+
+	if strfind(relative_point, "LEFT") then
+		x = frame:GetRight() or 0
+		ax = x - AdjustPositionOffset(frame, x, false)
 	else
-		frame:SetBackdrop(nil)
-		frame.icon:SetSize(size, size)
+		x = frame:GetLeft() or 0
+		ax = AdjustPositionOffset(frame, x, true) - x
+	end
+	if strfind(relative_point, "TOP") then
+		y = frame:GetTop() or 0
+		ay = AdjustPositionOffset(frame, y, true) - y
+	else
+		y = frame:GetBottom() or 0
+		ay = y - AdjustPositionOffset(frame, y, false) 
 	end
 
-	if crop then
-		frame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
-	else
-		frame.icon:SetTexCoord(0, 1, 0, 1)
-	end
+	return ax, ay
 end
 
 function Cooldowns:CreateFrame(unit)
@@ -662,7 +675,23 @@ function Cooldowns:CreateGroupFrame(group, unit)
 	end
 end
 
--- yeah this parameter list sucks
+local function UpdateCooldownFrame(frame, size, border_size, crop)
+	frame:SetSize(size, size)
+	if border_size ~= 0 then
+		frame:SetBackdrop({ edgeFile = [[Interface\ChatFrame\ChatFrameBackground]], edgeSize = border_size })
+		frame.icon:SetSize(size - border_size * 2, size - border_size * 2)
+	else
+		frame:SetBackdrop(nil)
+		frame.icon:SetSize(size, size)
+	end
+
+	if crop then
+		frame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+	else
+		frame.icon:SetTexCoord(0, 1, 0, 1)
+	end
+end
+
 local function UpdateCooldownGroup(
 	cooldownFrame, unit,
 	cooldownAttachTo,
@@ -681,15 +710,24 @@ local function UpdateCooldownGroup(
 
 	-- anchor point
 	local parent = GladiusEx:GetAttachFrame(unit, cooldownAttachTo)
+
+	local xo, yo = AdjustFrameOffset(parent, cooldownRelativePoint)
+	cooldownSpacingX = AdjustPositionOffset(parent, cooldownSpacingX)
+	cooldownSpacingY = AdjustPositionOffset(parent, cooldownSpacingY)
+	cooldownOffsetX = AdjustPositionOffset(parent, cooldownOffsetX)
+	cooldownOffsetY = AdjustPositionOffset(parent, cooldownOffsetY)
+	cooldownSize = AdjustPositionOffset(parent, cooldownSize)
+	cooldownBorderSize = AdjustPixels(parent, cooldownBorderSize)
+
 	cooldownFrame:ClearAllPoints()
-	cooldownFrame:SetPoint(cooldownAnchor, parent, cooldownRelativePoint, cooldownOffsetX, cooldownOffsetY)
+	cooldownFrame:SetPoint(cooldownAnchor, parent, cooldownRelativePoint, cooldownOffsetX + xo, cooldownOffsetY + yo)
 
 	-- size
-	cooldownFrame:SetWidth(cooldownSize*cooldownPerColumn+cooldownSpacingX*cooldownPerColumn)
-	cooldownFrame:SetHeight(cooldownSize*ceil(cooldownMax/cooldownPerColumn)+(cooldownSpacingY*(ceil(cooldownMax/cooldownPerColumn)+1)))
+	cooldownFrame:SetWidth(cooldownSize * cooldownPerColumn + cooldownSpacingX * cooldownPerColumn)
+	cooldownFrame:SetHeight(cooldownSize * ceil(cooldownMax / cooldownPerColumn) + (cooldownSpacingY * (ceil(cooldownMax / cooldownPerColumn) + 1)))
 
 	-- backdrop
-	-- cooldownFrame:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16,})
+	-- cooldownFrame:SetBackdrop({bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tile = true, tileSize = 16})
 	-- cooldownFrame:SetBackdropColor(0, 0, 1, 1)
 
 	-- icon points
@@ -713,7 +751,7 @@ local function UpdateCooldownGroup(
 			if (start == 1) then
 				anchor, parent, relativePoint, offsetX, offsetY = grow1, startAnchor, startRelPoint, 0, string.find(cooldownGrow, "DOWN") and -cooldownSpacingY or cooldownSpacingY
 			else
-				anchor, parent, relativePoint, offsetX, offsetY = grow1, cooldownFrame[i-1], grow3, string.find(cooldownGrow, "LEFT") and -cooldownSpacingX or cooldownSpacingX, 0
+				anchor, parent, relativePoint, offsetX, offsetY = grow1, cooldownFrame[i - 1], grow3, string.find(cooldownGrow, "LEFT") and -cooldownSpacingX or cooldownSpacingX, 0
 			end
 
 			if (start == cooldownPerColumn) then
@@ -760,7 +798,7 @@ function Cooldowns:UpdateGroup(group, unit)
 		db.cooldownsPerColumn,
 		db.cooldownsGrow,
 		db.cooldownsSize,
-		GetAdjustedSize(gs.frame[unit], db.cooldownsBorderSize),
+		db.cooldownsBorderSize,
 		db.cooldownsSpacingX,
 		db.cooldownsSpacingY,
 		db.cooldownsMax,
@@ -844,7 +882,7 @@ local FormatSpellDescription
 function Cooldowns:MakeGroupOptions(group)
 	local group_options = {
 		type = "group",
-		name = L["Group"] .. group,
+		name = L["Group"] .. " " .. group,
 		childGroups = "tab",
 		order = 10 + group,
 		hidden = function() return GetNumGroups() < group end,
