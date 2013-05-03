@@ -222,7 +222,6 @@ function GladiusEx:OnEnable()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("ARENA_OPPONENT_UPDATE")
 	self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
-	self:RegisterEvent("SCRIPT_ARENA_PREP_OPPONENT_SPECIALIZATIONS", "ARENA_PREP_OPPONENT_SPECIALIZATIONS")
 	self:RegisterEvent("UNIT_NAME_UPDATE")
 	self:RegisterEvent("UNIT_HEALTH")
 	self:RegisterEvent("UNIT_MAXHEALTH", "UNIT_HEALTH")
@@ -658,7 +657,7 @@ function GladiusEx:TestUnit(unit)
 end
 
 function GladiusEx:RefreshUnit(unit)
-	if not self.buttons[unit] then return end
+	if not self.buttons[unit] or self:IsTesting(unit) then return end
 
 	-- show modules
 	for n, m in self:IterateModules() do
@@ -770,15 +769,27 @@ function GladiusEx:CreateUnit(unit)
 	ClickCastFrames[button.secure] = true
 end
 
+function GladiusEx:SaveAnchorPosition(anchor_type)
+	local anchor = self:GetAnchorFrames(anchor_type)
+	local scale = anchor:GetEffectiveScale()
+	self.db.x["anchor_" .. anchor_type] = anchor:GetLeft() * scale
+	self.db.y["anchor_" .. anchor_type] = anchor:GetTop() * scale
+	-- save all unit positions so that they stay at the same place if the buttons are ungrouped
+	for unit, button in pairs(self.buttons) do
+		self.db.x[unit] = button:GetLeft() * scale
+		self.db.y[unit] = button:GetTop() * scale
+	end
+end
+
 function GladiusEx:CreateAnchor(anchor_type)
 	-- background
 	local background = CreateFrame("Frame", "GladiusExButtonBackground" .. anchor_type, anchor_type == "party" and self.party_parent or self.arena_parent)
-	background:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16,})
+	background:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16})
 	background:SetFrameStrata("BACKGROUND")
 
 	-- anchor
 	local anchor = CreateFrame("Frame", "GladiusExButtonAnchor" .. anchor_type, anchor_type == "party" and self.party_parent or self.arena_parent)
-	anchor:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16,})
+	anchor:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16})
 	anchor:SetBackdropColor(0, 0, 0, 1)
 	anchor:SetFrameStrata("MEDIUM")
 	anchor:Raise()
@@ -792,6 +803,25 @@ function GladiusEx:CreateAnchor(anchor_type)
 		if button == "LeftButton" then
 			if IsShiftKeyDown() then
 				-- center horizontally
+				anchor:ClearAllPoints()
+				anchor:SetPoint("BOTTOM", UIParent, "BOTTOM", 0, f:GetBottom())
+				self:SaveAnchorPosition(anchor_type)
+			elseif IsAltKeyDown() then
+				-- center vertically
+				anchor:ClearAllPoints()
+				anchor:SetPoint("LEFT", UIParent, "LEFT", f:GetLeft(), 0)
+				self:SaveAnchorPosition(anchor_type)
+			elseif IsControlKeyDown() then
+				local other_anchor = self:GetAnchorFrames(anchor_type == "party" and "arena" or "party")
+				if self.db.growDirection == "UP" or self.db.growDirection == "DOWN" or self.db.growDirection == "VCENTER" then
+					-- set same y as the other anchor
+					anchor:ClearAllPoints()
+					anchor:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", anchor:GetLeft(), other_anchor:GetTop())
+				else
+					-- set same x as the other anchor
+					anchor:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", other_anchor:GetLeft(), anchor:GetTop())
+				end
+				self:SaveAnchorPosition(anchor_type)
 			end
 		elseif button == "RightButton" then
 			self:ShowOptionsDialog()
@@ -799,21 +829,14 @@ function GladiusEx:CreateAnchor(anchor_type)
 	end)
 
 	anchor:SetScript("OnDragStart", function(f)
-		if (not InCombatLockdown() and not self.db.locked) then
+		if not InCombatLockdown() and not self.db.locked then
 			anchor:StartMoving()
 		end
 	end)
 
 	anchor:SetScript("OnDragStop", function(f)
 		anchor:StopMovingOrSizing()
-		local scale = f:GetEffectiveScale()
-		self.db.x["anchor_" .. anchor_type] = f:GetLeft() * scale
-		self.db.y["anchor_" .. anchor_type] = f:GetTop() * scale
-		-- save all unit positions so that they stay at the same place if the buttons are ungrouped
-		for unit, button in pairs(self.buttons) do
-			self.db.x[unit] = button:GetLeft() * scale
-			self.db.y[unit] = button:GetTop() * scale
-		end
+		self:SaveAnchorPosition(anchor_type)
 	end)
 
 	anchor.text = anchor:CreateFontString("GladiusExButtonAnchorText", "OVERLAY")
@@ -863,16 +886,12 @@ function GladiusEx:UpdateUnitPosition(unit)
 
 		if self.db.growDirection == "UP" then
 			self.buttons[unit]:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", abs(left), margin_y + abs(top))
-		
 		elseif self.db.growDirection == "DOWN" then
 			self.buttons[unit]:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", abs(left), -margin_y - abs(top))
-		
 		elseif self.db.growDirection == "LEFT" then
 			self.buttons[unit]:SetPoint("TOPRIGHT", anchor, "BOTTOMRIGHT", -margin_x - abs(right), -abs(top))
-		
 		elseif self.db.growDirection == "RIGHT" then
 			self.buttons[unit]:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", margin_x + abs(left), -abs(top))
-		
 		elseif self.db.growDirection == "HCENTER" then
 			local offset = (real_width * (num_frames - 1) + self.db.margin * (num_frames - 1) - abs(left) - abs(right)) / 2
 			self.buttons[unit]:SetPoint("TOP", anchor, "BOTTOM", -offset + margin_x, -abs(top))
@@ -952,10 +971,14 @@ function GladiusEx:UpdateUnit(unit, module)
 	self.buttons[unit].secure:SetFrameStrata("MEDIUM")
 end
 
-
-function GladiusEx:UpdateAnchor(anchor_type)
+function GladiusEx:GetAnchorFrames(anchor_type)
 	local anchor = anchor_type == "party" and self.party_anchor or self.arena_anchor
 	local background = anchor_type == "party" and self.party_background or self.arena_background
+	return anchor, background
+end
+
+function GladiusEx:UpdateAnchor(anchor_type)
+	local anchor, background = self:GetAnchorFrames(anchor_type)
 
 	-- anchor
 	anchor:ClearAllPoints()
@@ -975,10 +998,8 @@ function GladiusEx:UpdateAnchor(anchor_type)
 	anchor.text:SetPoint("CENTER", anchor, "CENTER")
 	anchor.text:SetFont(self.LSM:Fetch(self.LSM.MediaType.FONT, self.db.globalFont), (self.db.useGlobalFontSize and self.db.globalFontSize or 11))
 	anchor.text:SetTextColor(1, 1, 1, 1)
-
 	anchor.text:SetShadowOffset(1, -1)
 	anchor.text:SetShadowColor(0, 0, 0, 1)
-
 	anchor.text:SetText(anchor.anchor_type == "party" and L["GladiusEx Party Anchor - click to move"] or L["GladiusEx Enemy Anchor - click to move"])
 
 	if self.db.groupButtons and not self.db.locked then

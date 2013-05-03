@@ -384,7 +384,7 @@ function GladiusEx:SetupOptions()
 							globalFontSize = {
 								type = "range",
 								name = L["Global font size"],
-								desc = L["Text size of the power info text"],
+								desc = L["Text size of the global font"],
 								disabled = function() return not self.db.useGlobalFontSize end,
 								min = 1, max = 20, step = 1,
 								order = 5,
