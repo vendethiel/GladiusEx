@@ -834,12 +834,12 @@ function GladiusEx:CreateUnit(unit)
 	button:SetScript("OnDragStop", function(f)
 		if not InCombatLockdown() then
 			local f = self.db[unit].groupButtons and dragparent or f
-			local unit = self.db[unit].groupButtons and dragparentunit or unit
+			local tunit = self.db[unit].groupButtons and dragparentunit or unit
 
 			f:StopMovingOrSizing()
 			local scale = f:GetEffectiveScale()
-			self.db[unit].x[unit] = f:GetLeft() * scale
-			self.db[unit].y[unit] = f:GetTop() * scale
+			self.db[unit].x[tunit] = f:GetLeft() * scale
+			self.db[unit].y[tunit] = f:GetTop() * scale
 		end
 	end)
 
