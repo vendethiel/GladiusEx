@@ -74,7 +74,6 @@ function HealthBar:GetAttachFrame(unit)
 end
 
 function HealthBar:UpdateColorEvent(event, unit)
-	GladiusEx:Log("UpdateColorEvent", event, unit)
 	self:UpdateColor(unit)
 end
 
@@ -103,7 +102,6 @@ function HealthBar:UpdateColor(unit)
 	else
 		color = self.db.healthBarColor
 	end
-	GladiusEx:Log("UpdateColor", unit, class)
 	self.frame[unit]:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
 end
 

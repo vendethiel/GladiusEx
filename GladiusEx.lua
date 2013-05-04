@@ -381,15 +381,7 @@ end
 function GladiusEx:CheckArenaSize(unit)
 	local min_size = 0
 	if unit then
-		local an = string.match(unit, "^arena(%d+)$")
-		if an then
-			min_size = tonumber(an)
-		else
-			local pn = string.match(unit, "^party(%d+)$")
-			if pn then
-				min_size = tonumber(pn) + 1
-			end
-		end
+		min_size = self:GetUnitIndex(unit)
 	end
 
 	local size = self:GetArenaSize(min_size)
@@ -486,9 +478,20 @@ function GladiusEx:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
 	self:UpdateArenaFrames()
 end
 
+function GladiusEx:CheckOpponentSpecialization(unit)
+	local id = string.match("^arena(%d+)$")
+	if id then
+		local specID = GetArenaOpponentSpec(tonumber(id))
+		if specID and specID > 0 then
+			self:UpdateUnitSpecialization(unitid, specID)
+		end
+	end
+end
+
 function GladiusEx:ARENA_OPPONENT_UPDATE(event, unit, type)
 	log(event, unit, type)
 	self:RefreshUnit(unit)
+	self:CheckOpponentSpecialization(unit)
 	if type == "seen" or type == "destroyed" then
 		self:UpdateUnitState(unit, false)
 		self:CheckArenaSize(unit)
@@ -850,13 +853,13 @@ end
 function GladiusEx:GetUnitIndex(unit)
 	local unit_index
 	if unit == "player" then
-		unit_index = 0
+		unit_index = 1
 	else
 		local utype, n = string.match(unit, "^(%a+)(%d+)$")
 		if utype == "party" then
-			unit_index = tonumber(n)
+			unit_index = tonumber(n) + 1
 		elseif utype == "arena" then
-			unit_index = tonumber(n) - 1
+			unit_index = tonumber(n)
 		else
 			assert(false, "Unknown unit")
 		end
@@ -874,13 +877,13 @@ function GladiusEx:UpdateUnitPosition(unit)
 	self.buttons[unit]:ClearAllPoints()
 
 	if self.db.groupButtons then
-		local unit_index = self:GetUnitIndex(unit)
+		local unit_index = self:GetUnitIndex(unit) - 1
 		local num_frames = self:GetArenaSize()
 		local anchor = self:GetUnitAnchor(unit)
-		local frameWidth = self.buttons[unit].frameWidth
-		local frameHeight = self.buttons[unit].frameHeight
-		local real_width = frameWidth + abs(left) + abs(right)
-		local real_height = frameHeight + abs(top) + abs(bottom)
+		local frame_width = self.buttons[unit].frameWidth
+		local frame_height = self.buttons[unit].frameHeight
+		local real_width = frame_width + abs(left) + abs(right)
+		local real_height = frame_height + abs(top) + abs(bottom)
 		local margin_x = (real_width + self.db.margin) * unit_index
 		local margin_y = (real_height + self.db.margin) * unit_index
 
