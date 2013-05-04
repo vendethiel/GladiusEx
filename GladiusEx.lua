@@ -1,8 +1,9 @@
 ﻿-- globals
-local type, pairs = type, pairs
-local strfind, max = string.find, math.max
-local abs = math.abs
-local UnitIsDeadOrGhost, UnitGUID = UnitIsDeadOrGhost, UnitGUID
+local select, type, pairs, tonumber, wipe = select, type, pairs, tonumber, wipe
+local strfind, strmatch, max, abs = string.find, string.match, math.max, math.abs
+local UnitIsDeadOrGhost, UnitGUID, UnitExists = UnitIsDeadOrGhost, UnitGUID, UnitExists
+local InCombatLockdown = InCombatLockdown
+local GetNumArenaOpponents, GetNumArenaOpponentSpecs, GetNumGroupMembers = GetNumArenaOpponents, GetNumArenaOpponentSpecs, GetNumGroupMembers
 
 GladiusEx = LibStub("AceAddon-3.0"):NewAddon("GladiusEx", "AceEvent-3.0")
 
@@ -76,7 +77,7 @@ local function log(...)
 end
 
 function GladiusEx:IsDebugging()
-	return GladiusEx.db.debug
+	return GladiusEx.db.base.debug
 end
 
 function GladiusEx:Log(...)
@@ -91,35 +92,50 @@ function GladiusEx:Print(...)
 	print("|cff33ff99GladiusEx|r:", ...)
 end
 
+-- Module prototype
 local modulePrototype = {}
 
-function modulePrototype:GetAttachPoints()
-	-- get module list for frame anchor
-	local t = { ["Frame"] = L["Frame"] }
-	for name, m in GladiusEx:IterateModules() do
-		if m ~= self and m:IsEnabled() then
-			local points = m.GetModuleAttachPoints and m:GetModuleAttachPoints()
-			if points then
-				for point, name  in pairs(points) do
-					t[point] = name
-				end
-			end
-		end
-	end
+function modulePrototype:GetOtherAttachPoints(unit)
+	return GladiusEx:GetAttachPoints(unit, self)
+end
 
-	return t
+function modulePrototype:InitializeDB(name)
+	local dbi = GladiusEx.dbi:RegisterNamespace(name, { profile = self.defaults })
+	dbi.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
+	dbi.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
+	dbi.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")
+	return dbi
 end
 
 function modulePrototype:OnInitialize()
-	self.dbi = GladiusEx.dbi:RegisterNamespace(self:GetName(), { profile = self.defaults })
-	self.dbi.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
-	self.dbi.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
-	self.dbi.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")
-	self.db = self.dbi.profile
+	self.dbi_arena = self:InitializeDB(self:GetName())
+	self.dbi_party = self:InitializeDB("party_" .. self:GetName())
+	self.db = setmetatable({}, {
+		__index = function(t, k)
+			local v
+			if GladiusEx:IsPartyUnit(k) then
+				v = self.dbi_party.profile
+			elseif GladiusEx:IsArenaUnit(k) then
+				v = self.dbi_arena.profile
+			else
+				error("Bad module DB usage: not an unit (" .. tostring(k) .. ")", 2)
+			end
+			rawset(t, k, v)
+			return v
+		end
+	})
 end
 
 function modulePrototype:OnProfileChanged()
-	self.db = self.dbi.profile
+	wipe(self.db)
+end
+
+function modulePrototype:IsBar()
+	return false
+end
+
+function modulePrototype:IsUnitEnabled(unit)
+	return GladiusEx:IsModuleEnabled(unit, self:GetName())
 end
 
 GladiusEx:SetDefaultModulePrototype(modulePrototype)
@@ -134,14 +150,31 @@ function GladiusEx:NewGladiusExModule(name, isbar, defaults, ...)
 	return module
 end
 
+function GladiusEx:GetAttachPoints(unit, skip)
+	-- get module list for frame anchor
+	local t = { ["Frame"] = L["Frame"] }
+	for name, m in GladiusEx:IterateModules() do
+		if m ~= skip and self:IsModuleEnabled(unit, name) then
+			local points = m.GetModuleAttachPoints and m:GetModuleAttachPoints(unit)
+			if points then
+				for point, name  in pairs(points) do
+					t[point] = name
+				end
+			end
+		end
+	end
+
+	return t
+end
+
 function GladiusEx:GetAttachFrame(unit, point, nodefault)
 	-- get parent frame
-	if (point == "Frame") then
+	if point == "Frame" then
 		return self.buttons[unit]
 	else
 		for name, m in self:IterateModules() do
-			if m:IsEnabled() then
-				local points = m.GetModuleAttachPoints and m:GetModuleAttachPoints()
+			if self:IsModuleEnabled(unit, name) then
+				local points = m.GetModuleAttachPoints and m:GetModuleAttachPoints(unit)
 				if points and points[point] then
 					local f = m:GetAttachFrame(unit, point)
 					return f
@@ -154,12 +187,26 @@ function GladiusEx:GetAttachFrame(unit, point, nodefault)
 end
 
 function GladiusEx:OnInitialize()
-	-- init db
+	-- init db+
 	self.dbi = LibStub("AceDB-3.0"):New("GladiusExDB", self.defaults)
-	self.dbi.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
-	self.dbi.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
-	self.dbi.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")
-	self.db = self.dbi.profile
+	self.dbi_arena = self.dbi:RegisterNamespace("arena", self.group_defaults)
+	self.dbi_party = self.dbi:RegisterNamespace("party", self.group_defaults)
+	self.db = setmetatable({}, {
+		__index = function(t, k)
+			local v
+			if k == "party" or GladiusEx:IsPartyUnit(k) then
+				v = self.dbi_party.profile
+			elseif k == "arena" or GladiusEx:IsArenaUnit(k) then
+				v = self.dbi_arena.profile
+			elseif k == "base" then
+				v = self.dbi.profile
+			else
+				error("Bad DB usage: not an unit (" .. tostring(k) .. ")", 2)
+			end
+			rawset(t, k, v)
+			return v
+		end
+	})
 
 	-- libsharedmedia
 	self.LSM = LibStub("LibSharedMedia-3.0")
@@ -190,13 +237,41 @@ function GladiusEx:OnInitialize()
 	self.buttons = {}
 end
 
+function GladiusEx:IsModuleEnabled(unit, name)
+	return self.db[unit].modules[name]
+end
+
+function GladiusEx:CheckEnableDisableModule(name)
+	local mod = self:GetModule(name)
+
+	-- hide module if it is being disabled
+	if mod:IsEnabled() and mod.Reset then
+		if not self:IsModuleEnabled("party", name) then
+			for unit, button in pairs(self.buttons) do
+				if self:IsPartyUnit(unit) then
+					mod:Reset(unit)
+				end
+			end
+		end
+		if not self:IsModuleEnabled("arena", name) then
+			for unit, button in pairs(self.buttons) do
+				if self:IsArenaUnit(unit) then
+					mod:Reset(unit)
+				end
+			end
+		end
+	end
+
+	if self:IsModuleEnabled("party", name) or self:IsModuleEnabled("arena", name) then
+		self:EnableModule(name)
+	else
+		self:DisableModule(name)
+	end
+end
+
 function GladiusEx:EnableModules()
 	for module_name in self:IterateModules() do
-		if self.db.modules[module_name] then
-			self:EnableModule(module_name)
-		else
-			self:DisableModule(module_name)
-		end
+		self:CheckEnableDisableModule(module_name)
 	end
 end
 
@@ -230,6 +305,9 @@ function GladiusEx:OnEnable()
 	self:RegisterEvent("UNIT_PET", "UpdateUnitGUID")
 	self:RegisterEvent("UNIT_PORTRAIT_UPDATE", "UpdateUnitGUID")
 	LSR.RegisterMessage(self, "LSR_SpecializationChanged")
+	self.dbi.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
+	self.dbi.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
+	self.dbi.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")
 
 	-- wait until the first frame because some functions are not available until then
 	-- i expect a raptor will eat me at any moment now for creating a frame just for this..
@@ -237,7 +315,7 @@ function GladiusEx:OnEnable()
 	f:SetScript("OnUpdate", function()
 		f:SetScript("OnUpdate", nil)
 		-- display help message
-		if (not self.db.locked and not self.db.x["arena1"] and not self.db.y["arena1"] and not self.db.x["anchor_arena"] and not self.db.y["anchor_arena"]) then
+		if (not self.db.base.locked and not self.db.arena.x["arena1"] and not self.db.arena.y["arena1"] and not self.db.arena.x["anchor_arena"] and not self.db.arena.y["anchor_arena"]) then
 			self:Print(L["Welcome to GladiusEx!"])
 			self:Print(L["First run has been detected, displaying test frame"])
 			self:Print(L["Valid slash commands are:"])
@@ -248,7 +326,7 @@ function GladiusEx:OnEnable()
 			self:Print(L["** If this is not your first run please lock or move the frame to prevent this from happening **"])
 
 			self:SetTesting(3)
-		elseif self.db.debug then
+		elseif self:IsDebugging() then
 			self:SetTesting(3)
 		end
 
@@ -260,14 +338,17 @@ function GladiusEx:OnEnable()
 end
 
 function GladiusEx:OnDisable()
-	self:HideFrames()
 	self:UnregisterAllEvents()
+	LSR.UnregisterAllMessages(self)
+	self.dbi.UnregisterAllEvents(self)
+	self:HideFrames()
 end
 
 function GladiusEx:OnProfileChanged(event, database, newProfileKey)
 	-- update frame and modules on profile change
-	self.db = self.dbi.profile
+	wipe(self.db)
 
+	self:SetupOptions()
 	self:EnableModules()
 	self:UpdateFrames()
 end
@@ -395,20 +476,22 @@ function GladiusEx:ShowFrames()
 		self:QueueUpdate()
 	end
 
-	-- background
-	if (self.db.groupButtons) then
-		self.arena_background:Show()
-		self.party_background:Show()
+	local function show_anchor(anchor_type)
+		if self.db[anchor_type].groupButtons then
+			local anchor, background = self:GetAnchorFrames(anchor_type)
+			background:Show()
 
-		if (not self.db.locked) then
-			self.arena_anchor:Show()
-			self.party_anchor:Show()
+			if not self.db.base.locked then
+				anchor:Show()
+			end
 		end
 	end
 
+	show_anchor("arena")
 	self.arena_parent:Show()
 
-	if self.db.showParty then
+	if self.db.base.showParty then
+		show_anchor("party")
 		self.party_parent:Show()
 	end
 
@@ -479,11 +562,11 @@ function GladiusEx:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
 end
 
 function GladiusEx:CheckOpponentSpecialization(unit)
-	local id = string.match("^arena(%d+)$")
+	local id = strmatch("^arena(%d+)$")
 	if id then
 		local specID = GetArenaOpponentSpec(tonumber(id))
 		if specID and specID > 0 then
-			self:UpdateUnitSpecialization(unitid, specID)
+			self:UpdateUnitSpecialization(unit, specID)
 		end
 	end
 end
@@ -584,10 +667,10 @@ function GladiusEx:UpdateUnitState(unit, stealth)
 	end
 
 	if UnitIsDeadOrGhost(unit) then
-		self.buttons[unit]:SetAlpha(self.db.deadAlpha)
+		self.buttons[unit]:SetAlpha(self.db[unit].deadAlpha)
 		log("UpdateUnitState", unit, "DEAD")
 	elseif stealth then
-		self.buttons[unit]:SetAlpha(self.db.stealthAlpha)
+		self.buttons[unit]:SetAlpha(self.db[unit].stealthAlpha)
 		log("UpdateUnitState", unit, "STEALTH")
 	else
 		self.buttons[unit]:SetAlpha(1)
@@ -610,7 +693,7 @@ function GladiusEx:CheckUnitSpecialization(unit)
 	self:UpdateUnitSpecialization(unit, specID)
 end
 
-function GladiusEx:UpdateUnitSpecialization(unitid, specID)
+function GladiusEx:UpdateUnitSpecialization(unit, specID)
 	local _, class, spec
 
 	if specID and specID > 0 then
@@ -619,14 +702,14 @@ function GladiusEx:UpdateUnitSpecialization(unitid, specID)
 
 	specID = (specID and specID > 0) and specID or nil
 
-	if self.buttons[unitid] and self.buttons[unitid].specID ~= specID then
-		self.buttons[unitid].class = class
-		self.buttons[unitid].spec = spec
-		self.buttons[unitid].specID = specID
+	if self.buttons[unit] and self.buttons[unit].specID ~= specID then
+		self.buttons[unit].class = class
+		self.buttons[unit].spec = spec
+		self.buttons[unit].specID = specID
 
-		log("UpdateUnitSpecialization", unitid, "is", class, "/", spec)
+		log("UpdateUnitSpecialization", unit, "is", class, "/", spec)
 
-		self:SendMessage("GLADIUS_SPEC_UPDATE", unitid)
+		self:SendMessage("GLADIUS_SPEC_UPDATE", unit)
 	end
 end
 
@@ -646,8 +729,8 @@ function GladiusEx:TestUnit(unit)
 	if not self:IsHandledUnit(unit) then return end
 
 	-- test modules
-	for name, m in self:IterateModules() do
-		if (m:IsEnabled()) then
+	for n, m in self:IterateModules() do
+		if self:IsModuleEnabled(unit, n) then
 			if m.Test then
 				m:Test(unit)
 			end
@@ -664,7 +747,7 @@ function GladiusEx:RefreshUnit(unit)
 
 	-- show modules
 	for n, m in self:IterateModules() do
-		if m:IsEnabled() and m.Refresh then
+		if self:IsModuleEnabled(unit, n) and m.Refresh then
 			m:Refresh(unit)
 		end
 	end
@@ -675,7 +758,7 @@ function GladiusEx:ShowUnit(unit)
 
 	-- show modules
 	for n, m in self:IterateModules() do
-		if m:IsEnabled() and m.Show then
+		if self:IsModuleEnabled(unit, n) and m.Show then
 			m:Show(unit)
 		end
 	end
@@ -698,15 +781,15 @@ function GladiusEx:ShowUnit(unit)
 end
 
 function GladiusEx:HideUnit(unit)
-	if (not self.buttons[unit]) then return end
+	if not self.buttons[unit] then return end
 
 	if InCombatLockdown() then
 		self:QueueUpdate()
 	end
 
 	-- hide modules
-	for name, m in self:IterateModules() do
-		if m:IsEnabled() then
+	for n, m in self:IterateModules() do
+		if self:IsModuleEnabled(unit, n) then
 			if m.Reset then
 				m:Reset(unit)
 			end
@@ -742,21 +825,21 @@ function GladiusEx:CreateUnit(unit)
 	end)
 
 	button:SetScript("OnDragStart", function(f)
-		if (not InCombatLockdown() and not self.db.locked) then
-			local f = self.db.groupButtons and dragparent or f
+		if not InCombatLockdown() and not self.db.base.locked then
+			local f = self.db[unit].groupButtons and dragparent or f
 			f:StartMoving()
 		end
 	end)
 
 	button:SetScript("OnDragStop", function(f)
-		if (not InCombatLockdown()) then
-			local f = self.db.groupButtons and dragparent or f
-			local unit = self.db.groupButtons and dragparentunit or unit
+		if not InCombatLockdown() then
+			local f = self.db[unit].groupButtons and dragparent or f
+			local unit = self.db[unit].groupButtons and dragparentunit or unit
 
 			f:StopMovingOrSizing()
 			local scale = f:GetEffectiveScale()
-			self.db.x[unit] = f:GetLeft() * scale
-			self.db.y[unit] = f:GetTop() * scale
+			self.db[unit].x[unit] = f:GetLeft() * scale
+			self.db[unit].y[unit] = f:GetTop() * scale
 		end
 	end)
 
@@ -775,12 +858,12 @@ end
 function GladiusEx:SaveAnchorPosition(anchor_type)
 	local anchor = self:GetAnchorFrames(anchor_type)
 	local scale = anchor:GetEffectiveScale()
-	self.db.x["anchor_" .. anchor_type] = anchor:GetLeft() * scale
-	self.db.y["anchor_" .. anchor_type] = anchor:GetTop() * scale
+	self.db[anchor_type].x["anchor_" .. anchor_type] = anchor:GetLeft() * scale
+	self.db[anchor_type].y["anchor_" .. anchor_type] = anchor:GetTop() * scale
 	-- save all unit positions so that they stay at the same place if the buttons are ungrouped
 	for unit, button in pairs(self.buttons) do
-		self.db.x[unit] = button:GetLeft() * scale
-		self.db.y[unit] = button:GetTop() * scale
+		self.db[unit].x[unit] = button:GetLeft() * scale
+		self.db[unit].y[unit] = button:GetTop() * scale
 	end
 end
 
@@ -816,7 +899,7 @@ function GladiusEx:CreateAnchor(anchor_type)
 				self:SaveAnchorPosition(anchor_type)
 			elseif IsControlKeyDown() then
 				local other_anchor = self:GetAnchorFrames(anchor_type == "party" and "arena" or "party")
-				if self.db.growDirection == "UP" or self.db.growDirection == "DOWN" or self.db.growDirection == "VCENTER" then
+				if self.db[anchor_type].growDirection == "UP" or self.db[anchor_type].growDirection == "DOWN" or self.db[anchor_type].growDirection == "VCENTER" then
 					-- set same y as the other anchor
 					anchor:ClearAllPoints()
 					anchor:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", anchor:GetLeft(), other_anchor:GetTop())
@@ -832,7 +915,7 @@ function GladiusEx:CreateAnchor(anchor_type)
 	end)
 
 	anchor:SetScript("OnDragStart", function(f)
-		if not InCombatLockdown() and not self.db.locked then
+		if not InCombatLockdown() and not self.db.base.locked then
 			anchor:StartMoving()
 		end
 	end)
@@ -855,7 +938,7 @@ function GladiusEx:GetUnitIndex(unit)
 	if unit == "player" then
 		unit_index = 1
 	else
-		local utype, n = string.match(unit, "^(%a+)(%d+)$")
+		local utype, n = strmatch(unit, "^(%a+)(%d+)$")
 		if utype == "party" then
 			unit_index = tonumber(n) + 1
 		elseif utype == "arena" then
@@ -876,7 +959,7 @@ function GladiusEx:UpdateUnitPosition(unit)
 	local left, right, top, bottom = self.buttons[unit]:GetHitRectInsets()
 	self.buttons[unit]:ClearAllPoints()
 
-	if self.db.groupButtons then
+	if self.db[unit].groupButtons then
 		local unit_index = self:GetUnitIndex(unit) - 1
 		local num_frames = self:GetArenaSize()
 		local anchor = self:GetUnitAnchor(unit)
@@ -884,27 +967,27 @@ function GladiusEx:UpdateUnitPosition(unit)
 		local frame_height = self.buttons[unit].frameHeight
 		local real_width = frame_width + abs(left) + abs(right)
 		local real_height = frame_height + abs(top) + abs(bottom)
-		local margin_x = (real_width + self.db.margin) * unit_index
-		local margin_y = (real_height + self.db.margin) * unit_index
+		local margin_x = (real_width + self.db[unit].margin) * unit_index
+		local margin_y = (real_height + self.db[unit].margin) * unit_index
 
-		if self.db.growDirection == "UP" then
+		if self.db[unit].growDirection == "UP" then
 			self.buttons[unit]:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", abs(left), margin_y + abs(top))
-		elseif self.db.growDirection == "DOWN" then
+		elseif self.db[unit].growDirection == "DOWN" then
 			self.buttons[unit]:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", abs(left), -margin_y - abs(top))
-		elseif self.db.growDirection == "LEFT" then
+		elseif self.db[unit].growDirection == "LEFT" then
 			self.buttons[unit]:SetPoint("TOPRIGHT", anchor, "BOTTOMRIGHT", -margin_x - abs(right), -abs(top))
-		elseif self.db.growDirection == "RIGHT" then
+		elseif self.db[unit].growDirection == "RIGHT" then
 			self.buttons[unit]:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", margin_x + abs(left), -abs(top))
-		elseif self.db.growDirection == "HCENTER" then
-			local offset = (real_width * (num_frames - 1) + self.db.margin * (num_frames - 1) - abs(left) - abs(right)) / 2
+		elseif self.db[unit].growDirection == "HCENTER" then
+			local offset = (real_width * (num_frames - 1) + self.db[unit].margin * (num_frames - 1) - abs(left) - abs(right)) / 2
 			self.buttons[unit]:SetPoint("TOP", anchor, "BOTTOM", -offset + margin_x, -abs(top))
-		elseif self.db.growDirection == "VCENTER" then
-			local offset = (real_height * (num_frames - 1) + self.db.margin * (num_frames - 1)) / 2
+		elseif self.db[unit].growDirection == "VCENTER" then
+			local offset = (real_height * (num_frames - 1) + self.db[unit].margin * (num_frames - 1)) / 2
 			self.buttons[unit]:SetPoint("LEFT", anchor, "LEFT", abs(left) + abs(right), offset - margin_y)
 		end
 	else
 		local eff = self.buttons[unit]:GetEffectiveScale()
-		self.buttons[unit]:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", self.db.x[unit] / eff, self.db.y[unit] / eff)
+		self.buttons[unit]:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", self.db[unit].x[unit] / eff, self.db[unit].y[unit] / eff)
 	end
 end
 
@@ -921,7 +1004,7 @@ function GladiusEx:UpdateUnit(unit, module)
 	end
 
 	local height = 0
-	local frameWidth = self.db.barWidth
+	local frameWidth = self.db[unit].barWidth
 	local frameHeight = 0
 
 	-- reset hit rect
@@ -929,15 +1012,15 @@ function GladiusEx:UpdateUnit(unit, module)
 	self.buttons[unit].secure:SetHitRectInsets(0, 0, 0, 0)
 
 	-- update modules (bars first, because we need the height)
-	for _, m in self:IterateModules() do
-		if (m:IsEnabled()) then
+	for n, m in self:IterateModules() do
+		if self:IsModuleEnabled(unit, n) then
 			-- update and get bar height
-			if (m.isBarOption) then
+			if m.isBarOption then
 				m:Update(unit)
 
-				local attachTo = m:GetAttachTo()
-				if (attachTo == "Frame" or m.isBar) then
-					frameHeight = frameHeight + m:GetBarHeight()
+				local attachTo = m:GetAttachTo(unit)
+				if attachTo == "Frame" or m:IsBar(unit) then
+					frameHeight = frameHeight + m:GetBarHeight(unit)
 				end
 			end
 		end
@@ -947,12 +1030,12 @@ function GladiusEx:UpdateUnit(unit, module)
 	self.buttons[unit].frameHeight = frameHeight
 
 	-- update button
-	self.buttons[unit]:SetScale(self.db.frameScale)
+	self.buttons[unit]:SetScale(self.db[unit].frameScale)
 	self.buttons[unit]:SetSize(frameWidth, frameHeight)
 
 	-- update modules (indicator)
-	for _, m in self:IterateModules() do
-		if (m:IsEnabled() and not m.isBarOption and m.Update) then
+	for n, m in self:IterateModules() do
+		if self:IsModuleEnabled(unit, n) and not m.isBarOption and m.Update then
 			m:Update(unit)
 		end
 	end
@@ -986,8 +1069,8 @@ function GladiusEx:UpdateAnchor(anchor_type)
 	-- anchor
 	anchor:ClearAllPoints()
 	anchor:SetSize(anchor_width, anchor_height)
-	anchor:SetScale(self.db.frameScale)
-	if (not self.db.x and not self.db.y) or (not self.db.x["anchor_" .. anchor.anchor_type] and not self.db.y["anchor_" .. anchor.anchor_type]) then
+	anchor:SetScale(self.db[anchor_type].frameScale)
+	if (not self.db[anchor_type].x and not self.db[anchor_type].y) or (not self.db[anchor_type].x["anchor_" .. anchor.anchor_type] and not self.db[anchor_type].y["anchor_" .. anchor.anchor_type]) then
 		if anchor.anchor_type == "party" then
 			anchor:SetPoint("CENTER", UIParent, "CENTER", 0, -200)
 		else
@@ -995,17 +1078,17 @@ function GladiusEx:UpdateAnchor(anchor_type)
 		end
 	else
 		local eff = anchor:GetEffectiveScale()
-		anchor:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", self.db.x["anchor_" .. anchor.anchor_type] / eff, self.db.y["anchor_" .. anchor.anchor_type] / eff)
+		anchor:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", self.db[anchor_type].x["anchor_" .. anchor.anchor_type] / eff, self.db[anchor_type].y["anchor_" .. anchor.anchor_type] / eff)
 	end
 
 	anchor.text:SetPoint("CENTER", anchor, "CENTER")
-	anchor.text:SetFont(self.LSM:Fetch(self.LSM.MediaType.FONT, self.db.globalFont), (self.db.useGlobalFontSize and self.db.globalFontSize or 11))
+	anchor.text:SetFont(self.LSM:Fetch(self.LSM.MediaType.FONT, self.db[anchor_type].globalFont), (self.db[anchor_type].useGlobalFontSize and self.db[anchor_type].globalFontSize or 11))
 	anchor.text:SetTextColor(1, 1, 1, 1)
 	anchor.text:SetShadowOffset(1, -1)
 	anchor.text:SetShadowColor(0, 0, 0, 1)
 	anchor.text:SetText(anchor.anchor_type == "party" and L["GladiusEx Party Anchor - click to move"] or L["GladiusEx Enemy Anchor - click to move"])
 
-	if self.db.groupButtons and not self.db.locked then
+	if self.db[anchor_type].groupButtons and not self.db.base.locked then
 		anchor:Show()
 	else
 		anchor:Hide()
@@ -1018,38 +1101,38 @@ function GladiusEx:UpdateAnchor(anchor_type)
 	local frame_height = self.buttons[unit].frameHeight
 
 	local num_frames = self:GetArenaSize()
-	local width, height = self.db.backgroundPadding * 2, self.db.backgroundPadding * 2
+	local width, height = self.db[anchor_type].backgroundPadding * 2, self.db[anchor_type].backgroundPadding * 2
 	local real_frame_width = frame_width + abs(right) + abs(left)
 	local real_frame_height = frame_height + abs(top) + abs(bottom)
-	if self.db.growDirection == "UP" or self.db.growDirection == "DOWN" or self.db.growDirection == "VCENTER" then
+	if self.db[anchor_type].growDirection == "UP" or self.db[anchor_type].growDirection == "DOWN" or self.db[anchor_type].growDirection == "VCENTER" then
 		width = width + real_frame_width
-		height = height + real_frame_height * num_frames + self.db.margin * (num_frames - 1)
+		height = height + real_frame_height * num_frames + self.db[anchor_type].margin * (num_frames - 1)
 	else
-		width = width + real_frame_width * num_frames + self.db.margin * (num_frames - 1)
+		width = width + real_frame_width * num_frames + self.db[anchor_type].margin * (num_frames - 1)
 		height = height + real_frame_height
 	end
 
 	background:ClearAllPoints()
 	background:SetSize(width, height)
-	background:SetScale(self.db.frameScale)
+	background:SetScale(self.db[anchor_type].frameScale)
 
-	if self.db.growDirection == "UP" then
-		background:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", -self.db.backgroundPadding, -self.db.backgroundPadding)
-	elseif self.db.growDirection == "DOWN" then
-		background:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", -self.db.backgroundPadding, self.db.backgroundPadding)
-	elseif self.db.growDirection == "LEFT" then
-		background:SetPoint("TOPRIGHT", anchor, "BOTTOMRIGHT", self.db.backgroundPadding, self.db.backgroundPadding)
-	elseif self.db.growDirection == "RIGHT" then
-		background:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", -self.db.backgroundPadding, self.db.backgroundPadding)
-	elseif self.db.growDirection == "HCENTER" then
-		background:SetPoint("TOP", anchor, "BOTTOM", 0, self.db.backgroundPadding)
-	elseif self.db.growDirection == "VCENTER" then
-		background:SetPoint("LEFT", anchor, "LEFT", -self.db.backgroundPadding, 0)
+	if self.db[anchor_type].growDirection == "UP" then
+		background:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", -self.db[anchor_type].backgroundPadding, -self.db[anchor_type].backgroundPadding)
+	elseif self.db[anchor_type].growDirection == "DOWN" then
+		background:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", -self.db[anchor_type].backgroundPadding, self.db[anchor_type].backgroundPadding)
+	elseif self.db[anchor_type].growDirection == "LEFT" then
+		background:SetPoint("TOPRIGHT", anchor, "BOTTOMRIGHT", self.db[anchor_type].backgroundPadding, self.db[anchor_type].backgroundPadding)
+	elseif self.db[anchor_type].growDirection == "RIGHT" then
+		background:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", -self.db[anchor_type].backgroundPadding, self.db[anchor_type].backgroundPadding)
+	elseif self.db[anchor_type].growDirection == "HCENTER" then
+		background:SetPoint("TOP", anchor, "BOTTOM", 0, self.db[anchor_type].backgroundPadding)
+	elseif self.db[anchor_type].growDirection == "VCENTER" then
+		background:SetPoint("LEFT", anchor, "LEFT", -self.db[anchor_type].backgroundPadding, 0)
 	end
 
-	background:SetBackdropColor(self.db.backgroundColor.r, self.db.backgroundColor.g, self.db.backgroundColor.b, self.db.backgroundColor.a)
+	background:SetBackdropColor(self.db[anchor_type].backgroundColor.r, self.db[anchor_type].backgroundColor.g, self.db[anchor_type].backgroundColor.b, self.db[anchor_type].backgroundColor.a)
 
-	if self.db.groupButtons then
+	if self.db[anchor_type].groupButtons then
 		background:Show()
 	else
 		background:Hide()

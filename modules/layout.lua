@@ -64,7 +64,7 @@ function Layout:GetOptions()
 							desc = L["Code of your layout"],
 							get = function() return self.layout end,
 							set = function(info, value) self.layout = value end,
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							multiline = true,
 							width = "full",
 							order = 5,
@@ -73,7 +73,7 @@ function Layout:GetOptions()
 							type = "execute",
 							name = L["Import layout"],
 							desc = L["Import your layout code"],
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							func = function()
 								if (self.layout == nil or self.layout == "") then return end
 
@@ -107,7 +107,7 @@ function Layout:GetOptions()
 							type = "execute",
 							name = L["Export layout"],
 							desc = L["Export your layout code"],
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							func = function()
 								local t = CopyTable(GladiusEx.dbi.profile)
 								self.layout = LibStub("AceSerializer-3.0"):Serialize(SerializeTable(t, GladiusEx.defaults.profile))

@@ -64,11 +64,11 @@ function Auras:OnDisable()
 	end
 end
 
-function Auras:GetAttachTo()
-	return self.db.aurasAttachTo
+function Auras:GetAttachTo(unit)
+	return self.db[unit].aurasAttachTo
 end
 
-function Auras:GetModuleAttachPoints()
+function Auras:GetModuleAttachPoints(unit)
 	return {
 		["Buffs"] = L["Buffs"],
 		["Debuffs"] = L["Debuffs"],
@@ -137,13 +137,13 @@ function Auras:UpdateUnitAuras(event, unit)
 	local color
 	local sidx = 1
 
-	if self.buffFrame[unit] and self.db.aurasBuffs then
+	if self.buffFrame[unit] and self.db[unit].aurasBuffs then
 		-- buff frame
 		for i = 1, 40 do
 			local name, rank, icon, count, debuffType, duration, expires, caster, isStealable = UnitBuff(unit, i)
 
 			if name then
-				if not self.db.aurasBuffsOnlyDispellable or isStealable then
+				if not self.db[unit].aurasBuffsOnlyDispellable or isStealable then
 					SetBuff(self.buffFrame[unit][sidx], unit, i)
 					sidx = sidx + 1
 				end
@@ -158,10 +158,10 @@ function Auras:UpdateUnitAuras(event, unit)
 		end
 	end
 
-	if self.debuffFrame[unit] and self.db.aurasDebuffs then
+	if self.debuffFrame[unit] and self.db[unit].aurasDebuffs then
 		local debuffFrame
 
-		if self.db.aurasBuffs and self.db.aurasDebuffsWithBuffs then
+		if self.db[unit].aurasBuffs and self.db[unit].aurasDebuffsWithBuffs then
 			debuffFrame = self.buffFrame[unit]
 		else
 			debuffFrame = self.debuffFrame[unit]
@@ -173,7 +173,7 @@ function Auras:UpdateUnitAuras(event, unit)
 			local name, rank, icon, count, debuffType, duration, expires, caster, isStealable = UnitDebuff(unit, i)
 
 			if name then
-				if not self.db.aurasDebuffsOnlyDispellable or isStealable then
+				if not self.db[unit].aurasDebuffsOnlyDispellable or isStealable then
 					SetDebuff(debuffFrame[sidx], unit, i)
 					debuffFrame[sidx]:Show()
 					sidx = sidx + 1
@@ -205,7 +205,7 @@ local function CreateAuraFrame(name, parent)
 	frame.cooldown:Hide()
 
 	frame.count = frame:CreateFontString(nil, "OVERLAY")
-	frame.count:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.globalFont), 10, "OUTLINE")
+	frame.count:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont), 10, "OUTLINE")
 	frame.count:SetTextColor(1, 1, 1, 1)
 	frame.count:SetShadowColor(0, 0, 0, 1.0)
 	frame.count:SetShadowOffset(0.50, -0.50)
@@ -234,7 +234,7 @@ function Auras:CreateFrame(unit)
 	if (not button) then return end
 
 	-- create buff frame
-	if (not self.buffFrame[unit] and self.db.aurasBuffs) then
+	if (not self.buffFrame[unit] and self.db[unit].aurasBuffs) then
 		self.buffFrame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. "BuffFrame" .. unit, button)
 		self.buffFrame[unit]:EnableMouse(false)
 
@@ -245,7 +245,7 @@ function Auras:CreateFrame(unit)
 	end
 
 	-- create debuff frame
-	if (not self.debuffFrame[unit] and self.db.aurasDebuffs) then
+	if (not self.debuffFrame[unit] and self.db[unit].aurasDebuffs) then
 		self.debuffFrame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. "DebuffFrame" .. unit, button)
 		self.debuffFrame[unit]:EnableMouse(false)
 
@@ -298,7 +298,7 @@ local function UpdateAuraGroup(
 
 	local start, startAnchor = 1, auraFrame
 	for i = 1, 40 do
-		if (aurasBuffsMax >= i) then
+		if aurasBuffsMax >= i then
 			if (start == 1) then
 				anchor, parent, relativePoint, offsetX, offsetY = grow1, startAnchor, startRelPoint, 0, strfind(aurasBuffsGrow, "DOWN") and -aurasBuffsSpacingY or aurasBuffsSpacingY
 			else
@@ -322,66 +322,61 @@ end
 
 function Auras:Update(unit)
 	-- create frame
-	if (not self.buffFrame[unit] or not self.debuffFrame[unit]) then
+	if not self.buffFrame[unit] or not self.debuffFrame[unit] then
 		self:CreateFrame(unit)
 	end
 
 	-- update buff frame
-	if (self.db.aurasBuffs) then
+	if self.db[unit].aurasBuffs then
 		UpdateAuraGroup(self.buffFrame[unit], unit,
-			self.db.aurasBuffsAttachTo,
-			self.db.aurasBuffsAnchor,
-			self.db.aurasBuffsRelativePoint,
-			self.db.aurasBuffsOffsetX,
-			self.db.aurasBuffsOffsetY,
-			self.db.aurasBuffsPerColumn,
-			self.db.aurasBuffsGrow,
-			self.db.aurasBuffsSize,
-			self.db.aurasBuffsSpacingX,
-			self.db.aurasBuffsSpacingY,
-			self.db.aurasBuffsMax,
-			self.db.aurasBuffsCrop)
-
-		-- hide
+			self.db[unit].aurasBuffsAttachTo,
+			self.db[unit].aurasBuffsAnchor,
+			self.db[unit].aurasBuffsRelativePoint,
+			self.db[unit].aurasBuffsOffsetX,
+			self.db[unit].aurasBuffsOffsetY,
+			self.db[unit].aurasBuffsPerColumn,
+			self.db[unit].aurasBuffsGrow,
+			self.db[unit].aurasBuffsSize,
+			self.db[unit].aurasBuffsSpacingX,
+			self.db[unit].aurasBuffsSpacingY,
+			self.db[unit].aurasBuffsMax,
+			self.db[unit].aurasBuffsCrop)
+	end
+	-- hide
+	if self.buffFrame[unit] then
 		self.buffFrame[unit]:Hide()
 	end
 
 	-- update debuff frame
-	if (self.db.aurasDebuffs) then
+	if self.db[unit].aurasDebuffs then
 		UpdateAuraGroup(self.debuffFrame[unit], unit,
-			self.db.aurasDebuffsAttachTo,
-			self.db.aurasDebuffsAnchor,
-			self.db.aurasDebuffsRelativePoint,
-			self.db.aurasDebuffsOffsetX,
-			self.db.aurasDebuffsOffsetY,
-			self.db.aurasDebuffsPerColumn,
-			self.db.aurasDebuffsGrow,
-			self.db.aurasDebuffsSize,
-			self.db.aurasDebuffsSpacingX,
-			self.db.aurasDebuffsSpacingY,
-			self.db.aurasDebuffsMax,
-			self.db.aurasDebuffsCrop)
-
-		-- hide
-		self.debuffFrame[unit]:Hide()
+			self.db[unit].aurasDebuffsAttachTo,
+			self.db[unit].aurasDebuffsAnchor,
+			self.db[unit].aurasDebuffsRelativePoint,
+			self.db[unit].aurasDebuffsOffsetX,
+			self.db[unit].aurasDebuffsOffsetY,
+			self.db[unit].aurasDebuffsPerColumn,
+			self.db[unit].aurasDebuffsGrow,
+			self.db[unit].aurasDebuffsSize,
+			self.db[unit].aurasDebuffsSpacingX,
+			self.db[unit].aurasDebuffsSpacingY,
+			self.db[unit].aurasDebuffsMax,
+			self.db[unit].aurasDebuffsCrop)
 	end
-
-	-- event
-	if (not self.db.aurasDebuffs and not self.db.aurasBuffs) then
-		self:UnregisterAllEvents()
-	else
-		self:RegisterEvent("UNIT_AURA", "UpdateUnitAuras")
+	-- hide
+	if self.debuffFrame[unit] then
+		self.debuffFrame[unit]:Hide()
 	end
 end
 
 function Auras:Show(unit)
 	-- show buff frame
-	if self.db.aurasBuffs and self.buffFrame[unit] then
+	if self.db[unit].aurasBuffs and self.buffFrame[unit] then
 		self.buffFrame[unit]:Show()
 	end
 
 	-- show debuff frame
-	if self.db.aurasDebuffs and self.debuffFrame[unit] and not self.db.aurasDebuffsWithBuffs then
+	if self.db[unit].aurasDebuffs and self.debuffFrame[unit] and not self.db[unit].aurasDebuffsWithBuffs then
 		self.debuffFrame[unit]:Show()
 	end
 
@@ -389,7 +384,7 @@ function Auras:Show(unit)
 end
 
 function Auras:Reset(unit)
-	if (self.buffFrame[unit]) then
+	if self.buffFrame[unit] then
 		-- hide buff frame
 		self.buffFrame[unit]:Hide()
 
@@ -398,7 +393,7 @@ function Auras:Reset(unit)
 		end
 	end
 
-	if (self.debuffFrame[unit]) then
+	if self.debuffFrame[unit] then
 		-- hide debuff frame
 		self.debuffFrame[unit]:Hide()
 
@@ -410,23 +405,23 @@ end
 
 function Auras:Test(unit)
 	-- test buff frame
-	if (self.buffFrame[unit]) then
-		for i = 1, self.db.aurasBuffsMax do
+	if self.buffFrame[unit] then
+		for i = 1, self.db[unit].aurasBuffsMax do
 			self.buffFrame[unit][i].icon:SetTexture(GetSpellTexture(21562))
 			self.buffFrame[unit][i]:Show()
 		end
 	end
 
 	-- test debuff frame
-	if (self.debuffFrame[unit]) then
-		for i = 1, self.db.aurasDebuffsMax do
+	if self.debuffFrame[unit] then
+		for i = 1, self.db[unit].aurasDebuffsMax do
 			self.debuffFrame[unit][i].icon:SetTexture(GetSpellTexture(589))
 			self.debuffFrame[unit][i]:Show()
 		end
 	end
 end
 
-function Auras:GetOptions()
+function Auras:GetOptions(unit)
 	local options = {
 		buffs = {
 			type = "group",
@@ -450,7 +445,7 @@ function Auras:GetOptions()
 									type = "toggle",
 									name = L["Buffs"],
 									desc = L["Toggle aura buffs"],
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 5,
 								},
 								sep3 = {
@@ -470,7 +465,7 @@ function Auras:GetOptions()
 										["DOWNRIGHT"] = L["Down right"],
 									}
 									end,
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 10,
 								},
 								sep = {
@@ -483,22 +478,22 @@ function Auras:GetOptions()
 									type = "toggle",
 									name = L["Crop borders"],
 									desc = L["Toggle if the icon borders should be cropped or not"],
-									disabled = function() return not self:IsEnabled() end,
-									hidden = function() return not GladiusEx.db.advancedOptions end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
+									hidden = function() return not GladiusEx.db.base.advancedOptions end,
 									order = 14,
 								},
 								aurasBuffsOnlyDispellable = {
 									type = "toggle",
 									width = "full",
 									name = L["Show only dispellable"],
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 14,
 								},
 								aurasBuffsOnlyMine = {
 									type = "toggle",
 									width = "full",
 									name = L["Show only mine"],
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 14.1,
 								},
 								aurasBuffsPerColumn = {
@@ -506,7 +501,7 @@ function Auras:GetOptions()
 									name = L["Icons per column"],
 									desc = L["Number of aura icons per column"],
 									min = 1, max = 50, step = 1,
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 15,
 								},
 								aurasBuffsMax = {
@@ -514,7 +509,7 @@ function Auras:GetOptions()
 									name = L["Icons max"],
 									desc = L["Number of max buffs"],
 									min = 1, max = 40, step = 1,
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 20,
 								},
 								sep2 = {
@@ -537,7 +532,7 @@ function Auras:GetOptions()
 									name = L["Icon size"],
 									desc = L["Size of the aura icons"],
 									min = 10, max = 100, step = 1,
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 5,
 								},
 								sep = {
@@ -551,14 +546,14 @@ function Auras:GetOptions()
 									name = L["Vertical spacing"],
 									desc = L["Vertical spacing of the icons"],
 									min = 0, max = 30, step = 1,
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 15,
 								},
 								aurasBuffsSpacingX = {
 									type = "range",
 									name = L["Horizontal spacing"],
 									desc = L["Horizontal spacing of the icons"],
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									min = 0, max = 30, step = 1,
 									order = 20,
 								},
@@ -569,15 +564,15 @@ function Auras:GetOptions()
 							name = L["Position"],
 							desc = L["Position settings"],
 							inline = true,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 3,
 							args = {
 								aurasBuffsAttachTo = {
 									type = "select",
 									name = L["Attach to"],
 									desc = L["Attach to the given frame"],
-									values = function() return Auras:GetAttachPoints() end,
-									disabled = function() return not self:IsEnabled() end,
+									values = function() return self:GetOtherAttachPoints(unit) end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									width = "double",
 									order = 5,
 								},
@@ -592,7 +587,7 @@ function Auras:GetOptions()
 									name = L["Anchor"],
 									desc = L["Anchor of the frame"],
 									values = function() return GladiusEx:GetPositions() end,
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 10,
 								},
 								aurasBuffsRelativePoint = {
@@ -600,7 +595,7 @@ function Auras:GetOptions()
 									name = L["Relative point"],
 									desc = L["Relative point of the frame"],
 									values = function() return GladiusEx:GetPositions() end,
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 15,
 								},
 								sep2 = {
@@ -614,14 +609,14 @@ function Auras:GetOptions()
 									name = L["Offset X"],
 									desc = L["X offset of the frame"],
 									min = -100, max = 100, step = 1,
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 20,
 								},
 								aurasBuffsOffsetY = {
 									type = "range",
 									name = L["Offset Y"],
 									desc = L["Y offset of the frame"],
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									min = -50, max = 50, step = 1,
 									order = 25,
 								},
@@ -633,7 +628,7 @@ function Auras:GetOptions()
 					type = "group",
 					name = L["Filter"],
 					childGroups = "tree",
-					hidden = function() return not GladiusEx.db.advancedOptions end,
+					hidden = function() return not GladiusEx.db.base.advancedOptions end,
 					order = 2,
 					args = {
 						whitelist = {
@@ -683,14 +678,14 @@ function Auras:GetOptions()
 									type = "toggle",
 									name = L["Debuffs"],
 									desc = L["Toggle aura debuffs"],
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 5,
 								},
 								aurasDebuffsWithBuffs = {
 									type = "toggle",
 									name = L["Debuffs with buffs"],
 									width = "full",
-									disabled = function() return not self:IsEnabled() or not self.db.aurasBuffs end,
+									disabled = function() return not self:IsUnitEnabled(unit) or not self.db[unit].aurasBuffs end,
 									order = 6,
 								},
 								sep3 = {
@@ -710,7 +705,7 @@ function Auras:GetOptions()
 										["DOWNRIGHT"] = L["Down right"],
 									}
 									end,
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 10,
 								},
 								sep = {
@@ -723,22 +718,22 @@ function Auras:GetOptions()
 									type = "toggle",
 									name = L["Crop borders"],
 									desc = L["Toggle if the icon borders should be cropped or not"],
-									disabled = function() return not self:IsEnabled() end,
-									hidden = function() return not GladiusEx.db.advancedOptions end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
+									hidden = function() return not GladiusEx.db.base.advancedOptions end,
 									order = 14,
 								},
 								aurasDebuffsOnlyDispellable = {
 									type = "toggle",
 									width = "full",
 									name = L["Show only dispellable"],
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 14,
 								},
 								aurasDebuffsOnlyMine = {
 									type = "toggle",
 									width = "full",
 									name = L["Show only mine"],
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 14.1,
 								},
 								aurasDebuffsPerColumn = {
@@ -746,7 +741,7 @@ function Auras:GetOptions()
 									name = L["Icons per column"],
 									desc = L["Number of icons per column"],
 									min = 1, max = 50, step = 1,
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 15,
 								},
 								aurasDebuffsMax = {
@@ -754,7 +749,7 @@ function Auras:GetOptions()
 									name = L["Icons max"],
 									desc = L["Number of max icons"],
 									min = 1, max = 40, step = 1,
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 20,
 								},
 								sep2 = {
@@ -777,7 +772,7 @@ function Auras:GetOptions()
 									name = L["Icon size"],
 									desc = L["Size of the icons"],
 									min = 10, max = 100, step = 1,
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 5,
 								},
 								sep = {
@@ -791,14 +786,14 @@ function Auras:GetOptions()
 									name = L["Vertical spacing"],
 									desc = L["Vertical spacing of the icons"],
 									min = 0, max = 30, step = 1,
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 15,
 								},
 								aurasDebuffsSpacingX = {
 									type = "range",
 									name = L["Horizontal spacing"],
 									desc = L["Horizontal spacing of the icons"],
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									min = 0, max = 30, step = 1,
 									order = 20,
 								},
@@ -809,15 +804,15 @@ function Auras:GetOptions()
 							name = L["Position"],
 							desc = L["Position settings"],
 							inline = true,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 3,
 							args = {
 								aurasDebuffsAttachTo = {
 									type = "select",
 									name = L["Attach to"],
 									desc = L["Attach to the given frame"],
-									values = function() return Auras:GetAttachPoints() end,
-									disabled = function() return not self:IsEnabled() end,
+									values = function() return self:GetOtherAttachPoints(unit) end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									width = "double",
 									order = 5,
 								},
@@ -832,7 +827,7 @@ function Auras:GetOptions()
 									name = L["Anchor"],
 									desc = L["Anchor of the frame"],
 									values = function() return GladiusEx:GetPositions() end,
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 10,
 								},
 								aurasDebuffsRelativePoint = {
@@ -840,7 +835,7 @@ function Auras:GetOptions()
 									name = L["Relative point"],
 									desc = L["Relative point of the frame"],
 									values = function() return GladiusEx:GetPositions() end,
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 15,
 								},
 								sep2 = {
@@ -854,14 +849,14 @@ function Auras:GetOptions()
 									name = L["Offset X"],
 									desc = L["X offset"],
 									min = -100, max = 100, step = 1,
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 20,
 								},
 								aurasDebuffsOffsetY = {
 									type = "range",
 									name = L["Offset Y"],
 									desc = L["Y offset"],
-									disabled = function() return not self:IsEnabled() end,
+									disabled = function() return not self:IsUnitEnabled(unit) end,
 									min = -50, max = 50, step = 1,
 									order = 25,
 								},
@@ -873,7 +868,7 @@ function Auras:GetOptions()
 					type = "group",
 					name = L["Filter"],
 					childGroups = "tree",
-					hidden = function() return not GladiusEx.db.advancedOptions end,
+					hidden = function() return not GladiusEx.db.base.advancedOptions end,
 					order = 2,
 					args = {
 						whitelist = {

@@ -33,6 +33,6 @@ externals:
 		url: svn://svn.wowace.com/wow/libspecroster/mainline/trunk
 	libs/LibCooldownTracker-1.0:
 		git://git.wowace.com/wow/libcooldowntracker-1-0/mainline.git
-	libs/LibDualSpec-1.0: 
+	libs/LibDualSpec-1.0:
 		url: git://git.wowace.com/wow/libdualspec-1-0/mainline.git
 		tag: latest

@@ -47,8 +47,8 @@ function DRTracker:OnDisable()
 	end
 end
 
-function DRTracker:GetAttachTo()
-	return self.db.drTrackerAttachTo
+function DRTracker:GetAttachTo(unit)
+	return self.db[unit].drTrackerAttachTo
 end
 
 function DRTracker:GetModuleAttachPoints()
@@ -70,7 +70,7 @@ function DRTracker:CreateIcon(unit, drCat)
 	f.texture = _G[f:GetName().."Icon"]
 	f.normalTexture = _G[f:GetName().."NormalTexture"]
 	f.cooldown = _G[f:GetName().."Cooldown"]
-	
+
 	self.frame[unit].tracker[drCat] = f
 end
 
@@ -84,12 +84,12 @@ function DRTracker:UpdateIcon(unit, drCat)
 	tracked:SetHeight(self.frame[unit]:GetHeight())
 
 	tracked:SetNormalTexture([[Interface\AddOns\GladiusEx\images\gloss]])
-	tracked.normalTexture:SetVertexColor(self.db.drTrackerGlossColor.r, self.db.drTrackerGlossColor.g,
-		self.db.drTrackerGlossColor.b, self.db.drTrackerGloss and self.db.drTrackerGlossColor.a or 0)
+	tracked.normalTexture:SetVertexColor(self.db[unit].drTrackerGlossColor.r, self.db[unit].drTrackerGlossColor.g,
+		self.db[unit].drTrackerGlossColor.b, self.db[unit].drTrackerGloss and self.db[unit].drTrackerGlossColor.a or 0)
 
 	-- cooldown
-	tracked.cooldown:SetReverse(self.db.drTrackerCooldownReverse)
-	if self.db.drTrackerCooldown then
+	tracked.cooldown:SetReverse(self.db[unit].drTrackerCooldownReverse)
+	if self.db[unit].drTrackerCooldown then
 		tracked.cooldown:Show()
 	else
 		tracked.cooldown:Hide()
@@ -100,8 +100,8 @@ function DRTracker:UpdateIcon(unit, drCat)
 	tracked.text:SetDrawLayer("OVERLAY")
 	tracked.text:SetJustifyH("RIGHT")
 	tracked.text:SetPoint("BOTTOMRIGHT", tracked, -2, 0)
-	tracked.text:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.globalFont), self.db.drFontSize, "OUTLINE")
-	tracked.text:SetTextColor(self.db.drFontColor.r, self.db.drFontColor.g, self.db.drFontColor.b, self.db.drFontColor.a)
+	tracked.text:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont), self.db[unit].drFontSize, "OUTLINE")
+	tracked.text:SetTextColor(self.db[unit].drFontColor.r, self.db[unit].drFontColor.g, self.db[unit].drFontColor.b, self.db[unit].drFontColor.a)
 
 	-- style action button
 	tracked.normalTexture:SetHeight(self.frame[unit]:GetHeight() + self.frame[unit]:GetHeight() * 0.4)
@@ -113,7 +113,7 @@ function DRTracker:UpdateIcon(unit, drCat)
 	tracked.texture:ClearAllPoints()
 	tracked.texture:SetPoint("TOPLEFT", tracked, "TOPLEFT")
 	tracked.texture:SetPoint("BOTTOMRIGHT", tracked, "BOTTOMRIGHT")
-	if self.db.drTrackerCrop then
+	if self.db[unit].drTrackerCrop then
 		tracked.texture:SetTexCoord(0.07, 0.93, 0.07, 0.93)
 	else
 		tracked.texture:SetTexCoord(0, 1, 0, 1)
@@ -122,7 +122,7 @@ end
 
 function DRTracker:DRFaded(unit, spellID)
 	local drCat = DRData:GetSpellCategory(spellID)
-	if (self.db.drCategories[drCat] == false) then return end
+	if self.db[unit].drCategories[drCat] == false then return end
 
 	local drTexts = {
 		[1] =    { "½", 0, 1, 0 },
@@ -153,10 +153,10 @@ function DRTracker:DRFaded(unit, spellID)
 	tracked.text:SetTextColor(r,g,b)
 	tracked.texture:SetTexture(GetSpellTexture(spellID))
 
-	if self.db.drTrackerCooldown then
+	if self.db[unit].drTrackerCooldown then
 		tracked.cooldown:SetCooldown(GetTime(), time_left)
 	end
-	
+
 	tracked:SetScript("OnUpdate", function(f, elapsed)
 		if GetTime() >= f.reset_time then
 			tracked.active = false
@@ -177,16 +177,16 @@ function DRTracker:SortIcons(unit)
 
 		if frame.active then
 			if not lastFrame then
-				-- frame:SetPoint(self.db.drTrackerAnchor, self.frame[unit], self.db.drTrackerRelativePoint, self.db.drTrackerOffsetX, self.db.drTrackerOffsetY)
+				-- frame:SetPoint(self.db[unit].drTrackerAnchor, self.frame[unit], self.db[unit].drTrackerRelativePoint, self.db[unit].drTrackerOffsetX, self.db[unit].drTrackerOffsetY)
 				frame:SetPoint("TOPLEFT", self.frame[unit])
-			elseif self.db.drTrackerGrowDirection == "RIGHT" then
-				frame:SetPoint("TOPLEFT", lastFrame, "TOPRIGHT", self.db.drTrackerMargin, 0)
-			elseif self.db.drTrackerGrowDirection == "LEFT" then
-				frame:SetPoint("TOPRIGHT", lastFrame, "TOPLEFT", -self.db.drTrackerMargin, 0)
-			elseif self.db.drTrackerGrowDirection == "UP" then
-				frame:SetPoint("BOTTOMLEFT", lastFrame, "TOPLEFT", 0, self.db.drTrackerMargin)
-			elseif self.db.drTrackerGrowDirection == "DOWN" then
-				frame:SetPoint("TOPLEFT", lastFrame, "BOTTOMLEFT", 0, -self.db.drTrackerMargin)
+			elseif self.db[unit].drTrackerGrowDirection == "RIGHT" then
+				frame:SetPoint("TOPLEFT", lastFrame, "TOPRIGHT", self.db[unit].drTrackerMargin, 0)
+			elseif self.db[unit].drTrackerGrowDirection == "LEFT" then
+				frame:SetPoint("TOPRIGHT", lastFrame, "TOPLEFT", -self.db[unit].drTrackerMargin, 0)
+			elseif self.db[unit].drTrackerGrowDirection == "UP" then
+				frame:SetPoint("BOTTOMLEFT", lastFrame, "TOPLEFT", 0, self.db[unit].drTrackerMargin)
+			elseif self.db[unit].drTrackerGrowDirection == "DOWN" then
+				frame:SetPoint("TOPLEFT", lastFrame, "BOTTOMLEFT", 0, -self.db[unit].drTrackerMargin)
 			end
 
 			lastFrame = frame
@@ -229,24 +229,24 @@ function DRTracker:Update(unit)
 	self.frame[unit]:ClearAllPoints()
 
 	-- anchor point
-	local parent = GladiusEx:GetAttachFrame(unit, self.db.drTrackerAttachTo)
-	self.frame[unit]:SetPoint(self.db.drTrackerAnchor, parent, self.db.drTrackerRelativePoint, self.db.drTrackerOffsetX, self.db.drTrackerOffsetY)
+	local parent = GladiusEx:GetAttachFrame(unit, self.db[unit].drTrackerAttachTo)
+	self.frame[unit]:SetPoint(self.db[unit].drTrackerAnchor, parent, self.db[unit].drTrackerRelativePoint, self.db[unit].drTrackerOffsetX, self.db[unit].drTrackerOffsetY)
 
 	-- frame level
-	self.frame[unit]:SetFrameLevel(self.db.drTrackerFrameLevel)
+	self.frame[unit]:SetFrameLevel(self.db[unit].drTrackerFrameLevel)
 
-	if (self.db.drTrackerAdjustSize) then
-		if (self:GetAttachTo() == "Frame") then
+	if self.db[unit].drTrackerAdjustSize then
+		if self:GetAttachTo(unit) == "Frame" then
 			self.frame[unit]:SetWidth(GladiusEx.buttons[unit].frameHeight)
 			self.frame[unit]:SetHeight(GladiusEx.buttons[unit].frameHeight)
 		else
-			local f = GladiusEx:GetAttachFrame(unit, self.db.drTrackerAttachTo)
+			local f = GladiusEx:GetAttachFrame(unit, self.db[unit].drTrackerAttachTo)
 			self.frame[unit]:SetWidth(f and f:GetHeight() or 1)
 			self.frame[unit]:SetHeight(f and f:GetHeight() or 1)
 		end
 	else
-		self.frame[unit]:SetWidth(self.db.drTrackerSize)
-		self.frame[unit]:SetHeight(self.db.drTrackerSize)
+		self.frame[unit]:SetWidth(self.db[unit].drTrackerSize)
+		self.frame[unit]:SetHeight(self.db[unit].drTrackerSize)
 	end
 
 	-- update icons
@@ -299,8 +299,8 @@ function DRTracker:Test(unit)
 	self:DRFaded(unit, 33786)
 end
 
-function DRTracker:GetOptions()
-	local t = {
+function DRTracker:GetOptions(unit)
+	local options = {
 		general = {
 			type = "group",
 			name = L["General"],
@@ -322,17 +322,10 @@ function DRTracker:GetOptions()
 								["UP"]    = L["Up"],
 								["DOWN"]  = L["Down"],
 							},
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 1,
 						},
-						drTrackerMargin = {
-							type = "range",
-							name = L["Spacing"],
-							desc = L["Space between the icons"],
-							min = 0, max = 100, step = 1,
-							disabled = function() return not self:IsEnabled() end,
-							order = 5,
-						},
-						sep = {
+						sep2 = {
 							type = "description",
 							name = "",
 							width = "full",
@@ -342,27 +335,27 @@ function DRTracker:GetOptions()
 							type = "toggle",
 							name = L["Cooldown spiral"],
 							desc = L["Display the cooldown spiral for the drTracker icons"],
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 10,
 						},
 						drTrackerCooldownReverse = {
 							type = "toggle",
 							name = L["Cooldown reverse"],
 							desc = L["Invert the dark/bright part of the cooldown spiral"],
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 15,
 						},
 						drTrackerCrop = {
 							type = "toggle",
 							name = L["Crop borders"],
 							desc = L["Toggle if the icon borders should be cropped or not"],
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 16,
 						},
-						sep2 = {
+						sep3 = {
 							type = "description",
 							name = "",
 							width = "full",
@@ -372,34 +365,34 @@ function DRTracker:GetOptions()
 							type = "toggle",
 							name = L["Gloss"],
 							desc = L["Toggle gloss on the icon"],
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 25,
 						},
 						drTrackerGlossColor = {
 							type = "color",
 							name = L["Gloss color"],
 							desc = L["Color of the gloss"],
-							get = function(info) return GladiusEx:GetColorOption(self.db, info) end,
-							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db, info, r, g, b, a) end,
+							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
+							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
 							hasAlpha = true,
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 30,
 						},
-						sep3 = {
+						sep4 = {
 							type = "description",
 							name = "",
 							width = "full",
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 33,
 						},
 						drTrackerFrameLevel = {
 							type = "range",
 							name = L["Frame level"],
 							desc = L["Frame level of the frame"],
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							min = 1, max = 5, step = 1,
 							width = "double",
 							order = 35,
@@ -413,19 +406,33 @@ function DRTracker:GetOptions()
 					inline = true,
 					order = 2,
 					args = {
+						drTrackerMargin = {
+							type = "range",
+							name = L["Spacing"],
+							desc = L["Space between the icons"],
+							min = 0, max = 100, step = 1,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 5,
+						},
+						sep = {
+							type = "description",
+							name = "",
+							width = "full",
+							order = 6,
+						},
 						drTrackerAdjustSize = {
 							type = "toggle",
 							name = L["Adjust size"],
 							desc = L["Adjust size to the frame size"],
-							disabled = function() return not self:IsEnabled() end,
-							order = 5,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 7,
 						},
 						drTrackerSize = {
 							type = "range",
-							name = L["Size"],
-							desc = L["Size of the drTracker"],
+							name = L["Icon size"],
+							desc = L["Size of the icons"],
 							min = 10, max = 100, step = 1,
-							disabled = function() return self.db.drTrackerAdjustSize or not self:IsEnabled() end,
+							disabled = function() return self.db[unit].drTrackerAdjustSize or not self:IsUnitEnabled(unit) end,
 							order = 10,
 						},
 					},
@@ -435,7 +442,7 @@ function DRTracker:GetOptions()
 					name = L["Font"],
 					desc = L["Font settings"],
 					inline = true,
-					hidden = function() return not GladiusEx.db.advancedOptions end,
+					hidden = function() return not GladiusEx.db.base.advancedOptions end,
 					order = 3,
 					args = {
 						drFontColor = {
@@ -443,9 +450,9 @@ function DRTracker:GetOptions()
 							name = L["Text color"],
 							desc = L["Text color of the DR text"],
 							hasAlpha = true,
-							get = function(info) return GladiusEx:GetColorOption(self.db, info) end,
-							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db, info, r, g, b, a) end,
-							disabled = function() return not self:IsEnabled() end,
+							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
+							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 10,
 						},
 						drFontSize = {
@@ -453,7 +460,7 @@ function DRTracker:GetOptions()
 							name = L["Text size"],
 							desc = L["Text size of the DR text"],
 							min = 1, max = 20, step = 1,
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 15,
 						},
 					},
@@ -469,8 +476,8 @@ function DRTracker:GetOptions()
 							type = "select",
 							name = L["Attach to"],
 							desc = L["Attach drTracker to the given frame"],
-							values = function() return DRTracker:GetAttachPoints() end,
-							disabled = function() return not self:IsEnabled() end,
+							values = function() return self:GetOtherAttachPoints(unit) end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							width = "double",
 							order = 5,
 						},
@@ -479,20 +486,20 @@ function DRTracker:GetOptions()
 							name = L["Position"],
 							desc = L["Position of the drTracker"],
 							values = { ["LEFT"] = L["Left"], ["RIGHT"] = L["Right"] },
-							get = function() return strfind(self.db.drTrackerAnchor, "RIGHT") and "LEFT" or "RIGHT" end,
+							get = function() return strfind(self.db[unit].drTrackerAnchor, "RIGHT") and "LEFT" or "RIGHT" end,
 							set = function(info, value)
-								if (value == "LEFT") then
-									self.db.drTrackerAnchor = "TOPRIGHT"
-									self.db.drTrackerRelativePoint = "TOPLEFT"
+								if value == "LEFT" then
+									self.db[unit].drTrackerAnchor = "TOPRIGHT"
+									self.db[unit].drTrackerRelativePoint = "TOPLEFT"
 								else
-									self.db.drTrackerAnchor = "TOPLEFT"
-									self.db.drTrackerRelativePoint = "TOPRIGHT"
+									self.db[unit].drTrackerAnchor = "TOPLEFT"
+									self.db[unit].drTrackerRelativePoint = "TOPRIGHT"
 								end
 
-								GladiusEx:UpdateFrame(info[1])
+								GladiusEx:UpdateFrames()
 							end,
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return GladiusEx.db.advancedOptions end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return GladiusEx.db.base.advancedOptions end,
 							order = 6,
 						},
 						sep = {
@@ -506,8 +513,8 @@ function DRTracker:GetOptions()
 							name = L["Anchor"],
 							desc = L["Anchor of the frame"],
 							values = function() return GladiusEx:GetPositions() end,
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 10,
 						},
 						drTrackerRelativePoint = {
@@ -515,8 +522,8 @@ function DRTracker:GetOptions()
 							name = L["Relative point"],
 							desc = L["Relative point of the frame"],
 							values = function() return GladiusEx:GetPositions() end,
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 15,
 						},
 						sep2 = {
@@ -530,14 +537,14 @@ function DRTracker:GetOptions()
 							name = L["Offset X"],
 							desc = L["X offset of the frame"],
 							min = -100, max = 100, step = 1,
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 20,
 						},
 						drTrackerOffsetY = {
 							type = "range",
 							name = L["Offset Y"],
 							desc = L["Y offset of the frame"],
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							min = -50, max = 50, step = 1,
 							order = 25,
 						},
@@ -547,7 +554,7 @@ function DRTracker:GetOptions()
 		},
 	}
 
-	t.categories = {
+	options.categories = {
 		type = "group",
 		name = L["Categories"],
 		order = 2,
@@ -566,25 +573,25 @@ function DRTracker:GetOptions()
 
 	local index = 1
 	for key, name in pairs(DRData:GetCategories()) do
-		t.categories.args.categories.args[key] = {
+		options.categories.args.categories.args[key] = {
 			type = "toggle",
 			name = name,
 			get = function(info)
-				if (self.db.drCategories[info[#info]] == nil) then
+				if self.db[unit].drCategories[info[#info]] == nil then
 					return true
 				else
-					return self.db.drCategories[info[#info]]
+					return self.db[unit].drCategories[info[#info]]
 				end
 			end,
 			set = function(info, value)
-				self.db.drCategories[info[#info]] = value
+				self.db[unit].drCategories[info[#info]] = value
 			end,
-			disabled = function() return not self:IsEnabled() end,
+			disabled = function() return not self:IsUnitEnabled(unit) end,
 			order = index * 5,
 		}
 
 		index = index + 1
 	end
 
-	return t
+	return options
 end

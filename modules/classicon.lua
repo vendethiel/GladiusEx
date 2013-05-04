@@ -6,7 +6,7 @@ local LSM
 local strfind = string.find
 local pairs = pairs
 local GetTime = GetTime
-local GetSpellInfo, UnitAura, UnitClass = GetSpellInfo, UnitAura, UnitClass
+local GetSpellInfo, UnitAura, UnitClass, UnitBuff, UnitDebuff = GetSpellInfo, UnitAura, UnitClass, UnitBuff, UnitDebuff
 local CLASS_BUTTONS = CLASS_BUTTONS
 
 local ClassIcon = GladiusEx:NewGladiusExModule("ClassIcon", false, {
@@ -156,7 +156,7 @@ local ClassIcon = GladiusEx:NewGladiusExModule("ClassIcon", false, {
 		[GetSpellInfo(64695)] 	= 2,    -- Earthgrab (Earthgrab Totem)
 		[GetSpellInfo(63685)] 	= 2,    -- Freeze (Frozen Power)
 		[GetSpellInfo(107566)] 	= 2,    -- Staggering Shout
-		
+
 		-- Silences
 		[GetSpellInfo(47476)] 	= 3,    -- Strangulate
 		[GetSpellInfo(114238)] 	= 3,    -- Fae Silence (Glyph of Fae Silence)
@@ -179,7 +179,7 @@ local ClassIcon = GladiusEx:NewGladiusExModule("ClassIcon", false, {
 		[GetSpellInfo(69179)] 	= 3,    -- Arcane Torrent (Rage)
 		[GetSpellInfo(80483)] 	= 3,    -- Arcane Torrent (Focus)
 		[GetSpellInfo(129597)] 	= 3,    -- Arcane Torrent (Chi)
-				
+
 		-- Disarms
 		[GetSpellInfo(126458)] 	= 1,    -- Grapple Weapon (Monk)
 		[GetSpellInfo(50541)] 	= 1,    -- Clench (Scorpid)
@@ -189,7 +189,7 @@ local ClassIcon = GladiusEx:NewGladiusExModule("ClassIcon", false, {
 		[GetSpellInfo(51722)] 	= 1,    -- Dismantle
 		[GetSpellInfo(118093)] 	= 1,    -- Disarm (Voidwalker/Voidlord)
 		[GetSpellInfo(676)] 	= 1,    -- Disarm
-						
+
 		-- Buffs
 		[GetSpellInfo(48792)] 	= 1,    -- Icebound Fortitude
 		[GetSpellInfo(49039)] 	= 1,    -- Lichborne
@@ -223,7 +223,7 @@ local ClassIcon = GladiusEx:NewGladiusExModule("ClassIcon", false, {
 		[GetSpellInfo(47585)] 	= 1,    -- Dispersion
 		[GetSpellInfo(31224)] 	= 1,    -- Cloak of Shadows
 		[GetSpellInfo(46924)] 	= 1,    -- Bladestorm
-	}	
+	}
 })
 
 function ClassIcon:OnEnable()
@@ -232,7 +232,7 @@ function ClassIcon:OnEnable()
 
 	LSM = GladiusEx.LSM
 
-	if (not self.frame) then
+	if not self.frame then
 		self.frame = {}
 	end
 end
@@ -246,13 +246,8 @@ function ClassIcon:OnDisable()
 	end
 end
 
-function ClassIcon:OnProfileChanged()
-	self.super.OnProfileChanged(self)
-	self:SetupAllAurasOptions()
-end
-
-function ClassIcon:GetAttachTo()
-	return self.db.classIconAttachTo
+function ClassIcon:GetAttachTo(unit)
+	return self.db[unit].classIconAttachTo
 end
 
 function ClassIcon:GetModuleAttachPoints()
@@ -285,7 +280,7 @@ function ClassIcon:ScanAuras(unit)
 	local best_name, best_icon, best_duration, best_expires
 
 	local function handle_aura(name, icon, duration, expires)
-		local prio = self:GetImportantAura(name)
+		local prio = self:GetImportantAura(unit, name)
 		if prio and prio >= best_priority then
 			best_name = name
 			best_icon = icon
@@ -313,7 +308,7 @@ function ClassIcon:ScanAuras(unit)
 end
 
 function ClassIcon:UpdateAura(unit)
-	if not self.frame[unit] or not self.db.classIconImportantAuras then return end
+	if not self.frame[unit] or not self.db[unit].classIconImportantAuras then return end
 
 	local name, icon, duration, expires = self:ScanAuras(unit)
 
@@ -328,13 +323,13 @@ function ClassIcon:SetAura(unit, name, icon, duration, expires)
 	-- display aura
 	self.frame[unit].texture:SetTexture(icon)
 
-	if (self.db.classIconCrop) then
+	if self.db[unit].classIconCrop then
 		self.frame[unit].texture:SetTexCoord(0.07, 0.93, 0.07, 0.93)
 	else
 		self.frame[unit].texture:SetTexCoord(0, 1, 0, 1)
 	end
 
-	if self.db.classIconCooldown then
+	if self.db[unit].classIconCooldown then
 		self.frame[unit].cooldown:SetCooldown(expires - duration, duration)
 		self.frame[unit].cooldown:Show()
 	end
@@ -365,12 +360,12 @@ function ClassIcon:SetClassIcon(unit)
 		texture = [[Interface\Icons\INV_Misc_QuestionMark]]
 		left, right, top, bottom = 0, 1, 0, 1
 		needs_crop = true
-	elseif self.db.classIconMode == "ROLE" and specID then
+	elseif self.db[unit].classIconMode == "ROLE" and specID then
 		local _, _, _, _, _, role = GetSpecializationInfoByID(specID)
 		texture = [[Interface\LFGFrame\UI-LFG-ICON-ROLES]]
 		left, right, top, bottom = GetTexCoordsForRole(role)
 		needs_crop = false
-	elseif self.db.classIconMode == "SPEC" and specID then
+	elseif self.db[unit].classIconMode == "SPEC" and specID then
 		texture = select(4, GetSpecializationInfoByID(specID))
 		left, right, top, bottom = 0, 1, 0, 1
 		needs_crop = true
@@ -381,7 +376,7 @@ function ClassIcon:SetClassIcon(unit)
 	end
 
 	-- crop class icon borders
-	if self.db.classIconCrop and needs_crop then
+	if self.db[unit].classIconCrop and needs_crop then
 		left = left + (right - left) * 0.07
 		right = right - (right - left) * 0.07
 		top = top + (bottom - top) * 0.07
@@ -417,34 +412,34 @@ function ClassIcon:Update(unit)
 	-- update frame
 	self.frame[unit]:ClearAllPoints()
 
-	local parent = GladiusEx:GetAttachFrame(unit, self.db.classIconAttachTo)
-	self.frame[unit]:SetPoint(self.db.classIconAnchor, parent, self.db.classIconRelativePoint, self.db.classIconOffsetX, self.db.classIconOffsetY)
+	local parent = GladiusEx:GetAttachFrame(unit, self.db[unit].classIconAttachTo)
+	self.frame[unit]:SetPoint(self.db[unit].classIconAnchor, parent, self.db[unit].classIconRelativePoint, self.db[unit].classIconOffsetX, self.db[unit].classIconOffsetY)
 
 	-- frame level
-	self.frame[unit]:SetFrameLevel(self.db.classIconFrameLevel)
+	self.frame[unit]:SetFrameLevel(self.db[unit].classIconFrameLevel)
 
 	-- size
-	if (self.db.classIconAdjustSize) then
+	if self.db[unit].classIconAdjustSize then
 		self.frame[unit]:SetWidth(GladiusEx.buttons[unit].frameHeight)
 		self.frame[unit]:SetHeight(GladiusEx.buttons[unit].frameHeight)
 	else
-		self.frame[unit]:SetWidth(self.db.classIconSize)
-		self.frame[unit]:SetHeight(self.db.classIconSize)
+		self.frame[unit]:SetWidth(self.db[unit].classIconSize)
+		self.frame[unit]:SetHeight(self.db[unit].classIconSize)
 	end
 
 	-- set frame mouse-interactable area
-	if (self:GetAttachTo() == "Frame") then
+	if self:GetAttachTo(unit) == "Frame" then
 		local left, right, top, bottom = GladiusEx.buttons[unit]:GetHitRectInsets()
 
-		if (strfind(self.db.classIconRelativePoint, "LEFT")) then
-			left = -self.frame[unit]:GetWidth() + self.db.classIconOffsetX
+		if strfind(self.db[unit].classIconRelativePoint, "LEFT") then
+			left = -self.frame[unit]:GetWidth() + self.db[unit].classIconOffsetX
 		else
-			right = -self.frame[unit]:GetWidth() + -self.db.classIconOffsetX
+			right = -self.frame[unit]:GetWidth() + -self.db[unit].classIconOffsetX
 		end
 
 		-- top / bottom
-		if (self.frame[unit]:GetHeight() > GladiusEx.buttons[unit]:GetHeight()) then
-			bottom = -(self.frame[unit]:GetHeight() - GladiusEx.buttons[unit]:GetHeight()) + self.db.classIconOffsetY
+		if self.frame[unit]:GetHeight() > GladiusEx.buttons[unit]:GetHeight() then
+			bottom = -(self.frame[unit]:GetHeight() - GladiusEx.buttons[unit]:GetHeight()) + self.db[unit].classIconOffsetY
 		end
 
 		GladiusEx.buttons[unit]:SetHitRectInsets(left, right, top, bottom)
@@ -463,10 +458,10 @@ function ClassIcon:Update(unit)
 	self.frame[unit].texture:SetPoint("TOPLEFT", self.frame[unit], "TOPLEFT")
 	self.frame[unit].texture:SetPoint("BOTTOMRIGHT", self.frame[unit], "BOTTOMRIGHT")
 
-	self.frame[unit].normalTexture:SetVertexColor(self.db.classIconGlossColor.r, self.db.classIconGlossColor.g,
-		self.db.classIconGlossColor.b, self.db.classIconGloss and self.db.classIconGlossColor.a or 0)
+	self.frame[unit].normalTexture:SetVertexColor(self.db[unit].classIconGlossColor.r, self.db[unit].classIconGlossColor.g,
+		self.db[unit].classIconGlossColor.b, self.db[unit].classIconGloss and self.db[unit].classIconGlossColor.a or 0)
 
-	self.frame[unit].cooldown:SetReverse(self.db.classIconCooldownReverse)
+	self.frame[unit].cooldown:SetReverse(self.db[unit].classIconCooldownReverse)
 
 	-- hide
 	self.frame[unit]:SetAlpha(0)
@@ -482,6 +477,8 @@ function ClassIcon:Show(unit)
 end
 
 function ClassIcon:Reset(unit)
+	if not self.frame[unit] then return end
+
 	-- hide
 	self.frame[unit]:SetAlpha(0)
 end
@@ -489,16 +486,16 @@ end
 function ClassIcon:Test(unit)
 end
 
-function ClassIcon:GetImportantAura(name)
-	return self.db.classIconAuras[name]
+function ClassIcon:GetImportantAura(unit, name)
+	return self.db[unit].classIconAuras[name]
 end
 
 local function HasAuraEditBox()
 	return not not LibStub("AceGUI-3.0").WidgetVersions["Aura_EditBox"]
 end
 
-local options
-function ClassIcon:GetOptions()
+function ClassIcon:GetOptions(unit)
+	local options
 	options = {
 		general = {
 			type = "group",
@@ -517,7 +514,7 @@ function ClassIcon:GetOptions()
 							name = L["Show"],
 							values = { ["CLASS"] = L["Class"], ["SPEC"] = L["Spec"], ["ROLE"] = L["Role"] },
 							desc = L["When available, show specialization instead of class icons"],
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 3,
 						},
 						sep = {
@@ -530,15 +527,15 @@ function ClassIcon:GetOptions()
 							type = "toggle",
 							name = L["Important auras"],
 							desc = L["Show important auras instead of the class icon"],
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 5,
 						},
 						classIconCrop = {
 							type = "toggle",
 							name = L["Crop borders"],
 							desc = L["Toggle if the icon borders should be cropped or not"],
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 6,
 						},
 						classIconCooldown = {
@@ -546,8 +543,8 @@ function ClassIcon:GetOptions()
 							name = L["Cooldown spiral"],
 							desc = L["Display the cooldown spiral for the important auras"],
 							width = "full",
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 10,
 						},
 						classIconCooldownReverse = {
@@ -555,8 +552,8 @@ function ClassIcon:GetOptions()
 							name = L["Cooldown reverse"],
 							desc = L["Invert the dark/bright part of the cooldown spiral"],
 							width = "full",
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 15,
 						},
 						sep2 = {
@@ -569,19 +566,19 @@ function ClassIcon:GetOptions()
 							type = "toggle",
 							name = L["Gloss"],
 							desc = L["Toggle gloss on the icon"],
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 20,
 						},
 						classIconGlossColor = {
 							type = "color",
 							name = L["Gloss color"],
 							desc = L["Color of the gloss"],
-							get = function(info) return GladiusEx:GetColorOption(self.db, info) end,
-							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db, info, r, g, b, a) end,
+							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
+							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
 							hasAlpha = true,
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 25,
 						},
 						sep3 = {
@@ -594,8 +591,8 @@ function ClassIcon:GetOptions()
 							type = "range",
 							name = L["Frame level"],
 							desc = L["Frame level of the frame"],
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							min = 1, max = 5, step = 1,
 							width = "double",
 							order = 30,
@@ -613,7 +610,7 @@ function ClassIcon:GetOptions()
 							type = "toggle",
 							name = L["Adjust size"],
 							desc = L["Adjust size to the frame size"],
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 5,
 						},
 						classIconSize = {
@@ -621,7 +618,7 @@ function ClassIcon:GetOptions()
 							name = L["Icon size"],
 							desc = L["Size of the icon"],
 							min = 10, max = 100, step = 1,
-							disabled = function() return self.db.classIconAdjustSize or not self:IsEnabled() end,
+							disabled = function() return self.db[unit].classIconAdjustSize or not self:IsUnitEnabled(unit) end,
 							order = 10,
 						},
 					},
@@ -637,9 +634,9 @@ function ClassIcon:GetOptions()
 							type = "select",
 							name = L["Attach to"],
 							desc = L["Attach to the given frame"],
-							values = function() return ClassIcon:GetAttachPoints() end,
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							values = function() return self:GetOtherAttachPoints(unit) end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							width = "double",
 							order = 5,
 						},
@@ -648,20 +645,20 @@ function ClassIcon:GetOptions()
 							name = L["Position"],
 							desc = L["Position of the frame"],
 							values = { ["LEFT"] = L["Left"], ["RIGHT"] = L["Right"] },
-							get = function() return strfind(self.db.classIconAnchor, "RIGHT") and "LEFT" or "RIGHT" end,
+							get = function() return strfind(self.db[unit].classIconAnchor, "RIGHT") and "LEFT" or "RIGHT" end,
 							set = function(info, value)
-								if (value == "LEFT") then
-									self.db.classIconAnchor = "TOPRIGHT"
-									self.db.classIconRelativePoint = "TOPLEFT"
+								if value == "LEFT" then
+									self.db[unit].classIconAnchor = "TOPRIGHT"
+									self.db[unit].classIconRelativePoint = "TOPLEFT"
 								else
-									self.db.classIconAnchor = "TOPLEFT"
-									self.db.classIconRelativePoint = "TOPRIGHT"
+									self.db[unit].classIconAnchor = "TOPLEFT"
+									self.db[unit].classIconRelativePoint = "TOPRIGHT"
 								end
 
-								GladiusEx:UpdateFrame(info[1])
+								GladiusEx:UpdateFrames()
 							end,
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return GladiusEx.db.advancedOptions end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return GladiusEx.db.base.advancedOptions end,
 							order = 6,
 						},
 						sep = {
@@ -675,8 +672,8 @@ function ClassIcon:GetOptions()
 							name = L["Anchor"],
 							desc = L["Anchor of the frame"],
 							values = function() return GladiusEx:GetPositions() end,
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 10,
 						},
 						classIconRelativePoint = {
@@ -684,8 +681,8 @@ function ClassIcon:GetOptions()
 							name = L["Relative point"],
 							desc = L["Relative point of the frame"],
 							values = function() return GladiusEx:GetPositions() end,
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 15,
 						},
 						sep2 = {
@@ -699,14 +696,14 @@ function ClassIcon:GetOptions()
 							name = L["Offset X"],
 							desc = L["X offset of the frame"],
 							min = -100, max = 100, step = 1,
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 20,
 						},
 						classIconOffsetY = {
 							type = "range",
 							name = L["Offset Y"],
 							desc = L["Y offset of the frame"],
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							min = -50, max = 50, step = 1,
 							order = 25,
 						},
@@ -734,6 +731,7 @@ function ClassIcon:GetOptions()
 							desc = L["Name of the aura"],
 							get = function() return self.newAuraName or "" end,
 							set = function(info, value) self.newAuraName = value end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 1,
 						},
 						priority = {
@@ -742,6 +740,7 @@ function ClassIcon:GetOptions()
 							desc = L["Select what priority the aura should have - higher equals more priority"],
 							get = function() return self.newAuraPriority or "" end,
 							set = function(info, value) self.newAuraPriority = value end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							min = 0,
 							max = 10,
 							step = 1,
@@ -751,12 +750,12 @@ function ClassIcon:GetOptions()
 							type = "execute",
 							name = L["Add new aura"],
 							func = function(info)
-								self.db.classIconAuras[self.newAuraName] = self.newAuraPriority
+								self.db[unit].classIconAuras[self.newAuraName] = self.newAuraPriority
 								options.auraList.args[self.newAuraName] = self:SetupAuraOptions(self.newAuraName)
 								self.newAuraName = nil
 								GladiusEx:UpdateFrames()
 							end,
-							disabled = function() return not (self.newAuraName and self.newAuraPriority) end,
+							disabled = function() return not self:IsUnitEnabled(unit) or not (self.newAuraName and self.newAuraPriority) end,
 							order = 3,
 						},
 					},
@@ -765,37 +764,31 @@ function ClassIcon:GetOptions()
 		},
 	}
 
-	-- put some initial value for the auras priority
+	-- set some initial value for the auras priority
 	self.newAuraPriority = 5
 
-	-- set auras
-	self:SetupAllAurasOptions()
+	-- setup auras
+	for aura, priority in pairs(self.db[unit].classIconAuras) do
+		options.auraList.args[aura] = self:SetupAuraOptions(options, unit, aura)
+	end
 
 	return options
 end
 
-function ClassIcon:SetupAllAurasOptions()
-	local tmp = options.auraList.args.newAura
-	options.auraList.args = { newAura = tmp }
-	for aura, priority in pairs(self.db.classIconAuras) do
-		options.auraList.args[aura] = self:SetupAuraOptions(aura)
-	end
-end
-
-function ClassIcon:SetupAuraOptions(aura)
+function ClassIcon:SetupAuraOptions(options, unit, aura)
 	local function setAura(info, value)
 		if (info[#(info)] == "name") then
 			local old_name = info[#(info) - 1]
 
 			-- create new aura
-			self.db.classIconAuras[value] = self.db.classIconAuras[old_name]
+			self.db[unit].classIconAuras[value] = self.db[unit].classIconAuras[old_name]
 			options.auraList.args[value] = self:SetupAuraOptions(value)
 
 			-- delete old aura
-			self.db.classIconAuras[old_name] = nil
+			self.db[unit].classIconAuras[old_name] = nil
 			options.auraList.args[old_name] = nil
 		else
-			self.db.classIconAuras[info[#(info) - 1]] = value
+			self.db[unit].classIconAuras[info[#(info) - 1]] = value
 		end
 
 		GladiusEx:UpdateFrames()
@@ -805,10 +798,8 @@ function ClassIcon:SetupAuraOptions(aura)
 		if (info[#(info)] == "name") then
 			return info[#(info) - 1]
 		else
-			return self.db.classIconAuras[info[#(info) - 1]]
+			return self.db[unit].classIconAuras[info[#(info) - 1]]
 		end
-
-		GladiusEx:UpdateFrames()
 	end
 
 	return {
@@ -817,12 +808,14 @@ function ClassIcon:SetupAuraOptions(aura)
 		desc = aura,
 		get = getAura,
 		set = setAura,
+		disabled = function() return not self:IsUnitEnabled(unit) end,
 		args = {
 			name = {
 				type = "input",
 				dialogControl = HasAuraEditBox() and "Aura_EditBox" or nil,
 				name = L["Name"],
 				desc = L["Name of the aura"],
+				disabled = function() return not self:IsUnitEnabled(unit) end,
 				order = 1,
 			},
 			priority = {
@@ -839,11 +832,12 @@ function ClassIcon:SetupAuraOptions(aura)
 				name = L["Delete"],
 				func = function(info)
 					local aura = info[#(info) - 1]
-					self.db.classIconAuras[aura] = nil
+					self.db[unit].classIconAuras[aura] = nil
 					options.auraList.args[aura] = nil
 
 					GladiusEx:UpdateFrames()
 				end,
+				disabled = function() return not self:IsUnitEnabled(unit) end,
 				order = 3,
 			},
 		},

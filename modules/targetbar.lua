@@ -37,9 +37,7 @@ function TargetBar:OnEnable()
 
 	LSM = GladiusEx.LSM
 
-	if (not self.frame) then
-		self.frame = {}
-	end
+	self.frame = {}
 end
 
 function TargetBar:OnDisable()
@@ -50,8 +48,8 @@ function TargetBar:OnDisable()
 	end
 end
 
-function TargetBar:GetAttachTo()
-	return self.db.targetBarAttachTo
+function TargetBar:GetAttachTo(unit)
+	return self.db[unit].targetBarAttachTo
 end
 
 function TargetBar:GetModuleAttachPoints()
@@ -88,7 +86,7 @@ function TargetBar:SetClassIcon(unit)
 		local colorx = self:GetBarColor(class)
 		if (colorx == nil) then
 			--fallback, when targeting a pet or totem
-			colorx = self.db.targetBarColor
+			colorx = self.db[unit].targetBarColor
 		end
 
 		self.frame[unit].statusbar:SetStatusBarColor(colorx.r, colorx.g, colorx.b, colorx.a or 1)
@@ -100,7 +98,7 @@ function TargetBar:SetClassIcon(unit)
 
 		local left, right, top, bottom = unpack(CLASS_BUTTONS[class])
 
-		if (self.db.targetBarIconCrop) then
+		if (self.db[unit].targetBarIconCrop) then
 			-- zoom class icon
 			left = left + (right - left) * 0.07
 			right = right - (right - left) * 0.07
@@ -147,7 +145,7 @@ function TargetBar:UpdateHealth(unit, health, maxHealth)
 	self.frame[unit].statusbar:SetMinMaxValues(0, maxHealth)
 
 	-- inverse bar
-	if (self.db.targetBarInverse) then
+	if (self.db[unit].targetBarInverse) then
 		self.frame[unit].statusbar:SetValue(maxHealth - health)
 	else
 		self.frame[unit].statusbar:SetValue(health)
@@ -178,17 +176,17 @@ function TargetBar:Update(unit)
 	end
 
 	-- update health bar
-	local parent = GladiusEx:GetAttachFrame(unit, self.db.targetBarAttachTo)
+	local parent = GladiusEx:GetAttachFrame(unit, self.db[unit].targetBarAttachTo)
 
 	self.frame[unit]:ClearAllPoints()
-	self.frame[unit]:SetPoint(self.db.targetBarAnchor, parent, self.db.targetBarRelativePoint, self.db.targetBarOffsetX, self.db.targetBarOffsetY)
-	self.frame[unit]:SetWidth(self.db.targetBarWidth)
-	self.frame[unit]:SetHeight(self.db.targetBarHeight)
+	self.frame[unit]:SetPoint(self.db[unit].targetBarAnchor, parent, self.db[unit].targetBarRelativePoint, self.db[unit].targetBarOffsetX, self.db[unit].targetBarOffsetY)
+	self.frame[unit]:SetWidth(self.db[unit].targetBarWidth)
+	self.frame[unit]:SetHeight(self.db[unit].targetBarHeight)
 
 	-- update icon
 	self.frame[unit].icon:ClearAllPoints()
-	if self.db.targetBarIcon then
-		self.frame[unit].icon:SetPoint(self.db.targetBarIconPosition, self.frame[unit], self.db.targetBarIconPosition)
+	if self.db[unit].targetBarIcon then
+		self.frame[unit].icon:SetPoint(self.db[unit].targetBarIconPosition, self.frame[unit], self.db[unit].targetBarIconPosition)
 		self.frame[unit].icon:SetWidth(self.frame[unit]:GetHeight())
 		self.frame[unit].icon:SetHeight(self.frame[unit]:GetHeight())
 		self.frame[unit].icon:SetTexCoord(0, 1, 0, 1)
@@ -198,7 +196,7 @@ function TargetBar:Update(unit)
 	end
 
 	self.frame[unit].statusbar:ClearAllPoints()
-	if self.db.targetBarIcon then
+	if self.db[unit].targetBarIcon then
 		self.frame[unit].statusbar:SetPoint("TOPLEFT", self.frame[unit].icon, "TOPRIGHT")
 		self.frame[unit].statusbar:SetPoint("BOTTOMRIGHT")
 	else
@@ -206,16 +204,16 @@ function TargetBar:Update(unit)
 	end
 	self.frame[unit].statusbar:SetMinMaxValues(0, 100)
 	self.frame[unit].statusbar:SetValue(100)
-	self.frame[unit].statusbar:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db.targetBarTexture))
+	self.frame[unit].statusbar:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].targetBarTexture))
 	self.frame[unit].statusbar:GetStatusBarTexture():SetHorizTile(false)
 	self.frame[unit].statusbar:GetStatusBarTexture():SetVertTile(false)
 
 	-- update health bar background
 	self.frame[unit].background:ClearAllPoints()
 	self.frame[unit].background:SetAllPoints(self.frame[unit])
-	self.frame[unit].background:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db.targetBarTexture))
-	self.frame[unit].background:SetVertexColor(self.db.targetBarBackgroundColor.r, self.db.targetBarBackgroundColor.g,
-		self.db.targetBarBackgroundColor.b, self.db.targetBarBackgroundColor.a)
+	self.frame[unit].background:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].targetBarTexture))
+	self.frame[unit].background:SetVertexColor(self.db[unit].targetBarBackgroundColor.r, self.db[unit].targetBarBackgroundColor.g,
+		self.db[unit].targetBarBackgroundColor.b, self.db[unit].targetBarBackgroundColor.a)
 	self.frame[unit].background:SetHorizTile(false)
 	self.frame[unit].background:SetVertTile(false)
 
@@ -261,14 +259,14 @@ function TargetBar:Show(unit)
 	end
 
 	-- set color
-	if (not self.db.targetBarClassColor) then
-		local color = self.db.targetBarColor
+	if (not self.db[unit].targetBarClassColor) then
+		local color = self.db[unit].targetBarColor
 		self.frame[unit].statusbar:SetStatusBarColor(color.r, color.g, color.b, color.a)
 	else
 		local color = self:GetBarColor(class)
 		if (color == nil) then
 			-- fallback, when targeting a pet or totem
-			color = self.db.targetBarColor
+			color = self.db[unit].targetBarColor
 		end
 
 		self.frame[unit].statusbar:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
@@ -287,7 +285,7 @@ function TargetBar:Show(unit)
 end
 
 function TargetBar:Reset(unit)
-	if (not self.frame[unit]) then return end
+	if not self.frame[unit] then return end
 
 	-- reset bar
 	self.frame[unit].statusbar:SetMinMaxValues(0, 1)
@@ -307,7 +305,7 @@ function TargetBar:Test(unit)
 	self:UpdateHealth(unit, health, maxHealth)
 end
 
-function TargetBar:GetOptions()
+function TargetBar:GetOptions(unit)
 	return {
 		general = {
 			type = "group",
@@ -325,7 +323,7 @@ function TargetBar:GetOptions()
 							type = "toggle",
 							name = L["Class color"],
 							desc = L["Toggle health bar class color"],
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 5,
 						},
 						sep2 = {
@@ -339,9 +337,9 @@ function TargetBar:GetOptions()
 							name = L["Color"],
 							desc = L["Color of the health bar"],
 							hasAlpha = true,
-							get = function(info) return GladiusEx:GetColorOption(self.db, info) end,
-							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db, info, r, g, b, a) end,
-							disabled = function() return self.db.targetBarClassColor or not self:IsEnabled() end,
+							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
+							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
+							disabled = function() return self.db[unit].targetBarClassColor or not self:IsUnitEnabled(unit) end,
 							order = 10,
 						},
 						targetBarBackgroundColor = {
@@ -349,25 +347,25 @@ function TargetBar:GetOptions()
 							name = L["Background color"],
 							desc = L["Color of the health bar background"],
 							hasAlpha = true,
-							get = function(info) return GladiusEx:GetColorOption(self.db, info) end,
-							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db, info, r, g, b, a) end,
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
+							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 15,
 						},
 						sep3 = {
 							type = "description",
 							name = "",
 							width = "full",
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 17,
 						},
 						targetBarInverse = {
 							type = "toggle",
 							name = L["Inverse"],
 							desc = L["Invert the bar colors"],
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 20,
 						},
 						targetBarTexture = {
@@ -376,7 +374,7 @@ function TargetBar:GetOptions()
 							desc = L["Texture of the health bar"],
 							dialogControl = "LSM30_Statusbar",
 							values = AceGUIWidgetLSMlists.statusbar,
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 25,
 						},
 						sep4 = {
@@ -389,7 +387,7 @@ function TargetBar:GetOptions()
 							type = "toggle",
 							name = L["Class icon"],
 							desc = L["Toggle the target bar class icon"],
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 30,
 						},
 						targetBarIconPosition = {
@@ -397,7 +395,7 @@ function TargetBar:GetOptions()
 							name = L["Icon position"],
 							desc = L["Position of the target bar class icon"],
 							values = { ["LEFT"] = L["Left"], ["RIGHT"] = L["Right"] },
-							disabled = function() return not self.db.targetBarIcon or not self:IsEnabled() end,
+							disabled = function() return not self.db[unit].targetBarIcon or not self:IsUnitEnabled(unit) end,
 							order = 35,
 						},
 						sep6 = {
@@ -410,8 +408,8 @@ function TargetBar:GetOptions()
 							type = "toggle",
 							name = L["Crop borders"],
 							desc = L["Toggle if the icon borders should be cropped or not"],
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 40,
 						},
 					},
@@ -428,6 +426,7 @@ function TargetBar:GetOptions()
 							name = L["Bar width"],
 							desc = L["Width of the health bar"],
 							min = 10, max = 500, step = 1,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 15,
 						},
 						targetBarHeight = {
@@ -435,7 +434,7 @@ function TargetBar:GetOptions()
 							name = L["Bar height"],
 							desc = L["Height of the health bar"],
 							min = 10, max = 200, step = 1,
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 20,
 						},
 					},
@@ -445,15 +444,15 @@ function TargetBar:GetOptions()
 					name = L["Position"],
 					desc = L["Position settings"],
 					inline = true,
-					hidden = function() return not GladiusEx.db.advancedOptions end,
+					hidden = function() return not GladiusEx.db.base.advancedOptions end,
 					order = 3,
 					args = {
 						targetBarAttachTo = {
 							type = "select",
 							name = L["Attach to"],
 							desc = L["Attach to the given frame"],
-							values = function() return TargetBar:GetAttachPoints() end,
-							disabled = function() return not self:IsEnabled() end,
+							values = function() return self:GetOtherAttachPoints(unit) end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							width = "double",
 							order = 5,
 						},
@@ -468,7 +467,7 @@ function TargetBar:GetOptions()
 							name = L["Anchor"],
 							desc = L["Anchor of the frame"],
 							values = function() return GladiusEx:GetPositions() end,
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 10,
 						},
 						targetBarRelativePoint = {
@@ -476,7 +475,7 @@ function TargetBar:GetOptions()
 							name = L["Relative point"],
 							desc = L["Relative point of the frame"],
 							values = function() return GladiusEx:GetPositions() end,
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 15,
 						},
 						sep2 = {
@@ -490,14 +489,14 @@ function TargetBar:GetOptions()
 							name = L["Offset X"],
 							desc = L["X offset of the frame"],
 							min = -100, max = 100, step = 1,
-							disabled = function() return  not self:IsEnabled() end,
+							disabled = function() return  not self:IsUnitEnabled(unit) end,
 							order = 20,
 						},
 						targetBarOffsetY = {
 							type = "range",
 							name = L["Offset Y"],
 							desc = L["Y offset of the frame"],
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							min = -100, max = 100, step = 1,
 							order = 25,
 						},

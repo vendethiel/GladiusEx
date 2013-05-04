@@ -35,13 +35,6 @@ function HealthBar:OnEnable()
 
 	LSM = GladiusEx.LSM
 
-	-- set frame type
-	if (self.db.healthBarAttachTo == "Frame" or strfind(self.db.healthBarRelativePoint, "BOTTOM")) then
-		self.isBar = true
-	else
-		self.isBar = false
-	end
-
 	if (not self.frame) then
 		self.frame = {}
 	end
@@ -55,8 +48,20 @@ function HealthBar:OnDisable()
 	end
 end
 
-function HealthBar:GetAttachTo()
-	return self.db.healthBarAttachTo
+function HealthBar:IsBar(unit)
+	if self.db[unit].healthBarAttachTo == "Frame" or strfind(self.db[unit].healthBarRelativePoint, "BOTTOM") then
+		return true
+	else
+		return false
+	end
+end
+
+function HealthBar:GetBarHeight(unit)
+	return self.db[unit].healthBarHeight
+end
+
+function HealthBar:GetAttachTo(unit)
+	return self.db[unit].healthBarAttachTo
 end
 
 function HealthBar:GetModuleAttachPoints()
@@ -94,13 +99,13 @@ function HealthBar:UpdateColor(unit)
 	if not class then
 		class = GladiusEx.testing[unit].unitClass
 	end
-	
+
 	-- set color
 	local color
-	if self.db.healthBarClassColor then
+	if self.db[unit].healthBarClassColor then
 		color = self:GetBarColor(class)
 	else
-		color = self.db.healthBarColor
+		color = self.db[unit].healthBarColor
 	end
 	self.frame[unit]:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
 end
@@ -112,7 +117,7 @@ function HealthBar:UpdateHealth(unit, health, maxHealth)
 	self.frame[unit]:SetMinMaxValues(0, maxHealth)
 
 	-- inverse bar
-	if (self.db.healthBarInverse) then
+	if (self.db[unit].healthBarInverse) then
 		self.frame[unit]:SetValue(maxHealth - health)
 	else
 		self.frame[unit]:SetValue(health)
@@ -141,35 +146,30 @@ function HealthBar:Update(unit)
 	end
 
 	-- set bar type
-	local parent = GladiusEx:GetAttachFrame(unit, self.db.healthBarAttachTo)
-
-	if (self.db.healthBarAttachTo == "Frame" or strfind(self.db.healthBarRelativePoint, "BOTTOM")) then
-		self.isBar = true
-	else
-		self.isBar = false
-	end
+	local parent = GladiusEx:GetAttachFrame(unit, self.db[unit].healthBarAttachTo)
 
 	-- update health bar
 	self.frame[unit]:ClearAllPoints()
 
-	local width = self.db.healthBarAdjustWidth and GladiusEx.db.barWidth or self.db.healthBarWidth
+	local width = self.db[unit].healthBarAdjustWidth and GladiusEx.db[unit].barWidth or self.db[unit].healthBarWidth
 
 	-- add width of the widget if attached to an widget
-	if (self.db.healthBarAttachTo ~= "Frame" and not strfind(self.db.healthBarRelativePoint,"BOTTOM") and self.db.healthBarAdjustWidth) then
-		if (not GladiusEx:GetModule(self.db.healthBarAttachTo).frame[unit]) then
-			GladiusEx:GetModule(self.db.healthBarAttachTo):Update(unit)
+	-- todo: getmodule will fail
+	if (self.db[unit].healthBarAttachTo ~= "Frame" and not strfind(self.db[unit].healthBarRelativePoint,"BOTTOM") and self.db[unit].healthBarAdjustWidth) then
+		if (not GladiusEx:GetModule(self.db[unit].healthBarAttachTo).frame[unit]) then
+			GladiusEx:GetModule(self.db[unit].healthBarAttachTo):Update(unit)
 		end
 
-		width = width + GladiusEx:GetModule(self.db.healthBarAttachTo).frame[unit]:GetWidth()
+		width = width + GladiusEx:GetModule(self.db[unit].healthBarAttachTo).frame[unit]:GetWidth()
 	end
 
-	self.frame[unit]:SetHeight(self.db.healthBarHeight)
+	self.frame[unit]:SetHeight(self.db[unit].healthBarHeight)
 	self.frame[unit]:SetWidth(width)
 
-	self.frame[unit]:SetPoint(self.db.healthBarAnchor, parent, self.db.healthBarRelativePoint, self.db.healthBarOffsetX, self.db.healthBarOffsetY)
+	self.frame[unit]:SetPoint(self.db[unit].healthBarAnchor, parent, self.db[unit].healthBarRelativePoint, self.db[unit].healthBarOffsetX, self.db[unit].healthBarOffsetY)
 	self.frame[unit]:SetMinMaxValues(0, 100)
 	self.frame[unit]:SetValue(100)
-	self.frame[unit]:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db.healthBarTexture))
+	self.frame[unit]:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].healthBarTexture))
 
 	-- disable tileing
 	self.frame[unit]:GetStatusBarTexture():SetHorizTile(false)
@@ -182,10 +182,10 @@ function HealthBar:Update(unit)
 	self.frame[unit].background:SetWidth(self.frame[unit]:GetWidth())
 	self.frame[unit].background:SetHeight(self.frame[unit]:GetHeight())
 
-	self.frame[unit].background:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db.healthBarTexture))
+	self.frame[unit].background:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].healthBarTexture))
 
-	self.frame[unit].background:SetVertexColor(self.db.healthBarBackgroundColor.r, self.db.healthBarBackgroundColor.g,
-		self.db.healthBarBackgroundColor.b, self.db.healthBarBackgroundColor.a)
+	self.frame[unit].background:SetVertexColor(self.db[unit].healthBarBackgroundColor.r, self.db[unit].healthBarBackgroundColor.g,
+		self.db[unit].healthBarBackgroundColor.b, self.db[unit].healthBarBackgroundColor.a)
 
 	-- disable tileing
 	self.frame[unit].background:SetHorizTile(false)
@@ -206,10 +206,6 @@ function HealthBar:GetBarColor(class)
 	return RAID_CLASS_COLORS[class] or { r = 1, g = 1, b = 1, a = 1}
 end
 
-function HealthBar:GetBarHeight()
-	return self.db.healthBarHeight
-end
-
 function HealthBar:Show(unit)
 	-- show frame
 	self.frame[unit]:SetAlpha(1)
@@ -222,7 +218,7 @@ function HealthBar:Show(unit)
 end
 
 function HealthBar:Reset(unit)
-	if (not self.frame[unit]) then return end
+	if not self.frame[unit] then return end
 
 	-- reset bar
 	self.frame[unit]:SetMinMaxValues(0, 1)
@@ -240,7 +236,7 @@ function HealthBar:Test(unit)
 	self:UpdateColorEvent("Test", unit)
 end
 
-function HealthBar:GetOptions()
+function HealthBar:GetOptions(unit)
 	return {
 		general = {
 			type = "group",
@@ -258,14 +254,14 @@ function HealthBar:GetOptions()
 							type = "toggle",
 							name = L["Class color"],
 							desc = L["Toggle health bar class color"],
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 5,
 						},
 						sep = {
 							type = "description",
 							name = "",
 							width = "full",
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 7,
 						},
 						healthBarColor = {
@@ -273,9 +269,9 @@ function HealthBar:GetOptions()
 							name = L["Color"],
 							desc = L["Color of the health bar"],
 							hasAlpha = true,
-							get = function(info) return GladiusEx:GetColorOption(self.db, info) end,
-							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db, info, r, g, b, a) end,
-							disabled = function() return self.db.healthBarClassColor or not self:IsEnabled() end,
+							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
+							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
+							disabled = function() return self.db[unit].healthBarClassColor or not self:IsUnitEnabled(unit) end,
 							order = 10,
 						},
 						healthBarBackgroundColor = {
@@ -283,10 +279,10 @@ function HealthBar:GetOptions()
 							name = L["Background color"],
 							desc = L["Color of the health bar background"],
 							hasAlpha = true,
-							get = function(info) return GladiusEx:GetColorOption(self.db, info) end,
-							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db, info, r, g, b, a) end,
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
+							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 15,
 						},
 						sep2 = {
@@ -299,8 +295,8 @@ function HealthBar:GetOptions()
 							type = "toggle",
 							name = L["Inverse"],
 							desc = L["Invert the bar colors"],
-							disabled = function() return not self:IsEnabled() end,
-							hidden = function() return not GladiusEx.db.advancedOptions end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 20,
 						},
 						healthBarTexture = {
@@ -309,7 +305,7 @@ function HealthBar:GetOptions()
 							desc = L["Texture of the health bar"],
 							dialogControl = "LSM30_Statusbar",
 							values = AceGUIWidgetLSMlists.statusbar,
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 25,
 						},
 					},
@@ -325,7 +321,7 @@ function HealthBar:GetOptions()
 							type = "toggle",
 							name = L["Adjust width"],
 							desc = L["Adjust bar width to the frame width"],
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 5,
 						},
 						sep = {
@@ -339,7 +335,7 @@ function HealthBar:GetOptions()
 							name = L["Width"],
 							desc = L["Width of the health bar"],
 							min = 10, max = 500, step = 1,
-							disabled = function() return self.db.healthBarAdjustWidth or not self:IsEnabled() end,
+							disabled = function() return self.db[unit].healthBarAdjustWidth or not self:IsUnitEnabled(unit) end,
 							order = 15,
 						},
 						healthBarHeight = {
@@ -347,7 +343,7 @@ function HealthBar:GetOptions()
 							name = L["Height"],
 							desc = L["Height of the health bar"],
 							min = 10, max = 200, step = 1,
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 20,
 						},
 					},
@@ -357,27 +353,21 @@ function HealthBar:GetOptions()
 					name = L["Position"],
 					desc = L["Position settings"],
 					inline = true,
-					hidden = function() return not GladiusEx.db.advancedOptions end,
+					hidden = function() return not GladiusEx.db.base.advancedOptions end,
 					order = 3,
 					args = {
 						healthBarAttachTo = {
 							type = "select",
 							name = L["Attach to"],
 							desc = L["Attach health bar to the given frame"],
-							values = function() return HealthBar:GetAttachPoints() end,
+							values = function() return self:GetOtherAttachPoints(unit) end,
 							set = function(info, value)
 								local key = info.arg or info[#info]
 
-								if (strfind(self.db.healthBarRelativePoint, "BOTTOM")) then
-									self.isBar = true
-								else
-									self.isBar = false
-								end
-
-								self.db[key] = value
+								self.db[unit][key] = value
 								GladiusEx:UpdateFrames()
 							end,
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							width = "double",
 							order = 5,
 						},
@@ -392,7 +382,7 @@ function HealthBar:GetOptions()
 							name = L["Anchor"],
 							desc = L["Anchor of the health bar"],
 							values = function() return GladiusEx:GetPositions() end,
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 10,
 						},
 						healthBarRelativePoint = {
@@ -400,7 +390,7 @@ function HealthBar:GetOptions()
 							name = L["Relative point"],
 							desc = L["Relative point of the health bar"],
 							values = function() return GladiusEx:GetPositions() end,
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 15,
 						},
 						sep2 = {
@@ -414,14 +404,14 @@ function HealthBar:GetOptions()
 							name = L["Offset X"],
 							desc = L["X offset of the health bar"],
 							min = -100, max = 100, step = 1,
-							disabled = function() return  not self:IsEnabled() end,
+							disabled = function() return  not self:IsUnitEnabled(unit) end,
 							order = 20,
 						},
 						healthBarOffsetY = {
 							type = "range",
 							name = L["Offset Y"],
 							desc = L["Y offset of the health bar"],
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							min = -100, max = 100, step = 1,
 							order = 25,
 						},

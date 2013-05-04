@@ -24,9 +24,9 @@ function Clicks:GetSecureFrames(unit)
 	local frames = {}
 
 	-- Find secure frames
-	for point, _ in pairs(self:GetAttachPoints()) do
+	for point, _ in pairs(self:GetOtherAttachPoints(unit)) do
 		local frame = GladiusEx:GetAttachFrame(unit, point)
-		if (frame and frame.secure) then
+		if frame and frame.secure then
 			tinsert(frames, frame.secure)
 		end
 	end
@@ -47,11 +47,11 @@ end
 -- Applies attributes to a specific frame
 function Clicks:ApplyAttributes(unit, frame)
 	-- todo: remove previous attributes ..
-	for _, attr in pairs(self.db.clickAttributes) do
+	for _, attr in pairs(self.db[unit].clickAttributes) do
 		frame:SetAttribute(attr.modifier .. "type" .. attr.button, attr.action)
-		if (attr.action == "macro" and attr.macro ~= "") then
+		if attr.action == "macro" and attr.macro ~= "" then
 			frame:SetAttribute(attr.modifier .. "macrotext" .. attr.button, string.gsub(attr.macro, "*unit", unit))
-		elseif (attr.action == "spell" and attr.macro ~= "") then
+		elseif attr.action == "spell" and attr.macro ~= "" then
 			frame:SetAttribute(attr.modifier .. "spell" .. attr.button, attr.macro)
 		end
 	end
@@ -60,25 +60,15 @@ end
 function Clicks:Test(unit)
 end
 
-local function getOption(info)
-	local key = info[#info - 2]
-	return Clicks.db.clickAttributes[key][info[#info]]
-end
+local CLICK_BUTTONS = { ["1"] = L["Left"], ["2"] = L["Right"], ["3"] = L["Middle"], ["4"] = L["Button 4"], ["5"] = L["Button 5"] }
+local CLICK_MODIFIERS = { [""] = L["None"], ["ctrl-"] = L["ctrl-"], ["shift-"] = L["shift-"], ["alt-"] = L["alt-"] }
 
-local function setOption(info, value)
-	local key = info[#info - 2]
-	Clicks.db.clickAttributes[key][info[#info]] = value
-	GladiusEx:UpdateFrames()
-end
-
-local CLICK_BUTTONS = {["1"] = L["Left"], ["2"] = L["Right"], ["3"] = L["Middle"], ["4"] = L["Button 4"], ["5"] = L["Button 5"]}
-local CLICK_MODIFIERS = {[""] = L["None"], ["ctrl-"] = L["ctrl-"], ["shift-"] = L["shift-"], ["alt-"] = L["alt-"]}
-
-function Clicks:GetOptions()
+function Clicks:GetOptions(unit)
 	local addAttrButton = "1"
 	local addAttrMod = ""
 
-	local options = {
+	local options
+	options = {
 		attributeList = {
 			type = "group",
 			name = L["Click actions"],
@@ -97,7 +87,7 @@ function Clicks:GetOptions()
 							values = CLICK_BUTTONS,
 							get = function(info) return addAttrButton end,
 							set = function(info, value) addAttrButton = value end,
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 10,
 						},
 						modifier = {
@@ -107,7 +97,7 @@ function Clicks:GetOptions()
 							values = CLICK_MODIFIERS,
 							get = function(info) return addAttrMod end,
 							set = function(info, value) addAttrMod = value end,
-							disabled = function() return not self:IsEnabled() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 20,
 						},
 						add = {
@@ -115,19 +105,20 @@ function Clicks:GetOptions()
 							name = L["Add"],
 							func = function()
 								local attr = addAttrMod ~= "" and CLICK_MODIFIERS[addAttrMod] .. CLICK_BUTTONS[addAttrButton] or CLICK_BUTTONS[addAttrButton]
-								if (not self.db.clickAttributes[attr]) then
+								if not self.db[unit].clickAttributes[attr] then
 									-- add to db
-									self.db.clickAttributes[attr] = {
+									self.db[unit].clickAttributes[attr] = {
 									button = addAttrButton,
 										modifier = addAttrMod,
 										action = "target",
 										macro = ""
 									}
-									GladiusEx.options.args[self:GetName()].args.attributeList.args[attr] = self:GetAttributeOptionTable(attr, 100)
+									options.attributeList.args[attr] = self:GetAttributeOptionTable(unit, attr, 100)
 									-- update
 									GladiusEx:UpdateFrames()
 								end
 							end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 30,
 						},
 					},
@@ -138,28 +129,38 @@ function Clicks:GetOptions()
 
 	-- attributes
 	local order = 1
-	for attr, _ in pairs(self.db.clickAttributes) do
-		options.attributeList.args[attr] = self:GetAttributeOptionTable(attr, order)
+	for attr, _ in pairs(self.db[unit].clickAttributes) do
+		options.attributeList.args[attr] = self:GetAttributeOptionTable(unit, attr, order)
 		order = order + 1
 	end
 
 	return options
 end
 
-function Clicks:GetAttributeOptionTable(attribute, order)
+function Clicks:GetAttributeOptionTable(unit, attribute, order)
+	local function getOption(info)
+		local key = info[#info - 2]
+		return self.db[unit].clickAttributes[key][info[#info]]
+	end
+
+	local function setOption(info, value)
+		local key = info[#info - 2]
+		self.db[unit].clickAttributes[key][info[#info]] = value
+		GladiusEx:UpdateFrames()
+	end
+
 	return {
 		type = "group",
 		name = attribute,
 		childGroups = "tree",
 		order = order,
-		disabled = function() return not self:IsEnabled() end,
 		args = {
 			delete = {
 				type = "execute",
 				name = L["Delete click action"],
 				func = function()
 					-- remove from db
-					self.db.clickAttributes[attribute] = nil
+					self.db[unit].clickAttributes[attribute] = nil
 
 					-- remove from options
 					GladiusEx.options.args[self:GetName()].args.attributeList.args[attribute] = nil
@@ -167,6 +168,7 @@ function Clicks:GetAttributeOptionTable(attribute, order)
 					-- update
 					GladiusEx:UpdateFrames()
 				end,
+				disabled = function() return not self:IsUnitEnabled(unit) end,
 				order = 1,
 			},
 			action = {
@@ -182,6 +184,7 @@ function Clicks:GetAttributeOptionTable(attribute, order)
 						name = L["Action"],
 						desc = L["Select what this click action does"],
 						values = {["macro"] = MACRO, ["target"] = TARGET, ["focus"] = FOCUS, ["spell"] = L["Cast spell"]},
+						disabled = function() return not self:IsUnitEnabled(unit) end,
 						order = 10,
 					},
 					sep = {
@@ -196,6 +199,7 @@ function Clicks:GetAttributeOptionTable(attribute, order)
 						name = L["Spell name / Macro text"],
 						desc = L["Select what this click action does"],
 						width = "double",
+						disabled = function() return not self:IsUnitEnabled(unit) end,
 						order = 20,
 					},
 				},

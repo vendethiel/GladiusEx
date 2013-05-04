@@ -90,7 +90,18 @@ L["PowerBar"] = "Power Bar"
 L["TargetBar"] = "Target Bar"
 
 -- General
+L["Copy all settings from arena to party"] = true
+L["Copy all settings from party to arena"] = true
+L["Copy from arena"] = true
+L["Copy from party"] = true
+L["Copy settings"] = true
+L["Reset all arena settings to their default values"] = true
+L["Reset all party settings to their default values"] = true
+L["Reset arena settings"] = true
+L["Reset party settings"] = true
+L["Reset settings"] = true
 L["Up and down"] = true
+L["Arena"] = true
 
 L["%s settings"] = true
 L["** If this is not your first run please lock or move the frame to prevent this from happening **"] = true
