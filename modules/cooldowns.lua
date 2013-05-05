@@ -246,7 +246,9 @@ end
 
 function Cooldowns:UNIT_NAME_UPDATE(event, unit)
 	-- hopefully at this point the opponent's faction is known
-	self:UpdateIcons(unit)
+	if GladiusEx:IsHandledUnit(unit) then
+		self:UpdateIcons(unit)
+	end
 end
 
 function Cooldowns:LCT_CooldownsReset(event, unit)
