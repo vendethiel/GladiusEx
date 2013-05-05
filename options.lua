@@ -155,6 +155,20 @@ function GladiusEx:SetupModuleOptions(unit, key, module, order)
 		order = 0.5,
 	}
 
+	-- add copy from other group option
+	options.args.copy = {
+		type = "execute",
+		name = self:IsArenaUnit(unit) and L["Copy from party"] or L["Copy from arena"],
+		func = function()
+			if self:IsArenaUnit(unit) then
+				self:CopyGroupModuleSettings(module, "arena", "party")
+			else
+				self:CopyGroupModuleSettings(module, "party", "arena")
+			end
+		end,
+		order = 0.75,
+	}
+
 	return options
 end
 
@@ -595,6 +609,14 @@ function GladiusEx:CopyGroupSettings(dst_group, src_group)
 	for name, mod in self:IterateModules() do
 		copy_dbi(mod["dbi_" .. dst_group], mod["dbi_" .. src_group])
 	end
+
+	self:SetupOptions()
+	self:EnableModules()
+	self:UpdateFrames()
+end
+
+function GladiusEx:CopyGroupModuleSettings(module, dst_group, src_group)
+	copy_dbi(module["dbi_" .. dst_group], module["dbi_" .. src_group])
 
 	self:SetupOptions()
 	self:EnableModules()
