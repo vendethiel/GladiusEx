@@ -983,7 +983,7 @@ function GladiusEx:UpdateUnitPosition(unit)
 			self.buttons[unit]:SetPoint("TOP", anchor, "BOTTOM", -offset + margin_x, -abs(top))
 		elseif self.db[unit].growDirection == "VCENTER" then
 			local offset = (real_height * (num_frames - 1) + self.db[unit].margin * (num_frames - 1)) / 2
-			self.buttons[unit]:SetPoint("LEFT", anchor, "LEFT", abs(left) + abs(right), offset - margin_y)
+			self.buttons[unit]:SetPoint("LEFT", anchor, "LEFT", abs(left), offset - margin_y)
 		end
 	else
 		local eff = self.buttons[unit]:GetEffectiveScale()
@@ -1137,7 +1137,4 @@ function GladiusEx:UpdateAnchor(anchor_type)
 	else
 		background:Hide()
 	end
-end
-
-function GladiusEx:CenterUnitPosition(unit, numFrames)
 end

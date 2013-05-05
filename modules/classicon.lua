@@ -434,7 +434,7 @@ function ClassIcon:Update(unit)
 		if strfind(self.db[unit].classIconRelativePoint, "LEFT") then
 			left = -self.frame[unit]:GetWidth() + self.db[unit].classIconOffsetX
 		else
-			right = -self.frame[unit]:GetWidth() + -self.db[unit].classIconOffsetX
+			right = -self.frame[unit]:GetWidth() - self.db[unit].classIconOffsetX
 		end
 
 		-- top / bottom
