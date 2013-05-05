@@ -405,7 +405,7 @@ end
 
 function ClassIcon:Update(unit)
 	-- create frame
-	if (not self.frame[unit]) then
+	if not self.frame[unit] then
 		self:CreateFrame(unit)
 	end
 
@@ -438,9 +438,9 @@ function ClassIcon:Update(unit)
 		end
 
 		-- top / bottom
-		if self.frame[unit]:GetHeight() > GladiusEx.buttons[unit]:GetHeight() then
-			bottom = -(self.frame[unit]:GetHeight() - GladiusEx.buttons[unit]:GetHeight()) + self.db[unit].classIconOffsetY
-		end
+		-- if self.frame[unit]:GetHeight() > GladiusEx.buttons[unit]:GetHeight() then
+		-- 	bottom = -(self.frame[unit]:GetHeight() - GladiusEx.buttons[unit]:GetHeight()) + self.db[unit].classIconOffsetY
+		-- end
 
 		GladiusEx.buttons[unit]:SetHitRectInsets(left, right, top, bottom)
 		GladiusEx.buttons[unit].secure:SetHitRectInsets(left, right, top, bottom)

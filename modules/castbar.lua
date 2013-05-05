@@ -81,7 +81,6 @@ end
 function CastBar:GetModuleAttachPoints(unit)
 	return {
 		["CastBar"] = L["CastBar"],
-		["CastBarIcon"] = L["CastBar Icon"],
 	}
 end
 
@@ -90,11 +89,7 @@ function CastBar:GetAttachFrame(unit, point)
 		self:CreateBar(unit)
 	end
 
-	if point == "CastBar" then
-		return self.frame[unit]
-	else
-		return self.frame[unit].icon
-	end
+	return self.frame[unit]
 end
 
 local function CastUpdate(self)
@@ -103,9 +98,9 @@ local function CastUpdate(self)
 		local value = self.endTime - currentTime
 
 		if (self.isChanneling and not CastBar.db[self.unit].castBarInverse) or (self.isCasting and CastBar.db[self.unit].castBarInverse) then
-			self:SetValue(value)
+			self.bar:SetValue(value)
 		else
-			self:SetValue(self.endTime - self.startTime - value)
+			self.bar:SetValue(self.endTime - self.startTime - value)
 		end
 
 		if self.delay > 0 then
@@ -138,7 +133,7 @@ function CastBar:UNIT_SPELLCAST_START(event, unit)
 		f.startTime = startTime / 1000
 		f.endTime = endTime / 1000
 		f.delay = 0
-		f:SetMinMaxValues(0, (endTime - startTime) / 1000)
+		f.bar:SetMinMaxValues(0, (endTime - startTime) / 1000)
 		f.icon:SetTexture(icon)
 		f:SetScript("OnUpdate", CastUpdate)
 		CastUpdate(f)
@@ -159,7 +154,7 @@ function CastBar:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 		f.startTime = startTime / 1000
 		f.endTime = endTime / 1000
 		f.delay = 0
-		f:SetMinMaxValues(0, (endTime - startTime) / 1000)
+		f.bar:SetMinMaxValues(0, (endTime - startTime) / 1000)
 		f.icon:SetTexture(icon)
 		f:SetScript("OnUpdate", CastUpdate)
 		CastUpdate(f)
@@ -197,16 +192,16 @@ function CastBar:UNIT_SPELLCAST_DELAYED(event, unit)
 
 	self.frame[unit].startTime = startTime / 1000
 	self.frame[unit].endTime = endTime / 1000
-	self.frame[unit]:SetMinMaxValues(0, (endTime - startTime) / 1000)
+	self.frame[unit].bar:SetMinMaxValues(0, (endTime - startTime) / 1000)
 end
 
-function CastBar:CastEnd(bar)
-	bar.isCasting = false
-	bar.isChanneling = false
-	bar.timeText:SetText("")
-	bar.castText:SetText("")
-	bar.icon:SetTexture("")
-	bar:SetValue(0)
+function CastBar:CastEnd(frame)
+	frame.isCasting = false
+	frame.isChanneling = false
+	frame.timeText:SetText("")
+	frame.castText:SetText("")
+	frame.icon:SetTexture("")
+	frame.bar:SetValue(0)
 end
 
 function CastBar:CreateBar(unit)
@@ -214,11 +209,12 @@ function CastBar:CreateBar(unit)
 	if not button then return end
 
 	-- create bar + text
-	self.frame[unit] = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. unit, button)
-	self.frame[unit].background = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "Background", "BACKGROUND")
+	self.frame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. unit .. "Parent", button)
+	self.frame[unit].bar = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. unit .. "Bar", self.frame[unit])
+	self.frame[unit].background = self.frame[unit].bar:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "Background", "BACKGROUND")
 	self.frame[unit].highlight = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "Highlight" .. unit, "OVERLAY")
-	self.frame[unit].castText = self.frame[unit]:CreateFontString("GladiusEx" .. self:GetName() .. "CastText" .. unit, "OVERLAY")
-	self.frame[unit].timeText = self.frame[unit]:CreateFontString("GladiusEx" .. self:GetName() .. "TimeText" .. unit, "OVERLAY")
+	self.frame[unit].castText = self.frame[unit].bar:CreateFontString("GladiusEx" .. self:GetName() .. "CastText" .. unit, "OVERLAY")
+	self.frame[unit].timeText = self.frame[unit].bar:CreateFontString("GladiusEx" .. self:GetName() .. "TimeText" .. unit, "OVERLAY")
 	self.frame[unit].icon = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "IconFrame" .. unit, "ARTWORK")
 	self.frame[unit].icon.bg = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "IconFrameBackground" .. unit, "BACKGROUND")
 	self.frame[unit].unit = unit
@@ -229,70 +225,102 @@ function CastBar:GetBarHeight(unit)
 end
 
 function CastBar:Update(unit)
-	-- check parent module
-	if not GladiusEx:GetAttachFrame(unit, self.db[unit].castBarAttachTo) then
-		if (self.frame[unit]) then
-			self.frame[unit]:Hide()
-		end
-		return
-	end
-
 	-- create cast bar
-	if (not self.frame[unit]) then
+	if not self.frame[unit] then
 		self:CreateBar(unit)
 	end
 
-	-- set bar type
-	local parent = GladiusEx:GetAttachFrame(unit, self.db[unit].castBarAttachTo)
-
-	-- update bar
-	self.frame[unit]:ClearAllPoints()
-
+	-- update frame
 	local width = self.db[unit].castBarAdjustWidth and GladiusEx.db[unit].barWidth or self.db[unit].castBarWidth
-	if self.db[unit].castIcon then
-		width = width - self.db[unit].castBarHeight
-	end
+	local height = self.db[unit].castBarHeight
 
-	-- add width of the widget if attached to an widget
+	-- add width of the widget if attached to one
 	-- todo: GetModule will fail
 	local mod = self.db[unit].castBarAttachTo
 	if (mod ~= "Frame" and self.db[unit].castBarAdjustWidth and GladiusEx:IsModuleEnabled(unit, mod) and not GladiusEx:GetModule(mod):IsBar()) then
 		if not GladiusEx:GetModule(mod).frame or not GladiusEx:GetModule(mod).frame[unit] then
 			GladiusEx:GetModule(mod):Update(unit)
 		end
-
 		width = width + GladiusEx:GetModule(self.db[unit].castBarAttachTo).frame[unit]:GetWidth()
-
-		-- hack: needed for whatever reason, must be a bug elsewhere
-		width = width + 1
 	end
 
 	self.frame[unit]:SetHeight(self.db[unit].castBarHeight)
-	self.frame[unit]:SetWidth(width)
+	self.frame[unit]:SetWidth(width + 1)
 
-	local offsetX
-	if (not strfind(self.db[unit].castBarAnchor, "RIGHT") and strfind(self.db[unit].castBarRelativePoint, "RIGHT")) then
-		offsetX = self.db[unit].castIcon and self.db[unit].castIconPosition == "LEFT" and self.frame[unit]:GetHeight() or 0
-	elseif (not strfind(self.db[unit].castBarAnchor, "LEFT") and strfind(self.db[unit].castBarRelativePoint, "LEFT")) then
-		offsetX = self.db[unit].castIcon and self.db[unit].castIconPosition == "RIGHT" and -self.frame[unit]:GetHeight() or 0
-	elseif (strfind(self.db[unit].castBarAnchor, "LEFT") and strfind(self.db[unit].castBarRelativePoint, "LEFT")) then
-		offsetX = self.db[unit].castIcon and self.db[unit].castIconPosition == "LEFT" and self.frame[unit]:GetHeight() or 0
-	elseif (strfind(self.db[unit].castBarAnchor, "RIGHT") and strfind(self.db[unit].castBarRelativePoint, "RIGHT")) then
-		offsetX = self.db[unit].castIcon and self.db[unit].castIconPosition == "RIGHT" and -self.frame[unit]:GetHeight() or 0
+	local parent = GladiusEx:GetAttachFrame(unit, self.db[unit].castBarAttachTo)
+	self.frame[unit]:ClearAllPoints()
+	self.frame[unit]:SetPoint(self.db[unit].castBarAnchor, parent, self.db[unit].castBarRelativePoint, self.db[unit].castBarOffsetX, self.db[unit].castBarOffsetY)
+
+	-- update icon
+	self.frame[unit].icon:ClearAllPoints()
+	self.frame[unit].icon:SetPoint(self.db[unit].castIconPosition, self.frame[unit], self.db[unit].castIconPosition, 0, 0)
+	self.frame[unit].icon:SetWidth(height)
+	self.frame[unit].icon:SetHeight(height)
+	self.frame[unit].icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+
+	self.frame[unit].icon.bg:ClearAllPoints()
+	self.frame[unit].icon.bg:SetAllPoints(self.frame[unit].icon)
+	self.frame[unit].icon.bg:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].castBarTexture))
+	self.frame[unit].icon.bg:SetVertexColor(self.db[unit].castBarBackgroundColor.r, self.db[unit].castBarBackgroundColor.g,
+		self.db[unit].castBarBackgroundColor.b, self.db[unit].castBarBackgroundColor.a)
+
+	if self.db[unit].castIcon then
+		self.frame[unit].icon:Show()
+		self.frame[unit].icon.bg:Show()
+	else
+		self.frame[unit].icon:Hide()
+		self.frame[unit].icon.bg:Hide()
 	end
 
-	self.frame[unit]:SetPoint(self.db[unit].castBarAnchor, parent, self.db[unit].castBarRelativePoint, self.db[unit].castBarOffsetX + (offsetX or 0), self.db[unit].castBarOffsetY)
-	self.frame[unit]:SetMinMaxValues(0, 100)
-	self.frame[unit]:SetValue(0)
-	self.frame[unit]:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].castBarTexture))
+	-- update bar
+	self.frame[unit].bar:ClearAllPoints()
+	if self.db[unit].castIcon then
+		-- attach to icon
+		if self.db[unit].castIconPosition == "LEFT" then
+			self.frame[unit].bar:SetPoint("LEFT", self.frame[unit].icon, "RIGHT")
+			self.frame[unit].bar:SetPoint("RIGHT")
+		else
+			self.frame[unit].bar:SetPoint("LEFT")
+			self.frame[unit].bar:SetPoint("RIGHT", self.frame[unit].icon, "LEFT")
+		end
+	else
+		-- attach to frame
+		self.frame[unit].bar:SetAllPoints()
+	end
+	self.frame[unit].bar:SetHeight(height)
+	self.frame[unit].bar:SetMinMaxValues(0, 100)
+	self.frame[unit].bar:SetValue(0)
+	self.frame[unit].bar:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].castBarTexture))
 
 	-- disable tileing
-	self.frame[unit]:GetStatusBarTexture():SetHorizTile(false)
-	self.frame[unit]:GetStatusBarTexture():SetVertTile(false)
+	self.frame[unit].bar:GetStatusBarTexture():SetHorizTile(false)
+	self.frame[unit].bar:GetStatusBarTexture():SetVertTile(false)
 
 	-- set color
 	local color = self.db[unit].castBarColor
-	self.frame[unit]:SetStatusBarColor(color.r, color.g, color.b, color.a)
+	self.frame[unit].bar:SetStatusBarColor(color.r, color.g, color.b, color.a)
+
+	-- update cast bar background
+	self.frame[unit].background:ClearAllPoints()
+	self.frame[unit].background:SetAllPoints(self.frame[unit].bar)
+
+	-- Maybe it looks better if the background covers the whole castbar
+	--[[
+	if (self.db.castIcon) then
+		self.frame[unit].background:SetWidth(self.frame[unit]:GetWidth() + self.frame[unit].icon:GetWidth())
+	else
+		self.frame[unit].background:SetWidth(self.frame[unit]:GetWidth())
+	end
+	--]]
+
+	self.frame[unit].background:SetHeight(height)
+	self.frame[unit].background:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].castBarTexture))
+	self.frame[unit].background:SetVertexColor(self.db[unit].castBarBackgroundColor.r, self.db[unit].castBarBackgroundColor.g,
+		self.db[unit].castBarBackgroundColor.b, self.db[unit].castBarBackgroundColor.a)
+
+	-- disable tileing
+	self.frame[unit].background:SetHorizTile(false)
+	self.frame[unit].background:SetVertTile(false)
 
 	-- update cast text
 	if self.db[unit].castText then
@@ -328,52 +356,6 @@ function CastBar:Update(unit)
 	self.frame[unit].timeText:SetJustifyH(self.db[unit].castTimeTextAlign)
 	self.frame[unit].timeText:SetPoint(self.db[unit].castTimeTextAlign, self.db[unit].castTimeTextOffsetX, self.db[unit].castTimeTextOffsetY)
 
-	-- update icon
-	self.frame[unit].icon:ClearAllPoints()
-	self.frame[unit].icon:SetPoint(self.db[unit].castIconPosition == "LEFT" and "RIGHT" or "LEFT", self.frame[unit], self.db[unit].castIconPosition)
-
-	self.frame[unit].icon:SetWidth(self.frame[unit]:GetHeight())
-	self.frame[unit].icon:SetHeight(self.frame[unit]:GetHeight())
-
-	self.frame[unit].icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
-
-	self.frame[unit].icon.bg:ClearAllPoints()
-	self.frame[unit].icon.bg:SetAllPoints(self.frame[unit].icon)
-	self.frame[unit].icon.bg:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].castBarTexture))
-	self.frame[unit].icon.bg:SetVertexColor(self.db[unit].castBarBackgroundColor.r, self.db[unit].castBarBackgroundColor.g,
-		self.db[unit].castBarBackgroundColor.b, self.db[unit].castBarBackgroundColor.a)
-
-
-	if not self.db[unit].castIcon then
-		self.frame[unit].icon:SetAlpha(0)
-	else
-		self.frame[unit].icon:SetAlpha(1)
-	end
-
-	-- update cast bar background
-	self.frame[unit].background:ClearAllPoints()
-	self.frame[unit].background:SetAllPoints(self.frame[unit])
-
-	-- Maybe it looks better if the background covers the whole castbar
-	--[[
-	if (self.db.castIcon) then
-		self.frame[unit].background:SetWidth(self.frame[unit]:GetWidth() + self.frame[unit].icon:GetWidth())
-	else
-		self.frame[unit].background:SetWidth(self.frame[unit]:GetWidth())
-	end
-	--]]
-
-	self.frame[unit].background:SetHeight(self.frame[unit]:GetHeight())
-
-	self.frame[unit].background:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].castBarTexture))
-
-	self.frame[unit].background:SetVertexColor(self.db[unit].castBarBackgroundColor.r, self.db[unit].castBarBackgroundColor.g,
-		self.db[unit].castBarBackgroundColor.b, self.db[unit].castBarBackgroundColor.a)
-
-	-- disable tileing
-	self.frame[unit].background:SetHorizTile(false)
-	self.frame[unit].background:SetVertTile(false)
-
 	-- update highlight texture
 	self.frame[unit].highlight:SetAllPoints(self.frame[unit])
 	self.frame[unit].highlight:SetTexture([[Interface\QuestFrame\UI-QuestTitleHighlight]])
@@ -394,15 +376,15 @@ function CastBar:Reset(unit)
 	if not self.frame[unit] then return end
 
 	-- reset bar
-	self.frame[unit]:SetMinMaxValues(0, 1)
-	self.frame[unit]:SetValue(0)
+	self.frame[unit].bar:SetMinMaxValues(0, 1)
+	self.frame[unit].bar:SetValue(0)
 
 	-- reset text
-	if (self.frame[unit].castText:GetFont()) then
+	if self.frame[unit].castText:GetFont() then
 		self.frame[unit].castText:SetText("")
 	end
 
-	if (self.frame[unit].timeText:GetFont()) then
+	if self.frame[unit].timeText:GetFont() then
 		self.frame[unit].timeText:SetText("")
 	end
 
@@ -411,8 +393,8 @@ function CastBar:Reset(unit)
 end
 
 function CastBar:Test(unit)
-	self.frame[unit]:SetMinMaxValues(0, 100)
-	self.frame[unit]:SetValue(70)
+	self.frame[unit].bar:SetMinMaxValues(0, 100)
+	self.frame[unit].bar:SetValue(70)
 
 	self.frame[unit].timeText:SetFormattedText("+1.5 %.1f", 1.379)
 
