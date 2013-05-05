@@ -562,7 +562,7 @@ function GladiusEx:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
 end
 
 function GladiusEx:CheckOpponentSpecialization(unit)
-	local id = strmatch("^arena(%d+)$")
+	local id = strmatch(unit, "^arena(%d+)$")
 	if id then
 		local specID = GetArenaOpponentSpec(tonumber(id))
 		if specID and specID > 0 then
