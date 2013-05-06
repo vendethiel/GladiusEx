@@ -77,7 +77,11 @@ local function log(...)
 end
 
 function GladiusEx:IsDebugging()
-	return GladiusEx.db.base.debug
+	return self.db.base.debug
+end
+
+function GladiusEx:SetDebugging(enabled)
+	self.db.base.debug = enabled
 end
 
 function GladiusEx:Log(...)
@@ -588,12 +592,11 @@ function GladiusEx:ARENA_OPPONENT_UPDATE(event, unit, type)
 end
 
 function GladiusEx:GROUP_ROSTER_UPDATE()
-	--if self:IsPartyShown() then
-	--	self:UpdatePartyFrames()
-	--end
-	log("GROUP_ROSTER_UPDATE")
-	self:UpdateAllGUIDs()
-	self:UpdateFrames()
+	-- update arena as well since the group size is used as a clue of the arena size
+	if self:IsArenaShown() or self:IsPartyShown() then
+		self:UpdateAllGUIDs()
+		self:UpdateFrames()
+	end
 end
 
 function GladiusEx:QueueUpdate()

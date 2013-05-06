@@ -111,7 +111,7 @@ function HealthBar:UpdateColor(unit)
 end
 
 function HealthBar:UpdateHealth(unit, health, maxHealth)
-	if (not self.frame[unit]) then return end
+	if not self.frame[unit] then return end
 
 	-- update min max values
 	self.frame[unit]:SetMinMaxValues(0, maxHealth)

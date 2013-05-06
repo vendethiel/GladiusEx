@@ -89,7 +89,7 @@ function PowerBar:UpdateColorEvent(event, unit)
 end
 
 function PowerBar:UpdateColor(unit)
-	if not GladiusEx:IsHandledUnit(unit) then return end
+	if not self.frame[unit] then return end
 
 	-- get unit powerType
 	local powerType
@@ -118,7 +118,7 @@ function PowerBar:UpdatePowerEvent(event, unit)
 end
 
 function PowerBar:UpdatePower(unit, power, maxPower)
-	if (not self.frame[unit]) then return end
+	if not self.frame[unit] then return end
 
 	-- update min max values
 	self.frame[unit]:SetMinMaxValues(0, maxPower)
