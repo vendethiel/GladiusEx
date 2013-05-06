@@ -6,7 +6,7 @@ GladiusEx.defaults = {
 	profile = {
 		locked = false,
 		advancedOptions = true,
-		globalFont = "Friz Quadrata TT",
+		globalFont = "2002",
 		globalFontSize = 11,
 		useGlobalFontSize = true,
 		showParty = true,
@@ -16,7 +16,7 @@ GladiusEx.defaults = {
 	}
 }
 
-GladiusEx.group_defaults = {
+GladiusEx.defaults_arena = {
 	profile = {
 		x = {},
 		y = {},
@@ -24,16 +24,41 @@ GladiusEx.group_defaults = {
 			["*"] = true,
 			["TargetBar"] = false,
 			["Clicks"] = false,
+			["Auras"] = false,
 		},
-		growDirection = "HCENTER",
+		growDirection = "VCENTER",
 		groupButtons = true,
 		showParty = true,
 		stealthAlpha = 0.7,
 		deadAlpha = 0.5,
-		backgroundColor = { r = 0, g = 0, b = 0, a = 0.4 },
+		backgroundColor = { r = 0, g = 0, b = 0, a = 0 },
 		backgroundPadding = 5,
-		margin = 50,
-		barWidth = 166,
+		margin = 35,
+		barWidth = 173,
+		frameScale = 1,
+	},
+}
+
+GladiusEx.defaults_party = {
+	profile = {
+		x = {},
+		y = {},
+		modules = {
+			["*"] = true,
+			["TargetBar"] = false,
+			["Clicks"] = false,
+			["Announcements"] = false,
+			["Auras"] = false,
+		},
+		growDirection = "VCENTER",
+		groupButtons = true,
+		showParty = true,
+		stealthAlpha = 0.7,
+		deadAlpha = 0.5,
+		backgroundColor = { r = 0, g = 0, b = 0, a = 0 },
+		backgroundPadding = 5,
+		margin = 35,
+		barWidth = 173,
 		frameScale = 1,
 	},
 }
@@ -106,7 +131,7 @@ function GladiusEx:SetupModuleOptions(unit, key, module, order)
 
 	local options = {
 		type = "group",
-		name = L[key],
+		name = function() return (self:IsModuleEnabled(unit, key) and "" or "|cff7f7f7f") .. L[key]  end,
 		desc = string.format(L["%s settings"], L[key]),
 		childGroups = "tab",
 		order = order,
@@ -206,7 +231,6 @@ function GladiusEx:MakeGroupOptions(group, unit, order)
 							growDirection = {
 								order = 5,
 								type = "select",
-								name = "Direction",
 								name = L["Grow direction"],
 								desc = L["The direction you want the frames to grow in"],
 								values = {
@@ -354,45 +378,6 @@ function GladiusEx:SetupOptions()
 		get = getOption,
 		set = setOption,
 		args = {
-			test = {
-				type = "group",
-				name = "",
-				inline = true,
-				order = 0,
-				args = {
-					test2 = {
-						type = "execute",
-						name = L["Test 2v2"],
-						order = 0.2,
-						width = "half",
-						func = function() self:SetTesting(2) end,
-						disabled = function() return self:IsTesting() == 2 end,
-					},
-					test3 = {
-						type = "execute",
-						name = L["Test 3v3"],
-						width = "half",
-						order = 0.3,
-						func = function() self:SetTesting(3) end,
-						disabled = function() return self:IsTesting() == 3 end,
-					},
-					test5 = {
-						type = "execute",
-						name = L["Test 5v5"],
-						width = "half",
-						order = 0.5,
-						func = function() self:SetTesting(5) end,
-						disabled = function() return self:IsTesting() == 5 end,
-					},
-					hide = {
-						type = "execute",
-						name = L["Stop testing"],
-						order = 1,
-						func = function() self:SetTesting() end,
-						disabled = function() return not self:IsTesting() end,
-					},
-				},
-			},
 			general = {
 				type = "group",
 				name = L["General"],
@@ -473,7 +458,98 @@ function GladiusEx:SetupOptions()
 					},
 				},
 			},
-		},
+			testing = {
+				type = "group",
+				name = L["Testing"],
+				desc = L["Testing settings"],
+				order = 2,
+				args = {
+					test = {
+						type = "group",
+						name = L["Test frames"],
+						inline = true,
+						order = 0,
+						args = {
+							test2 = {
+								type = "execute",
+								name = L["Test 2v2"],
+								width = "half",
+								func = function() self:SetTesting(2) end,
+								disabled = function() return self:IsTesting() == 2 end,
+								order = 0.2,
+							},
+							test3 = {
+								type = "execute",
+								name = L["Test 3v3"],
+								width = "half",
+								func = function() self:SetTesting(3) end,
+								disabled = function() return self:IsTesting() == 3 end,
+								order = 0.3,
+							},
+							test5 = {
+								type = "execute",
+								name = L["Test 5v5"],
+								width = "half",
+								func = function() self:SetTesting(5) end,
+								disabled = function() return self:IsTesting() == 5 end,
+								order = 0.5,
+							},
+								hide = {
+								type = "execute",
+								name = L["Stop testing"],
+								width = "triple",
+								func = function() self:SetTesting() end,
+								disabled = function() return not self:IsTesting() end,
+								order = 1,
+							}
+						}
+					}, --[[
+					test_frame = {
+						type = "group",
+						name = "arena1",
+						inline = true,
+						order = 1,
+						args = {
+							spec = {
+								order = 1,
+								type = "select",
+								name = L["Spec"],
+								desc = L["Talent specialization"],
+								values = function() 
+									local t = {}
+
+									for classID = 1, MAX_CLASSES do
+										local classDisplayName, classTag = GetClassInfoByID(classID)
+										local color = RAID_CLASS_COLORS[classTag]
+										local colorfmt = string.format("|cff%02x%02x%02x", color.r * 255, color.g * 255, color.b * 255)
+										for specNum = 1, GetNumSpecializationsForClassID(classID) do
+											local specID, name, description, icon, background, role = GetSpecializationInfoForClassID(classID, specNum)
+											t[specID] = string.format("%s%s/%s", colorfmt, classDisplayName, name)
+										end
+									end
+									return t
+								end
+							},
+							race = {
+								order = 2,
+								type = "select",
+								name = L["Race"],
+								desc = L["Talent specialization"],
+								values = {
+									["HCENTER"] = L["Left and right"],
+									["VCENTER"] = L["Up and down"],
+									["LEFT"]    = L["Left"],
+									["RIGHT"]   = L["Right"],
+									["UP"]      = L["Up"],
+									["DOWN"]    = L["Down"],
+								},
+							},
+						}
+					}
+					]]
+				}
+			}
+		}
 	}
 
 	-- add groups
@@ -556,7 +632,7 @@ function GladiusEx:SetupOptions()
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("GladiusEx", options)
 
 	if not self.options then
-		LibStub("AceConfigDialog-3.0"):SetDefaultSize("GladiusEx", 830, 530)
+		LibStub("AceConfigDialog-3.0"):SetDefaultSize("GladiusEx", 860, 550)
 		LibStub("AceConfigDialog-3.0"):AddToBlizOptions("GladiusEx", "GladiusEx")
 	end
 

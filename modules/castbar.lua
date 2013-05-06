@@ -13,40 +13,61 @@ local time_text_format_normal = "%.02f "
 local time_text_format_delay = "+%.02f %.02f "
 
 local CastBar = GladiusEx:NewGladiusExModule("CastBar", true, {
-	castBarAttachTo = "ClassIcon",
-
-	castBarHeight = 12,
-	castBarAdjustWidth = true,
-	castBarWidth = 150,
-
-	castBarOffsetX = 0,
-	castBarOffsetY = 0,
-
-	castBarAnchor = "TOPLEFT",
-	castBarRelativePoint = "BOTTOMLEFT",
-
-	castBarInverse = false,
-	castBarColor = { r = 1, g = 1, b = 0, a = 1 },
-	castBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
-	castBarTexture = "Minimalist",
-
-	castIcon = true,
-	castIconPosition = "LEFT",
-
-	castText = true,
-	castTextSize = 11,
-	castTextColor = { r = 2.55, g = 2.55, b = 2.55, a = 1 },
-	castTextAlign = "LEFT",
-	castTextOffsetX = 2,
-	castTextOffsetY = 0,
-
-	castTimeText = true,
-	castTimeTextSize = 11,
-	castTimeTextColor = { r = 2.55, g = 2.55, b = 2.55, a = 1 },
-	castTimeTextAlign = "RIGHT",
-	castTimeTextOffsetX = 0,
-	castTimeTextOffsetY = 0,
-})
+		castBarAnchor = "TOPLEFT",
+		castBarAttachTo = "ClassIcon",
+		castBarRelativePoint = "BOTTOMLEFT",
+		castBarOffsetX = 0,
+		castBarOffsetY = 0,
+		castBarHeight = 24,
+		castBarAdjustWidth = true,
+		castBarWidth = 150,
+		castBarInverse = false,
+		castBarColor = { r = 1, g = 1, b = 0, a = 1 },
+		castBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
+		castBarTexture = "Minimalist",
+		castIcon = true,
+		castIconPosition = "LEFT",
+		castText = true,
+		castTextSize = 11,
+		castTextColor = { r = 2.55, g = 2.55, b = 2.55, a = 1 },
+		castTextAlign = "LEFT",
+		castTextOffsetX = 2,
+		castTextOffsetY = 0,
+		castTimeText = true,
+		castTimeTextSize = 11,
+		castTimeTextColor = { r = 2.55, g = 2.55, b = 2.55, a = 1 },
+		castTimeTextAlign = "RIGHT",
+		castTimeTextOffsetX = 0,
+		castTimeTextOffsetY = 0,
+	},
+	{
+		castBarAnchor = "TOPRIGHT",
+		castBarAttachTo = "ClassIcon",
+		castBarRelativePoint = "BOTTOMRIGHT",
+		castBarOffsetX = 0,
+		castBarOffsetY = 0,
+		castBarHeight = 24,
+		castBarAdjustWidth = true,
+		castBarWidth = 150,
+		castBarInverse = false,
+		castBarColor = { r = 1, g = 1, b = 0, a = 1 },
+		castBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
+		castBarTexture = "Minimalist",
+		castIcon = true,
+		castIconPosition = "RIGHT",
+		castText = true,
+		castTextSize = 11,
+		castTextColor = { r = 2.55, g = 2.55, b = 2.55, a = 1 },
+		castTextAlign = "RIGHT",
+		castTextOffsetX = -2,
+		castTextOffsetY = 0,
+		castTimeText = true,
+		castTimeTextSize = 11,
+		castTimeTextColor = { r = 2.55, g = 2.55, b = 2.55, a = 1 },
+		castTimeTextAlign = "LEFT",
+		castTimeTextOffsetX = 2,
+		castTimeTextOffsetY = 0,
+	})
 
 function CastBar:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_START")
@@ -247,12 +268,13 @@ function CastBar:Update(unit)
 		width = width + GladiusEx:GetModule(self.db[unit].castBarAttachTo).frame[unit]:GetWidth()
 	end
 
-	-- ??
+	--[[
 	if strfind(self.db[unit].castBarAnchor, "LEFT") then
 		width = width + 1
 	else
 		width = width - 1
 	end
+	]]
 
 	self.frame[unit]:SetHeight(self.db[unit].castBarHeight)
 	self.frame[unit]:SetWidth(width)

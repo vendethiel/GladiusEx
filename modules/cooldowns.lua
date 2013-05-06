@@ -10,6 +10,151 @@ local pairs, ipairs, select, type, unpack = pairs, ipairs, select, type, unpack
 local min, max, ceil, random = math.min, math.max, math.ceil, math.random
 local GetTime, UnitExists, UnitFactionGroup, UnitClass, UnitRace = GetTime, UnitExists, UnitFactionGroup, UnitClass, UnitRace
 
+local function GetDefaultSpells()
+	return {
+		{ -- group 1
+			[69070] = true, -- GOBLIN/Rocket Jump
+			[7744] = true, -- UNDEAD/Will of the Forsaken
+			[48707] = true, -- DEATHKNIGHT/Anti-Magic Shell
+			[42650] = true, -- DEATHKNIGHT/Army of the Dead
+			[108194] = true, -- DEATHKNIGHT/Asphyxiate
+			[49576] = true, -- DEATHKNIGHT/Death Grip
+			[48743] = true, -- DEATHKNIGHT/Death Pact
+			[108201] = true, -- DEATHKNIGHT/Desecrated Ground
+			[47568] = true, -- DEATHKNIGHT/Empower Rune Weapon
+			[48792] = true, -- DEATHKNIGHT/Icebound Fortitude
+			[49039] = true, -- DEATHKNIGHT/Lichborne
+			[47528] = true, -- DEATHKNIGHT/Mind Freeze
+			[51271] = true, -- DEATHKNIGHT/Pillar of Frost
+			[61999] = true, -- DEATHKNIGHT/Raise Ally
+			[108200] = true, -- DEATHKNIGHT/Remorseless Winter
+			[47476] = true, -- DEATHKNIGHT/Strangulate
+			[49206] = true, -- DEATHKNIGHT/Summon Gargoyle
+			[22812] = true, -- DRUID/Barkskin
+			[99] = true, -- DRUID/Disorienting Roar
+			[102280] = true, -- DRUID/Displacer Beast
+			[108288] = true, -- DRUID/Heart of the Wild
+			[106731] = true, -- DRUID/Incarnation
+			[102342] = true, -- DRUID/Ironbark
+			[102359] = true, -- DRUID/Mass Entanglement
+			[5211] = true, -- DRUID/Mighty Bash
+			[88423] = true, -- DRUID/Nature's Cure
+			[132158] = true, -- DRUID/Nature's Swiftness
+			[2782] = true, -- DRUID/Remove Corruption
+			[106839] = true, -- DRUID/Skull Bash
+			[78675] = true, -- DRUID/Solar Beam
+			[132469] = true, -- DRUID/Typhoon
+			[102793] = true, -- DRUID/Ursol's Vortex
+			[19574] = true, -- HUNTER/Bestial Wrath
+			[19263] = true, -- HUNTER/Deterrence
+			[781] = true, -- HUNTER/Disengage
+			[1499] = true, -- HUNTER/Freezing Trap
+			[19577] = true, -- HUNTER/Intimidation
+			[126246] = true, -- HUNTER/Lullaby
+			[50479] = true, -- HUNTER/Nether Shock
+			[26090] = true, -- HUNTER/Pummel
+			[23989] = true, -- HUNTER/Readiness
+			[19503] = true, -- HUNTER/Scatter Shot
+			[34490] = true, -- HUNTER/Silencing Shot
+			[50519] = true, -- HUNTER/Sonic Blast
+			[121818] = true, -- HUNTER/Stampede
+			[96201] = true, -- HUNTER/Web Wrap
+			[19386] = true, -- HUNTER/Wyvern Sting
+			[108843] = true, -- MAGE/Blazing Speed
+			[1953] = true, -- MAGE/Blink
+			[11958] = true, -- MAGE/Cold Snap
+			[2139] = true, -- MAGE/Counterspell
+			[44572] = true, -- MAGE/Deep Freeze
+			[102051] = true, -- MAGE/Frostjaw
+			[45438] = true, -- MAGE/Ice Block
+			[115450] = true, -- MONK/Detox
+			[122783] = true, -- MONK/Diffuse Magic
+			[113656] = true, -- MONK/Fists of Fury
+			[115203] = true, -- MONK/Fortifying Brew
+			[119381] = true, -- MONK/Leg Sweep
+			[116849] = true, -- MONK/Life Cocoon
+			[115078] = true, -- MONK/Paralysis
+			[115310] = true, -- MONK/Revival
+			[116844] = true, -- MONK/Ring of Peace
+			[116705] = true, -- MONK/Spear Hand Strike
+			[116841] = true, -- MONK/Tiger's Lust
+			[122470] = true, -- MONK/Touch of Karma
+			[119996] = true, -- MONK/Transcendence: Transfer
+			[115176] = true, -- MONK/Zen Meditation
+			[115750] = true, -- PALADIN/Blinding Light
+			[4987] = true, -- PALADIN/Cleanse
+			[498] = true, -- PALADIN/Divine Protection
+			[642] = true, -- PALADIN/Divine Shield
+			[105593] = true, -- PALADIN/Fist of Justice
+			[86698] = true, -- PALADIN/Guardian of Ancient Kings
+			[853] = true, -- PALADIN/Hammer of Justice
+			[96231] = true, -- PALADIN/Rebuke
+			[20066] = true, -- PALADIN/Repentance
+			[47585] = true, -- PRIEST/Dispersion
+			[47788] = true, -- PRIEST/Guardian Spirit
+			[89485] = true, -- PRIEST/Inner Focus
+			[96267] = true, -- PRIEST/Inner Focus
+			[73325] = true, -- PRIEST/Leap of Faith
+			[33206] = true, -- PRIEST/Pain Suppression
+			[8122] = true, -- PRIEST/Psychic Scream
+			[108921] = true, -- PRIEST/Psyfiend
+			[527] = true, -- PRIEST/Purify
+			[15487] = true, -- PRIEST/Silence
+			[112833] = true, -- PRIEST/Spectral Guise
+			[108968] = true, -- PRIEST/Void Shift
+			[108920] = true, -- PRIEST/Void Tendrils
+			[13750] = true, -- ROGUE/Adrenaline Rush
+			[2094] = true, -- ROGUE/Blind
+			[31224] = true, -- ROGUE/Cloak of Shadows
+			[1766] = true, -- ROGUE/Kick
+			[137619] = true, -- ROGUE/Marked for Death
+			[14185] = true, -- ROGUE/Preparation
+			[121471] = true, -- ROGUE/Shadow Blades
+			[51713] = true, -- ROGUE/Shadow Dance
+			[76577] = true, -- ROGUE/Smoke Bomb
+			[1856] = true, -- ROGUE/Vanish
+			[79140] = true, -- ROGUE/Vendetta
+			[114049] = true, -- SHAMAN/Ascendance
+			[51886] = true, -- SHAMAN/Cleanse Spirit
+			[8177] = true, -- SHAMAN/Grounding Totem
+			[108280] = true, -- SHAMAN/Healing Tide Totem
+			[51514] = true, -- SHAMAN/Hex
+			[16190] = true, -- SHAMAN/Mana Tide Totem
+			[77130] = true, -- SHAMAN/Purify Spirit
+			[30823] = true, -- SHAMAN/Shamanistic Rage
+			[98008] = true, -- SHAMAN/Spirit Link Totem
+			[79206] = true, -- SHAMAN/Spiritwalker's Grace
+			[51490] = true, -- SHAMAN/Thunderstorm
+			[8143] = true, -- SHAMAN/Tremor Totem
+			[57994] = true, -- SHAMAN/Wind Shear
+			[89766] = true, -- WARLOCK/Axe Toss
+			[111397] = true, -- WARLOCK/Blood Horror
+			[103967] = true, -- WARLOCK/Carrion Swarm
+			[110913] = true, -- WARLOCK/Dark Bargain
+			[108359] = true, -- WARLOCK/Dark Regeneration
+			[113858] = true, -- WARLOCK/Dark Soul: Instability
+			[113861] = true, -- WARLOCK/Dark Soul: Knowledge
+			[113860] = true, -- WARLOCK/Dark Soul: Misery
+			[48020] = true, -- WARLOCK/Demonic Circle: Teleport
+			[5484] = true, -- WARLOCK/Howl of Terror
+			[6789] = true, -- WARLOCK/Mortal Coil
+			[30283] = true, -- WARLOCK/Shadowfury
+			[19647] = true, -- WARLOCK/Spell Lock
+			[104773] = true, -- WARLOCK/Unending Resolve
+			[118038] = true, -- WARRIOR/Die by the Sword
+			[5246] = true, -- WARRIOR/Intimidating Shout
+			[6552] = true, -- WARRIOR/Pummel
+			[1719] = true, -- WARRIOR/Recklessness
+			[871] = true, -- WARRIOR/Shield Wall
+			[46968] = true, -- WARRIOR/Shockwave
+			[23920] = true, -- WARRIOR/Spell Reflection
+		},
+		{ -- group 2	
+			[42292] = true, -- ITEMS/PvP Trinket
+		} 
+	}
+end
+
 local function MakeGroupDb(settings)
 	local db = {
 		cooldownsAttachTo = "Frame",
@@ -20,61 +165,36 @@ local function MakeGroupDb(settings)
 		cooldownsGrow = "DOWNRIGHT",
 		cooldownsSpacingX = 0,
 		cooldownsSpacingY = 0,
-		cooldownsPerColumn = 9,
-		cooldownsMax = 40,
-		cooldownsSize = 23,
+		cooldownsPerColumn = 8,
+		cooldownsMax = 8,
+		cooldownsSize = 24,
 		cooldownsCrop = true,
 		cooldownsSpells = {},
 		cooldownsBorderSize = 1,
-		cooldownsBorderAvailAlpha = 0.7,
+		cooldownsBorderAvailAlpha = 1.0,
 		cooldownsBorderUsingAlpha = 1.0,
 		cooldownsBorderCooldownAlpha = 0.2,
-		cooldownsIconAvailAlpha = 0.5,
+		cooldownsIconAvailAlpha = 1.0,
 		cooldownsIconUsingAlpha = 1.0,
 		cooldownsIconCooldownAlpha = 0.2,
-		cooldownsCatPriority = {
-			"pvp_trinket",
-			"dispel",
-			"mass_dispel",
-			"immune",
-			"interrupt",
-			"silence",
-			"stun",
-			"knockback",
-			"cc",
-			"offensive",
-			"defensive",
-			"heal",
-			"uncat"
+		cooldownsCatPriority = { "pvp_trinket", "dispel", "mass_dispel", "immune",
+			"interrupt", "silence", "stun", "knockback", "cc",
+			"offensive", "defensive", "heal", "uncat"
 		},
 		cooldownsCatColors = {
-			["pvp_trinket"] =  { r = 1.0, g = 1.0, b = 1.0 },
-			["dispel"] =       { r = 1.0, g = 1.0, b = 1.0 },
-			["mass_dispel"] =  { r = 1.0, g = 1.0, b = 1.0 },
-			["immune"] =       { r = 0.0, g = 0.0, b = 1.0 },
-			["interrupt"] =    { r = 1.0, g = 0.0, b = 1.0 },
-			["silence"] =      { r = 1.0, g = 0.0, b = 1.0 },
-			["stun"] =         { r = 0.0, g = 1.0, b = 1.0 },
-			["knockback"] =    { r = 0.0, g = 1.0, b = 1.0 },
-			["cc"] =           { r = 0.0, g = 1.0, b = 1.0 },
-			["offensive"] =    { r = 1.0, g = 0.0, b = 0.0 },
-			["defensive"] =    { r = 0.0, g = 1.0, b = 0.0 },
-			["heal"] =         { r = 0.0, g = 1.0, b = 0.0 },
+			["pvp_trinket"] =  { r = 1.0, g = 1.0, b = 1.0 }, ["dispel"] =       { r = 1.0, g = 1.0, b = 1.0 },
+			["mass_dispel"] =  { r = 1.0, g = 1.0, b = 1.0 }, ["immune"] =       { r = 0.0, g = 0.0, b = 1.0 },
+			["interrupt"] =    { r = 1.0, g = 0.0, b = 1.0 }, ["silence"] =      { r = 1.0, g = 0.0, b = 1.0 },
+			["stun"] =         { r = 0.0, g = 1.0, b = 1.0 }, ["knockback"] =    { r = 0.0, g = 1.0, b = 1.0 },
+			["cc"] =           { r = 0.0, g = 1.0, b = 1.0 }, ["offensive"] =    { r = 1.0, g = 0.0, b = 0.0 },
+			["defensive"] =    { r = 0.0, g = 1.0, b = 0.0 }, ["heal"] =         { r = 0.0, g = 1.0, b = 0.0 },
 			["uncat"] =        { r = 1.0, g = 1.0, b = 1.0 },
 		},
 		cooldownsCatGroups = {
-			["pvp_trinket"] =  1,
-			["dispel"] =       1,
-			["mass_dispel"] =  1,
-			["immune"] =       1,
-			["interrupt"] =    1,
-			["silence"] =      1,
-			["stun"] =         1,
-			["knockback"] =    1,
-			["cc"] =           1,
-			["offensive"] =    1,
-			["defensive"] =    1,
-			["heal"] =         1,
+			["pvp_trinket"] =  1, ["dispel"] =       1, ["mass_dispel"] =  1,
+			["immune"] =       1, ["interrupt"] =    1, ["silence"] =      1,
+			["stun"] =         1, ["knockback"] =    1, ["cc"] =           1,
+			["offensive"] =    1, ["defensive"] =    1, ["heal"] =         1,
 			["uncat"] =        1,
 		},
 		cooldownsHideTalentsUntilDetected = true,
@@ -88,58 +208,85 @@ local function MakeGroupDb(settings)
 end
 
 local Cooldowns = GladiusEx:NewGladiusExModule("Cooldowns", false, {
-	num_groups = 2,
-	group_table = {
-		[1] = "group_1",
-		[2] = "group_2",
-	},
-	groups = {
-		["*"] = MakeGroupDb(),
-		["group_1"] = MakeGroupDb {
-			cooldownsGroupId = 1,
-			cooldownsAttachTo = "CastBar",
-			cooldownsAnchor = "TOPLEFT",
-			cooldownsRelativePoint = "BOTTOMLEFT",
-			cooldownsGrow = "DOWNRIGHT",
-			cooldownsPerColumn = 9,
-			cooldownsMax = 40,
-			cooldownsSize = 23,
-			cooldownsCrop = true,
-			cooldownsSpells = (function()
-				local r = {}
-				for spellid, spelldata in pairs(CT:GetCooldownsData()) do
-					if (type(spelldata) == "table") and not (spelldata.dispel or spelldata.mass_dispel or spelldata.pvp_trinket) then r[spellid] = true end
-				end
-				return r
-			end)(),
+		num_groups = 2,
+		group_table = {
+			[1] = "group_1",
+			[2] = "group_2",
 		},
-		["group_2"] = MakeGroupDb {
-			cooldownsGroupId = 2,
-			cooldownsAttachTo = "ClassIcon",
-			cooldownsAnchor = "BOTTOMRIGHT",
-			cooldownsRelativePoint = "BOTTOMLEFT",
-			cooldownsGrow = "UPLEFT",
-			cooldownsPerColumn = 1,
-			cooldownsMax = 10,
-			cooldownsSize = 40,
-			cooldownsCrop = false,
-			cooldownsBorderSize = 0,
-			cooldownsBorderAvailAlpha = 1.0,
-			cooldownsBorderUsingAlpha = 1.0,
-			cooldownsBorderCooldownAlpha = 1.0,
-			cooldownsIconAvailAlpha = 1.0,
-			cooldownsIconUsingAlpha = 1.0,
-			cooldownsIconCooldownAlpha = 1.0,
-			cooldownsSpells = (function()
-				local r = {}
-				for spellid, spelldata in pairs(CT:GetCooldownsData()) do
-					if (type(spelldata) == "table") and (spelldata.dispel or spelldata.mass_dispel or spelldata.pvp_trinket) then r[spellid] = true end
-				end
-				return r
-			end)(),
+		groups = {
+			["*"] = MakeGroupDb(),
+			["group_1"] = MakeGroupDb {
+				cooldownsGroupId = 1,
+				cooldownsAttachTo = "CastBar",
+				cooldownsAnchor = "TOPLEFT",
+				cooldownsRelativePoint = "BOTTOMLEFT",
+				cooldownsGrow = "DOWNRIGHT",
+				cooldownsBorderSize = 0,
+				cooldownsSpacingX = 2,
+				cooldownsSpacingY = 2,
+				cooldownsSpells = GetDefaultSpells()[1],
+			},
+			["group_2"] = MakeGroupDb {
+				cooldownsGroupId = 2,
+				cooldownsAttachTo = "Frame",
+				cooldownsAnchor = "TOPLEFT",
+				cooldownsRelativePoint = "TOPRIGHT",
+				cooldownsGrow = "DOWNRIGHT",
+				cooldownsPerColumn = 5,
+				cooldownsMax = 10,
+				cooldownsSize = 40,
+				cooldownsCrop = false,
+				cooldownsBorderSize = 0,
+				cooldownsBorderAvailAlpha = 1.0,
+				cooldownsBorderUsingAlpha = 1.0,
+				cooldownsBorderCooldownAlpha = 1.0,
+				cooldownsIconAvailAlpha = 1.0,
+				cooldownsIconUsingAlpha = 1.0,
+				cooldownsIconCooldownAlpha = 1.0,
+				cooldownsSpells = GetDefaultSpells()[2],
+			}
+		},
+	},
+	{
+		num_groups = 2,
+		group_table = {
+			[1] = "group_1",
+			[2] = "group_2",
+		},
+		groups = {
+			["*"] = MakeGroupDb(),
+			["group_1"] = MakeGroupDb {
+				cooldownsGroupId = 1,
+				cooldownsAttachTo = "CastBar",
+				cooldownsAnchor = "TOPRIGHT",
+				cooldownsRelativePoint = "BOTTOMRIGHT",
+				cooldownsGrow = "DOWNLEFT",
+				cooldownsBorderSize = 0,
+				cooldownsSpacingX = 2,
+				cooldownsSpacingY = 2,
+				cooldownsSpells = GetDefaultSpells()[1],
+			},
+			["group_2"] = MakeGroupDb {
+				cooldownsGroupId = 2,
+				cooldownsAttachTo = "Frame",
+				cooldownsAnchor = "TOPRIGHT",
+				cooldownsRelativePoint = "TOPLEFT",
+				cooldownsGrow = "DOWNLEFT",
+				cooldownsPerColumn = 5,
+				cooldownsMax = 10,
+				cooldownsSize = 40,
+				cooldownsCrop = false,
+				cooldownsBorderSize = 0,
+				cooldownsBorderAvailAlpha = 1.0,
+				cooldownsBorderUsingAlpha = 1.0,
+				cooldownsBorderCooldownAlpha = 1.0,
+				cooldownsIconAvailAlpha = 1.0,
+				cooldownsIconUsingAlpha = 1.0,
+				cooldownsIconCooldownAlpha = 1.0,
+				cooldownsSpells = GetDefaultSpells()[2],
+			}
 		}
-	}
-})
+	})
 
 local MAX_ICONS = 40
 

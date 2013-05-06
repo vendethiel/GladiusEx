@@ -103,8 +103,8 @@ function modulePrototype:GetOtherAttachPoints(unit)
 	return GladiusEx:GetAttachPoints(unit, self)
 end
 
-function modulePrototype:InitializeDB(name)
-	local dbi = GladiusEx.dbi:RegisterNamespace(name, { profile = self.defaults })
+function modulePrototype:InitializeDB(name, defaults)
+	local dbi = GladiusEx.dbi:RegisterNamespace(name, { profile = defaults })
 	dbi.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
 	dbi.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
 	dbi.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")
@@ -112,8 +112,8 @@ function modulePrototype:InitializeDB(name)
 end
 
 function modulePrototype:OnInitialize()
-	self.dbi_arena = self:InitializeDB(self:GetName())
-	self.dbi_party = self:InitializeDB("party_" .. self:GetName())
+	self.dbi_arena = self:InitializeDB(self:GetName(), self.defaults_arena)
+	self.dbi_party = self:InitializeDB("party_" .. self:GetName(), self.defaults_party)
 	self.db = setmetatable({}, {
 		__index = function(t, k)
 			local v
@@ -146,10 +146,11 @@ GladiusEx:SetDefaultModulePrototype(modulePrototype)
 GladiusEx:SetDefaultModuleLibraries("AceEvent-3.0")
 GladiusEx:SetDefaultModuleState(false)
 
-function GladiusEx:NewGladiusExModule(name, isbar, defaults, ...)
+function GladiusEx:NewGladiusExModule(name, isbar, defaults_arena, defaults_party, ...)
 	local module = self:NewModule(name, ...)
 	module.super = modulePrototype
-	module.defaults = defaults
+	module.defaults_arena = defaults_arena
+	module.defaults_party = defaults_party or defaults_arena
 	module.isBarOption = isbar
 	return module
 end
@@ -193,8 +194,8 @@ end
 function GladiusEx:OnInitialize()
 	-- init db+
 	self.dbi = LibStub("AceDB-3.0"):New("GladiusExDB", self.defaults)
-	self.dbi_arena = self.dbi:RegisterNamespace("arena", self.group_defaults)
-	self.dbi_party = self.dbi:RegisterNamespace("party", self.group_defaults)
+	self.dbi_arena = self.dbi:RegisterNamespace("arena", self.defaults_arena)
+	self.dbi_party = self.dbi:RegisterNamespace("party", self.defaults_party)
 	self.db = setmetatable({}, {
 		__index = function(t, k)
 			local v
@@ -1075,9 +1076,9 @@ function GladiusEx:UpdateAnchor(anchor_type)
 	anchor:SetScale(self.db[anchor_type].frameScale)
 	if (not self.db[anchor_type].x and not self.db[anchor_type].y) or (not self.db[anchor_type].x["anchor_" .. anchor.anchor_type] and not self.db[anchor_type].y["anchor_" .. anchor.anchor_type]) then
 		if anchor.anchor_type == "party" then
-			anchor:SetPoint("CENTER", UIParent, "CENTER", 0, -200)
+			anchor:SetPoint("CENTER", UIParent, "CENTER", -300, 0)
 		else
-			anchor:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
+			anchor:SetPoint("CENTER", UIParent, "CENTER", 300, 0)
 		end
 	else
 		local eff = anchor:GetEffectiveScale()

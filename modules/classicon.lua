@@ -9,27 +9,11 @@ local GetTime = GetTime
 local GetSpellInfo, UnitAura, UnitClass, UnitBuff, UnitDebuff = GetSpellInfo, UnitAura, UnitClass, UnitBuff, UnitDebuff
 local CLASS_BUTTONS = CLASS_BUTTONS
 
-local ClassIcon = GladiusEx:NewGladiusExModule("ClassIcon", false, {
-	classIconAttachTo = "Frame",
-	classIconAnchor = "TOPRIGHT",
-	classIconRelativePoint = "TOPLEFT",
-	classIconMode = "SPEC",
-	classIconAdjustSize = false,
-	classIconSize = 40,
-	classIconOffsetX = -1,
-	classIconOffsetY = 0,
-	classIconFrameLevel = 2,
-	classIconGloss = true,
-	classIconGlossColor = { r = 1, g = 1, b = 1, a = 0.4 },
-	classIconImportantAuras = true,
-	classIconCrop = false,
-	classIconCooldown = true,
-	classIconCooldownReverse = false,
-
-	-- NOTE: this list can be modified from the ClassIcon module options, no need to edit it here
-	-- Nonetheless, if you think that we missed an important aura, please post it on the addon site at curse or wowace
-	classIconAuras = {
-		-- Spell Name			Priority (higher = more priority)
+-- NOTE: this list can be modified from the ClassIcon module options, no need to edit it here
+-- Nonetheless, if you think that we missed an important aura, please post it on the addon site at curse or wowace
+local function GetDefaultImportantAuras()
+	return {
+		-- Spell Name           = Priority (higher = more priority)
 		-- Crowd control
 		[GetSpellInfo(108194)] 	= 4,    -- Asphyxiate
 		[GetSpellInfo(115001)] 	= 4,    -- Remorseless Winter
@@ -224,7 +208,44 @@ local ClassIcon = GladiusEx:NewGladiusExModule("ClassIcon", false, {
 		[GetSpellInfo(31224)] 	= 1,    -- Cloak of Shadows
 		[GetSpellInfo(46924)] 	= 1,    -- Bladestorm
 	}
-})
+end
+
+local ClassIcon = GladiusEx:NewGladiusExModule("ClassIcon", false, {
+		classIconAttachTo = "Frame",
+		classIconAnchor = "TOPRIGHT",
+		classIconRelativePoint = "TOPLEFT",
+		classIconMode = "SPEC",
+		classIconAdjustSize = false,
+		classIconSize = 40,
+		classIconOffsetX = 0,
+		classIconOffsetY = 0,
+		classIconFrameLevel = 2,
+		classIconGloss = true,
+		classIconGlossColor = { r = 1, g = 1, b = 1, a = 0.4 },
+		classIconImportantAuras = true,
+		classIconCrop = false,
+		classIconCooldown = true,
+		classIconCooldownReverse = false,
+		classIconAuras = GetDefaultImportantAuras()
+	},
+	{
+		classIconAttachTo = "Frame",
+		classIconAnchor = "TOPLEFT",
+		classIconRelativePoint = "TOPRIGHT",
+		classIconMode = "SPEC",
+		classIconAdjustSize = false,
+		classIconSize = 40,
+		classIconOffsetX = 0,
+		classIconOffsetY = 0,
+		classIconFrameLevel = 2,
+		classIconGloss = true,
+		classIconGlossColor = { r = 1, g = 1, b = 1, a = 0.4 },
+		classIconImportantAuras = true,
+		classIconCrop = false,
+		classIconCooldown = true,
+		classIconCooldownReverse = false,
+		classIconAuras = GetDefaultImportantAuras()
+	})
 
 function ClassIcon:OnEnable()
 	self:RegisterEvent("UNIT_AURA")

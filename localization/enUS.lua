@@ -102,6 +102,9 @@ L["Reset party settings"] = true
 L["Reset settings"] = true
 L["Up and down"] = true
 L["Arena"] = true
+L["Testing"] = true
+L["Testing settings"] = true
+
 
 L["%s settings"] = true
 L["** If this is not your first run please lock or move the frame to prevent this from happening **"] = true
