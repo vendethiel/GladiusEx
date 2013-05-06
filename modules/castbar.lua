@@ -247,8 +247,15 @@ function CastBar:Update(unit)
 		width = width + GladiusEx:GetModule(self.db[unit].castBarAttachTo).frame[unit]:GetWidth()
 	end
 
+	-- ??
+	if strfind(self.db[unit].castBarAnchor, "LEFT") then
+		width = width + 1
+	else
+		width = width - 1
+	end
+
 	self.frame[unit]:SetHeight(self.db[unit].castBarHeight)
-	self.frame[unit]:SetWidth(width + 1)
+	self.frame[unit]:SetWidth(width)
 
 	local parent = GladiusEx:GetAttachFrame(unit, self.db[unit].castBarAttachTo)
 	self.frame[unit]:ClearAllPoints()
