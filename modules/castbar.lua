@@ -9,6 +9,9 @@ local min = math.min
 local GetTime = GetTime
 local GetSpellInfo, UnitCastingInfo, UnitChannelInfo = GetSpellInfo, UnitCastingInfo, UnitChannelInfo
 
+local time_text_format_normal = "%.02f "
+local time_text_format_delay = "+%.02f %.02f "
+
 local CastBar = GladiusEx:NewGladiusExModule("CastBar", true, {
 	castBarAttachTo = "ClassIcon",
 
@@ -34,7 +37,7 @@ local CastBar = GladiusEx:NewGladiusExModule("CastBar", true, {
 	castTextSize = 11,
 	castTextColor = { r = 2.55, g = 2.55, b = 2.55, a = 1 },
 	castTextAlign = "LEFT",
-	castTextOffsetX = 0,
+	castTextOffsetX = 2,
 	castTextOffsetY = 0,
 
 	castTimeText = true,
@@ -104,9 +107,9 @@ local function CastUpdate(self)
 		end
 
 		if self.delay > 0 then
-			self.timeText:SetFormattedText("+%.2f %.2f", self.delay, value)
+			self.timeText:SetFormattedText(time_text_format_delay, self.delay, value)
 		else
-			self.timeText:SetFormattedText("%.2f", value)
+			self.timeText:SetFormattedText(time_text_format_normal, value)
 		end
 	else
 		self:SetScript("OnUpdate", nil)
@@ -337,7 +340,8 @@ function CastBar:Update(unit)
 	self.frame[unit].castText:SetShadowOffset(1, -1)
 	self.frame[unit].castText:SetShadowColor(0, 0, 0, 1)
 	self.frame[unit].castText:SetJustifyH(self.db[unit].castTextAlign)
-	self.frame[unit].castText:SetPoint(self.db[unit].castTextAlign, self.db[unit].castTextOffsetX, self.db[unit].castTextOffsetY)
+	self.frame[unit].castText:ClearAllPoints()
+	self.frame[unit].castText:SetPoint(self.db[unit].castTextAlign, self.frame[unit].bar, self.db[unit].castTextAlign, self.db[unit].castTextOffsetX, self.db[unit].castTextOffsetY)
 
 	-- update cast time text
 	if self.db[unit].castTimeText then
@@ -354,7 +358,8 @@ function CastBar:Update(unit)
 	self.frame[unit].timeText:SetShadowOffset(1, -1)
 	self.frame[unit].timeText:SetShadowColor(0, 0, 0, 1)
 	self.frame[unit].timeText:SetJustifyH(self.db[unit].castTimeTextAlign)
-	self.frame[unit].timeText:SetPoint(self.db[unit].castTimeTextAlign, self.db[unit].castTimeTextOffsetX, self.db[unit].castTimeTextOffsetY)
+	self.frame[unit].timeText:ClearAllPoints()
+	self.frame[unit].timeText:SetPoint(self.db[unit].castTimeTextAlign, self.frame[unit].bar, self.db[unit].castTimeTextAlign, self.db[unit].castTimeTextOffsetX, self.db[unit].castTimeTextOffsetY)
 
 	-- update highlight texture
 	self.frame[unit].highlight:SetAllPoints(self.frame[unit])
@@ -396,7 +401,7 @@ function CastBar:Test(unit)
 	self.frame[unit].bar:SetMinMaxValues(0, 100)
 	self.frame[unit].bar:SetValue(70)
 
-	self.frame[unit].timeText:SetFormattedText("+1.5 %.1f", 1.379)
+	self.frame[unit].timeText:SetFormattedText(time_text_format_delay, 1.5, 1.379)
 
 	local texture = select(3, GetSpellInfo(1))
 	self.frame[unit].icon:SetTexture(texture)
