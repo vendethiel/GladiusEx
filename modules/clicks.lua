@@ -68,6 +68,7 @@ function Clicks:GetOptions(unit)
 	local addAttrMod = ""
 
 	local options
+
 	options = {
 		attributeList = {
 			type = "group",
@@ -113,7 +114,7 @@ function Clicks:GetOptions(unit)
 										action = "target",
 										macro = ""
 									}
-									options.attributeList.args[attr] = self:GetAttributeOptionTable(unit, attr, 100)
+									options.attributeList.args[attr] = self:GetAttributeOptionTable(options, unit, attr, 100)
 									-- update
 									GladiusEx:UpdateFrames()
 								end
@@ -130,14 +131,14 @@ function Clicks:GetOptions(unit)
 	-- attributes
 	local order = 1
 	for attr, _ in pairs(self.db[unit].clickAttributes) do
-		options.attributeList.args[attr] = self:GetAttributeOptionTable(unit, attr, order)
+		options.attributeList.args[attr] = self:GetAttributeOptionTable(options, unit, attr, order)
 		order = order + 1
 	end
 
 	return options
 end
 
-function Clicks:GetAttributeOptionTable(unit, attribute, order)
+function Clicks:GetAttributeOptionTable(options, unit, attribute, order)
 	local function getOption(info)
 		local key = info[#info - 2]
 		return self.db[unit].clickAttributes[key][info[#info]]
@@ -163,7 +164,7 @@ function Clicks:GetAttributeOptionTable(unit, attribute, order)
 					self.db[unit].clickAttributes[attribute] = nil
 
 					-- remove from options
-					GladiusEx.options.args[self:GetName()].args.attributeList.args[attribute] = nil
+					options.attributeList.args[attribute] = nil
 
 					-- update
 					GladiusEx:UpdateFrames()
