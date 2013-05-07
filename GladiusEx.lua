@@ -939,16 +939,16 @@ end
 
 function GladiusEx:GetUnitIndex(unit)
 	local unit_index
-	if unit == "player" then
+	if unit == "player" or unit == "playerpet" then
 		unit_index = 1
 	else
 		local utype, n = strmatch(unit, "^(%a+)(%d+)$")
 		if utype == "party" then
 			unit_index = tonumber(n) + 1
-		elseif utype == "arena" then
+		elseif utype == "arena" or utype == "arenapet" then
 			unit_index = tonumber(n)
 		else
-			assert(false, "Unknown unit")
+			assert(false, "Unknown unit " .. tostring(unit))
 		end
 	end
 	return unit_index
