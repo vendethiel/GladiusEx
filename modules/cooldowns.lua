@@ -1064,17 +1064,6 @@ function Cooldowns:MakeGroupOptions(unit, group)
 				name = L["General"],
 				order = 1,
 				args = {
-					remgroup = {
-						type = "execute",
-						name = L["Remove this group"],
-						desc = L["Remove this group"],
-						func = function()
-							self:RemoveGroup(unit, group)
-							GladiusEx:UpdateFrames()
-						end,
-						disabled = function() return not self:IsUnitEnabled(unit) end,
-						order = 0,
-					},
 					widget = {
 						type = "group",
 						name = L["Widget"],
@@ -1120,7 +1109,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								type = "range",
 								name = L["Icons per column"],
 								desc = L["Number of icons per column"],
-								min = 1, max = 50, step = 1,
+								min = 1, max = MAX_ICONS, step = 1,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
 								order = 15,
 							},
@@ -1138,6 +1127,18 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								width = "full",
 								order = 23,
 							},
+							remgroup = {
+								type = "execute",
+								name = L["Remove this cooldowns group"],
+								desc = L["Remove this cooldowns group"],
+								width = "double",
+								func = function()
+									self:RemoveGroup(unit, group)
+									GladiusEx:UpdateFrames()
+								end,
+								disabled = function() return not self:IsUnitEnabled(unit) end,
+								order = 244,
+							},
 						},
 					},
 					icon_transparency = {
@@ -1151,7 +1152,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								type = "range",
 								name = L["Available"],
 								desc = L["Alpha of the icon while the spell is not on cooldown"],
-								min = 0, max = 1, step = 0.1,
+								min = 0, max = 1,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
 								order = 1,
 							},
@@ -1159,7 +1160,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								type = "range",
 								name = L["Active"],
 								desc = L["Alpha of the icon while the spell is being used"],
-								min = 0, max = 1, step = 0.1,
+								min = 0, max = 1,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
 								order = 2,
 							},
@@ -1167,7 +1168,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								type = "range",
 								name = L["On cooldown"],
 								desc = L["Alpha of the icon while the spell is on cooldown"],
-								min = 0, max = 1, step = 0.1,
+								min = 0, max = 1,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
 								order = 3,
 							},
@@ -1190,7 +1191,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								type = "range",
 								name = L["Available"],
 								desc = L["Alpha of the icon border while the spell is not on cooldown"],
-								min = 0, max = 1, step = 0.1,
+								min = 0, max = 1,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
 								order = 1,
 							},
@@ -1198,7 +1199,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								type = "range",
 								name = L["Active"],
 								desc = L["Alpha of the icon border while the spell is being used"],
-								min = 0, max = 1, step = 0.1,
+								min = 0, max = 1,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
 								order = 2,
 							},
@@ -1206,7 +1207,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								type = "range",
 								name = L["On cooldown"],
 								desc = L["Alpha of the icon border while the spell is on cooldown"],
-								min = 0, max = 1, step = 0.1,
+								min = 0, max = 1,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
 								order = 3,
 							},
@@ -1229,7 +1230,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								type = "range",
 								name = L["Icon size"],
 								desc = L["Size of the cooldown icons"],
-								min = 10, max = 100, step = 1,
+								min = 1, softMin = 10, softMax = 100, step = 1,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
 								order = 5,
 							},
@@ -1237,7 +1238,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								type = "range",
 								name = L["Icon border size"],
 								desc = L["Size of the cooldown icon borders"],
-								min = 0, max = 10, step = 1,
+								min = 0, softMin = 0, softMax = 10, step = 1,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
 								order = 6,
 							},
@@ -1251,7 +1252,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								type = "range",
 								name = L["Vertical spacing"],
 								desc = L["Vertical spacing of the icons"],
-								min = 0, max = 30, step = 1,
+								min = 0, softMax = 30, step = 1,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
 								order = 15,
 							},
@@ -1260,7 +1261,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								name = L["Horizontal spacing"],
 								desc = L["Horizontal spacing of the icons"],
 								disabled = function() return not self:IsUnitEnabled(unit) end,
-								min = 0, max = 30, step = 1,
+								min = 0, softMax = 30, step = 1,
 								order = 20,
 							},
 						},
@@ -1314,7 +1315,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								type = "range",
 								name = L["Offset X"],
 								desc = L["X offset of the frame"],
-								min = -100, max = 100, step = 1,
+								softMin = -100, softMax = 100, bigStep = 1,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
 								order = 20,
 							},
@@ -1323,7 +1324,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								name = L["Offset Y"],
 								desc = L["Y offset of the frame"],
 								disabled = function() return not self:IsUnitEnabled(unit) end,
-								min = -50, max = 50, step = 1,
+								softMin = -100, softMax = 100, bigStep = 1,
 								order = 25,
 							},
 						},
@@ -1335,20 +1336,6 @@ function Cooldowns:MakeGroupOptions(unit, group)
 				name = L["Category"],
 				order = 2,
 				args = {
-					cooldownsHideTalentsUntilDetected = {
-						type = "toggle",
-						name = L["Hide talents until detected"],
-						width = "full",
-						disabled = function() return not self:IsUnitEnabled(unit) end,
-						order = 1
-					},
-					priorities = {
-						type = "group",
-						name = L["Categories"],
-						inline = true,
-						order = 4,
-						args = {},
-					},
 				},
 			},
 			cooldowns = {
@@ -1356,6 +1343,13 @@ function Cooldowns:MakeGroupOptions(unit, group)
 				name = L["Cooldowns"],
 				order = 3,
 				args = {
+					cooldownsHideTalentsUntilDetected = {
+						type = "toggle",
+						name = L["Hide talents until detected"],
+						disabled = function() return not self:IsUnitEnabled(unit) end,
+						width = "double",
+						order = nil,
+					},
 					enableall = {
 						type = "execute",
 						name = L["Enable all"],
@@ -1369,7 +1363,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 							GladiusEx:UpdateFrames()
 						end,
 						disabled = function() return not self:IsUnitEnabled(unit) end,
-						order = 0,
+						order = 0.2,
 					},
 					disableall = {
 						type = "execute",
@@ -1403,8 +1397,8 @@ function Cooldowns:MakeGroupOptions(unit, group)
 		},
 	}
 
-	-- fill spell priority list
-	local pargs = group_options.args.category_options.args.priorities.args
+	-- fill category list
+	local pargs = group_options.args.category_options.args
 	for i = 1, #(self:GetGroupDB(unit, group).cooldownsCatPriority) do
 		local cat = self:GetGroupDB(unit, group).cooldownsCatPriority[i]
 		local option = {
@@ -1415,8 +1409,12 @@ function Cooldowns:MakeGroupOptions(unit, group)
 					if self:GetGroupDB(unit, group).cooldownsCatPriority[i] == cat then return i end
 				end
 			end,
-			inline = true,
 			args = {
+				header = {
+					type = "description",
+					name = L["cat:" .. cat],
+					order = 0,
+				},
 				color = {
 					type = "color",
 					name = L["Color"],
@@ -1430,13 +1428,11 @@ function Cooldowns:MakeGroupOptions(unit, group)
 						GladiusEx:UpdateFrames()
 					end,
 					disabled = function() return not self:IsUnitEnabled(unit) end,
-					order = 0,
+					order = 0.5,
 				},
 				group = {
 					type = "range",
-					min = 1,
-					max = 20,
-					step = 1,
+					softMin = 1, softMax = 20, step = 1,
 					name = L["Group"],
 					desc = L["Spells in each group have their own row or column"],
 					get = function() return self:GetGroupDB(unit, group).cooldownsCatGroups[cat] end,
@@ -1531,7 +1527,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 	end
 
 
-	-- fill spell data
+	-- fill spell list
 	local function getSpell(info)
 		return self:GetGroupDB(unit, group).cooldownsSpells[info.arg]
 	end
@@ -1540,9 +1536,6 @@ function Cooldowns:MakeGroupOptions(unit, group)
 		self:GetGroupDB(unit, group).cooldownsSpells[info.arg] = value
 		GladiusEx:UpdateFrames()
 	end
-
-	local lclasses = {}
-	FillLocalizedClassList(lclasses)
 
 	local args = group_options.args.cooldowns.args
 	for spellid, spelldata in pairs(CT:GetCooldownsData()) do
@@ -1591,7 +1584,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 				if not args[spelldata.class] then
 					args[spelldata.class] = {
 						type = "group",
-						name = lclasses[spelldata.class],
+						name = LOCALIZED_CLASS_NAMES_MALE[spelldata.class],
 						icon = [[Interface\ICONS\ClassIcon_]] .. spelldata.class,
 						disabled = function() return not self:IsUnitEnabled(unit) end,
 						order = 1,

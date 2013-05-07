@@ -104,6 +104,7 @@ L["Up and down"] = true
 L["Arena"] = true
 L["Testing"] = true
 L["Testing settings"] = true
+L["Remove this cooldowns group"] = true
 
 
 L["%s settings"] = true
@@ -342,7 +343,6 @@ L["Raid Warning"] = true
 L["Relative point of the frame"] = true
 L["Relative point of the health bar"] = true
 L["Relative point"] = true
-L["Remove this group"] = true
 L["Reset module"] = true
 L["RESURRECTING: %s (%s)"] = true
 L["Resurrection"] = true

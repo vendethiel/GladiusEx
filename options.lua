@@ -28,7 +28,6 @@ GladiusEx.defaults_arena = {
 		},
 		growDirection = "VCENTER",
 		groupButtons = true,
-		showParty = true,
 		stealthAlpha = 0.7,
 		deadAlpha = 0.5,
 		backgroundColor = { r = 0, g = 0, b = 0, a = 0 },
@@ -52,7 +51,6 @@ GladiusEx.defaults_party = {
 		},
 		growDirection = "VCENTER",
 		groupButtons = true,
-		showParty = true,
 		stealthAlpha = 0.7,
 		deadAlpha = 0.5,
 		backgroundColor = { r = 0, g = 0, b = 0, a = 0 },
@@ -465,11 +463,12 @@ function GladiusEx:SetupOptions()
 				order = 2,
 				args = {
 					test = {
-						type = "group",
+						type = "header",
 						name = L["Test frames"],
-						inline = true,
+						--inline = true,
 						order = 0,
-						args = {
+						-- args = {
+						},
 							test2 = {
 								type = "execute",
 								name = L["Test 2v2"],
@@ -494,7 +493,7 @@ function GladiusEx:SetupOptions()
 								disabled = function() return self:IsTesting() == 5 end,
 								order = 0.5,
 							},
-								hide = {
+							hide = {
 								type = "execute",
 								name = L["Stop testing"],
 								width = "triple",
@@ -502,8 +501,9 @@ function GladiusEx:SetupOptions()
 								disabled = function() return not self:IsTesting() end,
 								order = 1,
 							}
-						}
-					}, --[[
+						--}
+					--},
+					--[[
 					test_frame = {
 						type = "group",
 						name = "arena1",
@@ -588,6 +588,7 @@ function GladiusEx:SetupOptions()
 	}
 	-- party
 	options.args.party = self:MakeGroupOptions("Party", "player", 11)
+	options.args.party.disabled = function() return not self.db.base.showParty end
 	options.args.party.args.copy = {
 		type = "group",
 		name = L["Copy settings"],
