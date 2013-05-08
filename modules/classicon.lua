@@ -751,7 +751,7 @@ function ClassIcon:GetOptions(unit)
 							name = L["Name"],
 							desc = L["Name of the aura"],
 							get = function() return self.newAuraName or "" end,
-							set = function(info, value) self.newAuraName = value end,
+							set = function(info, value) self.newAuraName = GetSpellInfo(value) or value end,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 1,
 						},
