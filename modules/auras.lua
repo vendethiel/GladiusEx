@@ -8,40 +8,84 @@ local pairs = pairs
 local UnitAura, UnitBuff, UnitDebuff, GetSpellInfo = UnitAura, UnitBuff, UnitDebuff, GetSpellInfo
 local ceil = math.ceil
 
-local Auras = GladiusEx:NewGladiusExModule("Auras", false, {
-	aurasBuffsAttachTo = "ClassIcon",
-	aurasBuffsAnchor = "BOTTOMLEFT",
-	aurasBuffsRelativePoint = "TOPLEFT",
-	aurasBuffsGrow = "UPRIGHT",
-	aurasBuffs = true,
-	aurasBuffsOnlyDispellable = false,
-	aurasDebuffsOnlyMine = false,
-	aurasBuffsSpacingX = 0,
-	aurasBuffsSpacingY = 0,
-	aurasBuffsPerColumn = 6,
-	aurasBuffsMax = 18,
-	aurasBuffsSize = 16,
-	aurasBuffsOffsetX = 0,
-	aurasBuffsOffsetY = 0,
-	aurasBuffsCrop = true,
+local FILTER_TYPE_DISABLED = 0
+local FILTER_TYPE_WHITELIST = 1
+local FILTER_TYPE_BLACKLIST = 2
 
-	aurasDebuffsAttachTo = "Frame",
-	aurasDebuffsAnchor = "BOTTOMRIGHT",
-	aurasDebuffsRelativePoint = "TOPRIGHT",
-	aurasDebuffsGrow = "UPLEFT",
-	aurasDebuffsWithBuffs = false,
-	aurasDebuffs = true,
-	aurasDebuffsOnlyDispellable = false,
-	aurasDebuffsOnlyMine = false,
-	aurasDebuffsSpacingX = 0,
-	aurasDebuffsSpacingY = 0,
-	aurasDebuffsPerColumn = 6,
-	aurasDebuffsMax = 18,
-	aurasDebuffsSize = 16,
-	aurasDebuffsOffsetX = 0,
-	aurasDebuffsOffsetY = 0,
-	aurasDebuffsCrop = true,
-})
+local Auras = GladiusEx:NewGladiusExModule("Auras", false, {
+		aurasBuffsAttachTo = "ClassIcon",
+		aurasBuffsAnchor = "BOTTOMLEFT",
+		aurasBuffsRelativePoint = "TOPLEFT",
+		aurasBuffsGrow = "UPRIGHT",
+		aurasBuffs = true,
+		aurasBuffsOnlyDispellable = false,
+		aurasDebuffsOnlyMine = false,
+		aurasBuffsSpacingX = 0,
+		aurasBuffsSpacingY = 0,
+		aurasBuffsPerColumn = 6,
+		aurasBuffsMax = 18,
+		aurasBuffsSize = 16,
+		aurasBuffsOffsetX = 0,
+		aurasBuffsOffsetY = 0,
+		aurasBuffsCrop = true,
+
+		aurasDebuffsAttachTo = "Frame",
+		aurasDebuffsAnchor = "BOTTOMRIGHT",
+		aurasDebuffsRelativePoint = "TOPRIGHT",
+		aurasDebuffsGrow = "UPLEFT",
+		aurasDebuffsWithBuffs = false,
+		aurasDebuffs = true,
+		aurasDebuffsOnlyDispellable = false,
+		aurasDebuffsOnlyMine = false,
+		aurasDebuffsSpacingX = 0,
+		aurasDebuffsSpacingY = 0,
+		aurasDebuffsPerColumn = 6,
+		aurasDebuffsMax = 18,
+		aurasDebuffsSize = 16,
+		aurasDebuffsOffsetX = 0,
+		aurasDebuffsOffsetY = 0,
+		aurasDebuffsCrop = true,
+
+		aurasFilterType = FILTER_TYPE_DISABLED,
+		aurasFilterAuras = {},
+	},
+	{
+		aurasBuffsAttachTo = "ClassIcon",
+		aurasBuffsAnchor = "BOTTOMRIGHT",
+		aurasBuffsRelativePoint = "TOPRIGHT",
+		aurasBuffsGrow = "UPLEFT",
+		aurasBuffs = true,
+		aurasBuffsOnlyDispellable = false,
+		aurasDebuffsOnlyMine = false,
+		aurasBuffsSpacingX = 0,
+		aurasBuffsSpacingY = 0,
+		aurasBuffsPerColumn = 6,
+		aurasBuffsMax = 18,
+		aurasBuffsSize = 16,
+		aurasBuffsOffsetX = 0,
+		aurasBuffsOffsetY = 0,
+		aurasBuffsCrop = true,
+
+		aurasDebuffsAttachTo = "Frame",
+		aurasDebuffsAnchor = "BOTTOMLEFT",
+		aurasDebuffsRelativePoint = "TOPLEFT",
+		aurasDebuffsGrow = "UPRIGHT",
+		aurasDebuffsWithBuffs = false,
+		aurasDebuffs = true,
+		aurasDebuffsOnlyDispellable = false,
+		aurasDebuffsOnlyMine = false,
+		aurasDebuffsSpacingX = 0,
+		aurasDebuffsSpacingY = 0,
+		aurasDebuffsPerColumn = 6,
+		aurasDebuffsMax = 18,
+		aurasDebuffsSize = 16,
+		aurasDebuffsOffsetX = 0,
+		aurasDebuffsOffsetY = 0,
+		aurasDebuffsCrop = true,
+
+		aurasFilterType = FILTER_TYPE_DISABLED,
+		aurasFilterAuras = {},
+	})
 
 function Auras:OnEnable()
 	self:RegisterEvent("UNIT_AURA", "UpdateUnitAuras")
@@ -133,6 +177,16 @@ local function SetDebuff(debuffFrame, unit, i)
 	debuffFrame.border:SetVertexColor(color.r, color.g, color.b)
 end
 
+function Auras:IsAuraFiltered(unit, name)
+	if self.db[unit].aurasFilterType == FILTER_TYPE_DISABLED then
+		return true
+	elseif self.db[unit].aurasFilterType == FILTER_TYPE_WHITELIST then
+		return self.db[unit].aurasFilterAuras[name]
+	elseif self.db[unit].aurasFilterType == FILTER_TYPE_BLACKLIST then
+		return not self.db[unit].aurasFilterAuras[name]
+	end
+end
+
 function Auras:UpdateUnitAuras(event, unit)
 	local color
 	local sidx = 1
@@ -143,7 +197,7 @@ function Auras:UpdateUnitAuras(event, unit)
 			local name, rank, icon, count, debuffType, duration, expires, caster, isStealable = UnitBuff(unit, i)
 
 			if name then
-				if not self.db[unit].aurasBuffsOnlyDispellable or isStealable then
+				if self:IsAuraFiltered(unit, name) and (not self.db[unit].aurasBuffsOnlyDispellable or isStealable) then
 					SetBuff(self.buffFrame[unit][sidx], unit, i)
 					sidx = sidx + 1
 				end
@@ -173,7 +227,7 @@ function Auras:UpdateUnitAuras(event, unit)
 			local name, rank, icon, count, debuffType, duration, expires, caster, isStealable = UnitDebuff(unit, i)
 
 			if name then
-				if not self.db[unit].aurasDebuffsOnlyDispellable or isStealable then
+				if self:IsAuraFiltered(unit, name) and (not self.db[unit].aurasDebuffsOnlyDispellable or isStealable) then
 					SetDebuff(debuffFrame[sidx], unit, i)
 					debuffFrame[sidx]:Show()
 					sidx = sidx + 1
@@ -406,8 +460,18 @@ end
 function Auras:Test(unit)
 	-- test buff frame
 	if self.buffFrame[unit] then
-		for i = 1, self.db[unit].aurasBuffsMax do
+		local m = math.floor(self.db[unit].aurasBuffsMax / 2)
+		for i = 1, m do
 			self.buffFrame[unit][i].icon:SetTexture(GetSpellTexture(21562))
+			self.buffFrame[unit][i]:Show()
+		end
+
+		for i = m + 1, self.db[unit].aurasBuffsMax do
+			if self.db[unit].aurasDebuffs and self.db[unit].aurasDebuffsWithBuffs then
+				self.buffFrame[unit][i].icon:SetTexture(GetSpellTexture(589))
+			else
+				self.buffFrame[unit][i].icon:SetTexture(GetSpellTexture(21562))
+			end
 			self.buffFrame[unit][i]:Show()
 		end
 	end
@@ -421,17 +485,22 @@ function Auras:Test(unit)
 	end
 end
 
+local function HasAuraEditBox()
+	return not not LibStub("AceGUI-3.0").WidgetVersions["Aura_EditBox"]
+end
+
 function Auras:GetOptions(unit)
-	local options = {
+	local options
+	options = {
 		buffs = {
 			type = "group",
 			name = L["Buffs"],
-			childGroups = "tab",
 			order = 1,
 			args = {
 				general = {
 					type = "group",
 					name = L["General"],
+					inline = true,
 					order = 1,
 					args = {
 						widget = {
@@ -624,47 +693,17 @@ function Auras:GetOptions(unit)
 						},
 					},
 				},
-				--[[filter = {
-					type = "group",
-					name = L["Filter"],
-					childGroups = "tree",
-					hidden = function() return not GladiusEx.db.base.advancedOptions end,
-					order = 2,
-					args = {
-						whitelist = {
-							type = "group",
-							name = L["Whitelist"],
-							order = 1,
-							args = {
-							},
-						},
-						blacklist = {
-							type = "group",
-							name = L["Blacklist"],
-							order = 2,
-							args = {
-							},
-						},
-						filterFunction = {
-							type = "group",
-							name = L["Filter function"],
-							order = 3,
-							args = {
-							},
-						},
-					},
-				},]]
 			},
 		},
 		debuffs = {
 			type = "group",
 			name = L["Debuffs"],
-			childGroups = "tab",
 			order = 2,
 			args = {
 				general = {
 					type = "group",
 					name = L["General"],
+					inline = true,
 					order = 1,
 					args = {
 						widget = {
@@ -864,39 +903,126 @@ function Auras:GetOptions(unit)
 						},
 					},
 				},
-				--[[filter = {
+			},
+		},
+		filters = {
+			type = "group",
+			name = L["Filters"],
+			childGroups = "tree",
+			order = 3,
+			args = {
+				aurasFilterType = {
+					type = "select",
+					style = "radio",
+					name = L["Filter type"],
+					desc = L["Filter type"],
+					values = {
+						[FILTER_TYPE_DISABLED] = L["Disabled"],
+						[FILTER_TYPE_WHITELIST] = L["Whitelist"],
+						[FILTER_TYPE_BLACKLIST] = L["Blacklist"],
+					},
+					disabled = function() return not self:IsUnitEnabled(unit) end,
+					order = 1,
+				},
+				newAura = {
 					type = "group",
-					name = L["Filter"],
-					childGroups = "tree",
-					hidden = function() return not GladiusEx.db.base.advancedOptions end,
+					name = L["Add new aura filter"],
+					desc = L["Add new aura filter"],
+					inline = true,
 					order = 2,
 					args = {
-						whitelist = {
-							type = "group",
-							name = L["Whitelist"],
+						name = {
+							type = "input",
+							dialogControl = HasAuraEditBox() and "Aura_EditBox" or nil,
+							name = L["Name"],
+							desc = L["Name of the aura"],
+							get = function() return self.newAuraName or "" end,
+							set = function(info, value) self.newAuraName = GetSpellInfo(value) or value end,
+							disabled = function() return not self:IsUnitEnabled(unit) or self.db[unit].aurasFilterType == FILTER_TYPE_DISABLED end,
 							order = 1,
-							args = {
-							},
 						},
-						blacklist = {
-							type = "group",
-							name = L["Blacklist"],
-							order = 2,
-							args = {
-							},
-						},
-						filterFunction = {
-							type = "group",
-							name = L["Filter function"],
+						add = {
+							type = "execute",
+							name = L["Add new aura"],
+							func = function(info)
+								self.db[unit].aurasFilterAuras[self.newAuraName] = true
+								options.filters.args[self.newAuraName] = self:SetupAuraOptions(options, unit, self.newAuraName)
+								self.newAuraName = nil
+								GladiusEx:UpdateFrames()
+							end,
+							disabled = function() return not self:IsUnitEnabled(unit) or not self.newAuraName or self.db[unit].aurasFilterType == FILTER_TYPE_DISABLED end,
 							order = 3,
-							args = {
-							},
 						},
 					},
-				},]]
+				},
 			},
 		},
 	}
 
+	-- setup auras
+	for aura in pairs(self.db[unit].aurasFilterAuras) do
+		options.filters.args[aura] = self:SetupAuraOptions(options, unit, aura)
+	end
+
 	return options
+end
+
+function Auras:SetupAuraOptions(options, unit, aura)
+	local function setAura(info, value)
+		if (info[#(info)] == "name") then
+			local old_name = info[#(info) - 1]
+
+			-- create new aura
+			self.db[unit].aurasFilterAuras[value] = true
+			options.filters.args[value] = self:SetupAuraOptions(options, unit, value)
+
+			-- delete old aura
+			self.db[unit].aurasFilterAuras[old_name] = nil
+			options.filters.args[old_name] = nil
+		else
+			self.db[unit].aurasFilterAuras[info[#(info) - 1]] = value
+		end
+
+		GladiusEx:UpdateFrames()
+	end
+
+	local function getAura(info)
+		if (info[#(info)] == "name") then
+			return info[#(info) - 1]
+		else
+			return self.db[unit].aurasFilterAuras[info[#(info) - 1]]
+		end
+	end
+
+	return {
+		type = "group",
+		name = aura,
+		desc = aura,
+		get = getAura,
+		set = setAura,
+		disabled = function() return not self:IsUnitEnabled(unit) end,
+		args = {
+			name = {
+				type = "input",
+				dialogControl = HasAuraEditBox() and "Aura_EditBox" or nil,
+				name = L["Name"],
+				desc = L["Name of the aura"],
+				disabled = function() return not self:IsUnitEnabled(unit) end,
+				order = 1,
+			},
+			delete = {
+				type = "execute",
+				name = L["Delete"],
+				func = function(info)
+					local aura = info[#(info) - 1]
+					self.db[unit].aurasFilterAuras[aura] = nil
+					options.filters.args[aura] = nil
+
+					GladiusEx:UpdateFrames()
+				end,
+				disabled = function() return not self:IsUnitEnabled(unit) end,
+				order = 3,
+			},
+		},
+	}
 end
