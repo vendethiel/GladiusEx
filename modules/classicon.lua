@@ -772,7 +772,7 @@ function ClassIcon:GetOptions(unit)
 							name = L["Add new aura"],
 							func = function(info)
 								self.db[unit].classIconAuras[self.newAuraName] = self.newAuraPriority
-								options.auraList.args[self.newAuraName] = self:SetupAuraOptions(self.newAuraName)
+								options.auraList.args[self.newAuraName] = self:SetupAuraOptions(options, unit, self.newAuraName)
 								self.newAuraName = nil
 								GladiusEx:UpdateFrames()
 							end,
@@ -803,7 +803,7 @@ function ClassIcon:SetupAuraOptions(options, unit, aura)
 
 			-- create new aura
 			self.db[unit].classIconAuras[value] = self.db[unit].classIconAuras[old_name]
-			options.auraList.args[value] = self:SetupAuraOptions(value)
+			options.auraList.args[value] = self:SetupAuraOptions(options, unit, value)
 
 			-- delete old aura
 			self.db[unit].classIconAuras[old_name] = nil
