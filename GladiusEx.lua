@@ -819,8 +819,8 @@ function GladiusEx:CreateUnit(unit)
 
 	button:RegisterForDrag("LeftButton")
 
-	local dragparentunit = self:IsArenaUnit(unit) and "anchor_arena" or "anchor_party"
-	local dragparent = self:IsArenaUnit(unit) and self.arena_anchor or self.party_anchor
+	local drag_anchor_type = self:GetUnitAnchorType(unit)
+	local drag_anchor_frame = self:GetUnitAnchor(unit)
 
 	button:SetScript("OnMouseDown", function(f, button)
 		if button == "RightButton" then
@@ -830,20 +830,21 @@ function GladiusEx:CreateUnit(unit)
 
 	button:SetScript("OnDragStart", function(f)
 		if not InCombatLockdown() and not self.db.base.locked then
-			local f = self.db[unit].groupButtons and dragparent or f
+			local f = self.db[unit].groupButtons and drag_anchor_frame or f
 			f:StartMoving()
 		end
 	end)
 
 	button:SetScript("OnDragStop", function(f)
-		if not InCombatLockdown() then
-			local f = self.db[unit].groupButtons and dragparent or f
-			local tunit = self.db[unit].groupButtons and dragparentunit or unit
+		local f = self.db[unit].groupButtons and drag_anchor_frame or f
+		f:StopMovingOrSizing()
 
-			f:StopMovingOrSizing()
+		if self.db[unit].groupButtons then
+			self:SaveAnchorPosition(drag_anchor_type)
+		else
 			local scale = f:GetEffectiveScale()
-			self.db[unit].x[tunit] = f:GetLeft() * scale
-			self.db[unit].y[tunit] = f:GetTop() * scale
+			self.db[unit].x[unit] = f:GetLeft() * scale
+			self.db[unit].y[unit] = f:GetTop() * scale
 		end
 	end)
 
@@ -861,13 +862,13 @@ end
 
 function GladiusEx:SaveAnchorPosition(anchor_type)
 	local anchor = self:GetAnchorFrames(anchor_type)
-	local scale = anchor:GetEffectiveScale()
-	self.db[anchor_type].x["anchor_" .. anchor_type] = anchor:GetLeft() * scale
-	self.db[anchor_type].y["anchor_" .. anchor_type] = anchor:GetTop() * scale
+	local scale = anchor:GetEffectiveScale() or 1
+	self.db[anchor_type].x["anchor_" .. anchor_type] = (anchor:GetLeft() or 0) * scale
+	self.db[anchor_type].y["anchor_" .. anchor_type] = (anchor:GetTop() or 0) * scale
 	-- save all unit positions so that they stay at the same place if the buttons are ungrouped
 	for unit, button in pairs(self.buttons) do
-		self.db[unit].x[unit] = button:GetLeft() * scale
-		self.db[unit].y[unit] = button:GetTop() * scale
+		self.db[unit].x[unit] = (button:GetLeft() or 0) * scale
+		self.db[unit].y[unit] = (button:GetTop() or 0) * scale
 	end
 end
 
@@ -943,7 +944,7 @@ function GladiusEx:GetUnitIndex(unit)
 		unit_index = 1
 	else
 		local utype, n = strmatch(unit, "^(%a+)(%d+)$")
-		if utype == "party" then
+		if utype == "party" or utype == "partypet" then
 			unit_index = tonumber(n) + 1
 		elseif utype == "arena" or utype == "arenapet" then
 			unit_index = tonumber(n)
@@ -954,12 +955,15 @@ function GladiusEx:GetUnitIndex(unit)
 	return unit_index
 end
 
+function GladiusEx:GetUnitAnchorType(unit)
+	return self:IsArenaUnit(unit) and "arena" or "party"
+end
+
 function GladiusEx:GetUnitAnchor(unit)
 	return self:IsArenaUnit(unit) and self.arena_anchor or self.party_anchor
 end
 
 function GladiusEx:UpdateUnitPosition(unit)
-	--local left, right, top, bottom = -20, 20, 20, -20-- self.buttons[unit]:GetHitRectInsets()
 	local left, right, top, bottom = self.buttons[unit]:GetHitRectInsets()
 	self.buttons[unit]:ClearAllPoints()
 
@@ -990,8 +994,13 @@ function GladiusEx:UpdateUnitPosition(unit)
 			self.buttons[unit]:SetPoint("LEFT", anchor, "LEFT", abs(left), offset - margin_y)
 		end
 	else
-		local eff = self.buttons[unit]:GetEffectiveScale()
-		self.buttons[unit]:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", self.db[unit].x[unit] / eff, self.db[unit].y[unit] / eff)
+		local x, y = self.db[unit].x[unit], self.db[unit].y[unit]
+		if x and y then
+			local eff = self.buttons[unit]:GetEffectiveScale()
+			self.buttons[unit]:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", self.db[unit].x[unit] / eff, self.db[unit].y[unit] / eff)
+		else
+			self.buttons[unit]:SetPoint("CENTER", UIParent, "CENTER")
+		end
 	end
 end
 

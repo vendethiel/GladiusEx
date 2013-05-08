@@ -251,6 +251,13 @@ function GladiusEx:MakeGroupOptions(group, unit, order)
 								type = "toggle",
 								name = L["Group frames"],
 								desc = L["Disable this to be able to move the frames separately"],
+								set = function(info, value)
+									if not value then
+										-- if ungrouping, save current frame positions
+										self:SaveAnchorPosition(self:GetUnitAnchorType(unit))
+									end
+									setOption(info, value)
+								end,
 								order = 10,
 							},
 						},
