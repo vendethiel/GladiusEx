@@ -90,6 +90,14 @@ L["PowerBar"] = "Power Bar"
 L["TargetBar"] = "Target Bar"
 
 -- General
+L["Shield icon"] = true
+L["Toggle the cast bar shield icon for not interrumpible spells"] = true
+L["Not interrumpible color"] = true
+L["Color of the cast bar when the spell can't be interrupted"] = true
+L["Out of range alpha"] = true
+L["Transparency for units out of range"] = true
+
+
 L["%s settings"] = true
 L["** If this is not your first run please lock or move the frame to prevent this from happening **"] = true
 L["Action"] = true

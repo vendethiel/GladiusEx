@@ -28,6 +28,7 @@ local anchor_height = 20
 
 local LSR = LibStub("LibSpecRoster-1.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
+local RC = LibStub("LibRangeCheck-2.0")
 
 -- debugging output
 local log_frame
@@ -289,14 +290,17 @@ function GladiusEx:OnEnable()
 	self.arena_anchor, self.arena_background = self:CreateAnchor("arena")
 	self.party_anchor, self.party_background = self:CreateAnchor("party")
 
+	-- update roster
+	self:UpdateAllGUIDs()
+
+	-- update range checkers
+	self:UpdateRangeCheckers()
+
 	-- enable modules
 	self:EnableModules()
 
 	-- init options
 	self:SetupOptions()
-
-	-- update roster
-	self:UpdateAllGUIDs()
 
 	-- register the appropriate events
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -310,6 +314,7 @@ function GladiusEx:OnEnable()
 	self:RegisterEvent("UNIT_PET", "UpdateUnitGUID")
 	self:RegisterEvent("UNIT_PORTRAIT_UPDATE", "UpdateUnitGUID")
 	LSR.RegisterMessage(self, "LSR_SpecializationChanged")
+	RC.RegisterCallback(self, RC.CHECKERS_CHANGED, "UpdateRangeCheckers")
 	self.dbi.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
 	self.dbi.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
 	self.dbi.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")
@@ -416,6 +421,8 @@ function GladiusEx:UpdatePartyFrames()
 			else
 				self:RefreshUnit(unit)
 			end
+
+			self:UpdateUnitState(unit, false)
 		else
 			self:HideUnit(unit)
 		end
@@ -445,6 +452,8 @@ function GladiusEx:UpdateArenaFrames()
 			else
 				self:RefreshUnit(unit)
 			end
+
+			self:UpdateUnitState(unit, self.buttons[unit].unit_state == STATE_STEALTH)
 		else
 			self:HideUnit(unit)
 		end
@@ -664,6 +673,31 @@ function GladiusEx:UNIT_HEALTH(event, unit)
 	self:UpdateUnitState(unit, false)
 end
 
+local STATE_NORMAL = 0
+local STATE_DEAD = 1
+local STATE_STEALTH = 2
+local RANGE_UPDATE_INTERVAL = 1 / 5
+local range_check
+
+function GladiusEx:UpdateRangeCheckers()
+	range_check = RC:GetSmartMinChecker(40)
+end
+
+
+local function FrameRangeChecker_OnUpdate(f, elapsed)
+	f.elapsed = f.elapsed + elapsed
+
+	if f.elapsed >= RANGE_UPDATE_INTERVAL then
+		f.elapsed = 0
+		local unit = f.unit
+		if GladiusEx:IsTesting(unit) or range_check(unit) then
+			f:SetAlpha(1)
+		else
+			f:SetAlpha(GladiusEx.db[unit].oorAlpha)
+		end
+	end
+end
+
 function GladiusEx:UpdateUnitState(unit, stealth)
 	if not self.buttons[unit] then
 		log("UpdateUnitState", unit, "NO BUTTON")
@@ -671,15 +705,20 @@ function GladiusEx:UpdateUnitState(unit, stealth)
 	end
 
 	if UnitIsDeadOrGhost(unit) then
+		self.buttons[unit].unit_state = STATE_DEAD
+		self.buttons[unit]:SetScript("OnUpdate", nil)
 		self.buttons[unit]:SetAlpha(self.db[unit].deadAlpha)
-		log("UpdateUnitState", unit, "DEAD")
 	elseif stealth then
+		self.buttons[unit].unit_state = STATE_STEALTH
+		self.buttons[unit]:SetScript("OnUpdate", nil)
 		self.buttons[unit]:SetAlpha(self.db[unit].stealthAlpha)
-		log("UpdateUnitState", unit, "STEALTH")
 	else
-		self.buttons[unit]:SetAlpha(1)
-		log("UpdateUnitState", unit, "NORMAL")
+		self.buttons[unit].unit_state = STATE_NORMAL
+		self.buttons[unit]:SetScript("OnUpdate", FrameRangeChecker_OnUpdate)
+		FrameRangeChecker_OnUpdate(self.buttons[unit], RANGE_UPDATE_INTERVAL + 1)
 	end
+
+	log("UpdateUnitState", unit, self.buttons[unit].unit_state)
 end
 
 function GladiusEx:LSR_SpecializationChanged(event, guid, unitID, specID)
@@ -809,9 +848,8 @@ function GladiusEx:CreateUnit(unit)
 	local button = CreateFrame("Frame", "GladiusExButtonFrame" .. unit, self:IsArenaUnit(unit) and self.arena_parent or self.party_parent)
 	self.buttons[unit] = button
 
-	-- hide
-	self.buttons[unit]:SetAlpha(0)
-	self.buttons[unit]:Hide()
+	button.elapsed = 0
+	button.unit = unit
 
 	button:SetClampedToScreen(true)
 	button:EnableMouse(true)
@@ -847,6 +885,10 @@ function GladiusEx:CreateUnit(unit)
 			self.db[unit].y[unit] = f:GetTop() * scale
 		end
 	end)
+
+	-- hide
+	button:SetAlpha(0)
+	button:Hide()
 
 	-- secure button
 	button.secure = CreateFrame("Button", "GladiusExSecureButton" .. unit, button, "SecureActionButtonTemplate")
