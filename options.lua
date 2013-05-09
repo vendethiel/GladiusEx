@@ -10,6 +10,19 @@ GladiusEx.defaults = {
 		globalFontSize = 11,
 		useGlobalFontSize = true,
 		showParty = true,
+		testUnits = {
+			["arena1"] = { health = 320000, maxHealth = 320000, power = 18000, maxPower = 18000, powerType = 0, unitClass = "MAGE", unitRace = "Scourge", unitSpec = "Frost", specID = 64 },
+			["arena2"] = { health = 300000, maxHealth = 320000, power = 10000, maxPower = 12000, powerType = 2, unitClass = "HUNTER", unitRace = "NightElf", unitSpec = "Beast Mastery", specID = 253 },
+			["arena3"] = { health = 240000, maxHealth = 350000, power = 90, maxPower = 120, powerType = 3, unitClass = "ROGUE", unitRace = "Human", unitSpec = "Subtlety", specID = 261 },
+			["arena4"] = { health = 200000, maxHealth = 400000, power = 80, maxPower = 130, powerType = 6, unitClass = "DEATHKNIGHT", unitRace = "Dwarf", unitSpec = "Unholy", specID = 252 },
+			["arena5"] = { health = 100000, maxHealth = 300000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Gnome", unitSpec = "Arms", specID = 71 },
+
+			["player"] = { health = 320000, maxHealth = 320000, power = 18000, maxPower = 18000, powerType = 0, unitClass = "PRIEST", unitRace = "Draenei", unitSpec = "Discipline", specID = 256 },
+			["party1"] = { health = 300000, maxHealth = 320000, power = 10000, maxPower = 12000, powerType = 3, unitClass = "MONK", unitRace = "Pandaren", unitSpec = "Windwalker", specID = 269 },
+			["party2"] = { health = 100000, maxHealth = 300000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Gnome", unitSpec = "Arms", specID = 71 },
+			["party3"] = { health = 200000, maxHealth = 400000, power = 80, maxPower = 130, powerType = 6, unitClass = "DEATHKNIGHT", unitRace = "Dwarf", unitSpec = "Unholy", specID = 252 },
+			["party4"] = { health = 100000, maxHealth = 300000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Gnome", unitSpec = "Arms", specID = 71 },
+		},
 		--@debug@
 		debug = true,
 		--@end-debug@
@@ -476,97 +489,140 @@ function GladiusEx:SetupOptions()
 				type = "group",
 				name = L["Testing"],
 				desc = L["Testing settings"],
+				childGroups = "tree",
 				order = 2,
 				args = {
 					test = {
 						type = "header",
 						name = L["Test frames"],
-						--inline = true,
 						order = 0,
-						-- args = {
-						},
-							test2 = {
-								type = "execute",
-								name = L["Test 2v2"],
-								width = "half",
-								func = function() self:SetTesting(2) end,
-								disabled = function() return self:IsTesting() == 2 end,
-								order = 0.2,
-							},
-							test3 = {
-								type = "execute",
-								name = L["Test 3v3"],
-								width = "half",
-								func = function() self:SetTesting(3) end,
-								disabled = function() return self:IsTesting() == 3 end,
-								order = 0.3,
-							},
-							test5 = {
-								type = "execute",
-								name = L["Test 5v5"],
-								width = "half",
-								func = function() self:SetTesting(5) end,
-								disabled = function() return self:IsTesting() == 5 end,
-								order = 0.5,
-							},
-							hide = {
-								type = "execute",
-								name = L["Stop testing"],
-								width = "triple",
-								func = function() self:SetTesting() end,
-								disabled = function() return not self:IsTesting() end,
-								order = 1,
-							}
-						--}
-					--},
-					--[[
-					test_frame = {
-						type = "group",
-						name = "arena1",
-						inline = true,
+					},
+					test2 = {
+						type = "execute",
+						name = L["Test 2v2"],
+						width = "half",
+						func = function() self:SetTesting(2) end,
+						disabled = function() return self:IsTesting() == 2 end,
+						order = 0.2,
+					},
+					test3 = {
+						type = "execute",
+						name = L["Test 3v3"],
+						width = "half",
+						func = function() self:SetTesting(3) end,
+						disabled = function() return self:IsTesting() == 3 end,
+						order = 0.3,
+					},
+					test5 = {
+						type = "execute",
+						name = L["Test 5v5"],
+						width = "half",
+						func = function() self:SetTesting(5) end,
+						disabled = function() return self:IsTesting() == 5 end,
+						order = 0.5,
+					},
+					hide = {
+						type = "execute",
+						name = L["Stop testing"],
+						width = "triple",
+						func = function() self:SetTesting() end,
+						disabled = function() return not self:IsTesting() end,
 						order = 1,
-						args = {
-							spec = {
-								order = 1,
-								type = "select",
-								name = L["Spec"],
-								desc = L["Talent specialization"],
-								values = function() 
-									local t = {}
-
-									for classID = 1, MAX_CLASSES do
-										local classDisplayName, classTag = GetClassInfoByID(classID)
-										local color = RAID_CLASS_COLORS[classTag]
-										local colorfmt = string.format("|cff%02x%02x%02x", color.r * 255, color.g * 255, color.b * 255)
-										for specNum = 1, GetNumSpecializationsForClassID(classID) do
-											local specID, name, description, icon, background, role = GetSpecializationInfoForClassID(classID, specNum)
-											t[specID] = string.format("%s%s/%s", colorfmt, classDisplayName, name)
-										end
-									end
-									return t
-								end
-							},
-							race = {
-								order = 2,
-								type = "select",
-								name = L["Race"],
-								desc = L["Talent specialization"],
-								values = {
-									["HCENTER"] = L["Left and right"],
-									["VCENTER"] = L["Up and down"],
-									["LEFT"]    = L["Left"],
-									["RIGHT"]   = L["Right"],
-									["UP"]      = L["Up"],
-									["DOWN"]    = L["Down"],
-								},
-							},
-						}
-					}
-					]]
+					},
+					testunits = {
+						type = "header",
+						name = L["Test units"],
+						order = 3,
+					},
 				}
 			}
 		}
 	}
+
+	-- add test units
+	for _, unit in ipairs(fn.difference(fn.concat(fn.keys(self.party_units), fn.keys(self.arena_units)), { "player" })) do
+		local test_frame = {
+			type = "group",
+			name = unit,
+			order = 10,
+			inline = true,
+			args = {
+				race = {
+					order = 1,
+					type = "select",
+					name = L["Race"],
+					desc = L["Unit race"],
+					get = function() return self.db.base.testUnits[unit].unitRace end,
+					set = function(info, value)
+						self.db.base.testUnits[unit].unitRace = value
+						self:UpdateFrames()
+					end,
+					values = {
+						["BloodElf"] = "BloodElf",
+						["Draenei"] = "Draenei",
+						["Dwarf"] = "Dwarf",
+						["Gnome"] = "Gnome",
+						["Goblin"] = "Goblin",
+						["Human"] = "Human",
+						["NightElf"] = "NightElf",
+						["Orc"] = "Orc",
+						["Pandaren"] = "Pandaren",
+						["Scourge"] = "Scourge",
+						["Tauren"] = "Tauren",
+						["Troll"] = "Troll",
+						["Worgen"] = "Worgen",
+					},
+				},
+				spec = {
+					order = 2,
+					type = "select",
+					name = L["Spec"],
+					desc = L["Unit talent specialization"],
+					get = function() return self.db.base.testUnits[unit].specID end,
+					set = function(info, value)
+						self.db.base.testUnits[unit].specID = value
+						self.db.base.testUnits[unit].unitSpec = select(2, GetSpecializationInfoByID(value))
+						self.db.base.testUnits[unit].unitClass = select(7, GetSpecializationInfoByID(value))
+						self:UpdateFrames()
+					end,
+					values = function() 
+						local t = {}
+						for classID = 1, MAX_CLASSES do
+							local classDisplayName, classTag = GetClassInfoByID(classID)
+							local color = RAID_CLASS_COLORS[classTag]
+							local colorfmt = string.format("|cff%02x%02x%02x", color.r * 255, color.g * 255, color.b * 255)
+							for specNum = 1, GetNumSpecializationsForClassID(classID) do
+								local specID, name, description, icon, background, role = GetSpecializationInfoForClassID(classID, specNum)
+								t[specID] = string.format("%s%s/%s", colorfmt, classDisplayName, name)
+							end
+						end
+						return t
+					end
+				},
+				powerType = {
+					order = 3,
+					type = "select",
+					name = L["Power type"],
+					desc = L["Unit power type"],
+					get = function() return self.db.base.testUnits[unit].powerType end,
+					set = function(info, value)
+						self.db.base.testUnits[unit].powerType = value
+						self:UpdateFrames()
+					end,
+					values = {
+						[0] = MANA,
+						[1] = RAGE,
+						[2] = FOCUS,
+						[3] = ENERGY,
+						[4] = CHI,
+						[6] = RUNIC_POWER,
+					},
+				},
+			}
+		}
+		options.args.testing.args[unit] = test_frame
+	end
+
 
 	-- add groups
 	options.args.arena = self:MakeGroupOptions("Arena", "arena1", 10)

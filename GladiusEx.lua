@@ -23,6 +23,9 @@ local party_units = {
 	["party4"] = true,
 }
 
+GladiusEx.party_units = party_units
+GladiusEx.arena_units = arena_units
+
 local anchor_width = 220
 local anchor_height = 20
 
@@ -220,24 +223,11 @@ function GladiusEx:OnInitialize()
 
 	-- test environment
 	self.test = false
-	self.testing = setmetatable({
-		["arena1"] = { health = 320000, maxHealth = 320000, power = 18000, maxPower = 18000, powerType = 0, unitClass = "MAGE", unitRace = "Scourge", unitSpec = "Frost", specID = 64 },
-		["arena2"] = { health = 300000, maxHealth = 320000, power = 10000, maxPower = 12000, powerType = 2, unitClass = "HUNTER", unitRace = "NightElf", unitSpec = "Beast Mastery", specID = 253 },
-		["arena3"] = { health = 240000, maxHealth = 350000, power = 90, maxPower = 120, powerType = 3, unitClass = "ROGUE", unitRace = "Human", unitSpec = "Subtlety", specID = 261 },
-		["arena4"] = { health = 200000, maxHealth = 400000, power = 80, maxPower = 130, powerType = 6, unitClass = "DEATHKNIGHT", unitRace = "Dwarf", unitSpec = "Unholy", specID = 252 },
-		["arena5"] = { health = 100000, maxHealth = 300000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Gnome", unitSpec = "Arms", specID = 71 },
-
-		["player"] = { health = 320000, maxHealth = 320000, power = 18000, maxPower = 18000, powerType = 0, unitClass = "PRIEST", unitRace = "Draenei", unitSpec = "Discipline" },
-		["party1"] = { health = 300000, maxHealth = 320000, power = 10000, maxPower = 12000, powerType = 3, unitClass = "MONK", unitRace = "Pandaren", unitSpec = "Windwalker", specID = 269 },
-		["party2"] = { health = 100000, maxHealth = 300000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Gnome", unitSpec = "Arms", specID = 71 },
-		["party3"] = { health = 200000, maxHealth = 400000, power = 80, maxPower = 130, powerType = 6, unitClass = "DEATHKNIGHT", unitRace = "Dwarf", unitSpec = "Unholy", specID = 252 },
-		["party4"] = { health = 100000, maxHealth = 300000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Gnome", unitSpec = "Arms", specID = 71 },
-
-	}, {
+	self.testing = setmetatable({}, {
 		__index = function(t, k)
-			return t["arena1"]
-		end
-	})
+				return self.db.base.testUnits[k]
+			end
+		})
 
 	-- buttons
 	self.buttons = {}
@@ -841,7 +831,10 @@ function GladiusEx:HideUnit(unit)
 
 	-- hide the button
 	self.buttons[unit]:SetAlpha(0)
-	self.buttons[unit]:Hide()
+
+	if not InCombatLockdown() then
+		self.buttons[unit]:Hide()
+	end
 end
 
 function GladiusEx:CreateUnit(unit)
