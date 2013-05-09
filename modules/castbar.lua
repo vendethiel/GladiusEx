@@ -9,8 +9,8 @@ local min = math.min
 local GetTime = GetTime
 local GetSpellInfo, UnitCastingInfo, UnitChannelInfo = GetSpellInfo, UnitCastingInfo, UnitChannelInfo
 
-local time_text_format_normal = "%.02f "
-local time_text_format_delay = "+%.02f %.02f "
+local time_text_format_normal = "%.01f "
+local time_text_format_delay = "+%.01f %.01f "
 
 local CastBar = GladiusEx:NewGladiusExModule("CastBar", true, {
 		castBarAnchor = "TOPLEFT",
@@ -18,14 +18,16 @@ local CastBar = GladiusEx:NewGladiusExModule("CastBar", true, {
 		castBarRelativePoint = "BOTTOMLEFT",
 		castBarOffsetX = 0,
 		castBarOffsetY = 0,
-		castBarHeight = 24,
+		castBarHeight = 20,
 		castBarAdjustWidth = true,
 		castBarWidth = 150,
 		castBarInverse = false,
 		castBarColor = { r = 1, g = 1, b = 0, a = 1 },
-		castBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
+		castBarNotIntColor = { r = 1, g = 0, b = 0, a = 1 },
+		castBarBackgroundColor = { r = 0, g = 0, b = 0, a = 0.3 },
 		castBarTexture = "Minimalist",
 		castIcon = true,
+		castShieldIcon = true,
 		castIconPosition = "LEFT",
 		castText = true,
 		castTextSize = 11,
@@ -46,14 +48,16 @@ local CastBar = GladiusEx:NewGladiusExModule("CastBar", true, {
 		castBarRelativePoint = "BOTTOMRIGHT",
 		castBarOffsetX = 0,
 		castBarOffsetY = 0,
-		castBarHeight = 24,
+		castBarHeight = 20,
 		castBarAdjustWidth = true,
 		castBarWidth = 150,
 		castBarInverse = false,
 		castBarColor = { r = 1, g = 1, b = 0, a = 1 },
-		castBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
+		castBarNotIntColor = { r = 1, g = 0, b = 0, a = 1 },
+		castBarBackgroundColor = { r = 0, g = 0, b = 0, a = 0.3 },
 		castBarTexture = "Minimalist",
 		castIcon = true,
+		castShieldIcon = true,
 		castIconPosition = "RIGHT",
 		castText = true,
 		castTextSize = 11,
@@ -75,6 +79,8 @@ function CastBar:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_DELAYED")
 	self:RegisterEvent("UNIT_SPELLCAST_FAILED", "UNIT_SPELLCAST_STOP")
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED", "UNIT_SPELLCAST_STOP")
+	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
+	self:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE", "UNIT_SPELLCAST_DELAYED")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP", "UNIT_SPELLCAST_STOP")
@@ -149,8 +155,8 @@ function CastBar:UNIT_SPELLCAST_START(event, unit)
 	local f = self.frame[unit]
 	if not f then return end
 
-	local spell, rank, displayName, icon, startTime, endTime, isTradeSkill = UnitCastingInfo(unit)
-	if (spell) then
+	local spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unit)
+	if spell then
 		f.spellName = spell
 		f.isChanneling = false
 		f.isCasting = true
@@ -161,8 +167,8 @@ function CastBar:UNIT_SPELLCAST_START(event, unit)
 		f.icon:SetTexture(icon)
 		f:SetScript("OnUpdate", CastUpdate)
 		CastUpdate(f)
-
 		UpdateCastText(f, spell, rank)
+		self:SetInterrumpible(unit, not notInterruptible)
 	end
 end
 
@@ -170,8 +176,8 @@ function CastBar:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	local f = self.frame[unit]
 	if not f then return end
 
-	local spell, rank, displayName, icon, startTime, endTime, isTradeSkill = UnitChannelInfo(unit)
-	if (spell) then
+	local spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitChannelInfo(unit)
+	if spell then
 		f.spellName = spell
 		f.isChanneling = true
 		f.isCasting = false
@@ -182,9 +188,17 @@ function CastBar:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 		f.icon:SetTexture(icon)
 		f:SetScript("OnUpdate", CastUpdate)
 		CastUpdate(f)
-
 		UpdateCastText(f, spell, rank)
+		self:SetInterrumpible(unit, not notInterruptible)
 	end
+end
+
+function CastBar:UNIT_SPELLCAST_INTERRUPTIBLE(event, unit)
+	self:SetInterrumpible(unit, true)
+end
+
+function CastBar:UNIT_SPELLCAST_NOT_INTERRUPTIBLE(event, unit)
+	self:SetInterrumpible(unit, false)
 end
 
 function CastBar:UNIT_SPELLCAST_STOP(event, unit, spell)
@@ -219,6 +233,20 @@ function CastBar:UNIT_SPELLCAST_DELAYED(event, unit)
 	self.frame[unit].bar:SetMinMaxValues(0, (endTime - startTime) / 1000)
 end
 
+function CastBar:SetInterrumpible(unit, interrumpible)
+	if not self.frame[unit] then return end
+
+	local color = interrumpible and self.db[unit].castBarColor or self.db[unit].castBarNotIntColor
+
+	self.frame[unit].bar:SetStatusBarColor(color.r, color.g, color.b, color.a)
+
+	if not self.db[unit].castShieldIcon or interrumpible then
+		self.frame[unit].icon.shield:Hide()
+	else
+		self.frame[unit].icon.shield:Show()
+	end
+end
+
 function CastBar:CastEnd(frame)
 	frame.isCasting = false
 	frame.isChanneling = false
@@ -226,6 +254,7 @@ function CastBar:CastEnd(frame)
 	frame.castText:SetText("")
 	frame.icon:SetTexture("")
 	frame.bar:SetValue(0)
+	self:SetInterrumpible(frame.unit, true)
 end
 
 function CastBar:CreateBar(unit)
@@ -241,6 +270,8 @@ function CastBar:CreateBar(unit)
 	self.frame[unit].timeText = self.frame[unit].bar:CreateFontString("GladiusEx" .. self:GetName() .. "TimeText" .. unit, "OVERLAY")
 	self.frame[unit].icon = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "IconFrame" .. unit, "ARTWORK")
 	self.frame[unit].icon.bg = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "IconFrameBackground" .. unit, "BACKGROUND")
+	self.frame[unit].icon.shield = self.frame[unit].bar:CreateTexture(nil, "OVERLAY")
+	self.frame[unit].icon.shield:SetTexture([[Interface\AddOns\GladiusEx\images\shield]])
 	self.frame[unit].unit = unit
 end
 
@@ -278,6 +309,7 @@ function CastBar:Update(unit)
 
 	self.frame[unit]:SetHeight(self.db[unit].castBarHeight)
 	self.frame[unit]:SetWidth(width)
+	self.frame[unit]:SetFrameLevel(10)
 
 	local parent = GladiusEx:GetAttachFrame(unit, self.db[unit].castBarAttachTo)
 	self.frame[unit]:ClearAllPoints()
@@ -303,6 +335,12 @@ function CastBar:Update(unit)
 		self.frame[unit].icon:Hide()
 		self.frame[unit].icon.bg:Hide()
 	end
+
+	-- update not interrumpible shield
+	self.frame[unit].icon.shield:SetWidth(height * 64 / 20)
+	self.frame[unit].icon.shield:SetHeight(height * 64 / 20)
+	self.frame[unit].icon.shield:SetPoint("CENTER", self.frame[unit].icon, "CENTER")
+	self.frame[unit].icon.shield:Hide()
 
 	-- update bar
 	self.frame[unit].bar:ClearAllPoints()
@@ -461,6 +499,24 @@ function CastBar:GetOptions(unit)
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 5,
 						},
+						castBarNotIntColor = {
+							type = "color",
+							name = L["Not interrumpible color"],
+							desc = L["Color of the cast bar when the spell can't be interrupted"],
+							hasAlpha = true,
+							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
+							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
+							order = 6,
+						},
+						sep = {
+							type = "description",
+							name = "",
+							width = "full",
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
+							order = 7,
+						},
 						castBarBackgroundColor = {
 							type = "color",
 							name = L["Background color"],
@@ -472,7 +528,7 @@ function CastBar:GetOptions(unit)
 							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 10,
 						},
-						sep = {
+						sep2 = {
 							type = "description",
 							name = "",
 							width = "full",
@@ -496,7 +552,7 @@ function CastBar:GetOptions(unit)
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 20,
 						},
-						sep2 = {
+						sep3 = {
 							type = "description",
 							name = "",
 							width = "full",
@@ -516,6 +572,19 @@ function CastBar:GetOptions(unit)
 							values = { ["LEFT"] = L["Left"], ["RIGHT"] = L["Right"] },
 							disabled = function() return not self.db[unit].castIcon or not self:IsUnitEnabled(unit) end,
 							order = 30,
+						},
+						sep4 = {
+							type = "description",
+							name = "",
+							width = "full",
+							order = 31,
+						},
+						castShieldIcon = {
+							type = "toggle",
+							name = L["Shield icon"],
+							desc = L["Toggle the cast bar shield icon for not interrumpible spells"],
+							disabled = function() return not self.db[unit].castIcon or not self:IsUnitEnabled(unit) end,
+							order = 35,
 						},
 					},
 				},
