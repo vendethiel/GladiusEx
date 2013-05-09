@@ -149,9 +149,9 @@ local function GetDefaultSpells()
 			[46968] = true, -- WARRIOR/Shockwave
 			[23920] = true, -- WARRIOR/Spell Reflection
 		},
-		{ -- group 2	
+		{ -- group 2
 			[42292] = true, -- ITEMS/PvP Trinket
-		} 
+		}
 	}
 end
 
@@ -162,6 +162,7 @@ local function MakeGroupDb(settings)
 		cooldownsRelativePoint = "BOTTOMLEFT",
 		cooldownsOffsetX = 0,
 		cooldownsOffsetY = 0,
+		cooldownsBackground = { r = 0, g = 0, b = 0, a = 0 },
 		cooldownsGrow = "DOWNRIGHT",
 		cooldownsSpacingX = 0,
 		cooldownsSpacingY = 0,
@@ -842,7 +843,9 @@ local function UpdateCooldownFrame(frame, size, border_size, crop)
 end
 
 local function UpdateCooldownGroup(
-	cooldownFrame, unit,
+	unit,
+	cooldownFrame,
+	cooldownBackground,
 	cooldownAttachTo,
 	cooldownAnchor,
 	cooldownRelativePoint,
@@ -876,8 +879,8 @@ local function UpdateCooldownGroup(
 	cooldownFrame:SetHeight(cooldownSize * ceil(cooldownMax / cooldownPerColumn) + (cooldownSpacingY * (ceil(cooldownMax / cooldownPerColumn) + 1)))
 
 	-- backdrop
-	-- cooldownFrame:SetBackdrop({bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tile = true, tileSize = 16})
-	-- cooldownFrame:SetBackdropColor(0, 0, 1, 1)
+	cooldownFrame:SetBackdrop({bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tile = true, tileSize = 16})
+	cooldownFrame:SetBackdropColor(cooldownBackground.r, cooldownBackground.g, cooldownBackground.b, cooldownBackground.a)
 
 	-- icon points
 	local anchor, parent, relativePoint, offsetX, offsetY
@@ -939,7 +942,9 @@ function Cooldowns:UpdateGroup(unit, group)
 	local gs = self:GetGroupState(unit, group)
 
 	-- update cooldown frame
-	UpdateCooldownGroup(gs.frame, unit,
+	UpdateCooldownGroup(unit,
+		gs.frame,
+		db.cooldownsBackground,
 		db.cooldownsAttachTo,
 		db.cooldownsAnchor,
 		db.cooldownsRelativePoint,
@@ -1071,6 +1076,16 @@ function Cooldowns:MakeGroupOptions(unit, group)
 						inline = true,
 						order = 1,
 						args = {
+							cooldownsBackground = {
+								type = "color",
+								name = L["Background color"],
+								desc = L["Color of the frame background"],
+								hasAlpha = true,
+								get = function(info) return GladiusEx:GetColorOption(self:GetGroupDB(unit, group), info) end,
+								set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self:GetGroupDB(unit, group), info, r, g, b, a) end,
+								disabled = function() return not self:IsUnitEnabled(unit) end,
+								order = 1,
+							},
 							cooldownsGrow = {
 								type = "select",
 								name = L["Grow direction"],

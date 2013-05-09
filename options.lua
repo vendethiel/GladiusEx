@@ -585,7 +585,7 @@ function GladiusEx:SetupOptions()
 						self.db.base.testUnits[unit].unitClass = select(7, GetSpecializationInfoByID(value))
 						self:UpdateFrames()
 					end,
-					values = function() 
+					values = function()
 						local t = {}
 						for classID = 1, MAX_CLASSES do
 							local classDisplayName, classTag = GetClassInfoByID(classID)

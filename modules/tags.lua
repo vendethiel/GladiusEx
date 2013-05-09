@@ -179,7 +179,7 @@ end
 function Tags:ParseText(unit, text)
 	local out = {}
 	local arg_values = {}
-	
+
 	local function output_text(otext)
 		if otext ~= "" then
 			tinsert(arg_values, otext)
