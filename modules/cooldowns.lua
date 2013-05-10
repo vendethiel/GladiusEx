@@ -9,6 +9,7 @@ local tinsert, tremove, tsort = table.insert, table.remove, table.sort
 local pairs, ipairs, select, type, unpack = pairs, ipairs, select, type, unpack
 local min, max, ceil, random = math.min, math.max, math.ceil, math.random
 local GetTime, UnitExists, UnitFactionGroup, UnitClass, UnitRace = GetTime, UnitExists, UnitFactionGroup, UnitClass, UnitRace
+local UnitBuff = UnitBuff
 
 local function GetDefaultSpells()
 	return {
@@ -164,6 +165,8 @@ local function MakeGroupDb(settings)
 		cooldownsOffsetY = 0,
 		cooldownsBackground = { r = 0, g = 0, b = 0, a = 0 },
 		cooldownsGrow = "DOWNRIGHT",
+		cooldownsPaddingX = 0,
+		cooldownsPaddingY = 0,
 		cooldownsSpacingX = 0,
 		cooldownsSpacingY = 0,
 		cooldownsPerColumn = 8,
@@ -183,20 +186,20 @@ local function MakeGroupDb(settings)
 			"offensive", "defensive", "heal", "uncat"
 		},
 		cooldownsCatColors = {
-			["pvp_trinket"] =  { r = 1.0, g = 1.0, b = 1.0 }, ["dispel"] =       { r = 1.0, g = 1.0, b = 1.0 },
-			["mass_dispel"] =  { r = 1.0, g = 1.0, b = 1.0 }, ["immune"] =       { r = 0.0, g = 0.0, b = 1.0 },
-			["interrupt"] =    { r = 1.0, g = 0.0, b = 1.0 }, ["silence"] =      { r = 1.0, g = 0.0, b = 1.0 },
-			["stun"] =         { r = 0.0, g = 1.0, b = 1.0 }, ["knockback"] =    { r = 0.0, g = 1.0, b = 1.0 },
-			["cc"] =           { r = 0.0, g = 1.0, b = 1.0 }, ["offensive"] =    { r = 1.0, g = 0.0, b = 0.0 },
-			["defensive"] =    { r = 0.0, g = 1.0, b = 0.0 }, ["heal"] =         { r = 0.0, g = 1.0, b = 0.0 },
-			["uncat"] =        { r = 1.0, g = 1.0, b = 1.0 },
+			["pvp_trinket"] = { r = 1.0, g = 1.0, b = 1.0 }, ["dispel"] =    { r = 1.0, g = 1.0, b = 1.0 },
+			["mass_dispel"] = { r = 1.0, g = 1.0, b = 1.0 }, ["immune"] =    { r = 0.0, g = 0.0, b = 1.0 },
+			["interrupt"] =   { r = 1.0, g = 0.0, b = 1.0 }, ["silence"] =   { r = 1.0, g = 0.0, b = 1.0 },
+			["stun"] =        { r = 0.0, g = 1.0, b = 1.0 }, ["knockback"] = { r = 0.0, g = 1.0, b = 1.0 },
+			["cc"] =          { r = 0.0, g = 1.0, b = 1.0 }, ["offensive"] = { r = 1.0, g = 0.0, b = 0.0 },
+			["defensive"] =   { r = 0.0, g = 1.0, b = 0.0 }, ["heal"] =      { r = 0.0, g = 1.0, b = 0.0 },
+			["uncat"] =       { r = 1.0, g = 1.0, b = 1.0 },
 		},
 		cooldownsCatGroups = {
-			["pvp_trinket"] =  1, ["dispel"] =       1, ["mass_dispel"] =  1,
-			["immune"] =       1, ["interrupt"] =    1, ["silence"] =      1,
-			["stun"] =         1, ["knockback"] =    1, ["cc"] =           1,
-			["offensive"] =    1, ["defensive"] =    1, ["heal"] =         1,
-			["uncat"] =        1,
+			["pvp_trinket"] = 1, ["dispel"] =    1, ["mass_dispel"] = 1,
+			["immune"] =      1, ["interrupt"] = 1, ["silence"] =     1,
+			["stun"] =        1, ["knockback"] = 1, ["cc"] =          1,
+			["offensive"] =   1, ["defensive"] = 1, ["heal"] =        1,
+			["uncat"] =       1,
 		},
 		cooldownsHideTalentsUntilDetected = true,
 	}
@@ -223,6 +226,8 @@ local Cooldowns = GladiusEx:NewGladiusExModule("Cooldowns", false, {
 				cooldownsRelativePoint = "BOTTOMLEFT",
 				cooldownsGrow = "DOWNRIGHT",
 				cooldownsBorderSize = 0,
+				cooldownsPaddingX = 0,
+				cooldownsPaddingY = 2,
 				cooldownsSpacingX = 2,
 				cooldownsSpacingY = 2,
 				cooldownsSpells = GetDefaultSpells()[1],
@@ -263,6 +268,8 @@ local Cooldowns = GladiusEx:NewGladiusExModule("Cooldowns", false, {
 				cooldownsRelativePoint = "BOTTOMRIGHT",
 				cooldownsGrow = "DOWNLEFT",
 				cooldownsBorderSize = 0,
+				cooldownsPaddingX = 0,
+				cooldownsPaddingY = 2,
 				cooldownsSpacingX = 2,
 				cooldownsSpacingY = 2,
 				cooldownsSpells = GetDefaultSpells()[1],
@@ -567,20 +574,24 @@ local function GetCooldownList(unit, group)
 
 	local specID, class, race = GetUnitInfo(unit)
 
-	-- generate list of cooldowns available (and enabled) for this unit
+	-- generate list of valid cooldowns for this unit
 	wipe(spell_list)
 	for spellid, spelldata in CT:IterateCooldowns(class, specID, race) do
+		-- check if the spell is enabled by the user
 		if db.cooldownsSpells[spellid] then
 			local tracked = CT:GetUnitCooldownInfo(unit, spellid)
-
-			if (not spelldata.cooldown or spelldata.cooldown < 600) and ((not spelldata.glyph and not spelldata.talent and not spelldata.pet) or (tracked and tracked.detected) or not db.cooldownsHideTalentsUntilDetected) then
-				if spelldata.replaces then
-					-- remove replaced spell if detected
-					spell_list[spelldata.replaces] = false
-				end
-				-- do not overwrite if this spell has been replaced
-				if spell_list[spellid] == nil then
-					spell_list[spellid] = true
+			-- check if the spell has a cooldown valid for an arena, and check if it is a talent that has not yet been detected
+			if (not spelldata.cooldown or spelldata.cooldown < 600) and ((not spelldata.glyph and not spelldata.talent and not spelldata.pet and not spelldata.symbiosis) or (tracked and tracked.detected) or not db.cooldownsHideTalentsUntilDetected) then
+				-- check if the spell requires an aura
+				if not spelldata.requires_aura or UnitBuff(unit, spelldata.requires_aura_name) then
+					if spelldata.replaces then
+						-- remove replaced spell if detected
+						spell_list[spelldata.replaces] = false
+					end
+					-- do not overwrite if this spell has been replaced
+					if spell_list[spellid] == nil then
+						spell_list[spellid] = true
+					end
 				end
 			end
 		end
@@ -774,6 +785,7 @@ local function AdjustPositionOffset(frame, p, pos)
 	local perfectScale = GetPerfectScale()
 	local pp = p * frameScale / perfectScale
 	local pa = pos and (math.ceil(pp) - pp) or (pp - math.floor(pp))
+	if pa > 0.5 then pa = pa - 1 end
 	return p + pa * perfectScale / frameScale
 end
 
@@ -782,18 +794,18 @@ local function AdjustFrameOffset(frame, relative_point)
 	local ax, ay
 
 	if strfind(relative_point, "LEFT") then
-		x = frame:GetRight() or 0
-		ax = x - AdjustPositionOffset(frame, x, false)
-	else
 		x = frame:GetLeft() or 0
 		ax = AdjustPositionOffset(frame, x, true) - x
+	else
+		x = frame:GetRight() or 0
+		ax = x - AdjustPositionOffset(frame, x, false)
 	end
 	if strfind(relative_point, "TOP") then
 		y = frame:GetTop() or 0
-		ay = AdjustPositionOffset(frame, y, true) - y
+		ay = y - AdjustPositionOffset(frame, y, false)
 	else
 		y = frame:GetBottom() or 0
-		ay = y - AdjustPositionOffset(frame, y, false)
+		ay = AdjustPositionOffset(frame, y, true) - y
 	end
 
 	return ax, ay
@@ -855,6 +867,8 @@ local function UpdateCooldownGroup(
 	cooldownGrow,
 	cooldownSize,
 	cooldownBorderSize,
+	cooldownPaddingX,
+	cooldownPaddingY,
 	cooldownSpacingX,
 	cooldownSpacingY,
 	cooldownMax,
@@ -864,19 +878,21 @@ local function UpdateCooldownGroup(
 	local parent = GladiusEx:GetAttachFrame(unit, cooldownAttachTo)
 
 	local xo, yo = AdjustFrameOffset(parent, cooldownRelativePoint)
+	cooldownPaddingX = AdjustPositionOffset(parent, cooldownPaddingX)
+	cooldownPaddingY = AdjustPositionOffset(parent, cooldownPaddingY)
 	cooldownSpacingX = AdjustPositionOffset(parent, cooldownSpacingX)
 	cooldownSpacingY = AdjustPositionOffset(parent, cooldownSpacingY)
-	cooldownOffsetX = AdjustPositionOffset(parent, cooldownOffsetX)
-	cooldownOffsetY = AdjustPositionOffset(parent, cooldownOffsetY)
+	cooldownOffsetX = AdjustPositionOffset(parent, cooldownOffsetX) + xo
+	cooldownOffsetY = AdjustPositionOffset(parent, cooldownOffsetY) + yo
 	cooldownSize = AdjustPositionOffset(parent, cooldownSize)
 	cooldownBorderSize = AdjustPixels(parent, cooldownBorderSize)
 
 	cooldownFrame:ClearAllPoints()
-	cooldownFrame:SetPoint(cooldownAnchor, parent, cooldownRelativePoint, cooldownOffsetX + xo, cooldownOffsetY + yo)
+	cooldownFrame:SetPoint(cooldownAnchor, parent, cooldownRelativePoint, cooldownOffsetX, cooldownOffsetY)
 
 	-- size
-	cooldownFrame:SetWidth(cooldownSize * cooldownPerColumn + cooldownSpacingX * cooldownPerColumn)
-	cooldownFrame:SetHeight(cooldownSize * ceil(cooldownMax / cooldownPerColumn) + (cooldownSpacingY * (ceil(cooldownMax / cooldownPerColumn) + 1)))
+	cooldownFrame:SetWidth(cooldownSize * cooldownPerColumn + cooldownSpacingX * (cooldownPerColumn - 1) + cooldownPaddingX * 2)
+	cooldownFrame:SetHeight(cooldownSize * ceil(cooldownMax / cooldownPerColumn) + (cooldownSpacingY * (ceil(cooldownMax / cooldownPerColumn) - 1)) + cooldownPaddingY * 2)
 
 	-- backdrop
 	cooldownFrame:SetBackdrop({bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tile = true, tileSize = 16})
@@ -887,26 +903,33 @@ local function UpdateCooldownGroup(
 
 	-- grow anchor
 	local grow1, grow2, grow3, startRelPoint
-	if (cooldownGrow == "DOWNRIGHT") then
+	if cooldownGrow == "DOWNRIGHT" then
 		grow1, grow2, grow3, startRelPoint = "TOPLEFT", "BOTTOMLEFT", "TOPRIGHT", "TOPLEFT"
-	elseif (cooldownGrow == "DOWNLEFT") then
+	elseif cooldownGrow == "DOWNLEFT" then
 		grow1, grow2, grow3, startRelPoint = "TOPRIGHT", "BOTTOMRIGHT", "TOPLEFT", "TOPRIGHT"
-	elseif (cooldownGrow == "UPRIGHT") then
+	elseif cooldownGrow == "UPRIGHT" then
 		grow1, grow2, grow3, startRelPoint = "BOTTOMLEFT", "TOPLEFT", "BOTTOMRIGHT", "BOTTOMLEFT"
-	elseif (cooldownGrow == "UPLEFT") then
+	elseif cooldownGrow == "UPLEFT" then
 		grow1, grow2, grow3, startRelPoint = "BOTTOMRIGHT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT"
 	end
 
+	local grow_left = string.find(cooldownGrow, "LEFT")
+	local grow_down = string.find(cooldownGrow, "DOWN")
+
 	local start, startAnchor = 1, cooldownFrame
 	for i = 1, #cooldownFrame do
-		if (cooldownMax >= i) then
-			if (start == 1) then
-				anchor, parent, relativePoint, offsetX, offsetY = grow1, startAnchor, startRelPoint, 0, string.find(cooldownGrow, "DOWN") and -cooldownSpacingY or cooldownSpacingY
+		if cooldownMax >= i then
+			if start == 1 then
+				anchor, parent, relativePoint = grow1, startAnchor, startRelPoint
+				offsetX = i == 1 and (grow_left and -cooldownPaddingX or cooldownPaddingX) or 0
+				offsetY = i == 1 and (grow_down and -cooldownPaddingY or cooldownPaddingY) or (grow_down and -cooldownSpacingY or cooldownSpacingY)
 			else
-				anchor, parent, relativePoint, offsetX, offsetY = grow1, cooldownFrame[i - 1], grow3, string.find(cooldownGrow, "LEFT") and -cooldownSpacingX or cooldownSpacingX, 0
+				anchor, parent, relativePoint = grow1, cooldownFrame[i - 1], grow3
+				offsetX = grow_left and -cooldownSpacingX or cooldownSpacingX
+				offsetY = 0
 			end
 
-			if (start == cooldownPerColumn) then
+			if start == cooldownPerColumn then
 				start = 0
 				startAnchor = cooldownFrame[i - cooldownPerColumn + 1]
 				startRelPoint = grow2
@@ -954,6 +977,8 @@ function Cooldowns:UpdateGroup(unit, group)
 		db.cooldownsGrow,
 		db.cooldownsSize,
 		db.cooldownsBorderSize,
+		db.cooldownsPaddingX,
+		db.cooldownsPaddingY,
 		db.cooldownsSpacingX,
 		db.cooldownsSpacingY,
 		db.cooldownsMax,
@@ -1263,13 +1288,35 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								width = "full",
 								order = 13,
 							},
+							cooldownsPaddingY = {
+								type = "range",
+								name = L["Vertical padding"],
+								desc = L["Vertical padding of the icons"],
+								min = 0, softMax = 30, step = 1,
+								disabled = function() return not self:IsUnitEnabled(unit) end,
+								order = 15,
+							},
+							cooldownsPaddingX = {
+								type = "range",
+								name = L["Horizontal padding"],
+								desc = L["Horizontal padding of the icons"],
+								disabled = function() return not self:IsUnitEnabled(unit) end,
+								min = 0, softMax = 30, step = 1,
+								order = 20,
+							},
+							sep2 = {
+								type = "description",
+								name = "",
+								width = "full",
+								order = 23,
+							},
 							cooldownsSpacingY = {
 								type = "range",
 								name = L["Vertical spacing"],
 								desc = L["Vertical spacing of the icons"],
 								min = 0, softMax = 30, step = 1,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
-								order = 15,
+								order = 25,
 							},
 							cooldownsSpacingX = {
 								type = "range",
@@ -1277,7 +1324,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								desc = L["Horizontal spacing of the icons"],
 								disabled = function() return not self:IsUnitEnabled(unit) end,
 								min = 0, softMax = 30, step = 1,
-								order = 20,
+								order = 30,
 							},
 						},
 					},
@@ -1581,12 +1628,28 @@ function Cooldowns:MakeGroupOptions(unit, group)
 					GladiusEx:Log(namestr)
 				end
 			else
-				namestr = string.format(" |T%s:20|t %s [%ss] %s", spelldata.icon, spelldata.name, spelldata.cooldown or "??", catstr or "")
+				namestr = string.format(L[" |T%s:20|t %s [%ss] %s"], spelldata.icon, spelldata.name, spelldata.cooldown or "??", catstr or "")
 			end
+
+			local spelldesc = FormatSpellDescription(spellid)
+			local extradesc = {}
+			if spelldata.duration then table.insert(extradesc, string.format(L["Duration: %is"], spelldata.duration)) end
+			if spelldata.replaces then table.insert(extradesc, string.format(L["Replaces: %s"], GetSpellInfo(spelldata.replaces))) end
+			if spelldata.requires_aura then table.insert(extradesc, string.format(L["Required aura: %s"], GetSpellInfo(spelldata.requires_aura))) end
+			if spelldata.sets_cooldown then table.insert(extradesc, string.format(L["Shared cooldown: %s (%is)"], GetSpellInfo(spelldata.sets_cooldown.spellid), spelldata.sets_cooldown.cooldown)) end
+			if spelldata.cooldown_starts_on_aura_fade then table.insert(extradesc, L["Cooldown starts when aura fades"]) end
+			if spelldata.cooldown_starts_on_dispel then table.insert(extradesc, L["Cooldown starts on dispel"]) end
+			local SYMBIOSIS_SPELLID = 110309
+			if spelldata.symbiosis then table.insert(extradesc, "|cff00ff00" .. GetSpellInfo(SYMBIOSIS_SPELLID)) end
+			if spelldata.resets then table.insert(extradesc, string.format(L["Resets: %s"], table.concat(fn.sort(fn.map(spelldata.resets, GetSpellInfo)), ", "))) end
+			if #extradesc > 0 then
+				spelldesc = spelldesc .. "\n|cff9f9f9f" .. table.concat(fn.sort(extradesc), "\n|cff9f9f9f")
+			end
+
 			local spellconfig = {
 				type = "toggle",
 				name = namestr,
-				desc = FormatSpellDescription(spellid),
+				desc = spelldesc,
 				descStyle = "inline",
 				width = "full",
 				arg = spellid,

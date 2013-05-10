@@ -29,6 +29,11 @@ GladiusEx.arena_units = arena_units
 local anchor_width = 220
 local anchor_height = 20
 
+local STATE_NORMAL = 0
+local STATE_DEAD = 1
+local STATE_STEALTH = 2
+local RANGE_UPDATE_INTERVAL = 1 / 5
+
 local LSR = LibStub("LibSpecRoster-1.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local RC = LibStub("LibRangeCheck-2.0")
@@ -663,12 +668,7 @@ function GladiusEx:UNIT_HEALTH(event, unit)
 	self:UpdateUnitState(unit, false)
 end
 
-local STATE_NORMAL = 0
-local STATE_DEAD = 1
-local STATE_STEALTH = 2
-local RANGE_UPDATE_INTERVAL = 1 / 5
 local range_check
-
 function GladiusEx:UpdateRangeCheckers()
 	range_check = RC:GetSmartMinChecker(40)
 end

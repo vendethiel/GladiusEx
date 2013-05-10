@@ -90,6 +90,18 @@ L["PowerBar"] = "Power Bar"
 L["TargetBar"] = "Target Bar"
 
 -- General
+L[" |T%s:20|t %s [%ss] %s"] = true
+L["Vertical padding"] = true
+L["Vertical padding of the icons"] = true
+L["Horizontal padding"] = true
+L["Horizontal padding of the icons"] = true
+L["Duration: %is"] = true
+L["Replaces: %s"] = true
+L["Required aura: %s"] = true
+L["Shared cooldown: %s (%is)"] = true
+L["Cooldown starts when aura fades"] = true
+L["Cooldown starts on dispel"] = true
+L["Resets: %s"] = true
 L["Shield icon"] = true
 L["Toggle the cast bar shield icon for not interrumpible spells"] = true
 L["Not interrumpible color"] = true
