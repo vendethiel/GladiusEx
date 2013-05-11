@@ -296,6 +296,7 @@ function GladiusEx:MakeGroupOptions(group, unit, order)
 								name = L["Stealth alpha"],
 								desc = L["Transparency for units in stealth"],
 								min = 0, max = 1, bigStep = 0.1,
+								hidden = function() return self:IsPartyUnit(unit) end,
 								order = 1,
 							},
 							deadAlpha = {
