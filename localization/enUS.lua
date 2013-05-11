@@ -90,6 +90,24 @@ L["PowerBar"] = "Power Bar"
 L["TargetBar"] = "Target Bar"
 
 -- General
+L["Absorbs bar color"] = true
+L["Absorbs color"] = true
+L["Absorbs settings"] = true
+L["Absorbs"] = true
+L["How much the absorbs bar can grow outside the health bar, as a proportion of the unit's total health"] = true
+L["How much the incoming heals bar can grow outside the health bar, as a proportion of the unit's total health"] = true
+L["Incoming heals bar color"] = true
+L["Incoming heals color"] = true
+L["Incoming heals settings"] = true
+L["Incoming heals"] = true
+L["Outside bar limit"] = true
+L["Show absorbs"] = true
+L["Show incoming heals"] = true
+L["Toggle display of absorbs in the health bar"] = true
+L["Toggle display of incoming heals in the health bar"] = true
+
+
+
 L[" |T%s:20|t %s [%ss] %s"] = true
 L["Vertical padding"] = true
 L["Vertical padding of the icons"] = true

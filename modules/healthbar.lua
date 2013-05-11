@@ -9,22 +9,26 @@ local UnitHealth, UnitHealthMax, UnitClass = UnitHealth, UnitHealthMax, UnitClas
 
 local HealthBar = GladiusEx:NewGladiusExModule("HealthBar", true, {
 	healthBarAttachTo = "Frame",
-
 	healthBarHeight = 25,
 	healthBarAdjustWidth = true,
 	healthBarWidth = 200,
-
 	healthBarInverse = false,
 	healthBarColor = { r = 1, g = 1, b = 1, a = 1 },
 	healthBarClassColor = true,
 	healthBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
 	healthBarTexture = "Minimalist",
-
 	healthBarOffsetX = 0,
 	healthBarOffsetY = 0,
-
 	healthBarAnchor = "TOPLEFT",
 	healthBarRelativePoint = "TOPLEFT",
+
+	healthBarIncomingHeals = true,
+	healthBarIncomingHealsColor = { r = 0, g = 1, b = 0, a = 0.5 },
+	healthBarIncomingHealsCap = 0,
+
+	healthBarIncomingAbsorbs = true,
+	healthBarIncomingAbsorbsColor = { r = 1, g = 1, b = 1, a = 0.5 },
+	healthBarIncomingAbsorbsCap = 0,
 })
 
 function HealthBar:OnEnable()
@@ -32,6 +36,8 @@ function HealthBar:OnEnable()
 	self:RegisterEvent("UNIT_HEALTH_FREQUENT", "UpdateHealthEvent")
 	self:RegisterEvent("UNIT_MAXHEALTH", "UpdateHealthEvent")
 	self:RegisterEvent("UNIT_NAME_UPDATE", "UpdateColorEvent")
+	self:RegisterEvent("UNIT_HEAL_PREDICTION", "UpdateIncomingHealsEvent")
+	self:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED", "UpdateIncomingAbsorbsEvent")
 
 	LSM = GladiusEx.LSM
 
@@ -113,6 +119,9 @@ end
 function HealthBar:UpdateHealth(unit, health, maxHealth)
 	if not self.frame[unit] then return end
 
+	self.frame[unit].health = health
+	self.frame[unit].maxHealth = maxHealth
+
 	-- update min max values
 	self.frame[unit]:SetMinMaxValues(0, maxHealth)
 
@@ -122,6 +131,56 @@ function HealthBar:UpdateHealth(unit, health, maxHealth)
 	else
 		self.frame[unit]:SetValue(health)
 	end
+
+	-- update incoming bars
+	self:UpdateIncomingHeals(unit)
+	self:UpdateIncomingAbsorbs(unit)
+end
+
+
+function HealthBar:UpdateIncomingHealsEvent(event, unit)
+	self:UpdateIncomingHeals(unit)
+end
+
+function HealthBar:UpdateIncomingAbsorbsEvent(event, unit)
+	self:UpdateIncomingAbsorbs(unit)
+end
+
+function HealthBar:SetIncomingBarAmount(unit, bar, incamount, inccap)
+	local health = self.frame[unit].health
+	local maxHealth = self.frame[unit].maxHealth
+	local barWidth = self.frame[unit].barWidth
+
+	-- cap amount
+	incamount = min((maxHealth * (1 + inccap)) - health, incamount)
+
+	local parent = self.frame[unit].barParent
+	bar:ClearAllPoints()
+	local ox = health / maxHealth * barWidth
+	bar:SetPoint(self.db[unit].healthBarAnchor, parent, self.db[unit].healthBarRelativePoint, self.db[unit].healthBarOffsetX + ox, self.db[unit].healthBarOffsetY)
+	bar:SetMinMaxValues(0, maxHealth)
+	bar:SetValue(incamount)
+
+	if unit == "player" then
+		GladiusEx:Log("SetIncomingBarAmount",unit, incamount, inccap)
+		GladiusEx:Log(health, maxHealth, barWidth, ox)
+	end
+end
+
+function HealthBar:UpdateIncomingHeals(unit)
+	if not self.frame[unit] then return end
+	if not self.db[unit].healthBarIncomingHeals then return end
+
+	local incamount = UnitGetIncomingHeals(unit) or 0
+	self:SetIncomingBarAmount(unit, self.frame[unit].incheals, incamount, self.db[unit].healthBarIncomingHealsCap)
+end
+
+function HealthBar:UpdateIncomingAbsorbs(unit)
+	if not self.frame[unit] then return end
+	if not self.db[unit].healthBarIncomingAbsorbs then return end
+
+	local incamount = UnitGetTotalAbsorbs(unit) or 0
+	self:SetIncomingBarAmount(unit, self.frame[unit].incabsorbs, incamount, self.db[unit].healthBarIncomingAbsorbsCap)
 end
 
 function HealthBar:CreateBar(unit)
@@ -132,6 +191,8 @@ function HealthBar:CreateBar(unit)
 	self.frame[unit] = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. unit, button)
 	self.frame[unit].background = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "Background", "BACKGROUND")
 	self.frame[unit].highlight = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "Highlight" .. unit, "OVERLAY")
+	self.frame[unit].incheals = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. unit .. "IncHeals", button)
+	self.frame[unit].incabsorbs = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. unit .. "IncAbsorbs", button)
 end
 
 function HealthBar:Refresh(unit)
@@ -141,12 +202,13 @@ end
 
 function HealthBar:Update(unit)
 	-- create power bar
-	if (not self.frame[unit]) then
+	if not self.frame[unit] then
 		self:CreateBar(unit)
 	end
 
 	-- set bar type
 	local parent = GladiusEx:GetAttachFrame(unit, self.db[unit].healthBarAttachTo)
+	self.frame[unit].barParent = parent
 
 	-- update health bar
 	self.frame[unit]:ClearAllPoints()
@@ -162,32 +224,61 @@ function HealthBar:Update(unit)
 
 		width = width + GladiusEx:GetModule(self.db[unit].healthBarAttachTo).frame[unit]:GetWidth()
 	end
+	self.frame[unit].barWidth = width
 
 	self.frame[unit]:SetHeight(self.db[unit].healthBarHeight)
 	self.frame[unit]:SetWidth(width)
-
 	self.frame[unit]:SetPoint(self.db[unit].healthBarAnchor, parent, self.db[unit].healthBarRelativePoint, self.db[unit].healthBarOffsetX, self.db[unit].healthBarOffsetY)
-	self.frame[unit]:SetMinMaxValues(0, 100)
-	self.frame[unit]:SetValue(100)
 	self.frame[unit]:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].healthBarTexture))
-
-	-- disable tileing
 	self.frame[unit]:GetStatusBarTexture():SetHorizTile(false)
 	self.frame[unit]:GetStatusBarTexture():SetVertTile(false)
+	self.frame[unit]:SetMinMaxValues(0, 1)
+	self.frame[unit]:SetValue(1)
+
+	-- incoming heals
+	self.frame[unit].incheals:SetHeight(self.db[unit].healthBarHeight)
+	self.frame[unit].incheals:SetWidth(width)
+	self.frame[unit].incheals:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].healthBarTexture))
+	self.frame[unit].incheals:GetStatusBarTexture():SetHorizTile(false)
+	self.frame[unit].incheals:GetStatusBarTexture():SetVertTile(false)
+	local color = self.db[unit].healthBarIncomingHealsColor
+	self.frame[unit].incheals:SetStatusBarColor(color.r, color.g, color.b, color.a)
+	self.frame[unit].incheals:SetMinMaxValues(0, 1)
+	self.frame[unit].incheals:SetValue(0)
+	self.frame[unit].incheals:SetFrameLevel(11)
+
+	if self.db[unit].healthBarIncomingHeals then
+		self.frame[unit].incheals:Show()
+	else
+		self.frame[unit].incheals:Hide()
+	end
+
+	-- incoming absorbs
+	self.frame[unit].incabsorbs:SetHeight(self.db[unit].healthBarHeight)
+	self.frame[unit].incabsorbs:SetWidth(width)
+	self.frame[unit].incabsorbs:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].healthBarTexture))
+	self.frame[unit].incabsorbs:GetStatusBarTexture():SetHorizTile(false)
+	self.frame[unit].incabsorbs:GetStatusBarTexture():SetVertTile(false)
+	local color = self.db[unit].healthBarIncomingAbsorbsColor
+	self.frame[unit].incabsorbs:SetStatusBarColor(color.r, color.g, color.b, color.a)
+	self.frame[unit].incabsorbs:SetMinMaxValues(0, 1)
+	self.frame[unit].incabsorbs:SetValue(0)
+	self.frame[unit].incheals:SetFrameLevel(10)
+
+	if self.db[unit].healthBarIncomingAbsorbs then
+		self.frame[unit].incabsorbs:Show()
+	else
+		self.frame[unit].incabsorbs:Hide()
+	end
 
 	-- update health bar background
 	self.frame[unit].background:ClearAllPoints()
 	self.frame[unit].background:SetAllPoints(self.frame[unit])
-
 	self.frame[unit].background:SetWidth(self.frame[unit]:GetWidth())
 	self.frame[unit].background:SetHeight(self.frame[unit]:GetHeight())
-
 	self.frame[unit].background:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].healthBarTexture))
-
 	self.frame[unit].background:SetVertexColor(self.db[unit].healthBarBackgroundColor.r, self.db[unit].healthBarBackgroundColor.g,
 		self.db[unit].healthBarBackgroundColor.b, self.db[unit].healthBarBackgroundColor.a)
-
-	-- disable tileing
 	self.frame[unit].background:SetHorizTile(false)
 	self.frame[unit].background:SetVertTile(false)
 
@@ -232,8 +323,10 @@ function HealthBar:Test(unit)
 	-- set test values
 	local maxHealth = GladiusEx.testing[unit].maxHealth
 	local health = GladiusEx.testing[unit].health
-	self:UpdateHealth(unit, health, maxHealth)
 	self:UpdateColorEvent("Test", unit)
+	self:UpdateHealth(unit, health, maxHealth)
+	self:SetIncomingBarAmount(unit, self.frame[unit].incheals, maxHealth * 0.1, self.db[unit].healthBarIncomingHealsCap)
+	self:SetIncomingBarAmount(unit, self.frame[unit].incabsorbs, maxHealth * 0.2, self.db[unit].healthBarIncomingAbsorbsCap)
 end
 
 function HealthBar:GetOptions(unit)
@@ -419,5 +512,82 @@ function HealthBar:GetOptions(unit)
 				},
 			},
 		},
+		incoming = {
+			type = "group",
+			name = L["Incoming heals"],
+			order = 2,
+			args = {
+				heals = {
+					type = "group",
+					name = L["Incoming heals"],
+					desc = L["Incoming heals settings"],
+					inline = true,
+					order = 1,
+					args = {
+						healthBarIncomingHeals = {
+							type = "toggle",
+							name = L["Show incoming heals"],
+							desc = L["Toggle display of incoming heals in the health bar"],
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 1,
+						},
+						healthBarIncomingHealsColor = {
+							type = "color",
+							name = L["Incoming heals color"],
+							desc = L["Incoming heals bar color"],
+							hasAlpha = true,
+							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
+							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 2,
+						},
+						healthBarIncomingHealsCap = {
+							type = "range",
+							name = L["Outside bar limit"],
+							desc = L["How much the incoming heals bar can grow outside the health bar, as a proportion of the unit's total health"],
+							min = 0, softMax = 1, bigStep = 0.01, isPercent = true,
+							width = "double",
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 3,
+						},
+					}
+				},
+				absorbs = {
+					type = "group",
+					name = L["Absorbs"],
+					desc = L["Absorbs settings"],
+					inline = true,
+					order = 2,
+					args = {
+						healthBarIncomingAbsorbs = {
+							type = "toggle",
+							name = L["Show absorbs"],
+							desc = L["Toggle display of absorbs in the health bar"],
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 1,
+						},
+						healthBarIncomingAbsorbsColor = {
+							type = "color",
+							name = L["Absorbs color"],
+							desc = L["Absorbs bar color"],
+							hasAlpha = true,
+							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
+							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 2,
+						},
+						healthBarIncomingAbsorbsCap = {
+							type = "range",
+							name = L["Outside bar limit"],
+							desc = L["How much the absorbs bar can grow outside the health bar, as a proportion of the unit's total health"],
+							min = 0, softMax = 1, bigStep = 0.01, isPercent = true,
+							width = "double",
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 3,
+						},
+					}
+				}
+			}
+		}
 	}
 end
