@@ -27,6 +27,7 @@ local CastBar = GladiusEx:NewGladiusExModule("CastBar", true, {
 		castBarBackgroundColor = { r = 0, g = 0, b = 0, a = 0.3 },
 		castBarTexture = "Minimalist",
 		castIcon = true,
+		castSpark = true,
 		castShieldIcon = true,
 		castIconPosition = "LEFT",
 		castText = true,
@@ -61,6 +62,7 @@ local CastBar = GladiusEx:NewGladiusExModule("CastBar", true, {
 		castBarBackgroundColor = { r = 0, g = 0, b = 0, a = 0.3 },
 		castBarTexture = "Minimalist",
 		castIcon = true,
+		castSpark = true,
 		castShieldIcon = true,
 		castIconPosition = "RIGHT",
 		castText = true,
@@ -192,12 +194,7 @@ function CastBar:SetInterruptible(unit, interruptible)
 	local color = interruptible and self.db[unit].castBarColor or self.db[unit].castBarNotIntColor
 
 	self.frame[unit].bar:SetStatusBarColor(color.r, color.g, color.b, color.a)
-
-	if interruptible then
-		self.frame[unit].spark:SetTexture([[Interface\CastingBar\UI-CastingBar-Spark]])
-	else
-		self.frame[unit].spark:SetTexture([[Interface\CastingBar\UI-CastingBar-SparkRed]])
-	end
+	self.frame[unit].spark:SetVertexColor(color.r, color.g, color.b, color.a)
 
 	if not self.db[unit].castShieldIcon or interruptible then
 		self.frame[unit].icon.shield:Hide()
@@ -246,10 +243,14 @@ function CastBar:CastStart(unit, channel)
 		f.endTime = endTime / 1000
 		f.maxValue = f.endTime - f.startTime
 		f.delay = 0
-		self:SetInterruptible(unit, not notInterruptible)
-		f.bar:SetMinMaxValues(0, f.maxValue)
+
 		f.icon:SetTexture(icon)
-		f.spark:Show()
+		
+		self:SetInterruptible(unit, not notInterruptible)
+		
+		f.bar:SetMinMaxValues(0, f.maxValue)
+		
+		if self.db[unit].castSpark then f.spark:Show() end
 		f:SetScript("OnUpdate", CastUpdate)
 		CastUpdate(f)
 		UpdateCastText(f, spell, rank)
@@ -283,7 +284,8 @@ function CastBar:CreateBar(unit)
 	self.frame[unit].icon.shield = self.frame[unit].bar:CreateTexture(nil, "OVERLAY")
 	self.frame[unit].icon.shield:SetTexture([[Interface\AddOns\GladiusEx\images\shield]])
 	self.frame[unit].spark = self.frame[unit].bar:CreateTexture(nil, "OVERLAY")
-	self.frame[unit].spark:SetTexture([[Interface\CastingBar\UI-CastingBar-Spark]])
+	-- self.frame[unit].spark:SetTexture([[Interface\CastingBar\UI-CastingBar-Spark]])
+	self.frame[unit].spark:SetTexture([[Interface\AddOns\GladiusEx\images\spark]])
 	self.frame[unit].spark:SetBlendMode("ADD")
 
 	self.frame[unit].unit = unit
@@ -382,8 +384,9 @@ function CastBar:Update(unit)
 	self.frame[unit].bar:SetStatusBarColor(color.r, color.g, color.b, color.a)
 
 	-- update spark
-	self.frame[unit].spark:SetWidth(20)
+	self.frame[unit].spark:SetWidth(32)
 	self.frame[unit].spark:SetHeight(height * 2)
+	self.frame[unit].spark:Hide()
 
 	-- update cast bar background
 	self.frame[unit].background:ClearAllPoints()
@@ -494,6 +497,12 @@ function CastBar:Reset(unit)
 		self.frame[unit].timeText:SetText("")
 	end
 
+	-- reset shield
+	self.frame[unit].icon.shield:Hide()
+
+	-- reset spark
+	self.frame[unit].spark:Hide()
+
 	-- hide
 	self.frame[unit]:SetAlpha(0)
 end
@@ -504,9 +513,11 @@ function CastBar:Test(unit)
 	self.frame[unit].bar:SetValue(value)
 	local sparkPosition = value / maxValue * self.frame[unit].bar.width
 	self.frame[unit].spark:SetPoint("CENTER", self.frame[unit].bar, "LEFT", sparkPosition, 0)
+	if self.db[unit].castSpark then self.frame[unit].spark:Show() end
 	self.frame[unit].timeText:SetFormattedText(self.frame[unit].time_text_format, value, maxValue - value, maxValue, self.delay == 0 and "" or strformat(delay_format, delay))
 	local texture = select(3, GetSpellInfo(1))
 	self.frame[unit].icon:SetTexture(texture)
+	self:SetInterruptible(unit, true)
 	self.frame[unit].castText:SetText(L["Example Spell Name"])
 end
 
@@ -613,6 +624,13 @@ function CastBar:GetOptions(unit)
 							name = "",
 							width = "full",
 							order = 31,
+						},
+						castSpark = {
+							type = "toggle",
+							name = L["Show spark"],
+							desc = L["Toggle the cast bar spark"],
+							disabled = function() return not self.db[unit].castIcon or not self:IsUnitEnabled(unit) end,
+							order = 35,
 						},
 						castShieldIcon = {
 							type = "toggle",

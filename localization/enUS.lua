@@ -90,6 +90,8 @@ L["PowerBar"] = "Power Bar"
 L["TargetBar"] = "Target Bar"
 
 -- General
+L["Show spark"] = true
+L["Toggle the cast bar spark"] = true
 L["Remaining time"] = true
 L["Show cast time"] = true
 L["Show delay"] = true
