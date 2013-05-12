@@ -90,6 +90,8 @@ L["PowerBar"] = "Power Bar"
 L["TargetBar"] = "Target Bar"
 
 -- General
+L["Use the global font size"] = true
+
 L[" |T%s:20|t %s [%ss] %s"] = true
 L["%s settings"] = true
 L["** If this is not your first run please lock or move the frame to prevent this from happening **"] = true

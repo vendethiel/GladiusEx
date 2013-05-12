@@ -126,6 +126,7 @@ function modulePrototype:OnInitialize()
 	self.db = setmetatable({}, {
 		__index = function(t, k)
 			local v
+			k = strmatch(k, "^(.+)target$") or k
 			if GladiusEx:IsPartyUnit(k) then
 				v = self.dbi_party.profile
 			elseif GladiusEx:IsArenaUnit(k) then
@@ -230,6 +231,7 @@ function GladiusEx:OnInitialize()
 	self.test = false
 	self.testing = setmetatable({}, {
 		__index = function(t, k)
+				if not self.db.base.testUnits[k] then k = "arena1" end
 				return self.db.base.testUnits[k]
 			end
 		})
@@ -1140,7 +1142,7 @@ function GladiusEx:UpdateAnchor(anchor_type)
 	end
 
 	anchor.text:SetPoint("CENTER", anchor, "CENTER")
-	anchor.text:SetFont(self.LSM:Fetch(self.LSM.MediaType.FONT, self.db[anchor_type].globalFont), (self.db[anchor_type].useGlobalFontSize and self.db[anchor_type].globalFontSize or 11))
+	anchor.text:SetFont(self.LSM:Fetch(self.LSM.MediaType.FONT, self.db.base.globalFont), self.db.base.globalFontSize)
 	anchor.text:SetTextColor(1, 1, 1, 1)
 	anchor.text:SetShadowOffset(1, -1)
 	anchor.text:SetShadowColor(0, 0, 0, 1)
