@@ -23,6 +23,7 @@ local Tags = GladiusEx:NewGladiusExModule("Tags", false, {
 			offsetX = 2,
 			offsetY = 0,
 
+			globalFontSize = true,
 			size = 11,
 			color = { r = 1, g = 1, b = 1, a = 1 },
 
@@ -34,10 +35,11 @@ local Tags = GladiusEx:NewGladiusExModule("Tags", false, {
 			offsetX = -2,
 			offsetY = 0,
 
+			globalFontSize = true,
 			size = 11,
 			color = { r = 1, g = 1, b = 1, a = 1 },
 
-			text = "[health:percentage]",
+			text = "[health:short]",
 		},
 		["PowerBar Left Text"] = {
 			attachTo = "PowerBar",
@@ -45,6 +47,7 @@ local Tags = GladiusEx:NewGladiusExModule("Tags", false, {
 			offsetX = 2,
 			offsetY = 0,
 
+			globalFontSize = true,
 			size = 11,
 			color = { r = 1, g = 1, b = 1, a = 1 },
 
@@ -56,10 +59,11 @@ local Tags = GladiusEx:NewGladiusExModule("Tags", false, {
 			offsetX = -2,
 			offsetY = 0,
 
+			globalFontSize = true,
 			size = 11,
 			color = { r = 1, g = 1, b = 1, a = 1 },
 
-			text = "[power:short]/[maxpower:short]",
+			text = "[power:short]",
 		},
 		["TargetBar Left Text"] = {
 			attachTo = "TargetBar",
@@ -67,7 +71,8 @@ local Tags = GladiusEx:NewGladiusExModule("Tags", false, {
 			offsetX = 2,
 			offsetY = 0,
 
-			size = 11,
+			globalFontSize = false,
+			size = 9,
 			color = { r = 1, g = 1, b = 1, a = 1 },
 
 			text = "[name:status]",
@@ -78,10 +83,11 @@ local Tags = GladiusEx:NewGladiusExModule("Tags", false, {
 			offsetX = -2,
 			offsetY = 0,
 
-			size = 11,
+			globalFontSize = false,
+			size = 9,
 			color = { r = 1, g = 1, b = 1, a = 1 },
 
-			text = "[health:short] / [maxhealth:short] ([health:percentage])",
+			text = "[health:short]",
 		},
 	},
 })
@@ -122,8 +128,12 @@ function Tags:UpdateEvents(unit)
 	self:UnregisterAllEvents()
 	self:UnregisterAllMessages()
 
+	self:RegisterEvent("UNIT_NAME_UPDATE")
+	self:RegisterEvent("UNIT_TARGET")
+	self:RegisterEvent("PLAYER_TARGET_CHANGED", function() self:UNIT_TARGET("PLAYER_TARGET_CHANGED", "player") end)
+
 	for event in pairs(self.events) do
-		if (strfind(event, "GLADIUS")) then
+		if strfind(event, "GLADIUS") then
 			self:RegisterMessage(event, "OnMessage")
 		else
 			self:RegisterEvent(event, "OnEvent")
@@ -147,7 +157,7 @@ function Tags:GetAttachTo()
 end
 
 function Tags:OnMessage(event, unit)
-	if (self.events[event]) then
+	if self.events[event] then
 		-- update texts
 		for text, _ in pairs(self.events[event]) do
 			self:UpdateText(unit, text)
@@ -155,11 +165,22 @@ function Tags:OnMessage(event, unit)
 	end
 end
 
-function Tags:OnEvent(event, unit)
-	-- hack
-	if event == "PLAYER_TARGET_CHANGED" then unit = "player" end
+function Tags:UNIT_NAME_UPDATE(event, unit)
+	if not self.frame[unit] then return end
+	self:Refresh(unit)
+end
 
-	if (self.events[event]) then
+function Tags:UNIT_TARGET(event, unit)
+	local tunit = unit .. "target"
+	if not self.frame[tunit] then return end
+
+	self:Refresh(tunit)
+end
+
+function Tags:OnEvent(event, unit)
+	if unit == "target" then unit = "playertarget" end
+
+	if self.events[event] then
 		-- update texts
 		for text, _ in pairs(self.events[event]) do
 			self:UpdateText(unit, text)
@@ -169,7 +190,7 @@ end
 
 function Tags:CreateFrame(unit, text)
 	local button = GladiusEx.buttons[unit]
-	if (not button) then return end
+	if not button then return end
 
 	-- create frame
 	self.frame[unit][text] = button:CreateFontString("GladiusEx" .. self:GetName() .. unit .. text, "OVERLAY")
@@ -244,15 +265,10 @@ end
 function Tags:UpdateText(unit, text)
 	if not self.frame[unit] or not self.frame[unit][text] then return end
 
-	-- set unit
-	local parent = self.frame[unit][text]:GetParent()
-	local unit_parameter = parent and parent.unit or unit
-
 	-- update tag
 	local tagText = self.db[unit].tagsTexts[text].text
-
 	local fn = self:GetTextFunction(unit, tagText)
-	local formattedText = fn(unit_parameter)
+	local formattedText = fn(unit)
 
 	--[[
 	local formattedText = strgsub(self.db[unit].tagsTexts[text].text, "%[(.-)%]", function(tag)
@@ -298,6 +314,10 @@ function Tags:Update(unit)
 			-- create frame
 			if not self.frame[unit][text] then
 				self:CreateFrame(unit, text)
+				if attachframe.unit then
+					if not self.frame[attachframe.unit] then self.frame[attachframe.unit] = {} end
+					self.frame[attachframe.unit][text] = self.frame[unit][text]
+				end
 			end
 
 			-- update frame
@@ -315,7 +335,8 @@ function Tags:Update(unit)
 				self.frame[unit][text]:SetJustifyH(self.db[unit].tagsTexts[text].position)
 			end
 
-			self.frame[unit][text]:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont), (GladiusEx.db.base.useGlobalFontSize and GladiusEx.db.base.globalFontSize or self.db[unit].tagsTexts[text].size))
+			self.frame[unit][text]:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont),
+				self.db[unit].tagsTexts[text].globalFontSize and GladiusEx.db.base.globalFontSize or self.db[unit].tagsTexts[text].size)
 			self.frame[unit][text]:SetTextColor(self.db[unit].tagsTexts[text].color.r, self.db[unit].tagsTexts[text].color.g, self.db[unit].tagsTexts[text].color.b, self.db[unit].tagsTexts[text].color.a)
 
 			self.frame[unit][text]:SetShadowOffset(1, -1)
@@ -426,6 +447,7 @@ function Tags:GetOptions(unit)
 									position = "LEFT",
 									offsetX = 0,
 									offsetY = 0,
+									globalFontSize = true,
 									size = 11,
 									color = { r = 1, g = 1, b = 1, a = 1 },
 									text = ""
@@ -693,12 +715,19 @@ function Tags:GetTextOptionTable(options, unit, text, order)
 						disabled = function() return not self:IsUnitEnabled(unit) end,
 						order = 5,
 					},
+					globalFontSize = {
+						type = "toggle",
+						name = L["Global font size"],
+						desc = L["Use the global font size"],
+						disabled = function() return not self:IsUnitEnabled(unit) end,
+						order = 7,
+					},
 					size = {
 						type = "range",
 						name = L["Text size"],
 						desc = L["Size of the text"],
 						min = 1, max = 20, step = 1,
-						disabled = function() return not self:IsUnitEnabled(unit) or GladiusEx.db.base.useGlobalFontSize end,
+						disabled = function() return not self:IsUnitEnabled(unit) or self.db[unit].tagsTexts[text].globalFontSize end,
 						order = 10,
 					},
 				},
@@ -958,24 +987,24 @@ end
 
 function Tags:GetBuiltinTagsEvents()
 	return {
-		["name"] = "UNIT_NAME_UPDATE UNIT_TARGET PLAYER_TARGET_CHANGED",
-		["name:status"] = "UNIT_NAME_UPDATE UNIT_HEALTH UNIT_TARGET PLAYER_TARGET_CHANGED",
-		["class"] = "UNIT_NAME_UPDATE UNIT_TARGET PLAYER_TARGET_CHANGED",
-		["class:short"] = "UNIT_NAME_UPDATE UNIT_TARGET PLAYER_TARGET_CHANGED",
-		["race"] = "UNIT_NAME_UPDATE UNIT_TARGET PLAYER_TARGET_CHANGED",
-		["spec"] = "UNIT_NAME_UPDATE GLADIUS_SPEC_UPDATE UNIT_TARGET PLAYER_TARGET_CHANGED",
-		["spec:short"] = "UNIT_NAME_UPDATE GLADIUS_SPEC_UPDATE UNIT_TARGET PLAYER_TARGET_CHANGED",
+		["name"] = "",
+		["name:status"] = "UNIT_HEALTH",
+		["class"] = "",
+		["class:short"] = "",
+		["race"] = "",
+		["spec"] = "GLADIUS_SPEC_UPDATE",
+		["spec:short"] = "GLADIUS_SPEC_UPDATE",
 
-		["health"] = "UNIT_HEALTH UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_NAME_UPDATE",
-		["maxhealth"] = "UNIT_HEALTH UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_NAME_UPDATE",
-		["health:short"] = "UNIT_HEALTH UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_NAME_UPDATE",
-		["maxhealth:short"] = "UNIT_HEALTH UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_NAME_UPDATE",
-		["health:percentage"] = "UNIT_HEALTH UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_NAME_UPDATE",
+		["health"] = "UNIT_HEALTH UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH",
+		["maxhealth"] = "UNIT_HEALTH UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH",
+		["health:short"] = "UNIT_HEALTH UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH",
+		["maxhealth:short"] = "UNIT_HEALTH UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH",
+		["health:percentage"] = "UNIT_HEALTH UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH",
 
-		["power"] = "UNIT_POWER UNIT_POWER_FREQUENT UNIT_DISPLAYPOWER UNIT_NAME_UPDATE",
-		["maxpower"] = "UNIT_MAXPOWER UNIT_DISPLAYPOWER UNIT_NAME_UPDATE",
-		["power:short"] = "UNIT_POWER UNIT_POWER_FREQUENT UNIT_DISPLAYPOWER UNIT_NAME_UPDATE",
-		["maxpower:short"] = "UNIT_MAXPOWER UNIT_POWER_FREQUENT UNIT_DISPLAYPOWER UNIT_NAME_UPDATE",
-		["power:percentage"] = "UNIT_POWER UNIT_POWER_FREQUENT UNIT_MAXPOWER UNIT_DISPLAYPOWER UNIT_NAME_UPDATE",
+		["power"] = "UNIT_POWER UNIT_POWER_FREQUENT UNIT_DISPLAYPOWER",
+		["maxpower"] = "UNIT_MAXPOWER UNIT_DISPLAYPOWER",
+		["power:short"] = "UNIT_POWER UNIT_POWER_FREQUENT UNIT_DISPLAYPOWER",
+		["maxpower:short"] = "UNIT_MAXPOWER UNIT_POWER_FREQUENT UNIT_DISPLAYPOWER",
+		["power:percentage"] = "UNIT_POWER UNIT_POWER_FREQUENT UNIT_MAXPOWER UNIT_DISPLAYPOWER",
 	}
 end
