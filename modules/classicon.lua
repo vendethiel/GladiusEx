@@ -391,7 +391,7 @@ function ClassIcon:SetClassIcon(unit)
 		left, right, top, bottom = 0, 1, 0, 1
 		needs_crop = true
 	else
-		texture =[[Interface\Glues\CharacterCreate\UI-CharacterCreate-Classes]]
+		texture = [[Interface\Glues\CharacterCreate\UI-CharacterCreate-Classes]]
 		left, right, top, bottom = unpack(CLASS_BUTTONS[class])
 		needs_crop = true
 	end
@@ -407,6 +407,31 @@ function ClassIcon:SetClassIcon(unit)
 	-- set texture
 	self.frame[unit].texture:SetTexture(texture)
 	self.frame[unit].texture:SetTexCoord(left, right, top, bottom)
+
+	-- portrait2d
+	-- SetPortraitTexture(self.frame[unit].texture, unit)
+
+	-- portrait3d
+	--	if not self.frame[unit].portrait then
+	--		self.frame[unit].portrait = CreateFrame("PlayerModel", nil, self.frame[unit])
+	--		self.frame[unit].portrait:SetAllPoints()
+	--		self.frame[unit].portrait:SetScript("OnShow", function(f) f:SetPortraitZoom(1) end)
+	--		self.frame[unit].portrait:SetScript("OnHide", function(f) f.guid = nil end)
+	--	end
+
+	--	if not UnitIsVisible(unit) or not UnitIsConnected(unit) then
+	--		self.frame[unit].portrait:Hide()
+	--	else
+	--		local guid = UnitGUID(unit)
+	--		if self.frame[unit].portrait.guid ~= guid then
+	--			self.frame[unit].portrait.guid = guid
+	--			self.frame[unit].portrait:SetUnit(unit)
+	--			self.frame[unit].portrait:SetPortraitZoom(1)
+	--			self.frame[unit].portrait:SetPosition(0, 0, 0)
+	--			self.frame[unit].portrait:Show()
+	--		end
+	--	end
+
 
 	-- hide cooldown frame
 	self.frame[unit].cooldown:Hide()

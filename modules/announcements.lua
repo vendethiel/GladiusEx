@@ -20,16 +20,21 @@ local Announcements = GladiusEx:NewGladiusExModule("Announcements", false, {
 	})
 
 function Announcements:OnEnable()
-	-- Register events
+	-- register events
 	self:RegisterEvent("UNIT_HEALTH")
 	self:RegisterEvent("UNIT_HEALTH_FREQUENT", "UNIT_HEALTH")
 	self:RegisterEvent("UNIT_AURA")
 	self:RegisterEvent("UNIT_SPELLCAST_START")
+	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 
-	-- register custom events
+	-- register messages
 	self:RegisterMessage("GLADIUS_SPEC_UPDATE")
 
-	-- Table holding messages to throttle
+	-- table holding messages to throttle
+	self.throttled = {}
+end
+
+function Announcements:PLAYER_ENTERING_WORLD()
 	self.throttled = {}
 end
 
@@ -39,9 +44,7 @@ end
 
 local handled_units = {}
 
--- Reset throttled messages
 function Announcements:Reset(unit)
-	self.throttled = {}
 	handled_units[unit] = false
 end
 
@@ -109,26 +112,26 @@ end
 -- Sends an announcement
 -- Param unit is only used for class coloring of messages
 function Announcements:Send(msg, throttle, unit)
-	local color = unit and RAID_CLASS_COLORS[UnitClass(unit)] or { r = 0, g = 1, b = 0 }
-	local dest = self.db[unit].dest
-
 	-- only send announcements inside arenas
 	if select(2, IsInInstance()) ~= "arena" then return end
 
+	-- throttling
 	if not self.throttled then
 		self.throttled = {}
 	end
 
-	-- Throttling of messages
 	if throttle and throttle > 0 then
 		if not self.throttled[msg] then
-			self.throttled[msg] = GetTime()+throttle
+			self.throttled[msg] = GetTime() + throttle
 		elseif self.throttled[msg] < GetTime() then
 			self.throttled[msg] = nil
 		else
 			return
 		end
 	end
+
+	local color = unit and RAID_CLASS_COLORS[UnitClass(unit)] or { r = 0, g = 1, b = 0 }
+	local dest = self.db[unit].dest
 
 	if dest == "self" then
 		GladiusEx:Print(msg)
