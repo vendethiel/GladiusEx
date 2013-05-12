@@ -90,6 +90,14 @@ L["PowerBar"] = "Power Bar"
 L["TargetBar"] = "Target Bar"
 
 -- General
+L["Remaining time"] = true
+L["Show cast time"] = true
+L["Show delay"] = true
+L["Show total time"] = true
+L["Toggle cast time"] = true
+L["Toggle delay"] = true
+L["Toggle remaining time instead of cast time"] = true
+L["Toggle total time"] = true
 L["Use the global font size"] = true
 
 L[" |T%s:20|t %s [%ss] %s"] = true
@@ -322,7 +330,7 @@ L["Name of the text element"] = true
 L["Name"] = true
 L["New aura"] = true
 L["None"] = true
-L["Not interrumpible color"] = true
+L["Not interruptible color"] = true
 L["Number of aura icons per column"] = true
 L["Number of icons per column"] = true
 L["Number of max buffs"] = true
@@ -461,7 +469,7 @@ L["Toggle health bar class color"] = true
 L["Toggle if the frames can be moved"] = true
 L["Toggle if the icon borders should be cropped or not"] = true
 L["Toggle if you want to use the global font size"] = true
-L["Toggle the cast bar shield icon for not interrumpible spells"] = true
+L["Toggle the cast bar shield icon for not interruptible spells"] = true
 L["Toggle the cast bar spell icon"] = true
 L["Toggle the target bar class icon"] = true
 L["Toggle to show your party frames"] = true

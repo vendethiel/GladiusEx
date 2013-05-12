@@ -3,7 +3,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local LSM
 
 -- global functions
-local strfind = string.find
+local strfind, strformat = string.find, string.format
 local pairs = pairs
 local min = math.min
 local GetTime = GetTime
@@ -36,6 +36,10 @@ local CastBar = GladiusEx:NewGladiusExModule("CastBar", true, {
 		castTextOffsetX = 2,
 		castTextOffsetY = 0,
 		castTimeText = true,
+		castTimeTextCastTime = true,
+		castTimeTextRemainingTime = true,
+		castTimeTextTotalTime = false,
+		castTimeTextDelay = true,
 		castTimeTextSize = 11,
 		castTimeTextColor = { r = 2.55, g = 2.55, b = 2.55, a = 1 },
 		castTimeTextAlign = "RIGHT",
@@ -66,6 +70,10 @@ local CastBar = GladiusEx:NewGladiusExModule("CastBar", true, {
 		castTextOffsetX = -2,
 		castTextOffsetY = 0,
 		castTimeText = true,
+		castTimeTextCastTime = true,
+		castTimeTextRemainingTime = true,
+		castTimeTextTotalTime = false,
+		castTimeTextDelay = true,
 		castTimeTextSize = 11,
 		castTimeTextColor = { r = 2.55, g = 2.55, b = 2.55, a = 1 },
 		castTimeTextAlign = "LEFT",
@@ -122,27 +130,6 @@ function CastBar:GetAttachFrame(unit, point)
 	return self.frame[unit]
 end
 
-local function CastUpdate(self)
-	if self.isCasting or self.isChanneling then
-		local currentTime = min(self.endTime, GetTime())
-		local value = self.endTime - currentTime
-
-		if (self.isChanneling and not CastBar.db[self.unit].castBarInverse) or (self.isCasting and CastBar.db[self.unit].castBarInverse) then
-			self.bar:SetValue(value)
-		else
-			self.bar:SetValue(self.endTime - self.startTime - value)
-		end
-
-		if self.delay > 0 then
-			self.timeText:SetFormattedText(time_text_format_delay, self.delay, value)
-		else
-			self.timeText:SetFormattedText(time_text_format_normal, value)
-		end
-	else
-		self:SetScript("OnUpdate", nil)
-	end
-end
-
 local function UpdateCastText(f, spell, rank)
 	if rank ~= "" then
 		f.castText:SetFormattedText("%s (%s)", spell, rank)
@@ -152,53 +139,19 @@ local function UpdateCastText(f, spell, rank)
 end
 
 function CastBar:UNIT_SPELLCAST_START(event, unit)
-	local f = self.frame[unit]
-	if not f then return end
-
-	local spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unit)
-	if spell then
-		f.spellName = spell
-		f.isChanneling = false
-		f.isCasting = true
-		f.startTime = startTime / 1000
-		f.endTime = endTime / 1000
-		f.delay = 0
-		f.bar:SetMinMaxValues(0, (endTime - startTime) / 1000)
-		f.icon:SetTexture(icon)
-		f:SetScript("OnUpdate", CastUpdate)
-		CastUpdate(f)
-		UpdateCastText(f, spell, rank)
-		self:SetInterrumpible(unit, not notInterruptible)
-	end
+	self:CastStart(unit, false)
 end
 
 function CastBar:UNIT_SPELLCAST_CHANNEL_START(event, unit)
-	local f = self.frame[unit]
-	if not f then return end
-
-	local spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitChannelInfo(unit)
-	if spell then
-		f.spellName = spell
-		f.isChanneling = true
-		f.isCasting = false
-		f.startTime = startTime / 1000
-		f.endTime = endTime / 1000
-		f.delay = 0
-		f.bar:SetMinMaxValues(0, (endTime - startTime) / 1000)
-		f.icon:SetTexture(icon)
-		f:SetScript("OnUpdate", CastUpdate)
-		CastUpdate(f)
-		UpdateCastText(f, spell, rank)
-		self:SetInterrumpible(unit, not notInterruptible)
-	end
+	self:CastStart(unit, true)
 end
 
 function CastBar:UNIT_SPELLCAST_INTERRUPTIBLE(event, unit)
-	self:SetInterrumpible(unit, true)
+	self:SetInterruptible(unit, true)
 end
 
 function CastBar:UNIT_SPELLCAST_NOT_INTERRUPTIBLE(event, unit)
-	self:SetInterrumpible(unit, false)
+	self:SetInterruptible(unit, false)
 end
 
 function CastBar:UNIT_SPELLCAST_STOP(event, unit, spell)
@@ -233,17 +186,73 @@ function CastBar:UNIT_SPELLCAST_DELAYED(event, unit)
 	self.frame[unit].bar:SetMinMaxValues(0, (endTime - startTime) / 1000)
 end
 
-function CastBar:SetInterrumpible(unit, interrumpible)
+function CastBar:SetInterruptible(unit, interruptible)
 	if not self.frame[unit] then return end
 
-	local color = interrumpible and self.db[unit].castBarColor or self.db[unit].castBarNotIntColor
+	local color = interruptible and self.db[unit].castBarColor or self.db[unit].castBarNotIntColor
 
 	self.frame[unit].bar:SetStatusBarColor(color.r, color.g, color.b, color.a)
 
-	if not self.db[unit].castShieldIcon or interrumpible then
+	if interruptible then
+		self.frame[unit].spark:SetTexture([[Interface\CastingBar\UI-CastingBar-Spark]])
+	else
+		self.frame[unit].spark:SetTexture([[Interface\CastingBar\UI-CastingBar-SparkRed]])
+	end
+
+	if not self.db[unit].castShieldIcon or interruptible then
 		self.frame[unit].icon.shield:Hide()
 	else
 		self.frame[unit].icon.shield:Show()
+	end
+end
+
+local delay_format = "+%.01f"
+local function CastUpdate(self)
+	if self.isCasting or self.isChanneling then
+		local currentTime = min(self.endTime, GetTime())
+		local value = self.endTime - currentTime
+
+		if (self.isChanneling and CastBar.db[self.unit].castBarInverse) or (self.isCasting and not CastBar.db[self.unit].castBarInverse) then
+			value = self.endTime - self.startTime - value
+		end
+		
+		self.bar:SetValue(value)
+
+		local sparkPosition = value / self.maxValue * self.bar.width
+		self.spark:SetPoint("CENTER", self.bar, "LEFT", sparkPosition, 0)
+
+		self.timeText:SetFormattedText(self.time_text_format, value, self.maxValue - value, self.maxValue, self.delay == 0 and "" or strformat(delay_format, delay))
+	else
+		self:SetScript("OnUpdate", nil)
+	end
+end
+
+function CastBar:CastStart(unit, channel)
+	local f = self.frame[unit]
+	if not f then return end
+
+	local spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible
+	if channel then
+		spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitChannelInfo(unit)
+	else
+		spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unit)
+	end
+
+	if spell then
+		f.spellName = spell
+		f.isChanneling = channel
+		f.isCasting = not channel
+		f.startTime = startTime / 1000
+		f.endTime = endTime / 1000
+		f.maxValue = f.endTime - f.startTime
+		f.delay = 0
+		self:SetInterruptible(unit, not notInterruptible)
+		f.bar:SetMinMaxValues(0, f.maxValue)
+		f.icon:SetTexture(icon)
+		f.spark:Show()
+		f:SetScript("OnUpdate", CastUpdate)
+		CastUpdate(f)
+		UpdateCastText(f, spell, rank)
 	end
 end
 
@@ -254,7 +263,8 @@ function CastBar:CastEnd(frame)
 	frame.castText:SetText("")
 	frame.icon:SetTexture("")
 	frame.bar:SetValue(0)
-	self:SetInterrumpible(frame.unit, true)
+	frame.spark:Hide()
+	self:SetInterruptible(frame.unit, true)
 end
 
 function CastBar:CreateBar(unit)
@@ -272,6 +282,10 @@ function CastBar:CreateBar(unit)
 	self.frame[unit].icon.bg = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "IconFrameBackground" .. unit, "BACKGROUND")
 	self.frame[unit].icon.shield = self.frame[unit].bar:CreateTexture(nil, "OVERLAY")
 	self.frame[unit].icon.shield:SetTexture([[Interface\AddOns\GladiusEx\images\shield]])
+	self.frame[unit].spark = self.frame[unit].bar:CreateTexture(nil, "OVERLAY")
+	self.frame[unit].spark:SetTexture([[Interface\CastingBar\UI-CastingBar-Spark]])
+	self.frame[unit].spark:SetBlendMode("ADD")
+
 	self.frame[unit].unit = unit
 end
 
@@ -336,7 +350,7 @@ function CastBar:Update(unit)
 		self.frame[unit].icon.bg:Hide()
 	end
 
-	-- update not interrumpible shield
+	-- update not interruptible shield
 	self.frame[unit].icon.shield:SetWidth(height * 64 / 20)
 	self.frame[unit].icon.shield:SetHeight(height * 64 / 20)
 	self.frame[unit].icon.shield:SetPoint("CENTER", self.frame[unit].icon, "CENTER")
@@ -357,18 +371,19 @@ function CastBar:Update(unit)
 		-- attach to frame
 		self.frame[unit].bar:SetAllPoints()
 	end
+	self.frame[unit].bar.width = width - (self.db[unit].castIcon and height or 0)
 	self.frame[unit].bar:SetHeight(height)
 	self.frame[unit].bar:SetMinMaxValues(0, 100)
 	self.frame[unit].bar:SetValue(0)
 	self.frame[unit].bar:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].castBarTexture))
-
-	-- disable tileing
 	self.frame[unit].bar:GetStatusBarTexture():SetHorizTile(false)
 	self.frame[unit].bar:GetStatusBarTexture():SetVertTile(false)
-
-	-- set color
 	local color = self.db[unit].castBarColor
 	self.frame[unit].bar:SetStatusBarColor(color.r, color.g, color.b, color.a)
+
+	-- update spark
+	self.frame[unit].spark:SetWidth(20)
+	self.frame[unit].spark:SetHeight(height * 2)
 
 	-- update cast bar background
 	self.frame[unit].background:ClearAllPoints()
@@ -418,15 +433,34 @@ function CastBar:Update(unit)
 	end
 
 	self.frame[unit].timeText:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont), self.db[unit].castTimeTextSize)
-
 	local color = self.db[unit].castTimeTextColor
 	self.frame[unit].timeText:SetTextColor(color.r, color.g, color.b, color.a)
-
 	self.frame[unit].timeText:SetShadowOffset(1, -1)
 	self.frame[unit].timeText:SetShadowColor(0, 0, 0, 1)
 	self.frame[unit].timeText:SetJustifyH(self.db[unit].castTimeTextAlign)
 	self.frame[unit].timeText:ClearAllPoints()
 	self.frame[unit].timeText:SetPoint(self.db[unit].castTimeTextAlign, self.frame[unit].bar, self.db[unit].castTimeTextAlign, self.db[unit].castTimeTextOffsetX, self.db[unit].castTimeTextOffsetY)
+
+	-- time text format
+	local fmt
+	if self.db[unit].castTimeTextCastTime then
+		if self.db[unit].castTimeTextRemainingTime then
+			fmt = "%2$.01f"
+		else
+			fmt = "%1$.01f"
+		end
+		if self.db[unit].castTimeTextTotalTime then
+			fmt = fmt .. "/"
+		end
+	end
+	if self.db[unit].castTimeTextTotalTime then
+		fmt = (fmt or "")  .. "%3$.01f"
+	end
+	if self.db[unit].castTimeTextDelay then
+		fmt = (fmt and (fmt .. " ") or "") .. "%4$s"
+	end
+
+	self.frame[unit].time_text_format = fmt;
 
 	-- update highlight texture
 	self.frame[unit].highlight:SetAllPoints(self.frame[unit])
@@ -465,11 +499,12 @@ function CastBar:Reset(unit)
 end
 
 function CastBar:Test(unit)
-	self.frame[unit].bar:SetMinMaxValues(0, 100)
-	self.frame[unit].bar:SetValue(70)
-
-	self.frame[unit].timeText:SetFormattedText(time_text_format_delay, 1.5, 1.379)
-
+	local value, maxValue, delay = 1.5, 2, 0.5
+	self.frame[unit].bar:SetMinMaxValues(0, maxValue)
+	self.frame[unit].bar:SetValue(value)
+	local sparkPosition = value / maxValue * self.frame[unit].bar.width
+	self.frame[unit].spark:SetPoint("CENTER", self.frame[unit].bar, "LEFT", sparkPosition, 0)
+	self.frame[unit].timeText:SetFormattedText(self.frame[unit].time_text_format, value, maxValue - value, maxValue, self.delay == 0 and "" or strformat(delay_format, delay))
 	local texture = select(3, GetSpellInfo(1))
 	self.frame[unit].icon:SetTexture(texture)
 	self.frame[unit].castText:SetText(L["Example Spell Name"])
@@ -501,7 +536,7 @@ function CastBar:GetOptions(unit)
 						},
 						castBarNotIntColor = {
 							type = "color",
-							name = L["Not interrumpible color"],
+							name = L["Not interruptible color"],
 							desc = L["Color of the cast bar when the spell can't be interrupted"],
 							hasAlpha = true,
 							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
@@ -582,7 +617,7 @@ function CastBar:GetOptions(unit)
 						castShieldIcon = {
 							type = "toggle",
 							name = L["Shield icon"],
-							desc = L["Toggle the cast bar shield icon for not interrumpible spells"],
+							desc = L["Toggle the cast bar shield icon for not interruptible spells"],
 							disabled = function() return not self.db[unit].castIcon or not self:IsUnitEnabled(unit) end,
 							order = 35,
 						},
@@ -798,12 +833,6 @@ function CastBar:GetOptions(unit)
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 5,
 						},
-						sep = {
-							type = "description",
-							name = "",
-							width = "full",
-							order = 7,
-						},
 						castTimeTextColor = {
 							type = "color",
 							name = L["Text color"],
@@ -812,7 +841,41 @@ function CastBar:GetOptions(unit)
 							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
 							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
 							disabled = function() return not self.db[unit].castTimeText or not self:IsUnitEnabled(unit) end,
+							order = 6,
+						},
+						sep = {
+							type = "description",
+							name = "",
+							width = "full",
+							order = 7,
+						},
+						castTimeTextCastTime = {
+							type = "toggle",
+							name = L["Show cast time"],
+							desc = L["Toggle cast time"],
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 8,
+						},
+						castTimeTextRemainingTime = {
+							type = "toggle",
+							name = L["Remaining time"],
+							desc = L["Toggle remaining time instead of cast time"],
+							disabled = function() return not self:IsUnitEnabled(unit) or not self.db[unit].castTimeTextCastTime end,
+							order = 9,
+						},
+						castTimeTextTotalTime = {
+							type = "toggle",
+							name = L["Show total time"],
+							desc = L["Toggle total time"],
+							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 10,
+						},
+						castTimeTextDelay = {
+							type = "toggle",
+							name = L["Show delay"],
+							desc = L["Toggle delay"],
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 11,
 						},
 						castTimeTextSize = {
 							type = "range",
@@ -822,7 +885,6 @@ function CastBar:GetOptions(unit)
 							disabled = function() return not self.db[unit].castTimeText or not self:IsUnitEnabled(unit) end,
 							order = 15,
 						},
-
 					},
 				},
 				position = {
