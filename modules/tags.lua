@@ -266,6 +266,7 @@ function Tags:UpdateText(unit, text)
 	if not self.frame[unit] or not self.frame[unit][text] then return end
 
 	-- update tag
+	local unit = self.frame[unit][text].unit
 	local tagText = self.db[unit].tagsTexts[text].text
 	local fn = self:GetTextFunction(unit, tagText)
 	local formattedText = fn(unit)
@@ -318,6 +319,7 @@ function Tags:Update(unit)
 					if not self.frame[attachframe.unit] then self.frame[attachframe.unit] = {} end
 					self.frame[attachframe.unit][text] = self.frame[unit][text]
 				end
+				self.frame[unit][text].unit = attachframe.unit or unit
 			end
 
 			-- update frame
