@@ -8,25 +8,39 @@ local pairs = pairs
 local UnitClass, UnitGUID, UnitHealth, UnitHealthMax = UnitClass, UnitGUID, UnitHealth, UnitHealthMax
 
 local TargetBar = GladiusEx:NewGladiusExModule("TargetBar", false, {
-	targetBarAttachTo = "ClassIcon",
-	targetBarRelativePoint = "TOPLEFT",
-	targetBarAnchor = "BOTTOMLEFT",
-	targetBarOffsetX = 0,
-	targetBarOffsetY = 0,
-
-	targetBarHeight = 30,
-	targetBarWidth = 200,
-
-	targetBarInverse = false,
-	targetBarColor = { r = 1, g = 1, b = 1, a = 1 },
-	targetBarClassColor = true,
-	targetBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
-	targetBarTexture = "Minimalist",
-
-	targetBarIconPosition = "LEFT",
-	targetBarIcon = true,
-	targetBarIconCrop = false,
-})
+		targetBarAttachTo = "ClassIcon",
+		targetBarRelativePoint = "TOPLEFT",
+		targetBarAnchor = "BOTTOMLEFT",
+		targetBarOffsetX = 0,
+		targetBarOffsetY = 0,
+		targetBarHeight = 20,
+		targetBarWidth = 120,
+		targetBarInverse = false,
+		targetBarColor = { r = 1, g = 1, b = 1, a = 1 },
+		targetBarClassColor = true,
+		targetBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
+		targetBarTexture = "Minimalist",
+		targetBarIconPosition = "LEFT",
+		targetBarIcon = true,
+		targetBarIconCrop = false,
+	},
+	{
+		targetBarAttachTo = "ClassIcon",
+		targetBarRelativePoint = "TOPRIGHT",
+		targetBarAnchor = "BOTTOMRIGHT",
+		targetBarOffsetX = 0,
+		targetBarOffsetY = 0,
+		targetBarHeight = 20,
+		targetBarWidth = 120,
+		targetBarInverse = false,
+		targetBarColor = { r = 1, g = 1, b = 1, a = 1 },
+		targetBarClassColor = true,
+		targetBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
+		targetBarTexture = "Minimalist",
+		targetBarIconPosition = "RIGHT",
+		targetBarIcon = true,
+		targetBarIconCrop = false,
+	})
 
 function TargetBar:OnEnable()
 	self:RegisterEvent("UNIT_HEALTH")
@@ -67,7 +81,7 @@ function TargetBar:GetAttachFrame(unit)
 end
 
 function TargetBar:SetClassIcon(unit)
-	if (not self.frame[unit]) then return end
+	if not self.frame[unit] then return end
 
 	-- self.frame[unit]:Hide()
 	self.frame[unit].icon:Hide()
@@ -178,17 +192,20 @@ function TargetBar:Update(unit)
 	-- update health bar
 	local parent = GladiusEx:GetAttachFrame(unit, self.db[unit].targetBarAttachTo)
 
+	local width = self.db[unit].targetBarWidth
+	local height = self.db[unit].targetBarHeight
+
 	self.frame[unit]:ClearAllPoints()
 	self.frame[unit]:SetPoint(self.db[unit].targetBarAnchor, parent, self.db[unit].targetBarRelativePoint, self.db[unit].targetBarOffsetX, self.db[unit].targetBarOffsetY)
-	self.frame[unit]:SetWidth(self.db[unit].targetBarWidth)
-	self.frame[unit]:SetHeight(self.db[unit].targetBarHeight)
+	self.frame[unit]:SetWidth(width)
+	self.frame[unit]:SetHeight(height)
 
 	-- update icon
 	self.frame[unit].icon:ClearAllPoints()
 	if self.db[unit].targetBarIcon then
 		self.frame[unit].icon:SetPoint(self.db[unit].targetBarIconPosition, self.frame[unit], self.db[unit].targetBarIconPosition)
-		self.frame[unit].icon:SetWidth(self.frame[unit]:GetHeight())
-		self.frame[unit].icon:SetHeight(self.frame[unit]:GetHeight())
+		self.frame[unit].icon:SetWidth(height)
+		self.frame[unit].icon:SetHeight(height)
 		self.frame[unit].icon:SetTexCoord(0, 1, 0, 1)
 		self.frame[unit].icon:Show()
 	else
@@ -197,8 +214,14 @@ function TargetBar:Update(unit)
 
 	self.frame[unit].statusbar:ClearAllPoints()
 	if self.db[unit].targetBarIcon then
-		self.frame[unit].statusbar:SetPoint("TOPLEFT", self.frame[unit].icon, "TOPRIGHT")
-		self.frame[unit].statusbar:SetPoint("BOTTOMRIGHT")
+		if self.db[unit].targetBarIconPosition == "LEFT" then
+			self.frame[unit].statusbar:SetPoint("LEFT", self.frame[unit].icon, "RIGHT")
+			self.frame[unit].statusbar:SetPoint("RIGHT")
+		else
+			self.frame[unit].statusbar:SetPoint("LEFT")
+			self.frame[unit].statusbar:SetPoint("RIGHT", self.frame[unit].icon, "LEFT")
+		end
+		self.frame[unit].statusbar:SetHeight(height)
 	else
 		self.frame[unit].statusbar:SetAllPoints()
 	end
