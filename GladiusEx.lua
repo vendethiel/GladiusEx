@@ -332,7 +332,7 @@ function GladiusEx:OnEnable()
 
 			self:SetTesting(3)
 		elseif self:IsDebugging() then
-			-- self:SetTesting(3)
+			self:SetTesting(3)
 		end
 
 		-- see if we are already in arena
@@ -360,6 +360,8 @@ end
 
 function GladiusEx:SetTesting(count)
 	self.test = count
+
+	self:UpdateFrames()
 
 	if count then
 		self:ShowFrames()
@@ -1102,7 +1104,9 @@ function GladiusEx:UpdateUnit(unit, module)
 	self.buttons[unit].secure:SetAllPoints(self.buttons[unit])
 
 	-- show the secure frame
-	if not self:IsTesting() then
+	if self:IsTesting() then
+		self.buttons[unit].secure:Hide()
+	else
 		self.buttons[unit].secure:Show()
 		self.buttons[unit].secure:SetAlpha(1)
 	end
