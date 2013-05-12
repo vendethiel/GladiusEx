@@ -52,7 +52,7 @@ local function log(...)
 		log_frame:SetScript("OnMouseWheel", FloatingChatFrame_OnMouseScroll)
 		log_frame:EnableMouseWheel(true)
 
-		log_frame:SetSize(500, 600)
+		log_frame:SetSize(500, 500)
 		log_frame:SetFont(STANDARD_TEXT_FONT, 9, "NONE")
 		log_frame:SetShadowColor(0, 0, 0, 1)
 		log_frame:SetShadowOffset(1, -1)
@@ -63,13 +63,13 @@ local function log(...)
 		log_frame:SetBackdropColor(1, 1, 1, 0.2)
 		log_frame.starttime = GetTime()
 
-		log_frame:SetScale(0.6)
+		log_frame:SetScale(0.8)
 	end
 	local p = ...
 	if p == "ENABLE LOGGING" then
-		GladiusEx.db.log = GladiusEx.db.log or {}
+		GladiusEx.db.base.log = GladiusEx.db.base.log or {}
 		log_table = { date("%c", time()) }
-		table.insert(GladiusEx.db.log, log_table)
+		table.insert(GladiusEx.db.base.log, log_table)
 		logging = true
 		log_frame.starttime = GetTime()
 	elseif p == "DISABLE LOGGING" then
@@ -332,7 +332,7 @@ function GladiusEx:OnEnable()
 
 			self:SetTesting(3)
 		elseif self:IsDebugging() then
-			self:SetTesting(3)
+			-- self:SetTesting(3)
 		end
 
 		-- see if we are already in arena
@@ -359,7 +359,6 @@ function GladiusEx:OnProfileChanged(event, database, newProfileKey)
 end
 
 function GladiusEx:SetTesting(count)
-	log("SetTesting", count)
 	self.test = count
 
 	if count then
@@ -387,7 +386,7 @@ function GladiusEx:GetArenaSize(min)
 		guess = 5
 	end
 
-	log("GetArenaSize", GetNumArenaOpponents(), GetNumArenaOpponentSpecs(), GetNumGroupMembers(), " => ", guess)
+	-- log("GetArenaSize", min, GetNumArenaOpponents(), GetNumArenaOpponentSpecs(), GetNumGroupMembers(), self:IsTesting(), " => ", guess)
 
 	return guess
 end
@@ -396,7 +395,7 @@ function GladiusEx:UpdatePartyFrames()
 	if InCombatLockdown() then
 		self:QueueUpdate()
 	end
-	local group_members = self:GetArenaSize()
+	local group_members = self.arena_size
 
 	log("UpdatePartyFrames", group_members)
 
@@ -407,7 +406,7 @@ function GladiusEx:UpdatePartyFrames()
 			self:ShowUnit(unit)
 
 			if not self:IsTesting() and not UnitExists(unit) then
-				self:HideUnit(unit)
+				self:SoftHideUnit(unit)
 			end
 
 			-- test environment
@@ -431,7 +430,7 @@ function GladiusEx:UpdateArenaFrames()
 		self:QueueUpdate()
 	end
 
-	local numOpps = self:GetArenaSize()
+	local numOpps = self.arena_size
 
 	log("UpdateArenaFrames:", numOpps, GetNumArenaOpponents(), GetNumArenaOpponentSpecs())
 
@@ -459,6 +458,7 @@ end
 
 function GladiusEx:UpdateFrames()
 	log("UpdateFrames")
+	if not self:IsPartyShown() and not self:IsArenaShown() then return end
 
 	self:UpdatePartyFrames()
 	self:UpdateArenaFrames()
@@ -475,12 +475,17 @@ function GladiusEx:CheckArenaSize(unit)
 	end
 
 	local size = self:GetArenaSize(min_size)
-	log("CheckArenaSize", unit, size, self:GetArenaSize())
+
+	log("CheckArenaSize", unit, min_size, size, self:GetArenaSize())
+
+	if self.arena_size ~= size then
+		log("arena size change detected", self.arena_size, " => ", size)
+		self.arena_size = size
+		self:UpdateFrames()
+	end
 end
 
 function GladiusEx:ShowFrames()
-	log("ShowFrames")
-
 	if InCombatLockdown() then
 		self:QueueUpdate()
 	end
@@ -504,29 +509,28 @@ function GladiusEx:ShowFrames()
 		self.party_parent:Show()
 	end
 
-	self:UpdateFrames()
+	self:CheckArenaSize()
 end
 
 function GladiusEx:HideFrames()
-	log("HideFrames")
-
 	if InCombatLockdown() then
 		self:QueueUpdate()
 	end
 
 	-- hide frames instead of just setting alpha to 0
 	for unit, button in pairs(self.buttons) do
-		-- hide frames
-		self:HideUnit(unit)
-		button:Hide()
 		-- reset spec data
 		button.class = nil
 		button.spec = nil
 		button.specID = nil
+
+		-- hide frame
+		self:HideUnit(unit)
 	end
 
 	self.arena_parent:Hide()
 	self.party_parent:Hide()
+	self.arena_size = 0
 end
 
 function GladiusEx:IsPartyShown()
@@ -558,8 +562,6 @@ end
 function GladiusEx:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
 	local numOpps = GetNumArenaOpponentSpecs()
 
-	log("ARENA_PREP_OPPONENT_SPECIALIZATIONS", numOpps)
-
 	for i = 1, numOpps do
 		local specID = GetArenaOpponentSpec(i)
 		local unitid = "arena" .. i
@@ -568,6 +570,7 @@ function GladiusEx:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
 	end
 
 	self:UpdateArenaFrames()
+	self:CheckArenaSize()
 end
 
 function GladiusEx:CheckOpponentSpecialization(unit)
@@ -581,17 +584,18 @@ function GladiusEx:CheckOpponentSpecialization(unit)
 end
 
 function GladiusEx:ARENA_OPPONENT_UPDATE(event, unit, type)
-	log(event, unit, type)
+	log("ARENA_OPPONENT_UPDATE", unit, type)
 	self:RefreshUnit(unit)
-	self:CheckOpponentSpecialization(unit)
 	if type == "seen" or type == "destroyed" then
+		self:ShowUnit(unit)
+		self:CheckOpponentSpecialization(unit)
 		self:UpdateUnitState(unit, false)
 		self:CheckArenaSize(unit)
 	elseif type == "unseen" then
 		self:UpdateUnitState(unit, true)
 	elseif type == "cleared" then
 		if not self:IsTesting() then
-			self:HideUnit(unit)
+			self:SoftHideUnit(unit)
 		end
 	end
 end
@@ -600,7 +604,7 @@ function GladiusEx:GROUP_ROSTER_UPDATE()
 	-- update arena as well since the group size is used as a clue of the arena size
 	if self:IsArenaShown() or self:IsPartyShown() then
 		self:UpdateAllGUIDs()
-		self:UpdateFrames()
+		self:CheckArenaSize()
 	end
 end
 
@@ -618,7 +622,6 @@ function GladiusEx:ClearUpdateQueue()
 end
 
 function GladiusEx:PLAYER_REGEN_ENABLED()
-	log("PLAYER_REGEN_ENABLED")
 	if self:IsUpdatePending() then
 		self:UpdateFrames()
 	end
@@ -632,6 +635,7 @@ function GladiusEx:UNIT_NAME_UPDATE(event, unit)
 	self:UpdateUnitGUID(event, unit)
 	self:CheckArenaSize(unit)
 	self:UpdateUnitState(unit)
+	self:RefreshUnit(unit)
 end
 
 local guid_to_unitid = {}
@@ -689,10 +693,7 @@ local function FrameRangeChecker_OnUpdate(f, elapsed)
 end
 
 function GladiusEx:UpdateUnitState(unit, stealth)
-	if not self.buttons[unit] then
-		log("UpdateUnitState", unit, "NO BUTTON")
-		return
-	end
+	if not self.buttons[unit] then return end
 
 	if UnitIsDeadOrGhost(unit) then
 		self.buttons[unit].unit_state = STATE_DEAD
@@ -707,8 +708,6 @@ function GladiusEx:UpdateUnitState(unit, stealth)
 		self.buttons[unit]:SetScript("OnUpdate", FrameRangeChecker_OnUpdate)
 		FrameRangeChecker_OnUpdate(self.buttons[unit], RANGE_UPDATE_INTERVAL + 1)
 	end
-
-	log("UpdateUnitState", unit, self.buttons[unit].unit_state)
 end
 
 function GladiusEx:LSR_SpecializationChanged(event, guid, unitID, specID)
@@ -787,6 +786,7 @@ function GladiusEx:RefreshUnit(unit)
 end
 
 function GladiusEx:ShowUnit(unit)
+	log("ShowUnit", unit)
 	if not self.buttons[unit] then return end
 
 	-- show modules
@@ -813,13 +813,10 @@ function GladiusEx:ShowUnit(unit)
 	end
 end
 
-function GladiusEx:HideUnit(unit)
+function GladiusEx:SoftHideUnit(unit)
+	log("SoftHideUnit", unit)
 	if not self.buttons[unit] then return end
-
-	if InCombatLockdown() then
-		self:QueueUpdate()
-	end
-
+	
 	-- hide modules
 	for n, m in self:IterateModules() do
 		if self:IsModuleEnabled(unit, n) then
@@ -831,8 +828,17 @@ function GladiusEx:HideUnit(unit)
 
 	-- hide the button
 	self.buttons[unit]:SetAlpha(0)
+end
 
-	if not InCombatLockdown() then
+function GladiusEx:HideUnit(unit)
+	log("HideUnit", unit)
+	if not self.buttons[unit] then return end
+
+	self:SoftHideUnit(unit)
+
+	if InCombatLockdown() then
+		self:QueueUpdate()
+	else
 		self.buttons[unit]:Hide()
 	end
 end
@@ -1004,7 +1010,7 @@ function GladiusEx:UpdateUnitPosition(unit)
 
 	if self.db[unit].groupButtons then
 		local unit_index = self:GetUnitIndex(unit) - 1
-		local num_frames = self:GetArenaSize()
+		local num_frames = self.arena_size
 		local anchor = self:GetUnitAnchor(unit)
 		local frame_width = self.buttons[unit].frameWidth
 		local frame_height = self.buttons[unit].frameHeight
@@ -1148,7 +1154,7 @@ function GladiusEx:UpdateAnchor(anchor_type)
 	local frame_width = self.buttons[unit].frameWidth
 	local frame_height = self.buttons[unit].frameHeight
 
-	local num_frames = self:GetArenaSize()
+	local num_frames = self.arena_size
 	local width, height = self.db[anchor_type].backgroundPadding * 2, self.db[anchor_type].backgroundPadding * 2
 	local real_frame_width = frame_width + abs(right) + abs(left)
 	local real_frame_height = frame_height + abs(top) + abs(bottom)

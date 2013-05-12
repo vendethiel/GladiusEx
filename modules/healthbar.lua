@@ -160,11 +160,6 @@ function HealthBar:SetIncomingBarAmount(unit, bar, incamount, inccap)
 	bar:SetPoint(self.db[unit].healthBarAnchor, parent, self.db[unit].healthBarRelativePoint, self.db[unit].healthBarOffsetX + ox, self.db[unit].healthBarOffsetY)
 	bar:SetMinMaxValues(0, maxHealth)
 	bar:SetValue(incamount)
-
-	if unit == "player" then
-		GladiusEx:Log("SetIncomingBarAmount",unit, incamount, inccap)
-		GladiusEx:Log(health, maxHealth, barWidth, ox)
-	end
 end
 
 function HealthBar:UpdateIncomingHeals(unit)

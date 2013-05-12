@@ -957,6 +957,10 @@ function Cooldowns:Update(unit)
 	end
 end
 
+function Cooldowns:Refresh(unit)
+	self:UpdateIcons(unit)
+end
+
 function Cooldowns:UpdateGroup(unit, group)
 	-- create frame
 	self:CreateGroupFrame(unit, group)
@@ -1621,15 +1625,16 @@ function Cooldowns:MakeGroupOptions(unit, group)
 			end
 
 			local namestr
-			local basecd = GetSpellBaseCooldown(spellid)
+			--[[
 			if GladiusEx:IsDebugging() then
+				local basecd = GetSpellBaseCooldown(spellid)
 				namestr = string.format(" |T%s:20|t %s [%ss/Base: %ss] %s", spelldata.icon, spelldata.name, spelldata.cooldown or "??", basecd and basecd/1000 or "??", catstr or "")
-				if basecd and basecd/1000 ~= spelldata.cooldown then
+				if basecd and basecd / 1000 ~= spelldata.cooldown then
 					GladiusEx:Log(namestr)
 				end
-			else
-				namestr = string.format(L[" |T%s:20|t %s [%ss] %s"], spelldata.icon, spelldata.name, spelldata.cooldown or "??", catstr or "")
 			end
+			]]
+			namestr = string.format(L[" |T%s:20|t %s [%ss] %s"], spelldata.icon, spelldata.name, spelldata.cooldown or "??", catstr or "")
 
 			local spelldesc = FormatSpellDescription(spellid)
 			local extradesc = {}
