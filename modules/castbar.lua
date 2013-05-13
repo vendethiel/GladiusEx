@@ -212,13 +212,13 @@ local function CastUpdate(self)
 		if (self.isChanneling and CastBar.db[self.unit].castBarInverse) or (self.isCasting and not CastBar.db[self.unit].castBarInverse) then
 			value = self.endTime - self.startTime - value
 		end
-		
+
 		self.bar:SetValue(value)
 
 		local sparkPosition = value / self.maxValue * self.bar.width
 		self.spark:SetPoint("CENTER", self.bar, "LEFT", sparkPosition, 0)
 
-		self.timeText:SetFormattedText(self.time_text_format, value, self.maxValue - value, self.maxValue, self.delay == 0 and "" or strformat(delay_format, delay))
+		self.timeText:SetFormattedText(self.time_text_format, value, self.maxValue - value, self.maxValue, self.delay == 0 and "" or strformat(delay_format, self.delay))
 	else
 		self:SetScript("OnUpdate", nil)
 	end
@@ -284,7 +284,6 @@ function CastBar:CreateBar(unit)
 	self.frame[unit].icon.shield = self.frame[unit].bar:CreateTexture(nil, "OVERLAY")
 	self.frame[unit].icon.shield:SetTexture([[Interface\AddOns\GladiusEx\images\shield]])
 	self.frame[unit].spark = self.frame[unit].bar:CreateTexture(nil, "OVERLAY")
-	-- self.frame[unit].spark:SetTexture([[Interface\CastingBar\UI-CastingBar-Spark]])
 	self.frame[unit].spark:SetTexture([[Interface\AddOns\GladiusEx\images\spark]])
 	self.frame[unit].spark:SetBlendMode("ADD")
 
@@ -336,7 +335,8 @@ function CastBar:Update(unit)
 	self.frame[unit].icon:SetPoint(self.db[unit].castIconPosition, self.frame[unit], self.db[unit].castIconPosition, 0, 0)
 	self.frame[unit].icon:SetWidth(height)
 	self.frame[unit].icon:SetHeight(height)
-	self.frame[unit].icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+	local n = 5
+	self.frame[unit].icon:SetTexCoord(n / 64, 1 - n / 64, n / 64, 1 - n / 64)
 
 	self.frame[unit].icon.bg:ClearAllPoints()
 	self.frame[unit].icon.bg:SetAllPoints(self.frame[unit].icon)

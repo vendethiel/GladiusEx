@@ -276,7 +276,8 @@ local function UpdateAuraFrame(frame, size, crop)
 	frame:SetSize(size, size)
 	frame.icon:SetSize(size - 1.5, size - 1.5)
 	if crop then
-		frame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+		local n = 5
+		frame.icon:SetTexCoord(n / 64, 1 - n / 64, n / 64, 1 - n / 64)
 	else
 		frame.icon:SetTexCoord(0, 1, 0, 1)
 	end

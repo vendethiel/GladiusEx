@@ -133,7 +133,8 @@ function DRTracker:UpdateIcon(unit, drCat)
 	tracked.texture:SetPoint("TOPLEFT", tracked, "TOPLEFT")
 	tracked.texture:SetPoint("BOTTOMRIGHT", tracked, "BOTTOMRIGHT")
 	if self.db[unit].drTrackerCrop then
-		tracked.texture:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+		local n = 5
+		tracked.texture:SetTexCoord(n / 64, 1 - n / 64, n / 64, 1 - n / 64)
 	else
 		tracked.texture:SetTexCoord(0, 1, 0, 1)
 	end

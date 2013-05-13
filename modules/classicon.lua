@@ -342,13 +342,7 @@ end
 
 function ClassIcon:SetAura(unit, name, icon, duration, expires)
 	-- display aura
-	self.frame[unit].texture:SetTexture(icon)
-
-	if self.db[unit].classIconCrop then
-		self.frame[unit].texture:SetTexCoord(0.07, 0.93, 0.07, 0.93)
-	else
-		self.frame[unit].texture:SetTexCoord(0, 1, 0, 1)
-	end
+	self:SetTexture(unit, icon, true, 0, 1, 0, 1)
 
 	if self.db[unit].classIconCooldown then
 		self.frame[unit].cooldown:SetCooldown(expires - duration, duration)
@@ -356,8 +350,43 @@ function ClassIcon:SetAura(unit, name, icon, duration, expires)
 	end
 end
 
+function ClassIcon:SetTexture(unit, texture, needs_crop, left, right, top, bottom)
+	-- so the user wants a border, but the borders in the blizzard icons are
+	-- messed up in random ways (some are missing the alpha at the corners, some contain
+	-- random blocks of colored pixels there)
+	-- so instead of using the border already present in the icons, we crop them and add
+	-- our own (this would have been a lot easier if wow allowed alpha mask textures)
+	local needs_border = needs_crop and not self.db[unit].classIconCrop
+	if needs_border then
+		self.frame[unit].texture:ClearAllPoints()
+		self.frame[unit].texture:SetPoint("CENTER")
+		self.frame[unit].texture:SetWidth(self.db[unit].classIconSize * (1 - 6 / 64))
+		self.frame[unit].texture:SetHeight(self.db[unit].classIconSize * (1 - 6 / 64))
+		self.frame[unit].texture_border:Show()
+	else
+		self.frame[unit].texture:ClearAllPoints()
+		self.frame[unit].texture:SetPoint("CENTER")
+		self.frame[unit].texture:SetWidth(self.db[unit].classIconSize)
+		self.frame[unit].texture:SetHeight(self.db[unit].classIconSize)
+		self.frame[unit].texture_border:Hide()
+	end
+
+	if needs_crop then
+		local n
+		if self.db[unit].classIconCrop then n = 5 else n = 3 end
+		left = left + (right - left) * (n / 64)
+		right = right - (right - left) * (n / 64)
+		top = top + (bottom - top) * (n / 64)
+		bottom = bottom - (bottom - top) * (n / 64)
+	end
+
+	-- set texture
+	self.frame[unit].texture:SetTexture(texture)
+	self.frame[unit].texture:SetTexCoord(left, right, top, bottom)
+end
+
 function ClassIcon:SetClassIcon(unit)
-	if (not self.frame[unit]) then return end
+	if not self.frame[unit] then return end
 
 	-- get unit class
 	local class, specID
@@ -396,45 +425,32 @@ function ClassIcon:SetClassIcon(unit)
 		needs_crop = true
 	end
 
-	-- crop class icon borders
-	if self.db[unit].classIconCrop and needs_crop then
-		left = left + (right - left) * 0.07
-		right = right - (right - left) * 0.07
-		top = top + (bottom - top) * 0.07
-		bottom = bottom - (bottom - top) * 0.07
-	end
-
-	-- set texture
-	self.frame[unit].texture:SetTexture(texture)
-	self.frame[unit].texture:SetTexCoord(left, right, top, bottom)
-
-	-- portrait2d
-	-- SetPortraitTexture(self.frame[unit].texture, unit)
-
-	-- portrait3d
-	--	if not self.frame[unit].portrait then
-	--		self.frame[unit].portrait = CreateFrame("PlayerModel", nil, self.frame[unit])
-	--		self.frame[unit].portrait:SetAllPoints()
-	--		self.frame[unit].portrait:SetScript("OnShow", function(f) f:SetPortraitZoom(1) end)
-	--		self.frame[unit].portrait:SetScript("OnHide", function(f) f.guid = nil end)
-	--	end
-
-	--	if not UnitIsVisible(unit) or not UnitIsConnected(unit) then
-	--		self.frame[unit].portrait:Hide()
-	--	else
-	--		local guid = UnitGUID(unit)
-	--		if self.frame[unit].portrait.guid ~= guid then
-	--			self.frame[unit].portrait.guid = guid
-	--			self.frame[unit].portrait:SetUnit(unit)
-	--			self.frame[unit].portrait:SetPortraitZoom(1)
-	--			self.frame[unit].portrait:SetPosition(0, 0, 0)
-	--			self.frame[unit].portrait:Show()
-	--		end
-	--	end
-
+	self:SetTexture(unit, texture, needs_crop, left, right, top, bottom)
 
 	-- hide cooldown frame
 	self.frame[unit].cooldown:Hide()
+
+	-- portrait2d
+	-- SetPortraitTexture(self.frame[unit].texture, unit)
+	-- portrait3d
+	--if not self.frame[unit].portrait then
+	--	self.frame[unit].portrait = CreateFrame("PlayerModel", nil, self.frame[unit])
+	--	self.frame[unit].portrait:SetAllPoints()
+	--	self.frame[unit].portrait:SetScript("OnShow", function(f) f:SetPortraitZoom(1) end)
+	--	self.frame[unit].portrait:SetScript("OnHide", function(f) f.guid = nil end)
+	--end
+	--if not UnitIsVisible(unit) or not UnitIsConnected(unit) then
+	--	self.frame[unit].portrait:Hide()
+	--else
+	--	local guid = UnitGUID(unit)
+	--	if self.frame[unit].portrait.guid ~= guid then
+	--		self.frame[unit].portrait.guid = guid
+	--		self.frame[unit].portrait:SetUnit(unit)
+	--		self.frame[unit].portrait:SetPortraitZoom(1)
+	--		self.frame[unit].portrait:SetPosition(0, 0, 0)
+	--		self.frame[unit].portrait:Show()
+	--	end
+	--end
 end
 
 function ClassIcon:CreateFrame(unit)
@@ -447,6 +463,9 @@ function ClassIcon:CreateFrame(unit)
 	self.frame[unit].texture = _G[self.frame[unit]:GetName().."Icon"]
 	self.frame[unit].normalTexture = _G[self.frame[unit]:GetName().."NormalTexture"]
 	self.frame[unit].cooldown = _G[self.frame[unit]:GetName().."Cooldown"]
+	self.frame[unit].texture_border = self.frame[unit]:CreateTexture(nil, "BACKGROUND", nil, -1)
+	self.frame[unit].texture_border:SetTexture([[Interface\AddOns\GladiusEx\images\icon_border]])
+	self.frame[unit].texture_border:SetAllPoints()
 end
 
 function ClassIcon:Update(unit)
@@ -511,6 +530,11 @@ function ClassIcon:Update(unit)
 
 	-- hide
 	self.frame[unit]:SetAlpha(0)
+end
+
+function ClassIcon:Refresh(unit)
+	self:SetClassIcon(unit)
+	self:UpdateAura(unit)
 end
 
 function ClassIcon:Show(unit)
