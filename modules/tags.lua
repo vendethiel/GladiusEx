@@ -188,14 +188,6 @@ function Tags:OnEvent(event, unit)
 	end
 end
 
-function Tags:CreateFrame(unit, text)
-	local button = GladiusEx.buttons[unit]
-	if not button then return end
-
-	-- create frame
-	self.frame[unit][text] = button:CreateFontString("GladiusEx" .. self:GetName() .. unit .. text, "OVERLAY")
-end
-
 -- Takes a tag text and returns a function that receives a unit parameter and returns the formatted text
 function Tags:ParseText(unit, text)
 	local out = {}
@@ -273,7 +265,7 @@ function Tags:UpdateText(unit, text)
 
 	--[[
 	local formattedText = strgsub(self.db[unit].tagsTexts[text].text, "%[(.-)%]", function(tag)
-			return self:GetTagFunc(tag)(unit_parameter)
+			return self:GetTagFunc(tag)(unit)
 		end
 	end)
 	]]
@@ -290,6 +282,14 @@ function Tags:Refresh(unit)
 		-- update text
 		self:UpdateText(unit, text)
 	end
+end
+
+function Tags:CreateFrame(unit, text)
+	local button = GladiusEx.buttons[unit]
+	if not button then return end
+
+	-- create frame
+	self.frame[unit][text] = button:CreateFontString("GladiusEx" .. self:GetName() .. unit .. text, "OVERLAY")
 end
 
 function Tags:Update(unit)
@@ -340,7 +340,6 @@ function Tags:Update(unit)
 			self.frame[unit][text]:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont),
 				self.db[unit].tagsTexts[text].globalFontSize and GladiusEx.db.base.globalFontSize or self.db[unit].tagsTexts[text].size)
 			self.frame[unit][text]:SetTextColor(self.db[unit].tagsTexts[text].color.r, self.db[unit].tagsTexts[text].color.g, self.db[unit].tagsTexts[text].color.b, self.db[unit].tagsTexts[text].color.a)
-
 			self.frame[unit][text]:SetShadowOffset(1, -1)
 			self.frame[unit][text]:SetShadowColor(0, 0, 0, 1)
 

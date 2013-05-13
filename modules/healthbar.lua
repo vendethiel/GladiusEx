@@ -95,6 +95,14 @@ function HealthBar:UpdateHealthEvent(event, unit)
 	self:UpdateHealth(unit, health, maxHealth)
 end
 
+function HealthBar:UpdateIncomingHealsEvent(event, unit)
+	self:UpdateIncomingHeals(unit)
+end
+
+function HealthBar:UpdateIncomingAbsorbsEvent(event, unit)
+	self:UpdateIncomingAbsorbs(unit)
+end
+
 function HealthBar:UpdateColor(unit)
 	if not self.frame[unit] then return end
 
@@ -139,15 +147,6 @@ function HealthBar:UpdateHealth(unit, health, maxHealth)
 	self:UpdateIncomingAbsorbs(unit)
 end
 
-
-function HealthBar:UpdateIncomingHealsEvent(event, unit)
-	self:UpdateIncomingHeals(unit)
-end
-
-function HealthBar:UpdateIncomingAbsorbsEvent(event, unit)
-	self:UpdateIncomingAbsorbs(unit)
-end
-
 function HealthBar:SetIncomingBarAmount(unit, bar, incamount, inccap)
 	local health = self.frame[unit].health
 	local maxHealth = self.frame[unit].maxHealth
@@ -157,8 +156,8 @@ function HealthBar:SetIncomingBarAmount(unit, bar, incamount, inccap)
 	incamount = min((maxHealth * (1 + inccap)) - health, incamount)
 
 	local parent = self.frame[unit].barParent
-	bar:ClearAllPoints()
 	local ox = health / maxHealth * barWidth
+	bar:ClearAllPoints()
 	bar:SetPoint(self.db[unit].healthBarAnchor, parent, self.db[unit].healthBarRelativePoint, self.db[unit].healthBarOffsetX + ox, self.db[unit].healthBarOffsetY)
 	bar:SetMinMaxValues(0, maxHealth)
 	bar:SetValue(incamount)
@@ -186,10 +185,10 @@ function HealthBar:CreateBar(unit)
 
 	-- create bar + text
 	self.frame[unit] = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. unit, button)
-	self.frame[unit].background = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "Background", "BACKGROUND")
+	self.frame[unit].background = button:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "Background", "BACKGROUND")
 	self.frame[unit].highlight = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "Highlight" .. unit, "OVERLAY")
-	self.frame[unit].incheals = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. unit .. "IncHeals", button)
-	self.frame[unit].incabsorbs = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. unit .. "IncAbsorbs", button)
+	self.frame[unit].incheals = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. unit .. "IncHeals", self.frame[unit])
+	self.frame[unit].incabsorbs = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. unit .. "IncAbsorbs", self.frame[unit])
 end
 
 function HealthBar:Refresh(unit)
@@ -231,6 +230,7 @@ function HealthBar:Update(unit)
 	self.frame[unit]:GetStatusBarTexture():SetVertTile(false)
 	self.frame[unit]:SetMinMaxValues(0, 1)
 	self.frame[unit]:SetValue(1)
+	self.frame[unit]:SetFrameLevel(6)
 
 	-- incoming heals
 	self.frame[unit].incheals:SetHeight(self.db[unit].healthBarHeight)
@@ -242,7 +242,7 @@ function HealthBar:Update(unit)
 	self.frame[unit].incheals:SetStatusBarColor(color.r, color.g, color.b, color.a)
 	self.frame[unit].incheals:SetMinMaxValues(0, 1)
 	self.frame[unit].incheals:SetValue(0)
-	self.frame[unit].incheals:SetFrameLevel(11)
+	self.frame[unit].incheals:SetFrameLevel(5)
 
 	if self.db[unit].healthBarIncomingHeals then
 		self.frame[unit].incheals:Show()
@@ -260,7 +260,7 @@ function HealthBar:Update(unit)
 	self.frame[unit].incabsorbs:SetStatusBarColor(color.r, color.g, color.b, color.a)
 	self.frame[unit].incabsorbs:SetMinMaxValues(0, 1)
 	self.frame[unit].incabsorbs:SetValue(0)
-	self.frame[unit].incheals:SetFrameLevel(10)
+	self.frame[unit].incabsorbs:SetFrameLevel(4)
 
 	if self.db[unit].healthBarIncomingAbsorbs then
 		self.frame[unit].incabsorbs:Show()
