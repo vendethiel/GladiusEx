@@ -12,6 +12,7 @@ local UnitName, UnitIsDeadOrGhost, LOCALIZED_CLASS_NAMES_MALE = UnitName, UnitIs
 local UnitClass, UnitRace = UnitClass, UnitRace
 local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
 local UnitPower, UnitPowerMax = UnitPower, UnitPowerMax
+local UnitGetTotalAbsorbs = UnitGetTotalAbsorbs
 
 local Tags = GladiusEx:NewGladiusExModule("Tags", false, {
 	tags = {},
@@ -105,7 +106,11 @@ function Tags:OnEnable()
 end
 
 function Tags:UpdateEvents(unit)
-	self.events = {}
+	if not self.events then
+		self.events = {}
+	end
+
+	self.events[unit] = {}
 
 	for k,v in pairs(self.db[unit].tagsTexts) do
 		-- get tags
@@ -114,11 +119,11 @@ function Tags:UpdateEvents(unit)
 			local tag_events = self:GetTagEvents(unit, tag)
 			if tag_events then
 				for event in tag_events:gmatch("%S+") do
-					if (not self.events[event]) then
-						self.events[event] = {}
+					if not self.events[unit][event] then
+						self.events[unit][event] = {}
 					end
 
-					self.events[event][k] = true
+					self.events[unit][event][k] = true
 				end
 			end
 		end
@@ -132,11 +137,13 @@ function Tags:UpdateEvents(unit)
 	self:RegisterEvent("UNIT_TARGET")
 	self:RegisterEvent("PLAYER_TARGET_CHANGED", function() self:UNIT_TARGET("PLAYER_TARGET_CHANGED", "player") end)
 
-	for event in pairs(self.events) do
-		if strfind(event, "GLADIUS") then
-			self:RegisterMessage(event, "OnMessage")
-		else
-			self:RegisterEvent(event, "OnEvent")
+	for unit, events in pairs(self.events) do
+		for event in pairs(events) do
+			if strfind(event, "GLADIUS") then
+				self:RegisterMessage(event, "OnEvent")
+			else
+				self:RegisterEvent(event, "OnEvent")
+			end
 		end
 	end
 end
@@ -156,15 +163,6 @@ function Tags:GetAttachTo()
 	return nil
 end
 
-function Tags:OnMessage(event, unit)
-	if self.events[event] then
-		-- update texts
-		for text, _ in pairs(self.events[event]) do
-			self:UpdateText(unit, text)
-		end
-	end
-end
-
 function Tags:UNIT_NAME_UPDATE(event, unit)
 	if not self.frame[unit] then return end
 	self:Refresh(unit)
@@ -180,9 +178,9 @@ end
 function Tags:OnEvent(event, unit)
 	if unit == "target" then unit = "playertarget" end
 
-	if self.events[event] then
+	if self.events[unit][event] then
 		-- update texts
-		for text, _ in pairs(self.events[event]) do
+		for text, _ in pairs(self.events[unit][event]) do
 			self:UpdateText(unit, text)
 		end
 	end
@@ -522,7 +520,7 @@ function Tags:GetOptions(unit)
 												local key = info[#info - 2]
 
 												-- check if the tag is in the text
-												if (strfind(self.db[unit].tagsTexts[key].text, "%[" .. info[#info] .. "%]")) then
+												if strfind(self.db[unit].tagsTexts[key].text, "%[" .. info[#info] .. "%]") then
 													return true
 												else
 													return false
@@ -532,7 +530,7 @@ function Tags:GetOptions(unit)
 												local key = info[#info - 2]
 
 												-- add/remove tag to the text
-												if (not v) then
+												if not v then
 													self.db[unit].tagsTexts[key].text = strgsub(self.db[unit].tagsTexts[key].text, "%[" .. info[#info] .. "%]", "")
 
 													-- trim right
@@ -946,7 +944,33 @@ function Tags:GetBuiltinTags()
 			local maxHealth = not GladiusEx:IsTesting(unit) and UnitHealthMax(unit) or GladiusEx.testing[unit].maxHealth
 			return (maxHealth and maxHealth > 0) and strformat("%.1f%%", (health / maxHealth * 100)) or ""
 		end,
-
+		["absorbs"] = function(unit)
+			local absorbs = not GladiusEx:IsTesting(unit) and UnitGetTotalAbsorbs(unit) or (GladiusEx.testing[unit].maxHealth * 0.2)
+			return absorbs > 0 and absorbs or ""
+		end,
+		["absorbs:short"] = function(unit)
+			local absorbs = not GladiusEx:IsTesting(unit) and UnitGetTotalAbsorbs(unit) or (GladiusEx.testing[unit].maxHealth * 0.2)
+			if absorbs > 999 then
+				return strformat("%.1fk", (absorbs / 1000))
+			else
+				return absorbs > 0 and absorbs or ""
+			end
+		end,
+		["healthabsorbs"] = function(unit)
+			local health = not GladiusEx:IsTesting(unit) and UnitHealth(unit) or GladiusEx.testing[unit].health
+			local absorbs = not GladiusEx:IsTesting(unit) and UnitGetTotalAbsorbs(unit) or (GladiusEx.testing[unit].maxHealth * 0.2)
+			return (health or 0) + (absorbs or 0)
+		end,
+		["healthabsorbs:short"] = function(unit)
+			local health = not GladiusEx:IsTesting(unit) and UnitHealth(unit) or GladiusEx.testing[unit].health
+			local absorbs = not GladiusEx:IsTesting(unit) and UnitGetTotalAbsorbs(unit) or (GladiusEx.testing[unit].maxHealth * 0.2)
+			local total = (health or 0) + (absorbs or 0)
+			if total > 999 then
+				return strformat("%.1fk", (total / 1000))
+			else
+				return total
+			end
+		end,
 		["power"] = function(unit)
 			return not GladiusEx:IsTesting(unit) and UnitPower(unit) or GladiusEx.testing[unit].power
 		end,
@@ -1001,6 +1025,12 @@ function Tags:GetBuiltinTagsEvents()
 		["health:short"] = "UNIT_HEALTH UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH",
 		["maxhealth:short"] = "UNIT_HEALTH UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH",
 		["health:percentage"] = "UNIT_HEALTH UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH",
+
+		["absorbs"] = "UNIT_ABSORB_AMOUNT_CHANGED",
+		["absorbs:short"] = "UNIT_ABSORB_AMOUNT_CHANGED",
+
+		["healthabsorbs"] = "UNIT_HEALTH UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_ABSORB_AMOUNT_CHANGED",
+		["healthabsorbs:short"] = "UNIT_HEALTH UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_ABSORB_AMOUNT_CHANGED",
 
 		["power"] = "UNIT_POWER UNIT_POWER_FREQUENT UNIT_DISPLAYPOWER",
 		["maxpower"] = "UNIT_MAXPOWER UNIT_DISPLAYPOWER",

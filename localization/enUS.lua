@@ -80,6 +80,10 @@ L["health:percentageTag"] = "Health (Percentage)"
 L["healthTag"] = "Health"
 L["maxhealth:shortTag"] = "Max Health (Short)"
 L["maxpowerTag"] = "Max Power"
+L["absorbsTag"] = "Absorbs"
+L["absorbs:shortTag"] = "Absorbs (short)"
+L["healthabsorbsTag"] = "Health plus Absorbs"
+L["healthabsorbs:shortTag"] = "Health plus Absorbs (short)"
 
 -- Module names
 L["CastBar"] = "Cast Bar"
@@ -90,6 +94,7 @@ L["PowerBar"] = "Power Bar"
 L["TargetBar"] = "Target Bar"
 
 -- General
+
 L["Global bar texture"] = true
 L["Global texture of the bars"] = true
 L["Use global texture"] = true
