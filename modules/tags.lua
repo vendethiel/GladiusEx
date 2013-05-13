@@ -178,7 +178,7 @@ end
 function Tags:OnEvent(event, unit)
 	if unit == "target" then unit = "playertarget" end
 
-	if self.events[unit][event] then
+	if self.events[unit] and self.events[unit][event] then
 		-- update texts
 		for text, _ in pairs(self.events[unit][event]) do
 			self:UpdateText(unit, text)
