@@ -289,12 +289,6 @@ function PowerBar:GetOptions(unit)
 							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 15,
 						},
-						sep2 = {
-							type = "description",
-							name = "",
-							width = "full",
-							order = 17,
-						},
 						powerBarInverse = {
 							type = "toggle",
 							name = L["Inverse"],

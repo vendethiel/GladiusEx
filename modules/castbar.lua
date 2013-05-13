@@ -32,6 +32,7 @@ local CastBar = GladiusEx:NewGladiusExModule("CastBar", true, {
 		castShieldIcon = true,
 		castIconPosition = "LEFT",
 		castText = true,
+		castTextGlobalFontSize = true,
 		castTextSize = 11,
 		castTextColor = { r = 2.55, g = 2.55, b = 2.55, a = 1 },
 		castTextAlign = "LEFT",
@@ -42,6 +43,7 @@ local CastBar = GladiusEx:NewGladiusExModule("CastBar", true, {
 		castTimeTextRemainingTime = true,
 		castTimeTextTotalTime = false,
 		castTimeTextDelay = true,
+		castTimeTextGlobalFontSize = true,
 		castTimeTextSize = 11,
 		castTimeTextColor = { r = 2.55, g = 2.55, b = 2.55, a = 1 },
 		castTimeTextAlign = "RIGHT",
@@ -68,6 +70,7 @@ local CastBar = GladiusEx:NewGladiusExModule("CastBar", true, {
 		castShieldIcon = true,
 		castIconPosition = "RIGHT",
 		castText = true,
+		castTextGlobalFontSize = true,
 		castTextSize = 11,
 		castTextColor = { r = 2.55, g = 2.55, b = 2.55, a = 1 },
 		castTextAlign = "RIGHT",
@@ -78,6 +81,7 @@ local CastBar = GladiusEx:NewGladiusExModule("CastBar", true, {
 		castTimeTextRemainingTime = true,
 		castTimeTextTotalTime = false,
 		castTimeTextDelay = true,
+		castTimeTextGlobalFontSize = true,
 		castTimeTextSize = 11,
 		castTimeTextColor = { r = 2.55, g = 2.55, b = 2.55, a = 1 },
 		castTimeTextAlign = "LEFT",
@@ -421,7 +425,8 @@ function CastBar:Update(unit)
 		self.frame[unit].castText:Hide()
 	end
 
-	self.frame[unit].castText:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont), self.db[unit].castTextSize)
+	self.frame[unit].castText:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont),
+		self.db[unit].castTextGlobalFontSize and GladiusEx.db.base.globalFontSize or self.db[unit].castTextSize)
 
 	local color = self.db[unit].castTextColor
 	self.frame[unit].castText:SetTextColor(color.r, color.g, color.b, color.a)
@@ -439,7 +444,8 @@ function CastBar:Update(unit)
 		self.frame[unit].timeText:Hide()
 	end
 
-	self.frame[unit].timeText:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont), self.db[unit].castTimeTextSize)
+	self.frame[unit].timeText:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont),
+		self.db[unit].castTimeTextGlobalFontSize and GladiusEx.db.base.globalFontSize or self.db[unit].castTimeTextSize)
 	local color = self.db[unit].castTimeTextColor
 	self.frame[unit].timeText:SetTextColor(color.r, color.g, color.b, color.a)
 	self.frame[unit].timeText:SetShadowOffset(1, -1)
@@ -796,12 +802,19 @@ function CastBar:GetOptions(unit)
 							disabled = function() return not self.db[unit].castText or not self:IsUnitEnabled(unit) end,
 							order = 10,
 						},
+						castTextGlobalFontSize = {
+							type = "toggle",
+							name = L["Global font size"],
+							desc = L["Use the global font size"],
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 11,
+						},
 						castTextSize = {
 							type = "range",
 							name = L["Text size"],
 							desc = L["Text size of the cast text"],
 							min = 1, max = 20, step = 1,
-							disabled = function() return not self.db[unit].castText or not self:IsUnitEnabled(unit) end,
+							disabled = function() return self.db[unit].castTextGlobalFontSize or not self.db[unit].castText or not self:IsUnitEnabled(unit) end,
 							order = 15,
 						},
 					},
@@ -866,7 +879,13 @@ function CastBar:GetOptions(unit)
 							name = L["Cast time text"],
 							desc = L["Toggle cast time text"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							order = 5,
+							order = 1,
+						},
+						sep = {
+							type = "description",
+							name = "",
+							width = "full",
+							order = 2,
 						},
 						castTimeTextColor = {
 							type = "color",
@@ -876,9 +895,24 @@ function CastBar:GetOptions(unit)
 							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
 							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
 							disabled = function() return not self.db[unit].castTimeText or not self:IsUnitEnabled(unit) end,
+							order = 3,
+						},
+						castTimeTextGlobalFontSize = {
+							type = "toggle",
+							name = L["Global font size"],
+							desc = L["Use the global font size"],
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 5,
+						},
+						castTimeTextSize = {
+							type = "range",
+							name = L["Text size"],
+							desc = L["Text size of the cast time text"],
+							min = 1, max = 20, step = 1,
+							disabled = function() return self.db[unit].castTimeTextGlobalFontSize or not self.db[unit].castTimeText or not self:IsUnitEnabled(unit) end,
 							order = 6,
 						},
-						sep = {
+						sep2 = {
 							type = "description",
 							name = "",
 							width = "full",
@@ -911,14 +945,6 @@ function CastBar:GetOptions(unit)
 							desc = L["Toggle delay"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 11,
-						},
-						castTimeTextSize = {
-							type = "range",
-							name = L["Text size"],
-							desc = L["Text size of the cast time text"],
-							min = 1, max = 20, step = 1,
-							disabled = function() return not self.db[unit].castTimeText or not self:IsUnitEnabled(unit) end,
-							order = 15,
 						},
 					},
 				},
