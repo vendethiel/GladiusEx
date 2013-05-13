@@ -19,6 +19,7 @@ local TargetBar = GladiusEx:NewGladiusExModule("TargetBar", false, {
 		targetBarColor = { r = 1, g = 1, b = 1, a = 1 },
 		targetBarClassColor = true,
 		targetBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
+		targetBarGlobalTexture = true,
 		targetBarTexture = "Minimalist",
 		targetBarIconPosition = "LEFT",
 		targetBarIcon = true,
@@ -36,6 +37,7 @@ local TargetBar = GladiusEx:NewGladiusExModule("TargetBar", false, {
 		targetBarColor = { r = 1, g = 1, b = 1, a = 1 },
 		targetBarClassColor = true,
 		targetBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
+		targetBarGlobalTexture = true,
 		targetBarTexture = "Minimalist",
 		targetBarIconPosition = "RIGHT",
 		targetBarIcon = true,
@@ -194,6 +196,7 @@ function TargetBar:Update(unit)
 
 	local width = self.db[unit].targetBarWidth
 	local height = self.db[unit].targetBarHeight
+	local bar_texture = self.db[unit].targetBarGlobalTexture and LSM:Fetch(LSM.MediaType.STATUSBAR, GladiusEx.db.base.globalBarTexture) or LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].targetBarTexture)
 
 	self.frame[unit]:ClearAllPoints()
 	self.frame[unit]:SetPoint(self.db[unit].targetBarAnchor, parent, self.db[unit].targetBarRelativePoint, self.db[unit].targetBarOffsetX, self.db[unit].targetBarOffsetY)
@@ -227,14 +230,14 @@ function TargetBar:Update(unit)
 	end
 	self.frame[unit].statusbar:SetMinMaxValues(0, 100)
 	self.frame[unit].statusbar:SetValue(100)
-	self.frame[unit].statusbar:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].targetBarTexture))
+	self.frame[unit].statusbar:SetStatusBarTexture(bar_texture)
 	self.frame[unit].statusbar:GetStatusBarTexture():SetHorizTile(false)
 	self.frame[unit].statusbar:GetStatusBarTexture():SetVertTile(false)
 
 	-- update health bar background
 	self.frame[unit].background:ClearAllPoints()
 	self.frame[unit].background:SetAllPoints(self.frame[unit])
-	self.frame[unit].background:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].targetBarTexture))
+	self.frame[unit].background:SetTexture(bar_texture)
 	self.frame[unit].background:SetVertexColor(self.db[unit].targetBarBackgroundColor.r, self.db[unit].targetBarBackgroundColor.g,
 		self.db[unit].targetBarBackgroundColor.b, self.db[unit].targetBarBackgroundColor.a)
 	self.frame[unit].background:SetHorizTile(false)
@@ -391,16 +394,29 @@ function TargetBar:GetOptions(unit)
 							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 20,
 						},
+						sep4 = {
+							type = "description",
+							name = "",
+							width = "full",
+							order = 21,
+						},
+						targetBarGlobalTexture = {
+							type = "toggle",
+							name = L["Use global texture"],
+							desc = L["Use the global bar texture"],
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 22,
+						},
 						targetBarTexture = {
 							type = "select",
 							name = L["Texture"],
 							desc = L["Texture of the health bar"],
 							dialogControl = "LSM30_Statusbar",
 							values = AceGUIWidgetLSMlists.statusbar,
-							disabled = function() return not self:IsUnitEnabled(unit) end,
+							disabled = function() return self.db[unit].targetBarGlobalTexture or not self:IsUnitEnabled(unit) end,
 							order = 25,
 						},
-						sep4 = {
+						sep5 = {
 							type = "description",
 							name = "",
 							width = "full",

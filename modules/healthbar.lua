@@ -18,16 +18,15 @@ local HealthBar = GladiusEx:NewGladiusExModule("HealthBar", true, {
 	healthBarColor = { r = 1, g = 1, b = 1, a = 1 },
 	healthBarClassColor = true,
 	healthBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
+	healthBarGlobalTexture = true,
 	healthBarTexture = "Minimalist",
 	healthBarOffsetX = 0,
 	healthBarOffsetY = 0,
 	healthBarAnchor = "TOPLEFT",
 	healthBarRelativePoint = "TOPLEFT",
-
 	healthBarIncomingHeals = true,
 	healthBarIncomingHealsColor = { r = 0, g = 1, b = 0, a = 0.5 },
 	healthBarIncomingHealsCap = 0,
-
 	healthBarIncomingAbsorbs = true,
 	healthBarIncomingAbsorbsColor = { r = 1, g = 1, b = 1, a = 0.5 },
 	healthBarIncomingAbsorbsCap = 0,
@@ -193,7 +192,7 @@ function HealthBar:CreateBar(unit)
 
 	-- create bar + text
 	self.frame[unit] = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. unit, button)
-	self.frame[unit].background = button:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "Background", "BACKGROUND")
+	self.frame[unit].background = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "Background", "BACKGROUND")
 	self.frame[unit].highlight = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "Highlight" .. unit, "OVERLAY")
 	self.frame[unit].incabsorbs = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "IncAbsorbs", "ARTWORK", nil, 1)
 	self.frame[unit].incheals = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "IncHeals", "ARTWORK", nil, 2)
@@ -230,10 +229,12 @@ function HealthBar:Update(unit)
 	end
 	self.frame[unit].barWidth = width
 
+	local bar_texture = self.db[unit].healthBarGlobalTexture and LSM:Fetch(LSM.MediaType.STATUSBAR, GladiusEx.db.base.globalBarTexture) or LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].healthBarTexture)
+
 	self.frame[unit]:SetHeight(self.db[unit].healthBarHeight)
 	self.frame[unit]:SetWidth(width)
 	self.frame[unit]:SetPoint(self.db[unit].healthBarAnchor, parent, self.db[unit].healthBarRelativePoint, self.db[unit].healthBarOffsetX, self.db[unit].healthBarOffsetY)
-	self.frame[unit]:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].healthBarTexture))
+	self.frame[unit]:SetStatusBarTexture(bar_texture)
 	self.frame[unit]:GetStatusBarTexture():SetHorizTile(false)
 	self.frame[unit]:GetStatusBarTexture():SetVertTile(false)
 	self.frame[unit]:SetMinMaxValues(0, 1)
@@ -243,7 +244,7 @@ function HealthBar:Update(unit)
 	-- incoming heals
 	self.frame[unit].incheals:ClearAllPoints()
 	self.frame[unit].incheals:SetHeight(self.db[unit].healthBarHeight)
-	self.frame[unit].incheals:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].healthBarTexture), true)
+	self.frame[unit].incheals:SetTexture(bar_texture, true)
 	local color = self.db[unit].healthBarIncomingHealsColor
 	self.frame[unit].incheals:SetVertexColor(color.r, color.g, color.b, color.a)
 	self.frame[unit].incheals:Hide()
@@ -252,7 +253,7 @@ function HealthBar:Update(unit)
 	-- incoming absorbs
 	self.frame[unit].incabsorbs:ClearAllPoints()
 	self.frame[unit].incabsorbs:SetHeight(self.db[unit].healthBarHeight)
-	self.frame[unit].incabsorbs:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].healthBarTexture), true)
+	self.frame[unit].incabsorbs:SetTexture(bar_texture, true)
 	local color = self.db[unit].healthBarIncomingAbsorbsColor
 	self.frame[unit].incabsorbs:SetVertexColor(color.r, color.g, color.b, color.a)
 	self.frame[unit].incabsorbs:Hide()
@@ -262,7 +263,7 @@ function HealthBar:Update(unit)
 	self.frame[unit].background:SetAllPoints(self.frame[unit])
 	self.frame[unit].background:SetWidth(self.frame[unit]:GetWidth())
 	self.frame[unit].background:SetHeight(self.frame[unit]:GetHeight())
-	self.frame[unit].background:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].healthBarTexture))
+	self.frame[unit].background:SetTexture(bar_texture)
 	self.frame[unit].background:SetVertexColor(self.db[unit].healthBarBackgroundColor.r, self.db[unit].healthBarBackgroundColor.g,
 		self.db[unit].healthBarBackgroundColor.b, self.db[unit].healthBarBackgroundColor.a)
 	self.frame[unit].background:SetHorizTile(false)
@@ -311,8 +312,8 @@ function HealthBar:Test(unit)
 	local health = GladiusEx.testing[unit].health
 	self:UpdateColorEvent("Test", unit)
 	self:UpdateHealth(unit, health, maxHealth)
-	self:SetIncomingBarAmount(unit, self.frame[unit].incheals, maxHealth * 0.1, self.db[unit].healthBarIncomingHealsCap)
-	self:SetIncomingBarAmount(unit, self.frame[unit].incabsorbs, maxHealth * 0.2, self.db[unit].healthBarIncomingAbsorbsCap)
+	if self.db[unit].healthBarIncomingHeals then  self:SetIncomingBarAmount(unit, self.frame[unit].incheals, maxHealth * 0.1, self.db[unit].healthBarIncomingHealsCap) end
+	if self.db[unit].healthBarIncomingAbsorbs then self:SetIncomingBarAmount(unit, self.frame[unit].incabsorbs, maxHealth * 0.2, self.db[unit].healthBarIncomingAbsorbsCap) end
 end
 
 function HealthBar:GetOptions(unit)
@@ -378,13 +379,26 @@ function HealthBar:GetOptions(unit)
 							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 20,
 						},
+						sep2 = {
+							type = "description",
+							name = "",
+							width = "full",
+							order = 21,
+						},
+						healthBarGlobalTexture = {
+							type = "toggle",
+							name = L["Use global texture"],
+							desc = L["Use the global bar texture"],
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 24,
+						},
 						healthBarTexture = {
 							type = "select",
 							name = L["Texture"],
 							desc = L["Texture of the health bar"],
 							dialogControl = "LSM30_Statusbar",
 							values = AceGUIWidgetLSMlists.statusbar,
-							disabled = function() return not self:IsUnitEnabled(unit) end,
+							disabled = function() return self.db[unit].healthBarGlobalTexture or not self:IsUnitEnabled(unit) end,
 							order = 25,
 						},
 					},

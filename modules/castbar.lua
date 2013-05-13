@@ -25,6 +25,7 @@ local CastBar = GladiusEx:NewGladiusExModule("CastBar", true, {
 		castBarColor = { r = 1, g = 1, b = 0, a = 1 },
 		castBarNotIntColor = { r = 1, g = 0, b = 0, a = 1 },
 		castBarBackgroundColor = { r = 0, g = 0, b = 0, a = 0.3 },
+		castBarGlobalTexture = true,
 		castBarTexture = "Minimalist",
 		castIcon = true,
 		castSpark = true,
@@ -60,6 +61,7 @@ local CastBar = GladiusEx:NewGladiusExModule("CastBar", true, {
 		castBarColor = { r = 1, g = 1, b = 0, a = 1 },
 		castBarNotIntColor = { r = 1, g = 0, b = 0, a = 1 },
 		castBarBackgroundColor = { r = 0, g = 0, b = 0, a = 0.3 },
+		castBarGlobalTexture = true,
 		castBarTexture = "Minimalist",
 		castIcon = true,
 		castSpark = true,
@@ -303,6 +305,7 @@ function CastBar:Update(unit)
 	-- update frame
 	local width = self.db[unit].castBarAdjustWidth and GladiusEx.db[unit].barWidth or self.db[unit].castBarWidth
 	local height = self.db[unit].castBarHeight
+	local bar_texture = self.db[unit].castBarGlobalTexture and LSM:Fetch(LSM.MediaType.STATUSBAR, GladiusEx.db.base.globalBarTexture) or LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].castBarTexture)
 
 	-- add width of the widget if attached to one
 	-- todo: GetModule will fail
@@ -340,7 +343,7 @@ function CastBar:Update(unit)
 
 	self.frame[unit].icon.bg:ClearAllPoints()
 	self.frame[unit].icon.bg:SetAllPoints(self.frame[unit].icon)
-	self.frame[unit].icon.bg:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].castBarTexture))
+	self.frame[unit].icon.bg:SetTexture(bar_texture)
 	self.frame[unit].icon.bg:SetVertexColor(self.db[unit].castBarBackgroundColor.r, self.db[unit].castBarBackgroundColor.g,
 		self.db[unit].castBarBackgroundColor.b, self.db[unit].castBarBackgroundColor.a)
 
@@ -378,7 +381,7 @@ function CastBar:Update(unit)
 	self.frame[unit].bar:SetHeight(height)
 	self.frame[unit].bar:SetMinMaxValues(0, 100)
 	self.frame[unit].bar:SetValue(0)
-	self.frame[unit].bar:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].castBarTexture))
+	self.frame[unit].bar:SetStatusBarTexture(bar_texture)
 	self.frame[unit].bar:GetStatusBarTexture():SetHorizTile(false)
 	self.frame[unit].bar:GetStatusBarTexture():SetVertTile(false)
 	local color = self.db[unit].castBarColor
@@ -403,7 +406,7 @@ function CastBar:Update(unit)
 	--]]
 
 	self.frame[unit].background:SetHeight(height)
-	self.frame[unit].background:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].castBarTexture))
+	self.frame[unit].background:SetTexture(bar_texture)
 	self.frame[unit].background:SetVertexColor(self.db[unit].castBarBackgroundColor.r, self.db[unit].castBarBackgroundColor.g,
 		self.db[unit].castBarBackgroundColor.b, self.db[unit].castBarBackgroundColor.a)
 
@@ -590,16 +593,29 @@ function CastBar:GetOptions(unit)
 							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 15,
 						},
+						sep3 = {
+							type = "description",
+							name = "",
+							width = "full",
+							order = 16,
+						},
+						castBarGlobalTexture = {
+							type = "toggle",
+							name = L["Use global texture"],
+							desc = L["Use the global bar texture"],
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 17,
+						},
 						castBarTexture = {
 							type = "select",
 							name = L["Texture"],
 							desc = L["Texture of the cast bar"],
 							dialogControl = "LSM30_Statusbar",
 							values = AceGUIWidgetLSMlists.statusbar,
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							order = 20,
+							disabled = function() return self.db[unit].castBarGlobalTexture or not self:IsUnitEnabled(unit) end,
+							order = 18,
 						},
-						sep3 = {
+						sep4 = {
 							type = "description",
 							name = "",
 							width = "full",
@@ -620,7 +636,7 @@ function CastBar:GetOptions(unit)
 							disabled = function() return not self.db[unit].castIcon or not self:IsUnitEnabled(unit) end,
 							order = 30,
 						},
-						sep4 = {
+						sep5 = {
 							type = "description",
 							name = "",
 							width = "full",

@@ -90,6 +90,11 @@ L["PowerBar"] = "Power Bar"
 L["TargetBar"] = "Target Bar"
 
 -- General
+L["Global bar texture"] = true
+L["Global texture of the bars"] = true
+L["Use global texture"] = true
+L["Use the global bar texture"] = true
+
 L["Show spark"] = true
 L["Toggle the cast bar spark"] = true
 L["Remaining time"] = true

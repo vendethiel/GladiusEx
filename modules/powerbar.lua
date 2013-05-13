@@ -9,20 +9,17 @@ local UnitPower, UnitPowerMax, UnitPowerType = UnitPower, UnitPowerMax, UnitPowe
 
 local PowerBar = GladiusEx:NewGladiusExModule("PowerBar", true, {
 	powerBarAttachTo = "HealthBar",
-
 	powerBarHeight = 15,
 	powerBarAdjustWidth = true,
 	powerBarWidth = 200,
-
 	powerBarInverse = false,
 	powerBarDefaultColor = true,
 	powerBarColor = { r = 1, g = 1, b = 1, a = 1 },
 	powerBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
+	powerBarGlobalTexture = true,
 	powerBarTexture = "Minimalist",
-
 	powerBarOffsetX = 0,
 	powerBarOffsetY = 0,
-
 	powerBarAnchor = "TOPLEFT",
 	powerBarRelativePoint = "BOTTOMLEFT",
 })
@@ -171,13 +168,15 @@ function PowerBar:Update(unit)
 		width = width + GladiusEx:GetModule(self.db[unit].powerBarAttachTo).frame[unit]:GetWidth()
 	end
 
+	local bar_texture = self.db[unit].powerBarGlobalTexture and LSM:Fetch(LSM.MediaType.STATUSBAR, GladiusEx.db.base.globalBarTexture) or LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].powerBarTexture)
+
 	self.frame[unit]:SetHeight(self.db[unit].powerBarHeight)
 	self.frame[unit]:SetWidth(width)
 
 	self.frame[unit]:SetPoint(self.db[unit].powerBarAnchor, parent, self.db[unit].powerBarRelativePoint, self.db[unit].powerBarOffsetX, self.db[unit].powerBarOffsetY)
 	self.frame[unit]:SetMinMaxValues(0, 100)
 	self.frame[unit]:SetValue(100)
-	self.frame[unit]:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].powerBarTexture))
+	self.frame[unit]:SetStatusBarTexture(bar_texture)
 
 	-- disable tileing
 	self.frame[unit]:GetStatusBarTexture():SetHorizTile(false)
@@ -190,7 +189,7 @@ function PowerBar:Update(unit)
 	self.frame[unit].background:SetWidth(self.frame[unit]:GetWidth())
 	self.frame[unit].background:SetHeight(self.frame[unit]:GetHeight())
 
-	self.frame[unit].background:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].powerBarTexture))
+	self.frame[unit].background:SetTexture(bar_texture)
 
 	self.frame[unit].background:SetVertexColor(self.db[unit].powerBarBackgroundColor.r, self.db[unit].powerBarBackgroundColor.g,
 		self.db[unit].powerBarBackgroundColor.b, self.db[unit].powerBarBackgroundColor.a)
@@ -304,13 +303,26 @@ function PowerBar:GetOptions(unit)
 							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 20,
 						},
+						sep3 = {
+							type = "description",
+							name = "",
+							width = "full",
+							order = 21,
+						},
+						powerBarGlobalTexture = {
+							type = "toggle",
+							name = L["Use global texture"],
+							desc = L["Use the global bar texture"],
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 22,
+						},
 						powerBarTexture = {
 							type = "select",
 							name = L["Texture"],
 							desc = L["Texture of the power bar"],
 							dialogControl = "LSM30_Statusbar",
 							values = AceGUIWidgetLSMlists.statusbar,
-							disabled = function() return not self:IsUnitEnabled(unit) end,
+							disabled = function() return self.db[unit].powerBarGlobalTexture or not self:IsUnitEnabled(unit) end,
 							order = 25,
 						},
 					},

@@ -8,6 +8,7 @@ GladiusEx.defaults = {
 		advancedOptions = true,
 		globalFont = "2002",
 		globalFontSize = 11,
+		globalBarTexture = "Minimalist",
 		showParty = true,
 		testUnits = {
 			["arena1"] = { health = 320000, maxHealth = 320000, power = 18000, maxPower = 18000, powerType = 0, unitClass = "MAGE", unitRace = "Scourge", unitSpec = "Frost", specID = 64 },
@@ -467,6 +468,20 @@ function GladiusEx:SetupOptions()
 								desc = L["Text size of the global font"],
 								min = 1, max = 20, step = 1,
 								order = 5,
+							},
+							sep = {
+								type = "description",
+								name = "",
+								width = "full",
+								order = 7,
+							},
+							globalBarTexture = {
+								type = "select",
+								name = L["Global bar texture"],
+								desc = L["Global texture of the bars"],
+								dialogControl = "LSM30_Statusbar",
+								values = AceGUIWidgetLSMlists.statusbar,
+								order = 10,
 							},
 						},
 					},
