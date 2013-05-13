@@ -155,12 +155,20 @@ function HealthBar:SetIncomingBarAmount(unit, bar, incamount, inccap)
 	-- cap amount
 	incamount = min((maxHealth * (1 + inccap)) - health, incamount)
 
-	local parent = self.frame[unit].barParent
-	local ox = health / maxHealth * barWidth
-	bar:ClearAllPoints()
-	bar:SetPoint(self.db[unit].healthBarAnchor, parent, self.db[unit].healthBarRelativePoint, self.db[unit].healthBarOffsetX + ox, self.db[unit].healthBarOffsetY)
-	bar:SetMinMaxValues(0, maxHealth)
-	bar:SetValue(incamount)
+	if incamount == 0 then
+		bar:Hide()
+	else
+		local parent = self.frame[unit].barParent
+		local ox = health / maxHealth * barWidth
+		bar:SetPoint(self.db[unit].healthBarAnchor, parent, self.db[unit].healthBarRelativePoint, self.db[unit].healthBarOffsetX + ox, self.db[unit].healthBarOffsetY)
+		bar:SetWidth(incamount / maxHealth * barWidth)
+
+		-- set tex coords so that the incoming bar follows the bar texture
+		local left = health / maxHealth
+		local right = (health + incamount) / maxHealth
+		bar:SetTexCoord(left, right, 0, 1)
+		bar:Show()
+	end
 end
 
 function HealthBar:UpdateIncomingHeals(unit)
@@ -181,14 +189,14 @@ end
 
 function HealthBar:CreateBar(unit)
 	local button = GladiusEx.buttons[unit]
-	if (not button) then return end
+	if not button then return end
 
 	-- create bar + text
 	self.frame[unit] = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. unit, button)
 	self.frame[unit].background = button:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "Background", "BACKGROUND")
 	self.frame[unit].highlight = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "Highlight" .. unit, "OVERLAY")
-	self.frame[unit].incheals = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. unit .. "IncHeals", self.frame[unit])
-	self.frame[unit].incabsorbs = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. unit .. "IncAbsorbs", self.frame[unit])
+	self.frame[unit].incabsorbs = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "IncAbsorbs", "ARTWORK", nil, 1)
+	self.frame[unit].incheals = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "IncHeals", "ARTWORK", nil, 2)
 end
 
 function HealthBar:Refresh(unit)
@@ -233,40 +241,21 @@ function HealthBar:Update(unit)
 	self.frame[unit]:SetFrameLevel(6)
 
 	-- incoming heals
+	self.frame[unit].incheals:ClearAllPoints()
 	self.frame[unit].incheals:SetHeight(self.db[unit].healthBarHeight)
-	self.frame[unit].incheals:SetWidth(width)
-	self.frame[unit].incheals:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].healthBarTexture))
-	self.frame[unit].incheals:GetStatusBarTexture():SetHorizTile(false)
-	self.frame[unit].incheals:GetStatusBarTexture():SetVertTile(false)
+	self.frame[unit].incheals:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].healthBarTexture), true)
 	local color = self.db[unit].healthBarIncomingHealsColor
-	self.frame[unit].incheals:SetStatusBarColor(color.r, color.g, color.b, color.a)
-	self.frame[unit].incheals:SetMinMaxValues(0, 1)
-	self.frame[unit].incheals:SetValue(0)
-	self.frame[unit].incheals:SetFrameLevel(5)
+	self.frame[unit].incheals:SetVertexColor(color.r, color.g, color.b, color.a)
+	self.frame[unit].incheals:Hide()
 
-	if self.db[unit].healthBarIncomingHeals then
-		self.frame[unit].incheals:Show()
-	else
-		self.frame[unit].incheals:Hide()
-	end
 
 	-- incoming absorbs
+	self.frame[unit].incabsorbs:ClearAllPoints()
 	self.frame[unit].incabsorbs:SetHeight(self.db[unit].healthBarHeight)
-	self.frame[unit].incabsorbs:SetWidth(width)
-	self.frame[unit].incabsorbs:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].healthBarTexture))
-	self.frame[unit].incabsorbs:GetStatusBarTexture():SetHorizTile(false)
-	self.frame[unit].incabsorbs:GetStatusBarTexture():SetVertTile(false)
+	self.frame[unit].incabsorbs:SetTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].healthBarTexture), true)
 	local color = self.db[unit].healthBarIncomingAbsorbsColor
-	self.frame[unit].incabsorbs:SetStatusBarColor(color.r, color.g, color.b, color.a)
-	self.frame[unit].incabsorbs:SetMinMaxValues(0, 1)
-	self.frame[unit].incabsorbs:SetValue(0)
-	self.frame[unit].incabsorbs:SetFrameLevel(4)
-
-	if self.db[unit].healthBarIncomingAbsorbs then
-		self.frame[unit].incabsorbs:Show()
-	else
-		self.frame[unit].incabsorbs:Hide()
-	end
+	self.frame[unit].incabsorbs:SetVertexColor(color.r, color.g, color.b, color.a)
+	self.frame[unit].incabsorbs:Hide()
 
 	-- update health bar background
 	self.frame[unit].background:ClearAllPoints()
@@ -283,7 +272,7 @@ function HealthBar:Update(unit)
 	self.frame[unit].highlight:SetAllPoints(self.frame[unit])
 	self.frame[unit].highlight:SetTexture([[Interface\QuestFrame\UI-QuestTitleHighlight]])
 	self.frame[unit].highlight:SetBlendMode("ADD")
-	self.frame[unit].highlight:SetVertexColor(1.0, 1.0, 1.0, 1.0)
+	self.frame[unit].highlight:SetVertexColor(1, 1, 1, 1)
 	self.frame[unit].highlight:SetAlpha(0)
 
 	-- hide frame

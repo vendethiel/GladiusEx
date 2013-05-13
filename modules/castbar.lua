@@ -351,6 +351,7 @@ function CastBar:Update(unit)
 		self.frame[unit].icon:Hide()
 		self.frame[unit].icon.bg:Hide()
 	end
+	self.frame[unit].icon:SetTexture(nil)
 
 	-- update not interruptible shield
 	self.frame[unit].icon.shield:SetWidth(height * 64 / 20)
