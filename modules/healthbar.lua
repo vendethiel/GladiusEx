@@ -5,7 +5,9 @@ local LSM
 -- global functions
 local strfind = string.find
 local pairs = pairs
+local min = math.min
 local UnitHealth, UnitHealthMax, UnitClass = UnitHealth, UnitHealthMax, UnitClass
+local UnitGetIncomingHeals, UnitGetTotalAbsorbs = UnitGetIncomingHeals, UnitGetTotalAbsorbs
 
 local HealthBar = GladiusEx:NewGladiusExModule("HealthBar", true, {
 	healthBarAttachTo = "Frame",

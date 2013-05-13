@@ -109,7 +109,7 @@ function PowerBar:UpdateColor(unit)
 	self.frame[unit]:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
 
 	-- update power
-	self:UpdatePower(event, unit)
+	self:UpdatePowerEvent("UpdateColor", unit)
 end
 
 function PowerBar:UpdatePowerEvent(event, unit)
