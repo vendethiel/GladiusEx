@@ -210,7 +210,7 @@ local function GetDefaultImportantAuras()
 	}
 end
 
-local ClassIcon = GladiusEx:NewGladiusExModule("ClassIcon", false, {
+local ClassIcon = GladiusEx:NewGladiusExModule("ClassIcon", true, {
 		classIconAttachTo = "Frame",
 		classIconAnchor = "TOPRIGHT",
 		classIconRelativePoint = "TOPLEFT",
@@ -265,6 +265,10 @@ function ClassIcon:OnDisable()
 	for unit in pairs(self.frame) do
 		self.frame[unit]:SetAlpha(0)
 	end
+end
+
+function ClassIcon:IsBar()
+	return false
 end
 
 function ClassIcon:GetAttachTo(unit)
@@ -892,9 +896,7 @@ function ClassIcon:SetupAuraOptions(options, unit, aura)
 				type= "range",
 				name = L["Priority"],
 				desc = L["Select what priority the aura should have - higher equals more priority"],
-				min = 0,
-				max = 5,
-				step = 1,
+				min = 0, softMax = 10, step = 1,
 				order = 2,
 			},
 			delete = {
@@ -904,7 +906,6 @@ function ClassIcon:SetupAuraOptions(options, unit, aura)
 					local aura = info[#(info) - 1]
 					self.db[unit].classIconAuras[aura] = nil
 					options.auraList.args[aura] = nil
-
 					GladiusEx:UpdateFrames()
 				end,
 				disabled = function() return not self:IsUnitEnabled(unit) end,

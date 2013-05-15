@@ -1076,8 +1076,7 @@ function GladiusEx:UpdateUnit(unit, module)
 			if m.isBarOption then
 				m:Update(unit)
 
-				local attachTo = m:GetAttachTo(unit)
-				if attachTo == "Frame" or m:IsBar(unit) then
+				if m:IsBar(unit) then
 					frameHeight = frameHeight + m:GetBarHeight(unit)
 				end
 			end
