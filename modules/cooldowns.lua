@@ -1625,37 +1625,39 @@ function Cooldowns:MakeGroupOptions(unit, group)
 				catstr = "|cff7f7f7f(" .. strjoin(", ", unpack(cats)) .. ")|r"
 			end
 
-			local namestr
 			--[[
 			if GladiusEx:IsDebugging() then
 				local basecd = GetSpellBaseCooldown(spellid)
-				namestr = string.format(" |T%s:20|t %s [%ss/Base: %ss] %s", spelldata.icon, spelldata.name, spelldata.cooldown or "??", basecd and basecd/1000 or "??", catstr or "")
+				local namestr = string.format(" |T%s:20|t %s [%ss/Base: %ss] %s", spelldata.icon, spelldata.name, spelldata.cooldown or "??", basecd and basecd/1000 or "??", catstr or "")
 				if basecd and basecd / 1000 ~= spelldata.cooldown then
 					GladiusEx:Log(namestr)
 				end
 			end
 			]]
-			namestr = string.format(L[" |T%s:20|t %s [%ss] %s"], spelldata.icon, spelldata.name, spelldata.cooldown or "??", catstr or "")
+			local namestr = string.format(L[" |T%s:20|t %s [%ss] %s"], spelldata.icon, spelldata.name, spelldata.cooldown or "??", catstr or "")
 
-			local spelldesc = FormatSpellDescription(spellid)
-			local extradesc = {}
-			if spelldata.duration then table.insert(extradesc, string.format(L["Duration: %is"], spelldata.duration)) end
-			if spelldata.replaces then table.insert(extradesc, string.format(L["Replaces: %s"], GetSpellInfo(spelldata.replaces))) end
-			if spelldata.requires_aura then table.insert(extradesc, string.format(L["Required aura: %s"], GetSpellInfo(spelldata.requires_aura))) end
-			if spelldata.sets_cooldown then table.insert(extradesc, string.format(L["Shared cooldown: %s (%is)"], GetSpellInfo(spelldata.sets_cooldown.spellid), spelldata.sets_cooldown.cooldown)) end
-			if spelldata.cooldown_starts_on_aura_fade then table.insert(extradesc, L["Cooldown starts when aura fades"]) end
-			if spelldata.cooldown_starts_on_dispel then table.insert(extradesc, L["Cooldown starts on dispel"]) end
-			local SYMBIOSIS_SPELLID = 110309
-			if spelldata.symbiosis then table.insert(extradesc, "|cff00ff00" .. GetSpellInfo(SYMBIOSIS_SPELLID)) end
-			if spelldata.resets then table.insert(extradesc, string.format(L["Resets: %s"], table.concat(fn.sort(fn.map(spelldata.resets, GetSpellInfo)), ", "))) end
-			if #extradesc > 0 then
-				spelldesc = spelldesc .. "\n|cff9f9f9f" .. table.concat(fn.sort(extradesc), "\n|cff9f9f9f")
+			local function MakeSpellDesc()
+				local spelldesc = FormatSpellDescription(spellid)
+				local extradesc = {}
+				if spelldata.duration then table.insert(extradesc, string.format(L["Duration: %is"], spelldata.duration)) end
+				if spelldata.replaces then table.insert(extradesc, string.format(L["Replaces: %s"], GetSpellInfo(spelldata.replaces))) end
+				if spelldata.requires_aura then table.insert(extradesc, string.format(L["Required aura: %s"], GetSpellInfo(spelldata.requires_aura))) end
+				if spelldata.sets_cooldown then table.insert(extradesc, string.format(L["Shared cooldown: %s (%is)"], GetSpellInfo(spelldata.sets_cooldown.spellid), spelldata.sets_cooldown.cooldown)) end
+				if spelldata.cooldown_starts_on_aura_fade then table.insert(extradesc, L["Cooldown starts when aura fades"]) end
+				if spelldata.cooldown_starts_on_dispel then table.insert(extradesc, L["Cooldown starts on dispel"]) end
+				local SYMBIOSIS_SPELLID = 110309
+				if spelldata.symbiosis then table.insert(extradesc, "|cff00ff00" .. GetSpellInfo(SYMBIOSIS_SPELLID)) end
+				if spelldata.resets then table.insert(extradesc, string.format(L["Resets: %s"], table.concat(fn.sort(fn.map(spelldata.resets, GetSpellInfo)), ", "))) end
+				if #extradesc > 0 then
+					spelldesc = spelldesc .. "\n|cff9f9f9f" .. table.concat(fn.sort(extradesc), "\n|cff9f9f9f")
+				end
+				return spelldesc
 			end
 
 			local spellconfig = {
 				type = "toggle",
 				name = namestr,
-				desc = spelldesc,
+				desc = MakeSpellDesc,
 				descStyle = "inline",
 				width = "full",
 				arg = spellid,
