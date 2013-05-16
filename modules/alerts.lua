@@ -100,13 +100,15 @@ function Alerts:Show(unit)
 end
 
 function Alerts:Reset(unit)
+	if not self.frame[unit] then return end
+
 	self:StopFlash(unit)
 	self:ClearAllAlerts(unit)
 end
 
 function Alerts:Test(unit)
 	self:ClearAllAlerts(unit)
-	self:SetAlert(unit, "test", 1, { r = 0, g = 0.5, b = 0.5, a = 1 })
+	self:SetAlert(unit, "test", 1, { r = 1, g = 0, b = 0, a = 1 })
 end
 
 function Alerts:Refresh(unit)
