@@ -384,13 +384,14 @@ end
 
 function GladiusEx:GetArenaSize(min)
 	-- try to guess the current arena size
-	local guess = max(min or 0, 2, GetNumArenaOpponents(), GetNumArenaOpponentSpecs(), GetNumGroupMembers(), self:IsTesting() or 0)
+	local guess = max(min or 0, 2, GetNumArenaOpponents(), GetNumArenaOpponentSpecs(), GetNumGroupMembers(LE_PARTY_CATEGORY_HOME), GetNumGroupMembers(LE_PARTY_CATEGORY_INSTANCE), self:IsTesting() or 0)
+
+	log("GetArenaSize", min, GetNumArenaOpponents(), GetNumArenaOpponentSpecs(), GetNumGroupMembers(LE_PARTY_CATEGORY_HOME), GetNumGroupMembers(LE_PARTY_CATEGORY_INSTANCE), self:IsTesting() or 0,
+		" => ", guess)
 
 	if guess >= 4 then
 		guess = 5
 	end
-
-	-- log("GetArenaSize", min, GetNumArenaOpponents(), GetNumArenaOpponentSpecs(), GetNumGroupMembers(), self:IsTesting(), " => ", guess)
 
 	return guess
 end
@@ -480,7 +481,7 @@ function GladiusEx:CheckArenaSize(unit)
 
 	local size = self:GetArenaSize(min_size)
 
-	log("CheckArenaSize", unit, min_size, size, self:GetArenaSize())
+	log("CheckArenaSize", unit, unit and UnitName(unit) or "none", min_size, size)
 
 	if self.arena_size ~= size then
 		log("arena size change detected", self.arena_size, " => ", size)

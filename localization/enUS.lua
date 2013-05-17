@@ -94,6 +94,10 @@ L["PowerBar"] = "Power Bar"
 L["TargetBar"] = "Target Bar"
 
 -- General
+L["Spell name"] = true
+L["Aura name"] = true
+L["OFFLINE"] = true
+
 L["Add new aura"] = true
 L["Add new cast"] = true
 L["Add"] = true
