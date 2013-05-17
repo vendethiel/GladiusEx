@@ -165,6 +165,7 @@ end
 
 function Tags:UNIT_NAME_UPDATE(event, unit)
 	if not self.frame[unit] then return end
+
 	self:Refresh(unit)
 end
 
@@ -896,7 +897,15 @@ function Tags:GetBuiltinTags()
 			return UnitName(unit) or unit
 		end,
 		["name:status"] = function(unit)
-			return UnitIsDeadOrGhost(unit) and L["DEAD"] or (UnitName(unit) or unit)
+			if not UnitExists(unit) then
+				return unit
+			elseif not UnitIsConnected(unit) then
+				return L["OFFLINE"]
+			elseif UnitIsDeadOrGhost(unit) then
+				return L["DEAD"]
+			else
+				return UnitName(unit) or unit
+			end
 		end,
 		["class"] = function(unit)
 			return not GladiusEx:IsTesting(unit) and UnitClass(unit) or LOCALIZED_CLASS_NAMES_MALE[GladiusEx.testing[unit].unitClass]
