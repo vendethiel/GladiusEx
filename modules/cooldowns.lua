@@ -42,7 +42,7 @@ local function GetDefaultSpells()
 			[88423] = true, -- DRUID/Nature's Cure
 			[132158] = true, -- DRUID/Nature's Swiftness
 			[2782] = true, -- DRUID/Remove Corruption
-			[106839] = true, -- DRUID/Skull Bash
+			[80964] = true, -- DRUID/Skull Bash
 			[78675] = true, -- DRUID/Solar Beam
 			[132469] = true, -- DRUID/Typhoon
 			[102793] = true, -- DRUID/Ursol's Vortex
@@ -418,7 +418,7 @@ local function CooldownFrame_OnUpdate(frame)
 	local tracked = frame.tracked
 	local now = GetTime()
 
-	if tracked then
+	if tracked and (not tracked.charges_detected or not tracked.charges or tracked.charges <= 0) then
 		if tracked.used_start and ((not tracked.used_end and not tracked.cooldown_start) or (tracked.used_end and tracked.used_end > now)) then
 			-- using
 			if frame.state == 0 then
@@ -466,13 +466,20 @@ local function CooldownFrame_OnUpdate(frame)
 	end
 
 	-- not on cooldown or being used
-	frame.tracked = nil
-	frame.cooldown:Hide()
+	if frame.tracked and frame.tracked.charges_detected and frame.tracked.charges < frame.tracked.max_charges then
+		-- show the charge cooldown
+		frame.cooldown:SetReverse(false)
+		frame.cooldown:SetCooldown(tracked.cooldown_start, tracked.cooldown_end - tracked.cooldown_start, frame.tracked.charges, frame.tracked.max_charges)
+		frame.cooldown:Show()
+	else
+		frame.cooldown:Hide()
+	end
 	local a = Cooldowns:GetGroupDB(frame.unit, frame.group).cooldownsIconAvailAlpha
 	local ab = Cooldowns:GetGroupDB(frame.unit, frame.group).cooldownsBorderAvailAlpha
 	frame:SetBackdropBorderColor(frame.color.r, frame.color.g, frame.color.b, ab)
 	frame.icon_frame:SetAlpha(a)
 	frame:SetScript("OnUpdate", nil)
+	frame.tracked = nil
 end
 
 local unit_sortscore = {}
@@ -578,7 +585,7 @@ local function GetCooldownList(unit, group)
 	wipe(spell_list)
 	for spellid, spelldata in CT:IterateCooldowns(class, specID, race) do
 		-- check if the spell is enabled by the user
-		if db.cooldownsSpells[spellid] then
+		if db.cooldownsSpells[spellid] or (spelldata.replaces and db.cooldownsSpells[spelldata.replaces]) then
 			local tracked = CT:GetUnitCooldownInfo(unit, spellid)
 			-- check if the spell has a cooldown valid for an arena, and check if it is a talent that has not yet been detected
 			if (not spelldata.cooldown or spelldata.cooldown < 600) and ((not spelldata.glyph and not spelldata.talent and not spelldata.pet and not spelldata.symbiosis) or (tracked and tracked.detected) or not db.cooldownsHideTalentsUntilDetected) then
@@ -613,21 +620,13 @@ local function GetCooldownList(unit, group)
 	return sorted_spells
 end
 
-local function ShowIcon(frame)
-	frame:Show()
-end
-
-local function HideIcon(frame)
-	frame:Hide()
-end
-
 local function UpdateGroupIconFrames(unit, group, sorted_spells)
 	local gs = Cooldowns:GetGroupState(unit, group)
 	local db = Cooldowns:GetGroupDB(unit, group)
 	local faction = GetUnitFaction(unit)
 
 	local cat_priority = db.cooldownsCatPriority
-	local border_color = db.cooldownsCatColors
+	local border_colors = db.cooldownsCatColors
 	local cat_groups = db.cooldownsCatGroups
 	local cooldownsPerColumn = db.cooldownsPerColumn
 
@@ -638,7 +637,6 @@ local function UpdateGroupIconFrames(unit, group, sorted_spells)
 		local spellid = sorted_spells[i]
 		local spelldata = CT:GetCooldownData(spellid)
 		local tracked = CT:GetUnitCooldownInfo(unit, spellid)
-		local icon
 
 		-- icon grouping
 		local cat, group
@@ -659,7 +657,7 @@ local function UpdateGroupIconFrames(unit, group, sorted_spells)
 			local skip = cooldownsPerColumn - ((sidx - 1) % cooldownsPerColumn)
 			if skip ~= cooldownsPerColumn then
 				for i = 1, skip do
-					HideIcon(gs.frame[sidx])
+					gs.frame[sidx]:Hide()
 					sidx = sidx + 1
 					if sidx > #gs.frame then
 						-- ran out of space
@@ -671,6 +669,8 @@ local function UpdateGroupIconFrames(unit, group, sorted_spells)
 		prev_group = group
 		local frame = gs.frame[sidx]
 
+		-- icon
+		local icon
 		if spelldata.icon_alliance and faction == "Alliance" then
 			icon = spelldata.icon_alliance
 		elseif spelldata.icon_horde and faction == "Horde" then
@@ -681,26 +681,34 @@ local function UpdateGroupIconFrames(unit, group, sorted_spells)
 
 		-- set border color
 		local c
-
 		for i = 1, #cat_priority do
 			local key = cat_priority[i]
 			if spelldata[key] then
-				c = border_color[key]
+				c = border_colors[key]
 				break
 			end
 		end
 
-		frame.icon:SetTexture(icon)
+		-- charges
+		local charges
+		if spelldata.charges then
+			charges = (tracked and tracked.charges) or spelldata.charges
+		elseif tracked and tracked.charges_detected then
+			charges = tracked.charges or spelldata.opt_charges
+		end
 
+		-- update frame state
 		frame.spellid = spellid
 		frame.spelldata = spelldata
 		frame.state = 0
 		frame.tracked = tracked
-		frame.color = c or border_color["uncat"]
+		frame.color = c or border_colors["uncat"]
 
-		-- refresh
+		-- refresh frame
+		frame.icon:SetTexture(icon)
 		frame:SetScript("OnUpdate", CooldownFrame_OnUpdate)
-		ShowIcon(frame)
+		frame.count:SetText(charges)
+		frame:Show()
 
 		sidx = sidx + 1
 		shown = shown + 1
@@ -711,7 +719,7 @@ local function UpdateGroupIconFrames(unit, group, sorted_spells)
 
 	-- hide unused icons
 	for i = sidx, #gs.frame do
-		HideIcon(gs.frame[i])
+		gs.frame[i]:Hide()
 	end
 end
 
@@ -740,16 +748,13 @@ local function CreateCooldownFrame(name, parent)
 	frame.cooldown:SetReverse(true)
 	frame.cooldown:Hide()
 
-	frame.count = frame:CreateFontString(nil, "OVERLAY")
+	frame.count = frame.icon_frame:CreateFontString(nil, "OVERLAY")
 	frame.count:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont), 10, "OUTLINE")
 	frame.count:SetTextColor(1, 1, 1, 1)
-	frame.count:SetShadowColor(0, 0, 0, 1.0)
-	frame.count:SetShadowOffset(0.50, -0.50)
-	frame.count:SetHeight(1)
-	frame.count:SetWidth(1)
-	frame.count:SetAllPoints()
-	frame.count:SetJustifyV("BOTTOM")
-	frame.count:SetJustifyH("RIGHT")
+	-- frame.count:SetShadowColor(0, 0, 0, 0)
+	-- frame.count:SetShadowOffset(0.50, -0.50)
+	frame.count:SetPoint("BOTTOMRIGHT", 2, 0)
+	frame.count:Show()
 
 	frame:EnableMouse(false)
 	frame:SetScript("OnEnter", function(self)
@@ -1648,6 +1653,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 				local SYMBIOSIS_SPELLID = 110309
 				if spelldata.symbiosis then table.insert(extradesc, "|cff00ff00" .. GetSpellInfo(SYMBIOSIS_SPELLID)) end
 				if spelldata.resets then table.insert(extradesc, string.format(L["Resets: %s"], table.concat(fn.sort(fn.map(spelldata.resets, GetSpellInfo)), ", "))) end
+				if spelldata.charges then table.insert(extradesc, string.format(L["Charges: %i"], spelldata.charges)) end
 				if #extradesc > 0 then
 					spelldesc = spelldesc .. "\n|cff9f9f9f" .. table.concat(fn.sort(extradesc), "\n|cff9f9f9f")
 				end
@@ -1657,7 +1663,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 			local spellconfig = {
 				type = "toggle",
 				name = namestr,
-				desc = MakeSpellDesc,
+				desc = GladiusEx:IsDebugging() and MakeSpellDesc() or MakeSpellDesc,
 				descStyle = "inline",
 				width = "full",
 				arg = spellid,
@@ -1766,7 +1772,6 @@ function Cooldowns:MakeGroupOptions(unit, group)
 end
 
 -- Follows a ridiculous parser for GetSpellDescription()
-
 local function parse_desc(desc)
 	local input = desc
 	local output = ""

@@ -48,14 +48,21 @@ local DRTracker = GladiusEx:NewGladiusExModule("DRTracker", false, {
 		drCategories = {},
 	})
 
-function DRTracker:OnEnable()
-	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+local drTexts = {
+	[1] =    { "½", 0, 1, 0 },
+	[0.5] =  { "¼", 1, 0.65,0 },
+	[0.25] = { "Ø", 1, 0, 0 },
+	[0] =    { "Ø", 1, 0, 0 },
+}
 
+function DRTracker:OnEnable()
 	LSM = GladiusEx.LSM
 
-	if (not self.frame) then
+	if not self.frame then
 		self.frame = {}
 	end
+
+	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 end
 
 function DRTracker:OnDisable()
@@ -144,14 +151,7 @@ function DRTracker:DRFaded(unit, spellID)
 	local drCat = DRData:GetSpellCategory(spellID)
 	if self.db[unit].drCategories[drCat] == false then return end
 
-	local drTexts = {
-		[1] =    { "½", 0, 1, 0 },
-		[0.5] =  { "¼", 1, 0.65,0 },
-		[0.25] = { "Ø", 1, 0, 0 },
-		[0] =    { "Ø", 1, 0, 0 },
-	}
-
-	if (not self.frame[unit].tracker[drCat]) then
+	if not self.frame[unit].tracker[drCat] then
 		self:CreateIcon(unit, drCat)
 		self:UpdateIcon(unit, drCat)
 	end
@@ -233,7 +233,7 @@ end
 
 function DRTracker:CreateFrame(unit)
 	local button = GladiusEx.buttons[unit]
-	if (not button) then return end
+	if not button then return end
 
 	-- create frame
 	self.frame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. "Frame" .. unit, button, "ActionButtonTemplate")

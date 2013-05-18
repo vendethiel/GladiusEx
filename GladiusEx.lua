@@ -299,6 +299,7 @@ function GladiusEx:OnEnable()
 	-- init options
 	self:SetupOptions()
 
+	log("OnEnable")
 	-- register the appropriate events
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("ARENA_OPPONENT_UPDATE")
@@ -315,33 +316,29 @@ function GladiusEx:OnEnable()
 	self.dbi.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
 	self.dbi.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
 	self.dbi.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")
+	log("Done")
+end
 
-	-- wait until the first frame because some functions are not available until then
-	-- i expect a raptor will eat me at any moment now for creating a frame just for this..
-	local f = CreateFrame("Frame")
-	f:SetScript("OnUpdate", function()
-		f:SetScript("OnUpdate", nil)
-		-- display help message
-		if (not self.db.base.locked and not self.db.arena.x["arena1"] and not self.db.arena.y["arena1"] and not self.db.arena.x["anchor_arena"] and not self.db.arena.y["anchor_arena"]) then
-			self:Print(L["Welcome to GladiusEx!"])
-			self:Print(L["First run has been detected, displaying test frame"])
-			self:Print(L["Valid slash commands are:"])
-			self:Print("/gex ui")
-			self:Print("/gex test 2-5")
-			self:Print("/gex hide")
-			self:Print("/gex reset")
-			self:Print(L["** If this is not your first run please lock or move the frame to prevent this from happening **"])
+local first_run = false
+function GladiusEx:CheckFirstRun()
+	log("CheckFirstRun")
+	if first_run then return end
+	first_run = true
+	-- display help message
+	if (not self.db.base.locked and not self.db.arena.x["arena1"] and not self.db.arena.y["arena1"] and not self.db.arena.x["anchor_arena"] and not self.db.arena.y["anchor_arena"]) then
+		self:Print(L["Welcome to GladiusEx!"])
+		self:Print(L["First run has been detected, displaying test frame"])
+		self:Print(L["Valid slash commands are:"])
+		self:Print("/gex ui")
+		self:Print("/gex test 2-5")
+		self:Print("/gex hide")
+		self:Print("/gex reset")
+		self:Print(L["** If this is not your first run please lock or move the frame to prevent this from happening **"])
 
-			self:SetTesting(3)
-		elseif self:IsDebugging() then
-			self:SetTesting(3)
-		end
-
-		-- see if we are already in arena
-		if IsLoggedIn() then
-			GladiusEx:PLAYER_ENTERING_WORLD()
-		end
-	end)
+		self:SetTesting(3)
+	elseif self:IsDebugging() then
+		self:SetTesting(3)
+	end
 end
 
 function GladiusEx:OnDisable()
@@ -471,6 +468,10 @@ function GladiusEx:UpdateFrames()
 	log("UpdateFrames")
 	if not self:IsPartyShown() and not self:IsArenaShown() then return end
 
+	if not self.arena_size then
+		self:CheckArenaSize()
+	end
+
 	self:UpdatePartyFrames()
 	self:UpdateArenaFrames()
 
@@ -563,6 +564,8 @@ function GladiusEx:PLAYER_ENTERING_WORLD()
 		self:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
 		log("ENABLE LOGGING")
 	else
+		self:CheckFirstRun()
+
 		if not self:IsTesting() then
 			self:HideFrames()
 		end
@@ -1061,7 +1064,6 @@ function GladiusEx:UpdateUnit(unit, module)
 
 	if InCombatLockdown() then
 		self:QueueUpdate()
-		return
 	end
 
 	if not self.buttons[unit] then

@@ -97,6 +97,7 @@ L["TargetBar"] = "Target Bar"
 L["Spell name"] = true
 L["Aura name"] = true
 L["OFFLINE"] = true
+L["Charges: %i"] = true
 
 L["Add new aura"] = true
 L["Add new cast"] = true
