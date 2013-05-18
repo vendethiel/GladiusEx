@@ -358,6 +358,12 @@ function GladiusEx:OnProfileChanged(event, database, newProfileKey)
 	self:SetupOptions()
 	self:EnableModules()
 	self:UpdateFrames()
+
+	-- make sure that party is shown/hidden if its enabled state changed in the new profile
+	if GladiusEx:IsArenaShown() then
+		GladiusEx:HideFrames()
+		GladiusEx:ShowFrames()
+	end
 end
 
 function GladiusEx:SetTesting(count)
