@@ -1,4 +1,4 @@
-﻿local L = LibStub("AceLocale-3.0"):NewLocale("GladiusEx", "enUS", true)
+﻿local L = LibStub("AceLocale-3.0"):NewLocale("GladiusEx", "enUS", true, true)
 
 -- Cooldowns module
 L["cat:pvp_trinket"] = "PvP Trinket"

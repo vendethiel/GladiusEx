@@ -25,10 +25,10 @@ local HealthBar = GladiusEx:NewGladiusExModule("HealthBar", true, {
 	healthBarAnchor = "TOPLEFT",
 	healthBarRelativePoint = "TOPLEFT",
 	healthBarIncomingHeals = true,
-	healthBarIncomingHealsColor = { r = 0, g = 1, b = 0, a = 0.5 },
+	healthBarIncomingHealsColor = { r = 0, g = 1, b = 0, a = 0.55 },
 	healthBarIncomingHealsCap = 0,
 	healthBarIncomingAbsorbs = true,
-	healthBarIncomingAbsorbsColor = { r = 1, g = 1, b = 1, a = 0.5 },
+	healthBarIncomingAbsorbsColor = { r = 0, g = 0.5, b = 1, a = 0.55 },
 	healthBarIncomingAbsorbsCap = 0,
 })
 

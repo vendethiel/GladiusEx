@@ -923,4 +923,3 @@ function Alerts:SetupAuraOptions(options, unit, aura)
 		},
 	}
 end
-	
