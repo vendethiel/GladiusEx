@@ -1,4 +1,4 @@
-﻿local L = LibStub("AceLocale-3.0"):NewLocale("GladiusEx", "enUS", true, true)
+﻿local L = LibStub("AceLocale-3.0"):NewLocale("GladiusEx", "enUS", true)
 
 -- Cooldowns module
 L["cat:pvp_trinket"] = "PvP Trinket"
@@ -92,8 +92,26 @@ L["DRTracker"] = "DR Tracker"
 L["HealthBar"] = "Health Bar"
 L["PowerBar"] = "Power Bar"
 L["TargetBar"] = "Target Bar"
+L["SkillHistory"] = "Skill History"
 
 -- General
+
+L["Animation ease function"] = true
+L["Animation ease mode"] = true
+L["Cubic"] = true
+L["Duration of the enter animation, in seconds"] = true
+L["Duration of the fade out animation, in seconds"] = true
+L["Duration"] = true
+L["Ease function"] = true
+L["Ease mode"] = true
+L["Enter animation settings"] = true
+L["Enter animation"] = true
+L["Fade out duration"] = true
+L["Quadratic"] = true
+L["Timeout settings"] = true
+L["Timeout"] = true
+L["Timeout, in seconds"] = true
+
 L["Spell name"] = true
 L["Aura name"] = true
 L["OFFLINE"] = true

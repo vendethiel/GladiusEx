@@ -8,18 +8,19 @@ local defaults = {
 	MaxIcons = 8,
 	IconSize = 24,
 	Margin = 2,
-	Padding = 2,
+	PaddingX = 2,
+	PaddingY = 2,
 	OffsetX = 0,
 	OffsetY = 0,
 	BackgroundColor = { r = 0, g = 0, b = 0, a = 0.5 },
 	Crop = true,
 
-	Timeout = 7,
+	Timeout = 10,
 	TimeoutAnimDuration = 0.5,
 
-	EnterAnimDuration = 1.5,
-	EnterAnimEase = "IN_OUT",
-	EnterAnimEaseMode = "QUAD",
+	EnterAnimDuration = 1.0,
+	EnterAnimEase = "OUT",
+	EnterAnimEaseMode = "CUBIC",
 }
 
 local MAX_ICONS = 40
@@ -36,9 +37,6 @@ local SkillHistory = GladiusEx:NewGladiusExModule("SkillHistory", false,
 		Anchor = "BOTTOMRIGHT",
 		RelativePoint = "TOPRIGHT",
 		GrowDirection = "LEFT",
-
-		EnterAnimEase = "OUT",
-		EnterAnimEaseMode = "CUBIC",
 	}))
 
 function SkillHistory:OnEnable()
@@ -82,13 +80,20 @@ function SkillHistory:Update(unit)
 	self.frame[unit]:SetPoint(self.db[unit].Anchor, parent, self.db[unit].RelativePoint, self.db[unit].OffsetX, self.db[unit].OffsetY)
 
 	-- size
-	self.frame[unit]:SetWidth(self.db[unit].MaxIcons * self.db[unit].IconSize + (self.db[unit].MaxIcons - 1) * self.db[unit].Margin + self.db[unit].Padding * 2)
-	self.frame[unit]:SetHeight(self.db[unit].IconSize + self.db[unit].Padding * 2)
+	self.frame[unit]:SetWidth(self.db[unit].MaxIcons * self.db[unit].IconSize + (self.db[unit].MaxIcons - 1) * self.db[unit].Margin + self.db[unit].PaddingX * 2)
+	self.frame[unit]:SetHeight(self.db[unit].IconSize + self.db[unit].PaddingY * 2)
 
 	-- backdrop
 	local bgcolor = self.db[unit].BackgroundColor
 	self.frame[unit]:SetBackdrop({ bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tile = true, tileSize = 16 })
 	self.frame[unit]:SetBackdropColor(bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a)
+
+	-- icons
+	if self.frame[unit].enter then self:UpdateIcon(unit, "enter") end
+	for i = 1, MAX_ICONS do
+		if not self.frame[unit][i] then break end
+		self:UpdateIcon(unit, i)
+	end
 
 	self.frame[unit]:Hide()
 end
@@ -115,7 +120,7 @@ function SkillHistory:Test(unit)
 	specID = GladiusEx.testing[unit].specID
 	class = GladiusEx.testing[unit].unitClass
 	race = GladiusEx.testing[unit].unitRace
-	local n = self.db[unit].MaxIcons - 1
+	local n = 1
 	for spellid, spelldata in LibStub("LibCooldownTracker-1.0"):IterateCooldowns(class, specID, race) do
 		self:QueueSpell(unit, spellid, GetTime() + n * self.db[unit].EnterAnimDuration)
 		n = n + 1
@@ -130,8 +135,9 @@ function SkillHistory:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, rank, lin
 		-- casts with lineID = 0 seem to be secondary effects not directly casted by the unit
 		if lineID ~= 0 then
 			self:QueueSpell(unit, spellId, GetTime())
+			GladiusEx:Log("QUEUEING:", unit, spellName, rank, lineID, spellId)
 		else
-			GladiusEx:Log("SKIPPING:", event, unit, spellName, rank, lineID, spellId)
+			GladiusEx:Log("SKIPPING:", unit, spellName, rank, lineID, spellId)
 		end
 	end
 end
@@ -193,7 +199,7 @@ local function InverseDirection(direction)
 	end
 end
 
-local function GetEase(type, mod_type)
+local function GetEaseFunc(type, mod_type)
 	local function linear(t) return t end
 	local function quad(t) return t * t end
 	local function cubic(t) return t * t * t end
@@ -235,14 +241,16 @@ function SkillHistory:SetupAnimation(unit)
 	--self.frame[unit].enter:SetAlpha(0)
 	self.frame[unit].enter:Show()
 
-	local ease = GetEase(self.db[unit].EnterAnimEase, self.db[unit].EnterAnimEaseMode)
+	local ease = GetEaseFunc(self.db[unit].EnterAnimEase, self.db[unit].EnterAnimEaseMode)
 	
-
+	-- while this could be implemented with AnimationGroups, they are more
+	-- trouble than it worth, sadly
 	local function AnimationFrame()
 		local t = (GetTime() - st) / self.db[unit].EnterAnimDuration
 
 		if t < 1 then
-			local ox = off * ease(t)
+			t = ease(t)
+			local ox = off * t
 			local oy = 0
 			-- move all but the last icon
 			for i = 1, maxicons - 1 do
@@ -364,6 +372,8 @@ function SkillHistory:UpdateSpells(unit)
 	local now = GetTime()
 
 	local timeout = self.db[unit].Timeout
+	local timeout_duration = self.db[unit].TimeoutAnimDuration
+	local ease = GetEaseFunc(self.db[unit].EnterAnimEase, self.db[unit].EnterAnimEaseMode)
 
 	-- remove timed out spells
 	for i = #us, 1, -1 do
@@ -388,15 +398,13 @@ function SkillHistory:UpdateSpells(unit)
 		self.frame[unit][i]:SetAlpha(1)
 		self.frame[unit][i]:Show()
 
-		local timeout_duration = self.db[unit].TimeoutAnimDuration
 		local function FadeFrame(icon)
-			local now = GetTime()
-			local t = (now - icon.entry.time - timeout) / timeout_duration
+			local t = (GetTime() - icon.entry.time - timeout) / timeout_duration
 			if t >= 1 then
 				icon:Hide()
 				icon:SetScript("OnUpdate", nil)
-			elseif t > 0 then
-				icon:SetAlpha(1 - t)
+			elseif t >= 0 then
+				icon:SetAlpha(1 - ease(t))
 			end
 		end
 		self.frame[unit][i]:SetScript("OnUpdate", FadeFrame)
@@ -452,13 +460,260 @@ function SkillHistory:UpdateIconPosition(unit, index, ox, oy)
 	local dir = self.db[unit].GrowDirection
 	local invdir, sign = InverseDirection(dir)
 
-	local posx = self.db[unit].Padding + (self.db[unit].IconSize + self.db[unit].Margin) * (i - 1)
+	local posx = self.db[unit].PaddingX + (self.db[unit].IconSize + self.db[unit].Margin) * (i - 1)
 	self.frame[unit][index]:SetPoint(invdir, self.frame[unit], invdir, sign * (posx + ox), oy)
 end
 
 function SkillHistory:GetOptions(unit)
 	local options
 	options = {
+		general = {
+			type = "group",
+			name = L["General"],
+			order = 1,
+			args = {
+				widget = {
+					type = "group",
+					name = L["Widget"],
+					desc = L["Widget settings"],
+					inline = true,
+					order = 1,
+					args = {
+						BackgroundColor = {
+							type = "color",
+							name = L["Background color"],
+							desc = L["Color of the frame background"],
+							hasAlpha = true,
+							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
+							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 1,
+						},
+						GrowDirection = {
+							type = "select",
+							name = L["Grow direction"],
+							desc = L["Grow direction of the icons"],
+							values = {
+								["LEFT"] = L["Left"],
+								["RIGHT"] = L["Right"],
+							},
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 10,
+						},
+						sep = {
+							type = "description",
+							name = "",
+							width = "full",
+							order = 13,
+						},
+						Crop = {
+							type = "toggle",
+							name = L["Crop borders"],
+							desc = L["Toggle if the icon borders should be cropped or not"],
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
+							order = 14,
+						},
+						sep2 = {
+							type = "description",
+							name = "",
+							width = "full",
+							order = 14.5,
+						},
+						MaxIcons = {
+							type = "range",
+							name = L["Icons max"],
+							desc = L["Number of max icons"],
+							min = 1, max = MAX_ICONS, step = 1,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 20,
+						},
+					},
+				},
+				enteranim = {
+					type = "group",
+					name = L["Enter animation"],
+					desc = L["Enter animation settings"],
+					inline = true,
+					order = 2,
+					args = {
+						EnterAnimDuration = {
+							type = "range",
+							name = L["Duration"],
+							desc = L["Duration of the enter animation, in seconds"],
+							min = 0.1, softMax = 5, bigStep = 0.05,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 1,
+						},
+						EnterAnimEase = {
+							type = "select",
+							name = L["Ease mode"],
+							desc = L["Animation ease mode"],
+							values = {
+								["IN"] = L["In"],
+								["IN_OUT"] = L["In-Out"],
+								["OUT"] = L["Out"],
+								["NONE"] = L["None"],
+							},
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 2,
+						},
+						EnterAnimEaseMode = {
+							type = "select",
+							name = L["Ease function"],
+							desc = L["Animation ease function"],
+							values = {
+								["QUAD"] = L["Quadratic"],
+								["CUBIC"] = L["Cubic"],
+							},
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 3,
+						},
+					},
+				},
+				timeout = {
+					type = "group",
+					name = L["Timeout"],
+					desc = L["Timeout settings"],
+					inline = true,
+					order = 2,
+					args = {
+						Timeout = {
+							type = "range",
+							name = L["Timeout"],
+							desc = L["Timeout, in seconds"],
+							min = 1, softMax = 30, bigStep = 0.5,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 1,
+						},
+						TimeoutAnimDuration = {
+							type = "range",
+							name = L["Fade out duration"],
+							desc = L["Duration of the fade out animation, in seconds"],
+							min = 0.1, softMax = 3, bigStep = 0.05,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 2,
+						},
+					},
+				},
+				size = {
+					type = "group",
+					name = L["Size"],
+					desc = L["Size settings"],
+					inline = true,
+					order = 3,
+					args = {
+						IconSize = {
+							type = "range",
+							name = L["Icon size"],
+							desc = L["Size of the cooldown icons"],
+							min = 1, softMin = 10, softMax = 100, step = 1,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 5,
+						},
+						sep = {
+							type = "description",
+							name = "",
+							width = "full",
+							order = 13,
+						},
+						PaddingY = {
+							type = "range",
+							name = L["Vertical padding"],
+							desc = L["Vertical padding of the icons"],
+							min = 0, softMax = 30, step = 1,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 15,
+						},
+						PaddingX = {
+							type = "range",
+							name = L["Horizontal padding"],
+							desc = L["Horizontal padding of the icons"],
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							min = 0, softMax = 30, step = 1,
+							order = 20,
+						},
+						sep2 = {
+							type = "description",
+							name = "",
+							width = "full",
+							order = 23,
+						},
+						Margin = {
+							type = "range",
+							name = L["Horizontal spacing"],
+							desc = L["Horizontal spacing of the icons"],
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							min = 0, softMax = 30, step = 1,
+							order = 30,
+						},
+					},
+				},
+				position = {
+					type = "group",
+					name = L["Position"],
+					desc = L["Position settings"],
+					inline = true,
+					hidden = function() return not GladiusEx.db.base.advancedOptions end,
+					order = 4,
+					args = {
+						AttachTo = {
+							type = "select",
+							name = L["Attach to"],
+							desc = L["Attach to the given frame"],
+							values = function() return self:GetOtherAttachPoints(unit) end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							width = "double",
+							order = 5,
+						},
+						sep = {
+							type = "description",
+							name = "",
+							width = "full",
+							order = 7,
+						},
+						Anchor = {
+							type = "select",
+							name = L["Anchor"],
+							desc = L["Anchor of the frame"],
+							values = function() return GladiusEx:GetPositions() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 10,
+						},
+						RelativePoint = {
+							type = "select",
+							name = L["Relative point"],
+							desc = L["Relative point of the frame"],
+							values = function() return GladiusEx:GetPositions() end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 15,
+						},
+						sep2 = {
+							type = "description",
+							name = "",
+							width = "full",
+							order = 17,
+						},
+						OffsetX = {
+							type = "range",
+							name = L["Offset X"],
+							desc = L["X offset of the frame"],
+							softMin = -100, softMax = 100, bigStep = 1,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 20,
+						},
+						OffsetY = {
+							type = "range",
+							name = L["Offset Y"],
+							desc = L["Y offset of the frame"],
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							softMin = -100, softMax = 100, bigStep = 1,
+							order = 25,
+						},
+					},
+				},
+			},
+		},
 	}
 	
 	return options
