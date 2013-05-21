@@ -337,10 +337,12 @@ function Tags:Update(unit)
 			end
 
 			self.frame[unit][text]:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont),
-				self.db[unit].tagsTexts[text].globalFontSize and GladiusEx.db.base.globalFontSize or self.db[unit].tagsTexts[text].size)
+				self.db[unit].tagsTexts[text].globalFontSize and GladiusEx.db.base.globalFontSize or self.db[unit].tagsTexts[text].size,
+				GladiusEx.db.base.globalFontOutline)
 			self.frame[unit][text]:SetTextColor(self.db[unit].tagsTexts[text].color.r, self.db[unit].tagsTexts[text].color.g, self.db[unit].tagsTexts[text].color.b, self.db[unit].tagsTexts[text].color.a)
 			self.frame[unit][text]:SetShadowOffset(1, -1)
-			self.frame[unit][text]:SetShadowColor(0, 0, 0, 1)
+			self.frame[unit][text]:SetShadowColor(GladiusEx.db.base.globalFontShadowColor.r, GladiusEx.db.base.globalFontShadowColor.g, GladiusEx.db.base.globalFontShadowColor.b, GladiusEx.db.base.globalFontShadowColor.a)
+
 
 			-- hide
 			self.frame[unit][text]:SetAlpha(0)

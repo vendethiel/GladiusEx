@@ -1150,7 +1150,7 @@ function GladiusEx:UpdateAnchor(anchor_type)
 	end
 
 	anchor.text:SetPoint("CENTER", anchor, "CENTER")
-	anchor.text:SetFont(self.LSM:Fetch(self.LSM.MediaType.FONT, self.db.base.globalFont), self.db.base.globalFontSize)
+	anchor.text:SetFont(self.LSM:Fetch(self.LSM.MediaType.FONT, self.db.base.globalFont), self.db.base.globalFontSize, self.db.base.globalFontOutline)
 	anchor.text:SetTextColor(1, 1, 1, 1)
 	anchor.text:SetShadowOffset(1, -1)
 	anchor.text:SetShadowColor(0, 0, 0, 1)

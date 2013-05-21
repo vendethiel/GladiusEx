@@ -426,13 +426,14 @@ function CastBar:Update(unit)
 	end
 
 	self.frame[unit].castText:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont),
-		self.db[unit].castTextGlobalFontSize and GladiusEx.db.base.globalFontSize or self.db[unit].castTextSize)
+		self.db[unit].castTextGlobalFontSize and GladiusEx.db.base.globalFontSize or self.db[unit].castTextSize,
+		GladiusEx.db.base.globalFontOutline)
 
 	local color = self.db[unit].castTextColor
 	self.frame[unit].castText:SetTextColor(color.r, color.g, color.b, color.a)
 
 	self.frame[unit].castText:SetShadowOffset(1, -1)
-	self.frame[unit].castText:SetShadowColor(0, 0, 0, 1)
+	self.frame[unit].castText:SetShadowColor(GladiusEx.db.base.globalFontShadowColor.r, GladiusEx.db.base.globalFontShadowColor.g, GladiusEx.db.base.globalFontShadowColor.b, GladiusEx.db.base.globalFontShadowColor.a)
 	self.frame[unit].castText:SetJustifyH(self.db[unit].castTextAlign)
 	self.frame[unit].castText:ClearAllPoints()
 	self.frame[unit].castText:SetPoint(self.db[unit].castTextAlign, self.frame[unit].bar, self.db[unit].castTextAlign, self.db[unit].castTextOffsetX, self.db[unit].castTextOffsetY)
@@ -445,11 +446,12 @@ function CastBar:Update(unit)
 	end
 
 	self.frame[unit].timeText:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont),
-		self.db[unit].castTimeTextGlobalFontSize and GladiusEx.db.base.globalFontSize or self.db[unit].castTimeTextSize)
+		self.db[unit].castTimeTextGlobalFontSize and GladiusEx.db.base.globalFontSize or self.db[unit].castTimeTextSize,
+		GladiusEx.db.base.globalFontOutline)
 	local color = self.db[unit].castTimeTextColor
 	self.frame[unit].timeText:SetTextColor(color.r, color.g, color.b, color.a)
 	self.frame[unit].timeText:SetShadowOffset(1, -1)
-	self.frame[unit].timeText:SetShadowColor(0, 0, 0, 1)
+	self.frame[unit].timeText:SetShadowColor(GladiusEx.db.base.globalFontShadowColor.r, GladiusEx.db.base.globalFontShadowColor.g, GladiusEx.db.base.globalFontShadowColor.b, GladiusEx.db.base.globalFontShadowColor.a)
 	self.frame[unit].timeText:SetJustifyH(self.db[unit].castTimeTextAlign)
 	self.frame[unit].timeText:ClearAllPoints()
 	self.frame[unit].timeText:SetPoint(self.db[unit].castTimeTextAlign, self.frame[unit].bar, self.db[unit].castTimeTextAlign, self.db[unit].castTimeTextOffsetX, self.db[unit].castTimeTextOffsetY)

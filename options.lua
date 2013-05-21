@@ -8,6 +8,8 @@ GladiusEx.defaults = {
 		advancedOptions = true,
 		globalFont = "2002",
 		globalFontSize = 11,
+		globalFontOutline = "",
+		globalFontShadowColor = { r = 0, g = 0, b = 0, a = 1 },
 		globalBarTexture = "Minimalist",
 		showParty = true,
 		testUnits = {
@@ -453,14 +455,14 @@ function GladiusEx:SetupOptions()
 					},
 					font = {
 						type = "group",
-						name = L["Font"],
-						desc = L["Font settings"],
+						name = L["Global settings"],
+						desc = L["Global settings"],
 						inline = true,
 						order = 4,
 						args = {
 							globalFont = {
 								type = "select",
-								name = L["Global font"],
+								name = L["Font"],
 								desc = L["Global font, used by the modules"],
 								dialogControl = "LSM30_Font",
 								values = AceGUIWidgetLSMlists.font,
@@ -468,10 +470,30 @@ function GladiusEx:SetupOptions()
 							},
 							globalFontSize = {
 								type = "range",
-								name = L["Global font size"],
+								name = L["Font size"],
 								desc = L["Text size of the global font"],
 								min = 1, max = 20, step = 1,
-								order = 5,
+								order = 2,
+							},
+							globalFontOutline = {
+								type = "select",
+								name = L["Font outline"],
+								desc = L["Text outline of the global font"],
+								values = {
+									[""] = L["None"],
+									["OUTLINE"] = L["Outline"],
+									["THICKOUTLINE"] = L["Thick outline"],
+								},
+								order = 3,
+							},
+							globalFontShadowColor = {
+								type = "color",
+								name = L["Font shadow color"],
+								desc = L["Text shadow color of the global font"],
+								hasAlpha = true,
+								get = function(info) return GladiusEx:GetColorOption(self.db.base, info) end,
+								set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db.base, info, r, g, b, a) end,
+								order = 4,
 							},
 							sep = {
 								type = "description",
@@ -481,7 +503,7 @@ function GladiusEx:SetupOptions()
 							},
 							globalBarTexture = {
 								type = "select",
-								name = L["Global bar texture"],
+								name = L["Bar texture"],
 								desc = L["Global texture of the bars"],
 								dialogControl = "LSM30_Statusbar",
 								values = AceGUIWidgetLSMlists.statusbar,
