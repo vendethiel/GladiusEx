@@ -2,7 +2,11 @@ local GladiusEx = _G.GladiusEx
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local fn = LibStub("LibFunctional-1.0")
 
--- globals
+-- upvalues
+local pairs = pairs
+local min, max = math.min, math.max
+local tinsert, tremove = table.insert, table.remove
+local GetSpellTexture, GetTime = GetSpellTexture, GetTime
 
 local defaults = {
 	MaxIcons = 8,
@@ -44,7 +48,6 @@ function SkillHistory:OnEnable()
 		self.frame = {}
 	end
 
-	--self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 	self:RegisterEvent("UNIT_NAME_UPDATE")
 end
@@ -85,7 +88,7 @@ function SkillHistory:Update(unit)
 
 	-- backdrop
 	local bgcolor = self.db[unit].BackgroundColor
-	self.frame[unit]:SetBackdrop({ bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tile = true, tileSize = 16 })
+	self.frame[unit]:SetBackdrop({ bgFile = [[Interface\Buttons\WHITE8X8]], tile = true, tileSize = 16 })
 	self.frame[unit]:SetBackdropColor(bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a)
 
 	-- icons
@@ -142,15 +145,6 @@ function SkillHistory:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, rank, lin
 	end
 end
 
-function SkillHistory:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, auraType)
-	if eventType == "SPELL_CAST_SUCCESS" then
-		local unit = GladiusEx:GetUnitIdByGUID(sourceGUID)
-		if unit and self.frame[unit] then
-			self:QueueSpell(unit, spellID, GetTime())
-		end
-	end
-end
-
 function SkillHistory:UNIT_NAME_UPDATE(event, unit)
 	if self.frame[unit] then
 		self:ClearUnit(unit)
@@ -172,6 +166,7 @@ function SkillHistory:QueueSpell(unit, spellid, time)
 	-- 	end
 	-- end
 
+	-- replace trinket icon
 	-- if spellid == 42292 then
 	-- 	icon_alliance = [[Interface\Icons\INV_Jewelry_TrinketPVP_01]]
 	-- 	icon_horde = [[Interface\Icons\INV_Jewelry_TrinketPVP_02]]
@@ -199,32 +194,48 @@ local function InverseDirection(direction)
 	end
 end
 
-local function GetEaseFunc(type, mod_type)
-	local function linear(t) return t end
-	local function quad(t) return t * t end
-	local function cubic(t) return t * t * t end
-	local function reverse(f) return function(t) return 1 - f(1 - t) end end
-	local function reflect(f) return function(t) return .5 * (t < .5 and f(2 * t) or (2 - f(2 - 2 * t))) end end
-	
-	local mod
-	if mod_type == "LINEAR" then mod = linear
-	elseif mod_type == "QUAD" then mod = quad
-	elseif mod_type == "CUBIC" then mod = cubic end
-	assert(mod, "Unknown ease function " .. tostring(mod_type))
+local ease_funcs = {
+	["LINEAR"] = function(t) return t end,
+	["QUAD"] = function(t) return t * t end,
+	["CUBIC"] = function(t) return t * t * t end,
+}
 
-	if type == "NONE" then return linear
-	elseif type == "IN" then return mod
-	elseif type == "OUT" then return reverse(mod)
-	elseif type == "IN_OUT" then return reflect(mod) end
-	error("Invalid ease type " .. tostring(type))
+local ease_methods = {
+	["NONE"] = function(f) return function(t) return t end end,
+	["IN"] = function(f) return f end,
+	["OUT"] = function(f) return function(t) return 1 - f(1 - t) end end,
+	["IN_OUT"] = function(f) return function(t) return .5 * (t < .5 and f(2 * t) or (2 - f(2 - 2 * t))) end end,
+}
+
+local ease_cache = setmetatable({}, {
+	__index = function(t1, func)
+		assert(ease_funcs[func], "Unknown ease function " .. tostring(func))
+		local m = setmetatable({}, {
+			__index = function(t2, method)
+				assert(ease_methods[method], "Invalid ease method " .. tostring(method))
+				local f = ease_funcs[func]
+				local m = ease_methods[method]
+				local mf = m(f)
+				rawset(t2, method, mf)
+				return mf
+			end
+		})
+		rawset(t1, func, m)
+		return m
+	end
+})
+
+local function GetEaseFunc(method, func)
+	return ease_cache[func][method]
 end
 
 function SkillHistory:SetupAnimation(unit)
+	local frame = self.frame[unit]
 	local uq = unit_queue[unit]
 	local us = unit_spells[unit]
 	local entry = uq[1]
 
-	if not self.frame[unit].enter then
+	if not frame.enter then
 		self:CreateIcon(unit, "enter")
 		self:UpdateIcon(unit, "enter")
 	end
@@ -233,34 +244,40 @@ function SkillHistory:SetupAnimation(unit)
 	local iconsize = self.db[unit].IconSize
 	local margin = self.db[unit].Margin
 	local maxicons = self.db[unit].MaxIcons
+	local crop = self.db[unit].Crop
+
 	local st = GetTime()
 	local off = iconsize + margin
 
-	self.frame[unit].enter.entry = entry
-	self.frame[unit].enter.icon:SetTexture(GetSpellTexture(entry.spellid))
-	--self.frame[unit].enter:SetAlpha(0)
-	self.frame[unit].enter:Show()
+	local enter = frame.enter
+	local leave = frame[maxicons]
+
+	enter.entry = entry
+	enter.icon:SetTexture(GetSpellTexture(entry.spellid))
+	--enter:SetAlpha(0)
+	enter:Show()
+
+	if leave then leave.icon:ClearAllPoints() end
+	enter.icon:ClearAllPoints()
 
 	local ease = GetEaseFunc(self.db[unit].EnterAnimEase, self.db[unit].EnterAnimEaseMode)
 	
 	-- while this could be implemented with AnimationGroups, they are more
-	-- trouble than it worth, sadly
+	-- trouble than it is worth, sadly
 	local function AnimationFrame()
 		local t = (GetTime() - st) / self.db[unit].EnterAnimDuration
-
 		if t < 1 then
 			t = ease(t)
 			local ox = off * t
 			local oy = 0
 			-- move all but the last icon
 			for i = 1, maxicons - 1 do
-				if self.frame[unit][i] then
-					self:UpdateIconPosition(unit, i, ox, oy)
-				end
+				if not frame[i] or not frame[i]:IsShown() then break end
+				self:UpdateIconPosition(unit, i, ox, oy)
 			end
 
-			if self.frame[unit][maxicons] then
-				-- leave the last icon with clipping
+			if leave then
+				-- move the leaving icon with clipping
 				self:UpdateIconPosition(unit, maxicons, ox, oy)
 				local left, right
 				if dir == "LEFT" then
@@ -270,21 +287,20 @@ function SkillHistory:SetupAnimation(unit)
 					left = 0
 					right = min(iconsize, ox)
 				end
-				self.frame[unit][maxicons].icon:ClearAllPoints()
-				self.frame[unit][maxicons].icon:SetPoint("TOPLEFT", left, 0)
-				self.frame[unit][maxicons].icon:SetPoint("BOTTOMRIGHT", -right, 0)
-				if self.db[unit].Crop then
+				leave.icon:SetPoint("TOPLEFT", left, 0)
+				leave.icon:SetPoint("BOTTOMRIGHT", -right, 0)
+				if crop then
 					local n = 5
 					local range = 1 - (n / 32)
 					local texleft = n / 64 + (left / iconsize * range)
 					local texright = n / 64 + ((1 - right / iconsize) * range)
-					self.frame[unit][maxicons].icon:SetTexCoord(texleft, texright, n / 64, 1 - n / 64)
+					leave.icon:SetTexCoord(texleft, texright, n / 64, 1 - n / 64)
 				else
-					self.frame[unit][maxicons].icon:SetTexCoord(left / iconsize, 1 - right / iconsize, 0, 1)
+					leave.icon:SetTexCoord(left / iconsize, 1 - right / iconsize, 0, 1)
 				end
 
-				-- fade last to alpha 0
-				--self.frame[unit][maxicons]:SetAlpha(1 - t)
+				-- fade out leaving icon to alpha 0
+				--frame[maxicons]:SetAlpha(1 - t)
 			end
 
 			-- enter new icon with clipping
@@ -297,24 +313,23 @@ function SkillHistory:SetupAnimation(unit)
 				left = iconsize - max(0, ox - margin)
 				right = 0
 			end
-			self.frame[unit].enter.icon:ClearAllPoints()
-			self.frame[unit].enter.icon:SetPoint("TOPLEFT", left, 0)
-			self.frame[unit].enter.icon:SetPoint("BOTTOMRIGHT", -right, 0)
-			if self.db[unit].Crop then
+			enter.icon:SetPoint("TOPLEFT", left, 0)
+			enter.icon:SetPoint("BOTTOMRIGHT", -right, 0)
+			if crop then
 				local n = 5
 				local range = 1 - (n / 32)
 				local texleft = n / 64 + (left / iconsize * range)
 				local texright = n / 64 + ((1 - right / iconsize) * range)
-				self.frame[unit].enter.icon:SetTexCoord(texleft, texright, n / 64, 1 - n / 64)
+				enter.icon:SetTexCoord(texleft, texright, n / 64, 1 - n / 64)
 			else
-				self.frame[unit].enter.icon:SetTexCoord(left / iconsize, 1 - right / iconsize, 0, 1)
+				enter.icon:SetTexCoord(left / iconsize, 1 - right / iconsize, 0, 1)
 			end
 
-			-- fade tmp1 to alpha 1
-			--self.frame[unit].enter:SetAlpha(t)
+			-- fade in enter icon to alpha 1
+			--enter:SetAlpha(t)
 		else
 			-- restore last icon
-			if self.frame[unit][maxicons] then
+			if leave then
 				self:UpdateIcon(unit, maxicons)
 			end
 
@@ -331,7 +346,7 @@ function SkillHistory:SetupAnimation(unit)
 		end
 	end
 
-	self.frame[unit]:SetScript("OnUpdate", AnimationFrame)
+	frame:SetScript("OnUpdate", AnimationFrame)
 	AnimationFrame()
 end
 
@@ -368,6 +383,7 @@ function SkillHistory:ClearSpells(unit)
 end
 
 function SkillHistory:UpdateSpells(unit)
+	local frame = self.frame[unit]
 	local us = unit_spells[unit]
 	local now = GetTime()
 
@@ -385,7 +401,7 @@ function SkillHistory:UpdateSpells(unit)
 	-- update icons
 	local n = min(#us, self.db[unit].MaxIcons)
 	for i = 1, n do
-		if not self.frame[unit][i] then
+		if not frame[i] then
 			self:CreateIcon(unit, i)
 			self:UpdateIcon(unit, i)
 		end
@@ -393,12 +409,12 @@ function SkillHistory:UpdateSpells(unit)
 		self:UpdateIconPosition(unit, i, 0, 0)
 
 		local entry = unit_spells[unit][i]
-		self.frame[unit][i].entry = entry
-		self.frame[unit][i].icon:SetTexture(GetSpellTexture(entry.spellid))
-		self.frame[unit][i]:SetAlpha(1)
-		self.frame[unit][i]:Show()
+		frame[i].entry = entry
+		frame[i].icon:SetTexture(GetSpellTexture(entry.spellid))
+		frame[i]:SetAlpha(1)
+		frame[i]:Show()
 
-		local function FadeFrame(icon)
+		local function IconFadeFrame(icon)
 			local t = (GetTime() - icon.entry.time - timeout) / timeout_duration
 			if t >= 1 then
 				icon:Hide()
@@ -407,16 +423,16 @@ function SkillHistory:UpdateSpells(unit)
 				icon:SetAlpha(1 - ease(t))
 			end
 		end
-		self.frame[unit][i]:SetScript("OnUpdate", FadeFrame)
-		FadeFrame(self.frame[unit][i])
+		frame[i]:SetScript("OnUpdate", IconFadeFrame)
+		IconFadeFrame(frame[i])
 	end
 
 	-- hide unused icons
 	for i = n + 1, MAX_ICONS do
-		if not self.frame[unit][i] then break end
-		self.frame[unit][i]:Hide()
-		self.frame[unit][i]:SetScript("OnUpdate", nil)
-		self.frame[unit][i].entry = nil
+		if not frame[i] then break end
+		frame[i]:Hide()
+		frame[i]:SetScript("OnUpdate", nil)
+		frame[i].entry = false
 	end
 end
 
@@ -582,7 +598,7 @@ function SkillHistory:GetOptions(unit)
 							type = "range",
 							name = L["Timeout"],
 							desc = L["Timeout, in seconds"],
-							min = 1, softMax = 30, bigStep = 0.5,
+							min = 1, softMin = 3, softMax = 30, bigStep = 0.5,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 1,
 						},
