@@ -930,12 +930,12 @@ end
 function GladiusEx:CreateAnchor(anchor_type)
 	-- background
 	local background = CreateFrame("Frame", "GladiusExButtonBackground" .. anchor_type, anchor_type == "party" and self.party_parent or self.arena_parent)
-	background:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16})
+	background:SetBackdrop({ bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16 })
 	background:SetFrameStrata("BACKGROUND")
 
 	-- anchor
 	local anchor = CreateFrame("Frame", "GladiusExButtonAnchor" .. anchor_type, anchor_type == "party" and self.party_parent or self.arena_parent)
-	anchor:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16})
+	anchor:SetBackdrop({ bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16 })
 	anchor:SetBackdropColor(0, 0, 0, 1)
 	anchor:SetFrameStrata("MEDIUM")
 	anchor:Raise()

@@ -901,7 +901,7 @@ local function UpdateCooldownGroup(
 	cooldownFrame:SetHeight(cooldownSize * ceil(cooldownMax / cooldownPerColumn) + (cooldownSpacingY * (ceil(cooldownMax / cooldownPerColumn) - 1)) + cooldownPaddingY * 2)
 
 	-- backdrop
-	cooldownFrame:SetBackdrop({bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tile = true, tileSize = 16})
+	cooldownFrame:SetBackdrop({ bgFile = [[Interface\Buttons\WHITE8X8]], tile = true, tileSize = 16 })
 	cooldownFrame:SetBackdropColor(cooldownBackground.r, cooldownBackground.g, cooldownBackground.b, cooldownBackground.a)
 
 	-- icon points
