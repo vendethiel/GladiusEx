@@ -342,7 +342,7 @@ function SkillHistory:SetupAnimation(unit)
 				self:StopAnimation(unit)
 			end
 
-			self:AddSpell(unit, entry.spellid, entry.time)
+			self:AddSpell(unit, entry)
 		end
 	end
 
@@ -362,14 +362,9 @@ function SkillHistory:ClearQueue(unit)
 	self:StopAnimation(unit)
 end
 
-function SkillHistory:AddSpell(unit, spellid, time)
+function SkillHistory:AddSpell(unit, entry)
 	if not unit_spells[unit] then unit_spells[unit] = {} end
 	local us = unit_spells[unit]
-
-	local entry = {
-		["spellid"] = spellid,
-		["time"] = time
-	}
 
 	tremove(us, self.db[unit].MaxIcons)
 	tinsert(us, 1, entry)
@@ -393,8 +388,10 @@ function SkillHistory:UpdateSpells(unit)
 
 	-- remove timed out spells
 	for i = #us, 1, -1 do
-		if (us[i].time + timeout) < now then
+		if (us[i].time + timeout + timeout_duration) < now then
 			tremove(us, i)
+		else
+			break
 		end
 	end
 
@@ -429,7 +426,7 @@ function SkillHistory:UpdateSpells(unit)
 
 	-- hide unused icons
 	for i = n + 1, MAX_ICONS do
-		if not frame[i] then break end
+		if not frame[i] or not frame[i]:IsShown() then break end
 		frame[i]:Hide()
 		frame[i]:SetScript("OnUpdate", nil)
 		frame[i].entry = false
