@@ -1630,15 +1630,18 @@ function Cooldowns:MakeGroupOptions(unit, group)
 				catstr = "|cff7f7f7f(" .. strjoin(", ", unpack(cats)) .. ")|r"
 			end
 
-			--[[
 			if GladiusEx:IsDebugging() then
 				local basecd = GetSpellBaseCooldown(spellid)
-				local namestr = string.format(" |T%s:20|t %s [%ss/Base: %ss] %s", spelldata.icon, spelldata.name, spelldata.cooldown or "??", basecd and basecd/1000 or "??", catstr or "")
 				if basecd and basecd / 1000 ~= spelldata.cooldown then
-					GladiusEx:Log(namestr)
+					local str = string.format("%s: |T%s:20|t %s [%ss/Base: %ss] %s", spelldata.class, spelldata.icon, spelldata.name, spelldata.cooldown or "??", basecd and basecd/1000 or "??", catstr or "")
+					if not debuglog then debuglog = {} end
+					if not debuglog[str] then
+						debuglog[str] = true
+						GladiusEx:Log(str)
+					end
 				end
 			end
-			]]
+
 			local namestr = string.format(L[" |T%s:20|t %s [%ss] %s"], spelldata.icon, spelldata.name, spelldata.cooldown or "??", catstr or "")
 
 			local function MakeSpellDesc()
