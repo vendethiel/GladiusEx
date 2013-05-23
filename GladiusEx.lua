@@ -717,7 +717,17 @@ local function FrameRangeChecker_OnUpdate(f, elapsed)
 	if f.elapsed >= RANGE_UPDATE_INTERVAL then
 		f.elapsed = 0
 		local unit = f.unit
-		if GladiusEx:IsTesting(unit) or range_check(unit) then
+
+		if GladiusEx:IsTesting(unit) then
+			f:SetAlpha(1)
+		end
+
+		if not UnitExists(unit) then
+			-- should probably remove the OnUpdate handler here
+			return
+		end
+
+		if range_check(unit) then
 			f:SetAlpha(1)
 		else
 			f:SetAlpha(GladiusEx.db[unit].oorAlpha)
@@ -1041,6 +1051,7 @@ end
 function GladiusEx:GetWidgetsBounds(unit)
 	local button = self.buttons[unit]
 
+	-- todo: these lists of mods are already generated in UpdateUnit
 	local mods = fn.filter(fn.from_iterator(function(n, m) return m end, self:IterateModules()), function(m) return self:IsModuleEnabled(unit, m:GetName()) end)
 	local widget_mods = fn.filter(mods, function(m) return m:GetAttachType(unit) == "Widget" end)
 

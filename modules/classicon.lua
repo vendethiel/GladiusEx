@@ -386,6 +386,51 @@ end
 function ClassIcon:SetClassIcon(unit)
 	if not self.frame[unit] then return end
 
+	-- hide cooldown frame
+	self.frame[unit].cooldown:Hide()
+
+	if self.db[unit].classIconMode == "PORTRAIT2D" then
+		-- portrait2d
+		if not self.frame[unit].portrait2d then
+			self.frame[unit].portrait2d = self.frame[unit]:CreateTexture(nil, "OVERLAY")
+			self.frame[unit].portrait2d:SetAllPoints()
+			local n = 9 / 64
+			self.frame[unit].portrait2d:SetTexCoord(n, 1 - n, n, 1 - n)
+		end
+		if not UnitIsVisible(unit) or not UnitIsConnected(unit) then
+			self.frame[unit].portrait2d:Hide()
+		else
+			SetPortraitTexture(self.frame[unit].portrait2d, unit)
+			self.frame[unit].portrait2d:Show()
+			self.frame[unit].texture:SetTexture(0, 0, 0, 1)
+			return
+		end
+	elseif self.db[unit].classIconMode == "PORTRAIT3D" then
+		-- portrait3d
+		local zoom = 1.0
+		if not self.frame[unit].portrait3d then
+			self.frame[unit].portrait3d = CreateFrame("PlayerModel", nil, self.frame[unit])
+			self.frame[unit].portrait3d:SetAllPoints()
+			self.frame[unit].portrait3d:SetScript("OnShow", function(f) f:SetPortraitZoom(zoom) end)
+			self.frame[unit].portrait3d:SetScript("OnHide", function(f) GladiusEx:Log("Removing") f.guid = nil end)
+		end
+		if not UnitIsVisible(unit) or not UnitIsConnected(unit) then
+			self.frame[unit].portrait3d:Hide()
+		else
+			local guid = UnitGUID(unit)
+			if self.frame[unit].portrait3d.guid ~= guid then
+				self.frame[unit].portrait3d.guid = guid
+				self.frame[unit].portrait3d:SetUnit(unit)
+				self.frame[unit].portrait3d:SetPortraitZoom(zoom)
+				self.frame[unit].portrait3d:SetPosition(0, 0, 0)
+				GladiusEx:Log("CLASSICON-PORTRAIT3D", unit)
+			end
+			self.frame[unit].portrait3d:Show()
+			self.frame[unit].texture:SetTexture(0, 0, 0, 1)
+			return
+		end
+	end
+
 	-- get unit class
 	local class, specID
 	if not GladiusEx:IsTesting(unit) then
@@ -424,48 +469,6 @@ function ClassIcon:SetClassIcon(unit)
 	end
 
 	self:SetTexture(unit, texture, needs_crop, left, right, top, bottom)
-
-	-- hide cooldown frame
-	self.frame[unit].cooldown:Hide()
-
-	if self.db[unit].classIconMode == "PORTRAIT2D" then
-		-- portrait2d
-		if not self.frame[unit].portrait2d then
-			self.frame[unit].portrait2d = self.frame[unit]:CreateTexture(nil, "OVERLAY")
-			self.frame[unit].portrait2d:SetAllPoints()
-			local n = 9 / 64
-			self.frame[unit].portrait2d:SetTexCoord(n, 1 - n, n, 1 - n)
-		end
-		if not UnitIsVisible(unit) or not UnitIsConnected(unit) then
-			self.frame[unit].portrait2d:Hide()
-		else
-			SetPortraitTexture(self.frame[unit].portrait2d, unit)
-			self.frame[unit].portrait2d:Show()
-			self.frame[unit].texture:SetTexture(0, 0, 0, 1)
-		end
-	elseif self.db[unit].classIconMode == "PORTRAIT3D" then
-		-- portrait3d
-		local zoom = 1.0
-		if not self.frame[unit].portrait3d then
-			self.frame[unit].portrait3d = CreateFrame("PlayerModel", nil, self.frame[unit])
-			self.frame[unit].portrait3d:SetAllPoints()
-			self.frame[unit].portrait3d:SetScript("OnShow", function(f) f:SetPortraitZoom(zoom) end)
-			self.frame[unit].portrait3d:SetScript("OnHide", function(f) f.guid = nil end)
-		end
-		if not UnitIsVisible(unit) or not UnitIsConnected(unit) then
-			self.frame[unit].portrait3d:Hide()
-		else
-			local guid = UnitGUID(unit)
-			if self.frame[unit].portrait3d.guid ~= guid then
-				self.frame[unit].portrait3d.guid = guid
-				self.frame[unit].portrait3d:SetUnit(unit)
-				self.frame[unit].portrait3d:SetPortraitZoom(zoom)
-				self.frame[unit].portrait3d:SetPosition(0, 0, 0)
-			end
-			self.frame[unit].portrait3d:Show()
-			self.frame[unit].texture:SetTexture(0, 0, 0, 1)
-		end
-	end
 end
 
 function ClassIcon:CreateFrame(unit)
