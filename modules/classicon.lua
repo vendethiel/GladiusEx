@@ -232,7 +232,9 @@ local ClassIcon = GladiusEx:NewGladiusExModule("ClassIcon",
 
 function ClassIcon:OnEnable()
 	self:RegisterEvent("UNIT_AURA")
-	self:RegisterMessage("GLADIUS_SPEC_UPDATE")
+	self:RegisterEvent("UNIT_PORTRAIT_UPDATE", "UNIT_AURA")
+	self:RegisterEvent("UNIT_MODEL_CHANGED")
+	self:RegisterMessage("GLADIUS_SPEC_UPDATE", "UNIT_AURA")
 
 	if not self.frame then
 		self.frame = {}
@@ -275,13 +277,20 @@ function ClassIcon:GetModuleAttachFrame(unit)
 end
 
 function ClassIcon:UNIT_AURA(event, unit)
-	if not GladiusEx:IsHandledUnit(unit) then return end
+	if not self.frame[unit] then return end
 
 	-- important auras
 	self:UpdateAura(unit)
 end
 
-function ClassIcon:GLADIUS_SPEC_UPDATE(event, unit)
+function ClassIcon:UNIT_MODEL_CHANGED(event, unit)
+	if not self.frame[unit] then return end
+
+	-- force model update
+	if self.frame[unit].portrait3d then
+		self.frame[unit].portrait3d.guid = false
+	end
+
 	self:UpdateAura(unit)
 end
 
@@ -423,7 +432,7 @@ function ClassIcon:SetClassIcon(unit)
 				self.frame[unit].portrait3d:SetUnit(unit)
 				self.frame[unit].portrait3d:SetPortraitZoom(zoom)
 				self.frame[unit].portrait3d:SetPosition(0, 0, 0)
-				GladiusEx:Log("CLASSICON-PORTRAIT3D", unit)
+				GladiusEx:Log("CLASSICON-PORTRAIT3D", unit, guid)
 			end
 			self.frame[unit].portrait3d:Show()
 			self.frame[unit].texture:SetTexture(0, 0, 0, 1)
