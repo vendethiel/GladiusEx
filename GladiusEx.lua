@@ -427,9 +427,9 @@ function GladiusEx:UpdatePartyFrames()
 		local unit = i == 1 and "player" or ("party" .. (i - 1))
 		if group_members >= i then
 			self:UpdateUnit(unit)
+			self:UpdateUnitState(unit, false)
 			self:ShowUnit(unit)
 
-			self:UpdateUnitState(unit, false)
 
 			if not self:IsTesting() and not UnitExists(unit) then
 				self:SoftHideUnit(unit)
@@ -464,8 +464,8 @@ function GladiusEx:UpdateArenaFrames()
 		local unit = "arena" .. i
 		if numOpps >= i then
 			self:UpdateUnit(unit)
-			self:ShowUnit(unit)
 			self:UpdateUnitState(unit, self.buttons[unit].unit_state == STATE_STEALTH)
+			self:ShowUnit(unit)
 
 			-- test environment
 			if self:IsTesting(unit) then
@@ -554,6 +554,7 @@ function GladiusEx:HideFrames()
 		button.class = nil
 		button.spec = nil
 		button.specID = nil
+		button.unit_state = nil
 
 		-- hide frame
 		self:HideUnit(unit)
