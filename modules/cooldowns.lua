@@ -1131,7 +1131,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 							cooldownsTooltips = {
 								type = "toggle",
 								name = L["Show tooltips"],
-								desc = L["Toggle if the icons should should the spell tooltip when hovered"],
+								desc = L["Toggle if the icons should show the spell tooltip when hovered"],
 								disabled = function() return not self:IsUnitEnabled(unit) end,
 								hidden = function() return not GladiusEx.db.base.advancedOptions end,
 								order = 15,

@@ -61,7 +61,7 @@ function Announcements:GLADIUS_SPEC_UPDATE(event, unit)
 
 	if GladiusEx.buttons[unit].spec then
 		local class = UnitClass(unit) or LOCALIZED_CLASS_NAMES_MALE[GladiusEx.buttons[unit].class] or "??"
-		self:Send(string.format(L["SPEC DETECTED: %s (%s/%s)"], UnitName(unit) or unit, class, GladiusEx.buttons[unit].spec), 15, unit)
+		self:Send(string.format(L["Enemy spec: %s (%s/%s)"], UnitName(unit) or unit, class, GladiusEx.buttons[unit].spec), 15, unit)
 	end
 end
 

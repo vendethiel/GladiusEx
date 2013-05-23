@@ -1,4 +1,4 @@
-﻿local L = LibStub("AceLocale-3.0"):NewLocale("GladiusEx", "enUS", true, true)
+﻿local L = LibStub("AceLocale-3.0"):NewLocale("GladiusEx", "enUS", true)
 
 -- Cooldowns module
 L["cat:pvp_trinket"] = "PvP Trinket"
@@ -96,6 +96,21 @@ L["TargetBar"] = "Target"
 L["SkillHistory"] = "Skill History"
 
 -- General
+L["Grouping"] = true
+L["Frame grouping"] = true
+L["Mod margin"] = true
+L["Border size"] = true
+L["Width of the bars"] = true
+L["Bars height"] = true
+L["Height of the bars"] = true
+L["Top"] = true
+L["Bottom"] = true
+L["Portrait 2D"] = true
+L["Portrait 3D"] = true
+L["Show tooltips"] = true
+L["Toggle if the icons should show the spell tooltip when hovered"] = true
+L["Bar order"] = true
+
 L[" |T%s:20|t %s [%ss] %s"] = true
 L["%s settings"] = true
 L["** If this is not your first run please lock or move the frame to prevent this from happening **"] = true
@@ -477,7 +492,7 @@ L["Size settings"] = true
 L["Size"] = true
 L["Space between the icons"] = true
 L["Spacing"] = true
-L["SPEC DETECTED: %s (%s/%s)"] = true
+L["Enemy spec: %s (%s/%s)"] = true
 L["Spec detection"] = true
 L["Spec"] = true
 L["Spell name / Macro text"] = true
