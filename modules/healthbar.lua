@@ -1,6 +1,6 @@
 local GladiusEx = _G.GladiusEx
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
-local LSM
+local LSM = LibStub("LibSharedMedia-3.0")
 
 -- global functions
 local strfind = string.find
@@ -9,9 +9,9 @@ local min = math.min
 local UnitHealth, UnitHealthMax, UnitClass = UnitHealth, UnitHealthMax, UnitClass
 local UnitGetIncomingHeals, UnitGetTotalAbsorbs = UnitGetIncomingHeals, UnitGetTotalAbsorbs
 
-local HealthBar = GladiusEx:NewGladiusExModule("HealthBar", true, {
+local HealthBar = GladiusEx:NewGladiusExModule("HealthBar", {
 	healthBarAttachTo = "Frame",
-	healthBarHeight = 25,
+	healthBarHeight = 15,
 	healthBarAdjustWidth = true,
 	healthBarWidth = 200,
 	healthBarInverse = false,
@@ -20,8 +20,7 @@ local HealthBar = GladiusEx:NewGladiusExModule("HealthBar", true, {
 	healthBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
 	healthBarGlobalTexture = true,
 	healthBarTexture = "Minimalist",
-	healthBarOffsetX = 0,
-	healthBarOffsetY = 0,
+	healthBarOrder = 1,
 	healthBarAnchor = "TOPLEFT",
 	healthBarRelativePoint = "TOPLEFT",
 	healthBarIncomingHeals = true,
@@ -40,9 +39,7 @@ function HealthBar:OnEnable()
 	self:RegisterEvent("UNIT_HEAL_PREDICTION", "UpdateIncomingHealsEvent")
 	self:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED", "UpdateIncomingAbsorbsEvent")
 
-	LSM = GladiusEx.LSM
-
-	if (not self.frame) then
+	if not self.frame then
 		self.frame = {}
 	end
 end
@@ -51,24 +48,20 @@ function HealthBar:OnDisable()
 	self:UnregisterAllEvents()
 
 	for unit in pairs(self.frame) do
-		self.frame[unit]:SetAlpha(0)
+		self.frame[unit]:Hide()
 	end
 end
 
-function HealthBar:IsBar(unit)
-	if self.db[unit].healthBarAttachTo == "Frame" or strfind(self.db[unit].healthBarRelativePoint, "BOTTOM") then
-		return true
-	else
-		return false
-	end
+function HealthBar:GetAttachType(unit)
+	return "Bar"
 end
 
 function HealthBar:GetBarHeight(unit)
 	return self.db[unit].healthBarHeight
 end
 
-function HealthBar:GetAttachTo(unit)
-	return self.db[unit].healthBarAttachTo
+function HealthBar:GetBarOrder(unit)
+	return self.db[unit].healthBarOrder
 end
 
 function HealthBar:GetModuleAttachPoints()
@@ -77,7 +70,7 @@ function HealthBar:GetModuleAttachPoints()
 	}
 end
 
-function HealthBar:GetAttachFrame(unit)
+function HealthBar:GetModuleAttachFrame(unit)
 	if not self.frame[unit] then
 		self:CreateBar(unit)
 	end
@@ -149,7 +142,7 @@ end
 function HealthBar:SetIncomingBarAmount(unit, bar, incamount, inccap)
 	local health = self.frame[unit].health
 	local maxHealth = self.frame[unit].maxHealth
-	local barWidth = self.frame[unit].barWidth
+	local barWidth = self.frame[unit]:GetWidth()
 
 	-- cap amount
 	incamount = min((maxHealth * (1 + inccap)) - health, incamount)
@@ -157,9 +150,10 @@ function HealthBar:SetIncomingBarAmount(unit, bar, incamount, inccap)
 	if incamount == 0 then
 		bar:Hide()
 	else
-		local parent = self.frame[unit].barParent
+		local parent = self.frame[unit]
 		local ox = health / maxHealth * barWidth
-		bar:SetPoint(self.db[unit].healthBarAnchor, parent, self.db[unit].healthBarRelativePoint, self.db[unit].healthBarOffsetX + ox, self.db[unit].healthBarOffsetY)
+		bar:SetPoint("TOPLEFT", parent, "TOPLEFT", ox, 0)
+		bar:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", ox, 0)
 		bar:SetWidth(incamount / maxHealth * barWidth)
 
 		-- set tex coords so that the incoming bar follows the bar texture
@@ -186,6 +180,10 @@ function HealthBar:UpdateIncomingAbsorbs(unit)
 	self:SetIncomingBarAmount(unit, self.frame[unit].incabsorbs, incamount, self.db[unit].healthBarIncomingAbsorbsCap)
 end
 
+function HealthBar:GetBarColor(class)
+	return RAID_CLASS_COLORS[class] or { r = 1, g = 1, b = 1, a = 1}
+end
+
 function HealthBar:CreateBar(unit)
 	local button = GladiusEx.buttons[unit]
 	if not button then return end
@@ -193,9 +191,13 @@ function HealthBar:CreateBar(unit)
 	-- create bar + text
 	self.frame[unit] = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. unit, button)
 	self.frame[unit].background = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "Background", "BACKGROUND")
-	self.frame[unit].highlight = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "Highlight" .. unit, "OVERLAY")
-	self.frame[unit].incabsorbs = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "IncAbsorbs", "ARTWORK", nil, 1)
-	self.frame[unit].incheals = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "IncHeals", "ARTWORK", nil, 2)
+	self.frame[unit].background:SetAllPoints()
+
+	self.frame[unit].inc_frame = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. unit .. "IncBars", self.frame[unit])
+	self.frame[unit].inc_frame:SetAllPoints()
+
+	self.frame[unit].incabsorbs = self.frame[unit].inc_frame:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "IncAbsorbs", "OVERLAY", nil, 6)
+	self.frame[unit].incheals = self.frame[unit].inc_frame:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "IncHeals", "OVERLAY", nil, 7)
 end
 
 function HealthBar:Refresh(unit)
@@ -209,90 +211,50 @@ function HealthBar:Update(unit)
 		self:CreateBar(unit)
 	end
 
-	-- set bar type
-	local parent = GladiusEx:GetAttachFrame(unit, self.db[unit].healthBarAttachTo)
-	self.frame[unit].barParent = parent
-
-	-- update health bar
-	self.frame[unit]:ClearAllPoints()
-
-	local width = self.db[unit].healthBarAdjustWidth and GladiusEx.db[unit].barWidth or self.db[unit].healthBarWidth
-
-	-- add width of the widget if attached to an widget
-	-- todo: getmodule will fail
-	if (self.db[unit].healthBarAttachTo ~= "Frame" and not strfind(self.db[unit].healthBarRelativePoint,"BOTTOM") and self.db[unit].healthBarAdjustWidth) then
-		if (not GladiusEx:GetModule(self.db[unit].healthBarAttachTo).frame[unit]) then
-			GladiusEx:GetModule(self.db[unit].healthBarAttachTo):Update(unit)
-		end
-
-		width = width + GladiusEx:GetModule(self.db[unit].healthBarAttachTo).frame[unit]:GetWidth()
-	end
-	self.frame[unit].barWidth = width
-
 	local bar_texture = self.db[unit].healthBarGlobalTexture and LSM:Fetch(LSM.MediaType.STATUSBAR, GladiusEx.db.base.globalBarTexture) or LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].healthBarTexture)
-
-	self.frame[unit]:SetHeight(self.db[unit].healthBarHeight)
-	self.frame[unit]:SetWidth(width)
-	self.frame[unit]:SetPoint(self.db[unit].healthBarAnchor, parent, self.db[unit].healthBarRelativePoint, self.db[unit].healthBarOffsetX, self.db[unit].healthBarOffsetY)
 	self.frame[unit]:SetStatusBarTexture(bar_texture)
 	self.frame[unit]:GetStatusBarTexture():SetHorizTile(false)
 	self.frame[unit]:GetStatusBarTexture():SetVertTile(false)
-	self.frame[unit]:SetMinMaxValues(0, 1)
-	self.frame[unit]:SetValue(1)
-	self.frame[unit]:SetFrameLevel(6)
+	self.frame[unit]:SetMinMaxValues(0, 100)
+	self.frame[unit]:SetValue(100)
+
+	-- incframe
+	self.frame[unit].inc_frame:SetFrameStrata("MEDIUM")
 
 	-- incoming heals
 	self.frame[unit].incheals:ClearAllPoints()
-	self.frame[unit].incheals:SetHeight(self.db[unit].healthBarHeight)
 	self.frame[unit].incheals:SetTexture(bar_texture, true)
 	local color = self.db[unit].healthBarIncomingHealsColor
 	self.frame[unit].incheals:SetVertexColor(color.r, color.g, color.b, color.a)
 	self.frame[unit].incheals:Hide()
 
-
 	-- incoming absorbs
 	self.frame[unit].incabsorbs:ClearAllPoints()
-	self.frame[unit].incabsorbs:SetHeight(self.db[unit].healthBarHeight)
 	self.frame[unit].incabsorbs:SetTexture(bar_texture, true)
 	local color = self.db[unit].healthBarIncomingAbsorbsColor
 	self.frame[unit].incabsorbs:SetVertexColor(color.r, color.g, color.b, color.a)
 	self.frame[unit].incabsorbs:Hide()
 
 	-- update health bar background
-	self.frame[unit].background:ClearAllPoints()
-	self.frame[unit].background:SetAllPoints(self.frame[unit])
-	self.frame[unit].background:SetWidth(self.frame[unit]:GetWidth())
-	self.frame[unit].background:SetHeight(self.frame[unit]:GetHeight())
 	self.frame[unit].background:SetTexture(bar_texture)
 	self.frame[unit].background:SetVertexColor(self.db[unit].healthBarBackgroundColor.r, self.db[unit].healthBarBackgroundColor.g,
 		self.db[unit].healthBarBackgroundColor.b, self.db[unit].healthBarBackgroundColor.a)
 	self.frame[unit].background:SetHorizTile(false)
 	self.frame[unit].background:SetVertTile(false)
 
-	-- update highlight texture
-	self.frame[unit].highlight:SetAllPoints(self.frame[unit])
-	self.frame[unit].highlight:SetTexture([[Interface\QuestFrame\UI-QuestTitleHighlight]])
-	self.frame[unit].highlight:SetBlendMode("ADD")
-	self.frame[unit].highlight:SetVertexColor(1, 1, 1, 1)
-	self.frame[unit].highlight:SetAlpha(0)
-
 	-- hide frame
-	self.frame[unit]:SetAlpha(0)
-end
-
-function HealthBar:GetBarColor(class)
-	return RAID_CLASS_COLORS[class] or { r = 1, g = 1, b = 1, a = 1}
+	self.frame[unit]:Hide()
 end
 
 function HealthBar:Show(unit)
-	-- show frame
-	self.frame[unit]:SetAlpha(1)
-
 	-- update color
 	self:UpdateColorEvent("Show", unit)
 
 	-- call event
 	self:UpdateHealthEvent("Show", unit)
+
+	-- show frame
+	self.frame[unit]:Show()
 end
 
 function HealthBar:Reset(unit)
@@ -303,7 +265,7 @@ function HealthBar:Reset(unit)
 	self.frame[unit]:SetValue(1)
 
 	-- hide
-	self.frame[unit]:SetAlpha(0)
+	self.frame[unit]:Hide()
 end
 
 function HealthBar:Test(unit)
@@ -312,7 +274,7 @@ function HealthBar:Test(unit)
 	local health = GladiusEx.testing[unit].health
 	self:UpdateColorEvent("Test", unit)
 	self:UpdateHealth(unit, health, maxHealth)
-	if self.db[unit].healthBarIncomingHeals then  self:SetIncomingBarAmount(unit, self.frame[unit].incheals, maxHealth * 0.1, self.db[unit].healthBarIncomingHealsCap) end
+	if self.db[unit].healthBarIncomingHeals then self:SetIncomingBarAmount(unit, self.frame[unit].incheals, maxHealth * 0.1, self.db[unit].healthBarIncomingHealsCap) end
 	if self.db[unit].healthBarIncomingAbsorbs then self:SetIncomingBarAmount(unit, self.frame[unit].incabsorbs, maxHealth * 0.2, self.db[unit].healthBarIncomingAbsorbsCap) end
 end
 
@@ -410,32 +372,11 @@ function HealthBar:GetOptions(unit)
 					inline = true,
 					order = 2,
 					args = {
-						healthBarAdjustWidth = {
-							type = "toggle",
-							name = L["Adjust width"],
-							desc = L["Adjust bar width to the frame width"],
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							order = 5,
-						},
-						sep = {
-							type = "description",
-							name = "",
-							width = "full",
-							order = 13,
-						},
-						healthBarWidth = {
-							type = "range",
-							name = L["Width"],
-							desc = L["Width of the health bar"],
-							min = 10, max = 500, step = 1,
-							disabled = function() return self.db[unit].healthBarAdjustWidth or not self:IsUnitEnabled(unit) end,
-							order = 15,
-						},
 						healthBarHeight = {
 							type = "range",
 							name = L["Height"],
 							desc = L["Height of the health bar"],
-							min = 10, max = 200, step = 1,
+							softMin = -25, softMax = 25, bigStep = 1,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 20,
 						},
@@ -449,64 +390,13 @@ function HealthBar:GetOptions(unit)
 					hidden = function() return not GladiusEx.db.base.advancedOptions end,
 					order = 3,
 					args = {
-						healthBarAttachTo = {
-							type = "select",
-							name = L["Attach to"],
-							desc = L["Attach health bar to the given frame"],
-							values = function() return self:GetOtherAttachPoints(unit) end,
-							set = function(info, value)
-								local key = info.arg or info[#info]
-
-								self.db[unit][key] = value
-								GladiusEx:UpdateFrames()
-							end,
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							width = "double",
-							order = 5,
-						},
-						sep = {
-							type = "description",
-							name = "",
-							width = "full",
-							order = 7,
-						},
-						healthBarAnchor = {
-							type = "select",
-							name = L["Anchor"],
-							desc = L["Anchor of the health bar"],
-							values = function() return GladiusEx:GetPositions() end,
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							order = 10,
-						},
-						healthBarRelativePoint = {
-							type = "select",
-							name = L["Relative point"],
-							desc = L["Relative point of the health bar"],
-							values = function() return GladiusEx:GetPositions() end,
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							order = 15,
-						},
-						sep2 = {
-							type = "description",
-							name = "",
-							width = "full",
-							order = 17,
-						},
-						healthBarOffsetX = {
+						healthBarOrder = {
 							type = "range",
-							name = L["Offset X"],
-							desc = L["X offset of the health bar"],
-							softMin = -100, softMax = 100, bigStep = 1,
+							name = L["Bar order"],
+							desc = L["Bar order"],
+							softMin = 1, softMax = 10, bigStep = 1,
 							disabled = function() return  not self:IsUnitEnabled(unit) end,
-							order = 20,
-						},
-						healthBarOffsetY = {
-							type = "range",
-							name = L["Offset Y"],
-							desc = L["Y offset of the health bar"],
-							softMin = -100, softMax = 100, bigStep = 1,
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							order = 25,
+							order = 1,
 						},
 					},
 				},

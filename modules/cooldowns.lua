@@ -1,12 +1,12 @@
 local GladiusEx = _G.GladiusEx
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
-local LSM
+local LSM = LibStub("LibSharedMedia-3.0")
 local CT = LibStub("LibCooldownTracker-1.0")
 local fn = LibStub("LibFunctional-1.0")
 
 -- global functions
 local tinsert, tremove, tsort = table.insert, table.remove, table.sort
-local pairs, ipairs, select, type, unpack = pairs, ipairs, select, type, unpack
+local pairs, ipairs, select, type, unpack, wipe = pairs, ipairs, select, type, unpack, wipe
 local min, max, ceil, random = math.min, math.max, math.ceil, math.random
 local GetTime, UnitExists, UnitFactionGroup, UnitClass, UnitRace = GetTime, UnitExists, UnitFactionGroup, UnitClass, UnitRace
 local UnitBuff = UnitBuff
@@ -14,141 +14,172 @@ local UnitBuff = UnitBuff
 local function GetDefaultSpells()
 	return {
 		{ -- group 1
-			[69070] = true, -- GOBLIN/Rocket Jump
-			[7744] = true, -- UNDEAD/Will of the Forsaken
-			[48707] = true, -- DEATHKNIGHT/Anti-Magic Shell
-			[42650] = true, -- DEATHKNIGHT/Army of the Dead
-			[108194] = true, -- DEATHKNIGHT/Asphyxiate
-			[49576] = true, -- DEATHKNIGHT/Death Grip
-			[48743] = true, -- DEATHKNIGHT/Death Pact
-			[108201] = true, -- DEATHKNIGHT/Desecrated Ground
-			[47568] = true, -- DEATHKNIGHT/Empower Rune Weapon
-			[48792] = true, -- DEATHKNIGHT/Icebound Fortitude
-			[49039] = true, -- DEATHKNIGHT/Lichborne
-			[47528] = true, -- DEATHKNIGHT/Mind Freeze
-			[51271] = true, -- DEATHKNIGHT/Pillar of Frost
-			[61999] = true, -- DEATHKNIGHT/Raise Ally
-			[108200] = true, -- DEATHKNIGHT/Remorseless Winter
-			[47476] = true, -- DEATHKNIGHT/Strangulate
-			[49206] = true, -- DEATHKNIGHT/Summon Gargoyle
-			[22812] = true, -- DRUID/Barkskin
-			[99] = true, -- DRUID/Disorienting Roar
-			[102280] = true, -- DRUID/Displacer Beast
-			[108288] = true, -- DRUID/Heart of the Wild
-			[106731] = true, -- DRUID/Incarnation
-			[102342] = true, -- DRUID/Ironbark
-			[102359] = true, -- DRUID/Mass Entanglement
-			[5211] = true, -- DRUID/Mighty Bash
-			[88423] = true, -- DRUID/Nature's Cure
-			[132158] = true, -- DRUID/Nature's Swiftness
-			[2782] = true, -- DRUID/Remove Corruption
-			[80964] = true, -- DRUID/Skull Bash
-			[78675] = true, -- DRUID/Solar Beam
-			[132469] = true, -- DRUID/Typhoon
-			[102793] = true, -- DRUID/Ursol's Vortex
-			[19574] = true, -- HUNTER/Bestial Wrath
-			[19263] = true, -- HUNTER/Deterrence
-			[781] = true, -- HUNTER/Disengage
-			[1499] = true, -- HUNTER/Freezing Trap
-			[19577] = true, -- HUNTER/Intimidation
-			[126246] = true, -- HUNTER/Lullaby
-			[50479] = true, -- HUNTER/Nether Shock
-			[26090] = true, -- HUNTER/Pummel
-			[23989] = true, -- HUNTER/Readiness
-			[19503] = true, -- HUNTER/Scatter Shot
-			[34490] = true, -- HUNTER/Silencing Shot
-			[50519] = true, -- HUNTER/Sonic Blast
-			[121818] = true, -- HUNTER/Stampede
-			[96201] = true, -- HUNTER/Web Wrap
-			[19386] = true, -- HUNTER/Wyvern Sting
-			[108843] = true, -- MAGE/Blazing Speed
-			[1953] = true, -- MAGE/Blink
-			[11958] = true, -- MAGE/Cold Snap
-			[2139] = true, -- MAGE/Counterspell
-			[44572] = true, -- MAGE/Deep Freeze
-			[102051] = true, -- MAGE/Frostjaw
-			[45438] = true, -- MAGE/Ice Block
-			[115450] = true, -- MONK/Detox
-			[122783] = true, -- MONK/Diffuse Magic
-			[113656] = true, -- MONK/Fists of Fury
-			[115203] = true, -- MONK/Fortifying Brew
-			[119381] = true, -- MONK/Leg Sweep
-			[116849] = true, -- MONK/Life Cocoon
-			[115078] = true, -- MONK/Paralysis
-			[115310] = true, -- MONK/Revival
-			[116844] = true, -- MONK/Ring of Peace
-			[116705] = true, -- MONK/Spear Hand Strike
-			[116841] = true, -- MONK/Tiger's Lust
-			[122470] = true, -- MONK/Touch of Karma
-			[119996] = true, -- MONK/Transcendence: Transfer
-			[115176] = true, -- MONK/Zen Meditation
-			[115750] = true, -- PALADIN/Blinding Light
-			[4987] = true, -- PALADIN/Cleanse
-			[498] = true, -- PALADIN/Divine Protection
-			[642] = true, -- PALADIN/Divine Shield
-			[105593] = true, -- PALADIN/Fist of Justice
-			[86698] = true, -- PALADIN/Guardian of Ancient Kings
-			[853] = true, -- PALADIN/Hammer of Justice
-			[96231] = true, -- PALADIN/Rebuke
-			[20066] = true, -- PALADIN/Repentance
-			[47585] = true, -- PRIEST/Dispersion
-			[47788] = true, -- PRIEST/Guardian Spirit
-			[89485] = true, -- PRIEST/Inner Focus
-			[96267] = true, -- PRIEST/Inner Focus
-			[73325] = true, -- PRIEST/Leap of Faith
-			[33206] = true, -- PRIEST/Pain Suppression
-			[8122] = true, -- PRIEST/Psychic Scream
-			[108921] = true, -- PRIEST/Psyfiend
-			[527] = true, -- PRIEST/Purify
-			[15487] = true, -- PRIEST/Silence
-			[112833] = true, -- PRIEST/Spectral Guise
-			[108968] = true, -- PRIEST/Void Shift
-			[108920] = true, -- PRIEST/Void Tendrils
-			[13750] = true, -- ROGUE/Adrenaline Rush
-			[2094] = true, -- ROGUE/Blind
-			[31224] = true, -- ROGUE/Cloak of Shadows
-			[1766] = true, -- ROGUE/Kick
-			[137619] = true, -- ROGUE/Marked for Death
-			[14185] = true, -- ROGUE/Preparation
-			[121471] = true, -- ROGUE/Shadow Blades
-			[51713] = true, -- ROGUE/Shadow Dance
-			[76577] = true, -- ROGUE/Smoke Bomb
-			[1856] = true, -- ROGUE/Vanish
-			[79140] = true, -- ROGUE/Vendetta
-			[114049] = true, -- SHAMAN/Ascendance
-			[51886] = true, -- SHAMAN/Cleanse Spirit
-			[8177] = true, -- SHAMAN/Grounding Totem
-			[108280] = true, -- SHAMAN/Healing Tide Totem
-			[51514] = true, -- SHAMAN/Hex
-			[16190] = true, -- SHAMAN/Mana Tide Totem
-			[77130] = true, -- SHAMAN/Purify Spirit
-			[30823] = true, -- SHAMAN/Shamanistic Rage
-			[98008] = true, -- SHAMAN/Spirit Link Totem
-			[79206] = true, -- SHAMAN/Spiritwalker's Grace
-			[51490] = true, -- SHAMAN/Thunderstorm
-			[8143] = true, -- SHAMAN/Tremor Totem
-			[57994] = true, -- SHAMAN/Wind Shear
-			[89766] = true, -- WARLOCK/Axe Toss
-			[111397] = true, -- WARLOCK/Blood Horror
-			[103967] = true, -- WARLOCK/Carrion Swarm
-			[110913] = true, -- WARLOCK/Dark Bargain
-			[108359] = true, -- WARLOCK/Dark Regeneration
-			[113858] = true, -- WARLOCK/Dark Soul: Instability
-			[113861] = true, -- WARLOCK/Dark Soul: Knowledge
-			[113860] = true, -- WARLOCK/Dark Soul: Misery
-			[48020] = true, -- WARLOCK/Demonic Circle: Teleport
-			[5484] = true, -- WARLOCK/Howl of Terror
-			[6789] = true, -- WARLOCK/Mortal Coil
-			[30283] = true, -- WARLOCK/Shadowfury
-			[19647] = true, -- WARLOCK/Spell Lock
-			[104773] = true, -- WARLOCK/Unending Resolve
-			[118038] = true, -- WARRIOR/Die by the Sword
-			[5246] = true, -- WARRIOR/Intimidating Shout
-			[6552] = true, -- WARRIOR/Pummel
-			[1719] = true, -- WARRIOR/Recklessness
-			[871] = true, -- WARRIOR/Shield Wall
-			[46968] = true, -- WARRIOR/Shockwave
-			[23920] = true, -- WARRIOR/Spell Reflection
+			[28730] = true, -- BloodElf/Arcane Torrent
+			[107079] = true, -- Pandaren/Quaking Palm
+			[69070] = true, -- Goblin/Rocket Jump
+			[7744] = true, -- Scourge/Will of the Forsaken
+			[48707] = true, -- Death Knight/Anti-Magic Shell
+			[42650] = true, -- Death Knight/Army of the Dead
+			[108194] = true, -- Death Knight/Asphyxiate
+			[49576] = true, -- Death Knight/Death Grip
+			[48743] = true, -- Death Knight/Death Pact
+			[108201] = true, -- Death Knight/Desecrated Ground
+			[47568] = true, -- Death Knight/Empower Rune Weapon
+			[48792] = true, -- Death Knight/Icebound Fortitude
+			[49039] = true, -- Death Knight/Lichborne
+			[47528] = true, -- Death Knight/Mind Freeze
+			[51271] = true, -- Death Knight/Pillar of Frost
+			[61999] = true, -- Death Knight/Raise Ally
+			[108200] = true, -- Death Knight/Remorseless Winter
+			[47476] = true, -- Death Knight/Strangulate
+			[49206] = true, -- Death Knight/Summon Gargoyle
+			[110570] = true, -- Druid/Anti-Magic Shell
+			[22812] = true, -- Druid/Barkskin
+			[122288] = true, -- Druid/Cleanse
+			[110788] = true, -- Druid/Cloak of Shadows
+			[112970] = true, -- Druid/Demonic Circle: Teleport
+			[110617] = true, -- Druid/Deterrence
+			[99] = true, -- Druid/Disorienting Roar
+			[110715] = true, -- Druid/Dispersion
+			[102280] = true, -- Druid/Displacer Beast
+			[110700] = true, -- Druid/Divine Shield
+			[110791] = true, -- Druid/Evasion
+			[126456] = true, -- Druid/Fortifying Brew
+			[110693] = true, -- Druid/Frost Nova
+			[110698] = true, -- Druid/Hammer of Justice
+			[108288] = true, -- Druid/Heart of the Wild
+			[110696] = true, -- Druid/Ice Block
+			[110575] = true, -- Druid/Icebound Fortitude
+			[106731] = true, -- Druid/Incarnation
+			[113004] = true, -- Druid/Intimidating Roar
+			[102342] = true, -- Druid/Ironbark
+			[110718] = true, -- Druid/Leap of Faith
+			[102359] = true, -- Druid/Mass Entanglement
+			[5211] = true, -- Druid/Mighty Bash
+			[88423] = true, -- Druid/Nature's Cure
+			[132158] = true, -- Druid/Nature's Swiftness
+			[2782] = true, -- Druid/Remove Corruption
+			[80964] = true, -- Druid/Skull Bash
+			[78675] = true, -- Druid/Solar Beam
+			[132469] = true, -- Druid/Typhoon
+			[122291] = true, -- Druid/Unending Resolve
+			[102793] = true, -- Druid/Ursol's Vortex
+			[90337] = true, -- Hunter/Bad Manner
+			[19574] = true, -- Hunter/Bestial Wrath
+			[19263] = true, -- Hunter/Deterrence
+			[781] = true, -- Hunter/Disengage
+			[1499] = true, -- Hunter/Freezing Trap
+			[19577] = true, -- Hunter/Intimidation
+			[126246] = true, -- Hunter/Lullaby
+			[50479] = true, -- Hunter/Nether Shock
+			[126355] = true, -- Hunter/Paralyzing Quill
+			[126423] = true, -- Hunter/Petrifying Gaze
+			[26090] = true, -- Hunter/Pummel
+			[23989] = true, -- Hunter/Readiness
+			[19503] = true, -- Hunter/Scatter Shot
+			[34490] = true, -- Hunter/Silencing Shot
+			[50519] = true, -- Hunter/Sonic Blast
+			[121818] = true, -- Hunter/Stampede
+			[96201] = true, -- Hunter/Web Wrap
+			[19386] = true, -- Hunter/Wyvern Sting
+			[108843] = true, -- Mage/Blazing Speed
+			[1953] = true, -- Mage/Blink
+			[11958] = true, -- Mage/Cold Snap
+			[2139] = true, -- Mage/Counterspell
+			[44572] = true, -- Mage/Deep Freeze
+			[122] = true, -- Mage/Frost Nova
+			[102051] = true, -- Mage/Frostjaw
+			[113074] = true, -- Mage/Healing Touch
+			[45438] = true, -- Mage/Ice Block
+			[115450] = true, -- Monk/Detox
+			[122783] = true, -- Monk/Diffuse Magic
+			[113656] = true, -- Monk/Fists of Fury
+			[115203] = true, -- Monk/Fortifying Brew
+			[119381] = true, -- Monk/Leg Sweep
+			[116849] = true, -- Monk/Life Cocoon
+			[137562] = true, -- Monk/Nimble Brew
+			[115078] = true, -- Monk/Paralysis
+			[115310] = true, -- Monk/Revival
+			[116844] = true, -- Monk/Ring of Peace
+			[116705] = true, -- Monk/Spear Hand Strike
+			[116841] = true, -- Monk/Tiger's Lust
+			[122470] = true, -- Monk/Touch of Karma
+			[119996] = true, -- Monk/Transcendence: Transfer
+			[115176] = true, -- Monk/Zen Meditation
+			[115750] = true, -- Paladin/Blinding Light
+			[4987] = true, -- Paladin/Cleanse
+			[31821] = true, -- Paladin/Devotion Aura
+			[642] = true, -- Paladin/Divine Shield
+			[105593] = true, -- Paladin/Fist of Justice
+			[86698] = true, -- Paladin/Guardian of Ancient Kings
+			[86669] = true, -- Paladin/Guardian of Ancient Kings
+			[853] = true, -- Paladin/Hammer of Justice
+			[96231] = true, -- Paladin/Rebuke
+			[20066] = true, -- Paladin/Repentance
+			[19236] = true, -- Priest/Desperate Prayer
+			[47585] = true, -- Priest/Dispersion
+			[47788] = true, -- Priest/Guardian Spirit
+			[96267] = true, -- Priest/Inner Focus
+			[89485] = true, -- Priest/Inner Focus
+			[73325] = true, -- Priest/Leap of Faith
+			[33206] = true, -- Priest/Pain Suppression
+			[8122] = true, -- Priest/Psychic Scream
+			[108921] = true, -- Priest/Psyfiend
+			[527] = true, -- Priest/Purify
+			[15487] = true, -- Priest/Silence
+			[112833] = true, -- Priest/Spectral Guise
+			[108968] = true, -- Priest/Void Shift
+			[108920] = true, -- Priest/Void Tendrils
+			[13750] = true, -- Rogue/Adrenaline Rush
+			[2094] = true, -- Rogue/Blind
+			[31230] = true, -- Rogue/Cheat Death
+			[31224] = true, -- Rogue/Cloak of Shadows
+			[1766] = true, -- Rogue/Kick
+			[137619] = true, -- Rogue/Marked for Death
+			[14185] = true, -- Rogue/Preparation
+			[121471] = true, -- Rogue/Shadow Blades
+			[51713] = true, -- Rogue/Shadow Dance
+			[76577] = true, -- Rogue/Smoke Bomb
+			[1856] = true, -- Rogue/Vanish
+			[79140] = true, -- Rogue/Vendetta
+			[114049] = true, -- Shaman/Ascendance
+			[51886] = true, -- Shaman/Cleanse Spirit
+			[8177] = true, -- Shaman/Grounding Totem
+			[108280] = true, -- Shaman/Healing Tide Totem
+			[51514] = true, -- Shaman/Hex
+			[16190] = true, -- Shaman/Mana Tide Totem
+			[77130] = true, -- Shaman/Purify Spirit
+			[30823] = true, -- Shaman/Shamanistic Rage
+			[113286] = true, -- Shaman/Solar Beam
+			[98008] = true, -- Shaman/Spirit Link Totem
+			[79206] = true, -- Shaman/Spiritwalker's Grace
+			[51490] = true, -- Shaman/Thunderstorm
+			[8143] = true, -- Shaman/Tremor Totem
+			[57994] = true, -- Shaman/Wind Shear
+			[89766] = true, -- Warlock/Axe Toss
+			[111397] = true, -- Warlock/Blood Horror
+			[103967] = true, -- Warlock/Carrion Swarm
+			[110913] = true, -- Warlock/Dark Bargain
+			[108359] = true, -- Warlock/Dark Regeneration
+			[113858] = true, -- Warlock/Dark Soul: Instability
+			[113861] = true, -- Warlock/Dark Soul: Knowledge
+			[113860] = true, -- Warlock/Dark Soul: Misery
+			[48020] = true, -- Warlock/Demonic Circle: Teleport
+			[5484] = true, -- Warlock/Howl of Terror
+			[6789] = true, -- Warlock/Mortal Coil
+			[30283] = true, -- Warlock/Shadowfury
+			[89808] = true, -- Warlock/Singe Magic
+			[19647] = true, -- Warlock/Spell Lock
+			[6229] = true, -- Warlock/Twilight Ward
+			[104773] = true, -- Warlock/Unending Resolve
+			[107574] = true, -- Warrior/Avatar
+			[118038] = true, -- Warrior/Die by the Sword
+			[5246] = true, -- Warrior/Intimidating Shout
+			[6552] = true, -- Warrior/Pummel
+			[1719] = true, -- Warrior/Recklessness
+			[871] = true, -- Warrior/Shield Wall
+			[46968] = true, -- Warrior/Shockwave
+			[23920] = true, -- Warrior/Spell Reflection
 		},
 		{ -- group 2
 			[42292] = true, -- ITEMS/PvP Trinket
@@ -157,7 +188,7 @@ local function GetDefaultSpells()
 end
 
 local function MakeGroupDb(settings)
-	local db = {
+	local defaults = {
 		cooldownsAttachTo = "Frame",
 		cooldownsAnchor = "TOPLEFT",
 		cooldownsRelativePoint = "BOTTOMLEFT",
@@ -169,30 +200,32 @@ local function MakeGroupDb(settings)
 		cooldownsPaddingY = 0,
 		cooldownsSpacingX = 0,
 		cooldownsSpacingY = 0,
-		cooldownsPerColumn = 8,
-		cooldownsMax = 8,
-		cooldownsSize = 24,
+		cooldownsPerColumn = 10,
+		cooldownsMax = 10,
+		cooldownsSize = 20,
 		cooldownsCrop = true,
+		cooldownsTooltips = true,
 		cooldownsSpells = {},
 		cooldownsBorderSize = 1,
-		cooldownsBorderAvailAlpha = 1.0,
-		cooldownsBorderUsingAlpha = 1.0,
+		cooldownsBorderAvailAlpha = 1,
+		cooldownsBorderUsingAlpha = 1,
 		cooldownsBorderCooldownAlpha = 0.2,
-		cooldownsIconAvailAlpha = 1.0,
-		cooldownsIconUsingAlpha = 1.0,
+		cooldownsIconAvailAlpha = 1,
+		cooldownsIconUsingAlpha = 1,
 		cooldownsIconCooldownAlpha = 0.2,
-		cooldownsCatPriority = { "pvp_trinket", "dispel", "mass_dispel", "immune",
+		cooldownsCatPriority = {
+			"pvp_trinket", "dispel", "mass_dispel", "immune",
 			"interrupt", "silence", "stun", "knockback", "cc",
 			"offensive", "defensive", "heal", "uncat"
 		},
 		cooldownsCatColors = {
-			["pvp_trinket"] = { r = 1.0, g = 1.0, b = 1.0 }, ["dispel"] =    { r = 1.0, g = 1.0, b = 1.0 },
-			["mass_dispel"] = { r = 1.0, g = 1.0, b = 1.0 }, ["immune"] =    { r = 0.0, g = 0.0, b = 1.0 },
-			["interrupt"] =   { r = 1.0, g = 0.0, b = 1.0 }, ["silence"] =   { r = 1.0, g = 0.0, b = 1.0 },
-			["stun"] =        { r = 0.0, g = 1.0, b = 1.0 }, ["knockback"] = { r = 0.0, g = 1.0, b = 1.0 },
-			["cc"] =          { r = 0.0, g = 1.0, b = 1.0 }, ["offensive"] = { r = 1.0, g = 0.0, b = 0.0 },
-			["defensive"] =   { r = 0.0, g = 1.0, b = 0.0 }, ["heal"] =      { r = 0.0, g = 1.0, b = 0.0 },
-			["uncat"] =       { r = 1.0, g = 1.0, b = 1.0 },
+			["pvp_trinket"] = { r = 0, g = 0, b = 0 }, ["dispel"] =    { r = 1, g = 1, b = 1 },
+			["mass_dispel"] = { r = 1, g = 1, b = 1 }, ["immune"] =    { r = 0, g = 0, b = 1 },
+			["interrupt"] =   { r = 1, g = 0, b = 1 }, ["silence"] =   { r = 1, g = 0, b = 1 },
+			["stun"] =        { r = 0, g = 1, b = 1 }, ["knockback"] = { r = 0, g = 1, b = 1 },
+			["cc"] =          { r = 0, g = 1, b = 1 }, ["offensive"] = { r = 1, g = 0, b = 0 },
+			["defensive"] =   { r = 0, g = 1, b = 0 }, ["heal"] =      { r = 0, g = 1, b = 0 },
+			["uncat"] =       { r = 1, g = 1, b = 1 },
 		},
 		cooldownsCatGroups = {
 			["pvp_trinket"] = 1, ["dispel"] =    1, ["mass_dispel"] = 1,
@@ -203,98 +236,77 @@ local function MakeGroupDb(settings)
 		},
 		cooldownsHideTalentsUntilDetected = true,
 	}
-	if settings then
-		for k, v in pairs(settings) do
-			db[k] = v
-		end
-	end
-	return db
+	return fn.merge(defaults, settings or {})
 end
 
-local Cooldowns = GladiusEx:NewGladiusExModule("Cooldowns", false, {
-		num_groups = 2,
-		group_table = {
-			[1] = "group_1",
-			[2] = "group_2",
-		},
+local defaults = {
+	num_groups = 2,
+	group_table = {
+		[1] = "group_1",
+		[2] = "group_2",
+	}
+}
+
+local g1_defaults = MakeGroupDb {
+	cooldownsGroupId = 1,
+	cooldownsBorderSize = 0,
+	cooldownsPaddingX = 0,
+	cooldownsPaddingY = 2,
+	cooldownsSpacingX = 2,
+	cooldownsSpacingY = 0,
+	cooldownsSpells = GetDefaultSpells()[1],
+}
+
+local g2_defaults = MakeGroupDb {
+	cooldownsGroupId = 2,
+	cooldownsPerColumn = 1,
+	cooldownsMax = 1,
+	cooldownsSize = 42,
+	cooldownsCrop = true,
+	cooldownsTooltips = false,
+	cooldownsBorderSize = 1,
+	cooldownsBorderAvailAlpha = 1.0,
+	cooldownsBorderUsingAlpha = 1.0,
+	cooldownsBorderCooldownAlpha = 1.0,
+	cooldownsIconAvailAlpha = 1.0,
+	cooldownsIconUsingAlpha = 1.0,
+	cooldownsIconCooldownAlpha = 1.0,
+	cooldownsSpells = GetDefaultSpells()[2],
+}
+
+local Cooldowns = GladiusEx:NewGladiusExModule("Cooldowns",
+	fn.merge(defaults, {
 		groups = {
-			["*"] = MakeGroupDb(),
-			["group_1"] = MakeGroupDb {
-				cooldownsGroupId = 1,
-				cooldownsAttachTo = "CastBar",
+			["group_1"] = fn.merge(g1_defaults, {
+				cooldownsAttachTo = "Frame",
 				cooldownsAnchor = "TOPLEFT",
 				cooldownsRelativePoint = "BOTTOMLEFT",
 				cooldownsGrow = "DOWNRIGHT",
-				cooldownsBorderSize = 0,
-				cooldownsPaddingX = 0,
-				cooldownsPaddingY = 2,
-				cooldownsSpacingX = 2,
-				cooldownsSpacingY = 2,
-				cooldownsSpells = GetDefaultSpells()[1],
-			},
-			["group_2"] = MakeGroupDb {
-				cooldownsGroupId = 2,
+			}),
+			["group_2"] = fn.merge(g2_defaults, {
 				cooldownsAttachTo = "Frame",
 				cooldownsAnchor = "TOPLEFT",
 				cooldownsRelativePoint = "TOPRIGHT",
 				cooldownsGrow = "DOWNRIGHT",
-				cooldownsPerColumn = 5,
-				cooldownsMax = 10,
-				cooldownsSize = 40,
-				cooldownsCrop = false,
-				cooldownsBorderSize = 0,
-				cooldownsBorderAvailAlpha = 1.0,
-				cooldownsBorderUsingAlpha = 1.0,
-				cooldownsBorderCooldownAlpha = 1.0,
-				cooldownsIconAvailAlpha = 1.0,
-				cooldownsIconUsingAlpha = 1.0,
-				cooldownsIconCooldownAlpha = 1.0,
-				cooldownsSpells = GetDefaultSpells()[2],
-			}
+			})
 		},
-	},
-	{
-		num_groups = 2,
-		group_table = {
-			[1] = "group_1",
-			[2] = "group_2",
-		},
+	}),
+	fn.merge(defaults, {
 		groups = {
-			["*"] = MakeGroupDb(),
-			["group_1"] = MakeGroupDb {
-				cooldownsGroupId = 1,
-				cooldownsAttachTo = "CastBar",
+			["group_1"] = fn.merge(g1_defaults, {
+				cooldownsAttachTo = "Frame",
 				cooldownsAnchor = "TOPRIGHT",
 				cooldownsRelativePoint = "BOTTOMRIGHT",
 				cooldownsGrow = "DOWNLEFT",
-				cooldownsBorderSize = 0,
-				cooldownsPaddingX = 0,
-				cooldownsPaddingY = 2,
-				cooldownsSpacingX = 2,
-				cooldownsSpacingY = 2,
-				cooldownsSpells = GetDefaultSpells()[1],
-			},
-			["group_2"] = MakeGroupDb {
-				cooldownsGroupId = 2,
+			}),
+			["group_2"] = fn.merge(g2_defaults, {
 				cooldownsAttachTo = "Frame",
 				cooldownsAnchor = "TOPRIGHT",
 				cooldownsRelativePoint = "TOPLEFT",
 				cooldownsGrow = "DOWNLEFT",
-				cooldownsPerColumn = 5,
-				cooldownsMax = 10,
-				cooldownsSize = 40,
-				cooldownsCrop = false,
-				cooldownsBorderSize = 0,
-				cooldownsBorderAvailAlpha = 1.0,
-				cooldownsBorderUsingAlpha = 1.0,
-				cooldownsBorderCooldownAlpha = 1.0,
-				cooldownsIconAvailAlpha = 1.0,
-				cooldownsIconUsingAlpha = 1.0,
-				cooldownsIconCooldownAlpha = 1.0,
-				cooldownsSpells = GetDefaultSpells()[2],
-			}
+			})
 		}
-	})
+	}))
 
 local MAX_ICONS = 40
 
@@ -357,8 +369,6 @@ function Cooldowns:OnEnable()
 	CT.RegisterCallback(self, "LCT_CooldownsReset")
 	self:RegisterEvent("UNIT_NAME_UPDATE")
 	self:RegisterMessage("GLADIUS_SPEC_UPDATE")
-
-	LSM = GladiusEx.LSM
 end
 
 function Cooldowns:OnDisable()
@@ -369,6 +379,14 @@ function Cooldowns:OnDisable()
 	CT.UnregisterAllCallbacks(self)
 	self:UnregisterAllEvents()
 	self:UnregisterAllMessages()
+end
+
+function Cooldowns:GetFrames(unit)
+	local frames = {}
+	for group = 1, self:GetNumGroups(unit) do
+		tinsert(frames, self:GetGroupState(unit, group).frame)
+	end
+	return frames
 end
 
 function Cooldowns:OnProfileChanged()
@@ -385,12 +403,14 @@ function Cooldowns:GetModuleAttachPoints(unit)
 	return t
 end
 
-function Cooldowns:GetAttachFrame(unit, point)
+function Cooldowns:GetModuleAttachFrame(unit, point)
 	local gid = string.match(point, "^Cooldowns_(%d+)$")
 	if not gid then return nil end
 
 	local group, gidx = self:GetGroupById(unit, tonumber(gid))
 	if not group then return nil end
+
+	-- self:CreateGroupFrame(unit, group)
 
 	return self:GetGroupState(unit, gidx).frame
 end
@@ -472,7 +492,7 @@ local function CooldownFrame_OnUpdate(frame)
 		frame.cooldown:SetCooldown(tracked.cooldown_start, tracked.cooldown_end - tracked.cooldown_start, frame.tracked.charges, frame.tracked.max_charges)
 		frame.cooldown:Show()
 	else
-		frame.cooldown:Hide()
+		frame.cooldown:SetCooldown(0, 0)
 	end
 	local a = Cooldowns:GetGroupDB(frame.unit, frame.group).cooldownsIconAvailAlpha
 	local ab = Cooldowns:GetGroupDB(frame.unit, frame.group).cooldownsBorderAvailAlpha
@@ -751,69 +771,10 @@ local function CreateCooldownFrame(name, parent)
 	frame.count = frame.icon_frame:CreateFontString(nil, "OVERLAY")
 	frame.count:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont), 10, "OUTLINE")
 	frame.count:SetTextColor(1, 1, 1, 1)
-	-- frame.count:SetShadowColor(0, 0, 0, 0)
-	-- frame.count:SetShadowOffset(0.50, -0.50)
 	frame.count:SetPoint("BOTTOMRIGHT", 2, 0)
 	frame.count:Show()
 
-	frame:EnableMouse(false)
-	frame:SetScript("OnEnter", function(self)
-		if self.spellid then
-			GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-			GameTooltip:SetSpellByID(self.spellid)
-		end
-	end)
-	frame:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
-
 	return frame
-end
-
-local perfect_scale
-local function GetPerfectScale()
-	if not perfect_scale then
-		perfect_scale = 768 / string.match(({GetScreenResolutions()})[GetCurrentResolution()], "%d+x(%d+)")
-	end
-	return perfect_scale
-end
-
-local function AdjustPixels(frame, size)
-	while not frame.GetEffectiveScale do frame = frame:GetParent() end
-	local frameScale = frame:GetEffectiveScale()
-	local perfectScale = GetPerfectScale()
-	local size_adjusted = size / (frameScale / perfectScale)
-	return size_adjusted
-end
-
-local function AdjustPositionOffset(frame, p, pos)
-	while not frame.GetEffectiveScale do frame = frame:GetParent() end
-	local frameScale = frame:GetEffectiveScale()
-	local perfectScale = GetPerfectScale()
-	local pp = p * frameScale / perfectScale
-	local pa = pos and (math.ceil(pp) - pp) or (pp - math.floor(pp))
-	if pa > 0.5 then pa = pa - 1 end
-	return p + pa * perfectScale / frameScale
-end
-
-local function AdjustFrameOffset(frame, relative_point)
-	local x, y
-	local ax, ay
-
-	if strfind(relative_point, "LEFT") then
-		x = frame:GetLeft() or 0
-		ax = AdjustPositionOffset(frame, x, true) - x
-	else
-		x = frame:GetRight() or 0
-		ax = x - AdjustPositionOffset(frame, x, false)
-	end
-	if strfind(relative_point, "TOP") then
-		y = frame:GetTop() or 0
-		ay = y - AdjustPositionOffset(frame, y, false)
-	else
-		y = frame:GetBottom() or 0
-		ay = AdjustPositionOffset(frame, y, true) - y
-	end
-
-	return ax, ay
 end
 
 function Cooldowns:CreateFrame(unit)
@@ -824,7 +785,7 @@ end
 
 function Cooldowns:CreateGroupFrame(unit, group)
 	local button = GladiusEx.buttons[unit]
-	if (not button) then return end
+	if not button then return end
 
 	local gs = self:GetGroupState(unit, group)
 
@@ -878,20 +839,22 @@ local function UpdateCooldownGroup(
 	cooldownSpacingX,
 	cooldownSpacingY,
 	cooldownMax,
-	cooldownCrop)
+	cooldownCrop,
+	cooldownTooltips)
 
 	-- anchor point
 	local parent = GladiusEx:GetAttachFrame(unit, cooldownAttachTo)
 
-	local xo, yo = AdjustFrameOffset(parent, cooldownRelativePoint)
-	cooldownPaddingX = AdjustPositionOffset(parent, cooldownPaddingX)
-	cooldownPaddingY = AdjustPositionOffset(parent, cooldownPaddingY)
-	cooldownSpacingX = AdjustPositionOffset(parent, cooldownSpacingX)
-	cooldownSpacingY = AdjustPositionOffset(parent, cooldownSpacingY)
-	cooldownOffsetX = AdjustPositionOffset(parent, cooldownOffsetX) + xo
-	cooldownOffsetY = AdjustPositionOffset(parent, cooldownOffsetY) + yo
-	cooldownSize = AdjustPositionOffset(parent, cooldownSize)
-	cooldownBorderSize = AdjustPixels(parent, cooldownBorderSize)
+	-- local xo, yo = GladiusEx:AdjustFrameOffset(parent, cooldownRelativePoint)
+	local xo, yo = 0, 0
+	cooldownPaddingX = GladiusEx:AdjustPositionOffset(parent, cooldownPaddingX)
+	cooldownPaddingY = GladiusEx:AdjustPositionOffset(parent, cooldownPaddingY)
+	cooldownSpacingX = GladiusEx:AdjustPositionOffset(parent, cooldownSpacingX)
+	cooldownSpacingY = GladiusEx:AdjustPositionOffset(parent, cooldownSpacingY)
+	cooldownOffsetX = GladiusEx:AdjustPositionOffset(parent, cooldownOffsetX) + xo
+	cooldownOffsetY = GladiusEx:AdjustPositionOffset(parent, cooldownOffsetY) + yo
+	cooldownSize = GladiusEx:AdjustPositionOffset(parent, cooldownSize)
+	cooldownBorderSize = GladiusEx:AdjustPixels(parent, cooldownBorderSize)
 
 	cooldownFrame:ClearAllPoints()
 	cooldownFrame:SetPoint(cooldownAnchor, parent, cooldownRelativePoint, cooldownOffsetX, cooldownOffsetY)
@@ -946,6 +909,21 @@ local function UpdateCooldownGroup(
 
 		cooldownFrame[i]:ClearAllPoints()
 		cooldownFrame[i]:SetPoint(anchor, parent, relativePoint, offsetX, offsetY)
+		cooldownFrame[i]:SetFrameStrata("MEDIUM")
+
+		if cooldownTooltips then
+			cooldownFrame[i]:SetScript("OnEnter", function(self)
+				if self.spellid then
+					GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+					GameTooltip:SetSpellByID(self.spellid)
+				end
+			end)
+			cooldownFrame[i]:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
+		else
+			cooldownFrame[i]:SetScript("OnEnter", nil)
+			cooldownFrame[i]:SetScript("OnLeave", nil)
+		end
+
 		UpdateCooldownFrame(cooldownFrame[i], cooldownSize, cooldownBorderSize, cooldownCrop)
 	end
 end
@@ -992,7 +970,8 @@ function Cooldowns:UpdateGroup(unit, group)
 		db.cooldownsSpacingX,
 		db.cooldownsSpacingY,
 		db.cooldownsMax,
-		db.cooldownsCrop)
+		db.cooldownsCrop,
+		db.cooldownsTooltips)
 
 	-- update icons
 	self:UpdateIcons(unit)
@@ -1149,11 +1128,19 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								hidden = function() return not GladiusEx.db.base.advancedOptions end,
 								order = 14,
 							},
+							cooldownsTooltips = {
+								type = "toggle",
+								name = L["Show tooltips"],
+								desc = L["Toggle if the icons should should the spell tooltip when hovered"],
+								disabled = function() return not self:IsUnitEnabled(unit) end,
+								hidden = function() return not GladiusEx.db.base.advancedOptions end,
+								order = 15,
+							},
 							sep2 = {
 								type = "description",
 								name = "",
 								width = "full",
-								order = 14.5,
+								order = 18,
 							},
 							cooldownsPerColumn = {
 								type = "range",
@@ -1161,7 +1148,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								desc = L["Number of icons per column"],
 								min = 1, max = MAX_ICONS, step = 1,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
-								order = 15,
+								order = 19,
 							},
 							cooldownsMax = {
 								type = "range",
@@ -1495,7 +1482,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 						local c = self:GetGroupDB(unit, group).cooldownsCatColors[cat]
 						return c.r, c.g, c.b
 					end,
-					set = function(self, r, g, b)
+					set = function(info, r, g, b)
 						self:GetGroupDB(unit, group).cooldownsCatColors[cat] = { r = r, g = g, b = b }
 						GladiusEx:UpdateFrames()
 					end,

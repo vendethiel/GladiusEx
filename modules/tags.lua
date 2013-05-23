@@ -1,7 +1,7 @@
 local GladiusEx = _G.GladiusEx
 local fn = LibStub("LibFunctional-1.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
-local LSM
+local LSM = LibStub("LibSharedMedia-3.0")
 
 -- global functions
 local strfind, strgsub, strgmatch, strformat = string.find, string.gsub, string.gmatch, string.format
@@ -14,7 +14,7 @@ local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
 local UnitPower, UnitPowerMax = UnitPower, UnitPowerMax
 local UnitGetTotalAbsorbs = UnitGetTotalAbsorbs
 
-local Tags = GladiusEx:NewGladiusExModule("Tags", false, {
+local Tags = GladiusEx:NewGladiusExModule("Tags", {
 	tags = {},
 	tagEvents = {},
 	tagsTexts = {
@@ -22,7 +22,7 @@ local Tags = GladiusEx:NewGladiusExModule("Tags", false, {
 			attachTo = "HealthBar",
 			position = "LEFT",
 			offsetX = 2,
-			offsetY = 0,
+			offsetY = -1,
 
 			globalFontSize = true,
 			size = 11,
@@ -34,7 +34,7 @@ local Tags = GladiusEx:NewGladiusExModule("Tags", false, {
 			attachTo = "HealthBar",
 			position = "RIGHT",
 			offsetX = -2,
-			offsetY = 0,
+			offsetY = -1,
 
 			globalFontSize = true,
 			size = 11,
@@ -46,7 +46,7 @@ local Tags = GladiusEx:NewGladiusExModule("Tags", false, {
 			attachTo = "PowerBar",
 			position = "LEFT",
 			offsetX = 2,
-			offsetY = 0,
+			offsetY = -1,
 
 			globalFontSize = true,
 			size = 11,
@@ -58,7 +58,7 @@ local Tags = GladiusEx:NewGladiusExModule("Tags", false, {
 			attachTo = "PowerBar",
 			position = "RIGHT",
 			offsetX = -2,
-			offsetY = 0,
+			offsetY = -1,
 
 			globalFontSize = true,
 			size = 11,
@@ -94,10 +94,8 @@ local Tags = GladiusEx:NewGladiusExModule("Tags", false, {
 })
 
 function Tags:OnEnable()
-	LSM = GladiusEx.LSM
-
 	-- frame
-	if (not self.frame) then
+	if not self.frame then
 		self.frame = {}
 	end
 
@@ -154,12 +152,12 @@ function Tags:OnDisable()
 
 	for unit in pairs(self.frame) do
 		for text in pairs(self.frame[unit]) do
-			self.frame[unit][text]:SetAlpha(0)
+			self.frame[unit][text]:Hide()
 		end
 	end
 end
 
-function Tags:GetAttachTo()
+function Tags:GetFrames()
 	return nil
 end
 
@@ -189,8 +187,13 @@ end
 
 -- Takes a tag text and returns a function that receives a unit parameter and returns the formatted text
 function Tags:ParseText(unit, text)
+	if text == "" then
+		return function() return "" end
+	end
+
 	local out = {}
 	local arg_values = {}
+
 
 	local function output_text(otext)
 		if otext ~= "" then
@@ -269,7 +272,7 @@ function Tags:UpdateText(unit, text)
 	end)
 	]]
 
-	self.frame[unit][text]:SetText(formattedText or tagText)
+	self.frame[unit][text].fs:SetText(formattedText or tagText)
 end
 
 function Tags:GetTagEvents(unit, tag)
@@ -288,7 +291,9 @@ function Tags:CreateFrame(unit, text)
 	if not button then return end
 
 	-- create frame
-	self.frame[unit][text] = button:CreateFontString("GladiusEx" .. self:GetName() .. unit .. text, "OVERLAY")
+	self.frame[unit][text] = CreateFrame("Frame", nil, button)
+	-- self.frame[unit][text].fs = self.frame[unit][text]:CreateFontString("GladiusEx" .. self:GetName() .. unit .. text, "OVERLAY")
+	self.frame[unit][text].fs = GladiusEx:CreateSuperFS(self.frame[unit][text], "OVERLAY")
 end
 
 function Tags:Update(unit)
@@ -303,6 +308,7 @@ function Tags:Update(unit)
 	for text, frame in pairs(self.frame[unit]) do
 		if not self.db[unit].tagsTexts[text] then
 			frame:Hide()
+			frame.fs:Hide()
 		end
 	end
 
@@ -322,30 +328,33 @@ function Tags:Update(unit)
 			end
 
 			-- update frame
-			self.frame[unit][text]:ClearAllPoints()
+			local position = self.db[unit].tagsTexts[text].position
+			local ox = self.db[unit].tagsTexts[text].offsetX
+			local oy = self.db[unit].tagsTexts[text].offsetY
 			self.frame[unit][text]:SetParent(attachframe)
-			self.frame[unit][text]:SetPoint(self.db[unit].tagsTexts[text].position, attachframe, self.db[unit].tagsTexts[text].position, self.db[unit].tagsTexts[text].offsetX, self.db[unit].tagsTexts[text].offsetY)
+			self.frame[unit][text]:SetFrameStrata("MEDIUM")
+			self.frame[unit][text]:SetFrameLevel(50)
 
-			-- limit text bounds
-			local invpos = self.db[unit].tagsTexts[text].position
-			if invpos == "LEFT" then invpos = "RIGHT"
-			elseif invpos == "RIGHT" then invpos = "LEFT"
-			end
-			if invpos ~= self.db[unit].tagsTexts[text].position then
-				self.frame[unit][text]:SetPoint(invpos, attachframe, invpos, 0, 0)
-				self.frame[unit][text]:SetJustifyH(self.db[unit].tagsTexts[text].position)
-			end
-
-			self.frame[unit][text]:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont),
+			-- update fontstring
+			self.frame[unit][text].fs:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont),
 				self.db[unit].tagsTexts[text].globalFontSize and GladiusEx.db.base.globalFontSize or self.db[unit].tagsTexts[text].size,
 				GladiusEx.db.base.globalFontOutline)
-			self.frame[unit][text]:SetTextColor(self.db[unit].tagsTexts[text].color.r, self.db[unit].tagsTexts[text].color.g, self.db[unit].tagsTexts[text].color.b, self.db[unit].tagsTexts[text].color.a)
-			self.frame[unit][text]:SetShadowOffset(1, -1)
-			self.frame[unit][text]:SetShadowColor(GladiusEx.db.base.globalFontShadowColor.r, GladiusEx.db.base.globalFontShadowColor.g, GladiusEx.db.base.globalFontShadowColor.b, GladiusEx.db.base.globalFontShadowColor.a)
+			self.frame[unit][text].fs:SetTextColor(self.db[unit].tagsTexts[text].color.r, self.db[unit].tagsTexts[text].color.g, self.db[unit].tagsTexts[text].color.b, self.db[unit].tagsTexts[text].color.a)
+			self.frame[unit][text].fs:SetShadowOffset(1, -1)
+			self.frame[unit][text].fs:SetShadowColor(GladiusEx.db.base.globalFontShadowColor.r, GladiusEx.db.base.globalFontShadowColor.g, GladiusEx.db.base.globalFontShadowColor.b, GladiusEx.db.base.globalFontShadowColor.a)
+			self.frame[unit][text].fs:SetJustifyH(position)
+			self.frame[unit][text].fs:ClearAllPoints()
+			self.frame[unit][text].fs:SetPoint(position, attachframe, position, ox, oy)
 
+			-- limit text bounds
+			local invpos = (position == "LEFT" and "RIGHT") or (position == "RIGHT" and "LEFT")
+			if invpos then
+				--self.frame[unit][text].fs:SetPoint(invpos, attachframe, invpos, ox, oy)
+				self.frame[unit][text].fs:SetPoint(invpos, attachframe, "CENTER", 0, oy)
+			end
 
 			-- hide
-			self.frame[unit][text]:SetAlpha(0)
+			self.frame[unit][text]:Hide()
 		end
 	end
 end
@@ -362,7 +371,7 @@ function Tags:Show(unit)
 
 	-- show
 	for _, text in pairs(self.frame[unit]) do
-		text:SetAlpha(1)
+		text:Show()
 	end
 end
 
@@ -371,7 +380,7 @@ function Tags:Reset(unit)
 
 	-- hide
 	for _, text in pairs(self.frame[unit]) do
-		text:SetAlpha(0)
+		text:Hide()
 	end
 end
 
@@ -383,7 +392,7 @@ function Tags:GetOptions(unit)
 	local optionTags
 
 	-- add values
-	local addTextAttachTo = "HealthBar"
+	local addTextAttachTo = ""
 	local addTextName = ""
 	local addTagName = ""
 
@@ -416,17 +425,7 @@ function Tags:GetOptions(unit)
 						type = "select",
 						name = L["Attach to"],
 						desc = L["Attach text to module bar"],
-						values = function()
-							local t = {}
-
-							for moduleName, module in GladiusEx:IterateModules() do
-								if (module.isBarOption) then
-									t[moduleName] = moduleName
-								end
-							end
-
-							return t
-						end,
+						values = function() return self:GetOtherAttachPoints(unit) end,
 						get = function(info)
 							return addTextAttachTo
 						end,
@@ -465,7 +464,7 @@ function Tags:GetOptions(unit)
 								GladiusEx:UpdateFrames()
 							end
 						end,
-						disabled = function() return not self:IsUnitEnabled(unit) end,
+						disabled = function() return addTextName == "" or addTextAttachTo == "" or not self:IsUnitEnabled(unit) end,
 						order = 15,
 					},
 				},
@@ -554,7 +553,7 @@ function Tags:GetOptions(unit)
 								GladiusEx:UpdateFrames()
 							end
 						end,
-						disabled = function() return not self:IsUnitEnabled(unit) end,
+						disabled = function() return addTagName == "" or not self:IsUnitEnabled(unit) end,
 						order = 10,
 					},
 				},
@@ -595,7 +594,7 @@ function Tags:GetOptions(unit)
 				local key = info[#info - 2]
 
 				-- add/remove tag to the text
-				if (not v) then
+				if not v then
 					self.db[unit].tagsTexts[key].text = strgsub(self.db[unit].tagsTexts[key].text, "%[" .. info[#info] .. "%]", "")
 
 					-- trim right
@@ -676,22 +675,6 @@ function Tags:GetTextOptionTable(options, unit, text, order)
 		order = order,
 		disabled = function() return not self:IsUnitEnabled(unit) end,
 		args = {
-			delete = {
-				type = "execute",
-				name = L["Delete text"],
-				func = function()
-					-- remove from db
-					self.db[unit].tagsTexts[text] = nil
-
-					-- remove from options
-					options.textList.args[text] = nil
-
-					-- update
-					GladiusEx:UpdateFrames()
-				end,
-				disabled = function() return not self:IsUnitEnabled(unit) end,
-				order = 1,
-			},
 			tag = {
 				type = "group",
 				name = L["Tag"],
@@ -769,6 +752,20 @@ function Tags:GetTextOptionTable(options, unit, text, order)
 						order = 15,
 					},
 				},
+			},
+			delete = {
+				type = "execute",
+				name = L["Delete text"],
+				func = function()
+					-- remove from db
+					self.db[unit].tagsTexts[text] = nil
+					-- remove from options
+					options.textList.args[text] = nil
+					-- update
+					GladiusEx:UpdateFrames()
+				end,
+				disabled = function() return not self:IsUnitEnabled(unit) end,
+				order = 5,
 			},
 		},
 	}

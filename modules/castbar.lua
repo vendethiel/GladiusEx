@@ -1,6 +1,7 @@
 local GladiusEx = _G.GladiusEx
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
-local LSM
+local fn = LibStub("LibFunctional-1.0")
+local LSM = LibStub("LibSharedMedia-3.0")
 
 -- global functions
 local strfind, strformat = string.find, string.format
@@ -12,19 +13,13 @@ local GetSpellInfo, UnitCastingInfo, UnitChannelInfo = GetSpellInfo, UnitCasting
 local time_text_format_normal = "%.01f "
 local time_text_format_delay = "+%.01f %.01f "
 
-local CastBar = GladiusEx:NewGladiusExModule("CastBar", true, {
-		castBarAnchor = "TOPLEFT",
-		castBarAttachTo = "ClassIcon",
-		castBarRelativePoint = "BOTTOMLEFT",
-		castBarOffsetX = 0,
-		castBarOffsetY = 0,
+local defaults = {
+		castBarPosition = "BOTTOM",
 		castBarHeight = 20,
-		castBarAdjustWidth = true,
-		castBarWidth = 150,
 		castBarInverse = false,
 		castBarColor = { r = 1, g = 1, b = 0, a = 1 },
 		castBarNotIntColor = { r = 1, g = 0, b = 0, a = 1 },
-		castBarBackgroundColor = { r = 0, g = 0, b = 0, a = 0.3 },
+		castBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
 		castBarGlobalTexture = true,
 		castBarTexture = "Minimalist",
 		castIcon = true,
@@ -34,7 +29,7 @@ local CastBar = GladiusEx:NewGladiusExModule("CastBar", true, {
 		castText = true,
 		castTextGlobalFontSize = true,
 		castTextSize = 11,
-		castTextColor = { r = 2.55, g = 2.55, b = 2.55, a = 1 },
+		castTextColor = { r = 1, g = 1, b = 1, a = 1 },
 		castTextAlign = "LEFT",
 		castTextOffsetX = 2,
 		castTextOffsetY = 0,
@@ -45,49 +40,31 @@ local CastBar = GladiusEx:NewGladiusExModule("CastBar", true, {
 		castTimeTextDelay = true,
 		castTimeTextGlobalFontSize = true,
 		castTimeTextSize = 11,
-		castTimeTextColor = { r = 2.55, g = 2.55, b = 2.55, a = 1 },
+		castTimeTextColor = { r = 1, g = 1, b = 1, a = 1 },
 		castTimeTextAlign = "RIGHT",
 		castTimeTextOffsetX = 0,
 		castTimeTextOffsetY = 0,
-	},
-	{
-		castBarAnchor = "TOPRIGHT",
-		castBarAttachTo = "ClassIcon",
-		castBarRelativePoint = "BOTTOMRIGHT",
-		castBarOffsetX = 0,
-		castBarOffsetY = 0,
-		castBarHeight = 20,
-		castBarAdjustWidth = true,
-		castBarWidth = 150,
-		castBarInverse = false,
-		castBarColor = { r = 1, g = 1, b = 0, a = 1 },
-		castBarNotIntColor = { r = 1, g = 0, b = 0, a = 1 },
-		castBarBackgroundColor = { r = 0, g = 0, b = 0, a = 0.3 },
-		castBarGlobalTexture = true,
-		castBarTexture = "Minimalist",
-		castIcon = true,
-		castSpark = true,
-		castShieldIcon = true,
+}
+
+local CastBar = GladiusEx:NewGladiusExModule("CastBar",
+	fn.merge(defaults, {
+		castIconPosition = "LEFT",
+		castTextAlign = "LEFT",
+		castTextOffsetX = 2,
+		castTextOffsetY = 0,
+		castTimeTextAlign = "RIGHT",
+		castTimeTextOffsetX = -2,
+		castTimeTextOffsetY = 0,
+	}),
+	fn.merge(defaults, {
 		castIconPosition = "RIGHT",
-		castText = true,
-		castTextGlobalFontSize = true,
-		castTextSize = 11,
-		castTextColor = { r = 2.55, g = 2.55, b = 2.55, a = 1 },
 		castTextAlign = "RIGHT",
 		castTextOffsetX = -2,
 		castTextOffsetY = 0,
-		castTimeText = true,
-		castTimeTextCastTime = true,
-		castTimeTextRemainingTime = true,
-		castTimeTextTotalTime = false,
-		castTimeTextDelay = true,
-		castTimeTextGlobalFontSize = true,
-		castTimeTextSize = 11,
-		castTimeTextColor = { r = 2.55, g = 2.55, b = 2.55, a = 1 },
 		castTimeTextAlign = "LEFT",
 		castTimeTextOffsetX = 2,
 		castTimeTextOffsetY = 0,
-	})
+	}))
 
 function CastBar:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_START")
@@ -101,9 +78,7 @@ function CastBar:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE", "UNIT_SPELLCAST_DELAYED")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP", "UNIT_SPELLCAST_STOP")
 
-	LSM = GladiusEx.LSM
-
-	if (not self.frame) then
+	if not self.frame then
 		self.frame = {}
 	end
 end
@@ -112,16 +87,20 @@ function CastBar:OnDisable()
 	self:UnregisterAllEvents()
 
 	for unit in pairs(self.frame) do
-		self.frame[unit]:SetAlpha(0)
+		self.frame[unit]:Hide()
 	end
 end
 
-function CastBar:IsBar(unit)
-	return true
+function CastBar:GetAttachType()
+	return "InFrame"
 end
 
-function CastBar:GetAttachTo(unit)
-	return self.db[unit].castBarAttachTo
+function CastBar:GetAttachPoint(unit)
+	return self.db[unit].castBarPosition
+end
+
+function CastBar:GetAttachSize(unit)
+	return self.db[unit].castBarHeight
 end
 
 function CastBar:GetModuleAttachPoints(unit)
@@ -130,7 +109,7 @@ function CastBar:GetModuleAttachPoints(unit)
 	}
 end
 
-function CastBar:GetAttachFrame(unit, point)
+function CastBar:GetModuleAttachFrame(unit, point)
 	if not self.frame[unit] then
 		self:CreateBar(unit)
 	end
@@ -209,7 +188,7 @@ function CastBar:SetInterruptible(unit, interruptible)
 	end
 end
 
-local delay_format = "+%.01f"
+local delay_format = " +%.01f"
 local function CastUpdate(self)
 	if self.isCasting or self.isChanneling then
 		local currentTime = min(self.endTime, GetTime())
@@ -221,7 +200,8 @@ local function CastUpdate(self)
 
 		self.bar:SetValue(value)
 
-		local sparkPosition = value / self.maxValue * self.bar.width
+		local width = self.bar:GetWidth()
+		local sparkPosition = value / self.maxValue * width
 		self.spark:SetPoint("CENTER", self.bar, "LEFT", sparkPosition, 0)
 
 		self.timeText:SetFormattedText(self.time_text_format, value, self.maxValue - value, self.maxValue, self.delay == 0 and "" or strformat(delay_format, self.delay))
@@ -251,11 +231,11 @@ function CastBar:CastStart(unit, channel)
 		f.delay = 0
 
 		f.icon:SetTexture(icon)
-		
+
 		self:SetInterruptible(unit, not notInterruptible)
-		
+
 		f.bar:SetMinMaxValues(0, f.maxValue)
-		
+
 		if self.db[unit].castSpark then f.spark:Show() end
 		f:SetScript("OnUpdate", CastUpdate)
 		CastUpdate(f)
@@ -282,22 +262,21 @@ function CastBar:CreateBar(unit)
 	self.frame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. unit .. "Parent", button)
 	self.frame[unit].bar = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. unit .. "Bar", self.frame[unit])
 	self.frame[unit].background = self.frame[unit].bar:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "Background", "BACKGROUND")
-	self.frame[unit].highlight = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "Highlight" .. unit, "OVERLAY")
-	self.frame[unit].castText = self.frame[unit].bar:CreateFontString("GladiusEx" .. self:GetName() .. "CastText" .. unit, "OVERLAY")
-	self.frame[unit].timeText = self.frame[unit].bar:CreateFontString("GladiusEx" .. self:GetName() .. "TimeText" .. unit, "OVERLAY")
+	self.frame[unit].background:SetAllPoints()
+	-- self.frame[unit].castText = self.frame[unit].bar:CreateFontString("GladiusEx" .. self:GetName() .. "CastText" .. unit, "OVERLAY")
+	-- self.frame[unit].timeText = self.frame[unit].bar:CreateFontString("GladiusEx" .. self:GetName() .. "TimeText" .. unit, "OVERLAY")
+	self.frame[unit].castText = GladiusEx:CreateSuperFS(self.frame[unit].bar, "OVERLAY")
+	self.frame[unit].timeText = GladiusEx:CreateSuperFS(self.frame[unit].bar, "OVERLAY")
+
 	self.frame[unit].icon = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "IconFrame" .. unit, "ARTWORK")
 	self.frame[unit].icon.bg = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "IconFrameBackground" .. unit, "BACKGROUND")
 	self.frame[unit].icon.shield = self.frame[unit].bar:CreateTexture(nil, "OVERLAY")
-	self.frame[unit].icon.shield:SetTexture([[Interface\AddOns\GladiusEx\images\shield]])
+	self.frame[unit].icon.shield:SetTexture([[Interface\AddOns\GladiusEx\media\shield]])
 	self.frame[unit].spark = self.frame[unit].bar:CreateTexture(nil, "OVERLAY")
-	self.frame[unit].spark:SetTexture([[Interface\AddOns\GladiusEx\images\spark]])
+	self.frame[unit].spark:SetTexture([[Interface\AddOns\GladiusEx\media\spark]])
 	self.frame[unit].spark:SetBlendMode("ADD")
 
 	self.frame[unit].unit = unit
-end
-
-function CastBar:GetBarHeight(unit)
-	return self.db[unit].castBarHeight
 end
 
 function CastBar:Update(unit)
@@ -306,50 +285,23 @@ function CastBar:Update(unit)
 		self:CreateBar(unit)
 	end
 
-	-- update frame
-	local width = self.db[unit].castBarAdjustWidth and GladiusEx.db[unit].barWidth or self.db[unit].castBarWidth
-	local height = self.db[unit].castBarHeight
 	local bar_texture = self.db[unit].castBarGlobalTexture and LSM:Fetch(LSM.MediaType.STATUSBAR, GladiusEx.db.base.globalBarTexture) or LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].castBarTexture)
-
-	-- add width of the widget if attached to one
-	-- todo: GetModule will fail
-	local mod = self.db[unit].castBarAttachTo
-	if (mod ~= "Frame" and self.db[unit].castBarAdjustWidth and GladiusEx:IsModuleEnabled(unit, mod) and not GladiusEx:GetModule(mod):IsBar()) then
-		if not GladiusEx:GetModule(mod).frame or not GladiusEx:GetModule(mod).frame[unit] then
-			GladiusEx:GetModule(mod):Update(unit)
-		end
-		width = width + GladiusEx:GetModule(self.db[unit].castBarAttachTo).frame[unit]:GetWidth()
-	end
-
-	--[[
-	if strfind(self.db[unit].castBarAnchor, "LEFT") then
-		width = width + 1
-	else
-		width = width - 1
-	end
-	]]
-
-	self.frame[unit]:SetHeight(self.db[unit].castBarHeight)
-	self.frame[unit]:SetWidth(width)
-	self.frame[unit]:SetFrameLevel(10)
-
-	local parent = GladiusEx:GetAttachFrame(unit, self.db[unit].castBarAttachTo)
-	self.frame[unit]:ClearAllPoints()
-	self.frame[unit]:SetPoint(self.db[unit].castBarAnchor, parent, self.db[unit].castBarRelativePoint, self.db[unit].castBarOffsetX, self.db[unit].castBarOffsetY)
+	local height = self:GetAttachSize(unit)
 
 	-- update icon
-	self.frame[unit].icon:ClearAllPoints()
-	self.frame[unit].icon:SetPoint(self.db[unit].castIconPosition, self.frame[unit], self.db[unit].castIconPosition, 0, 0)
-	self.frame[unit].icon:SetWidth(height)
-	self.frame[unit].icon:SetHeight(height)
-	local n = 5
-	self.frame[unit].icon:SetTexCoord(n / 64, 1 - n / 64, n / 64, 1 - n / 64)
-
 	self.frame[unit].icon.bg:ClearAllPoints()
-	self.frame[unit].icon.bg:SetAllPoints(self.frame[unit].icon)
-	self.frame[unit].icon.bg:SetTexture(bar_texture)
+	self.frame[unit].icon.bg:SetPoint(self.db[unit].castIconPosition, self.frame[unit], self.db[unit].castIconPosition, 0, 0)
+	self.frame[unit].icon.bg:SetSize(height, height)
+	--self.frame[unit].icon.bg:SetTexture(bar_texture)
+	self.frame[unit].icon.bg:SetTexture(1, 1, 1, 1)
 	self.frame[unit].icon.bg:SetVertexColor(self.db[unit].castBarBackgroundColor.r, self.db[unit].castBarBackgroundColor.g,
 		self.db[unit].castBarBackgroundColor.b, self.db[unit].castBarBackgroundColor.a)
+
+	self.frame[unit].icon:SetSize(height, height)
+	self.frame[unit].icon:ClearAllPoints()
+	self.frame[unit].icon:SetPoint("CENTER", self.frame[unit].icon.bg, "CENTER")
+	local n = 5
+	self.frame[unit].icon:SetTexCoord(n / 64, 1 - n / 64, n / 64, 1 - n / 64)
 
 	if self.db[unit].castIcon then
 		self.frame[unit].icon:Show()
@@ -361,8 +313,7 @@ function CastBar:Update(unit)
 	self.frame[unit].icon:SetTexture(nil)
 
 	-- update not interruptible shield
-	self.frame[unit].icon.shield:SetWidth(height * 64 / 20)
-	self.frame[unit].icon.shield:SetHeight(height * 64 / 20)
+	self.frame[unit].icon.shield:SetSize(height * 64 / 20, height * 64 / 20)
 	self.frame[unit].icon.shield:SetPoint("CENTER", self.frame[unit].icon, "CENTER")
 	self.frame[unit].icon.shield:Hide()
 
@@ -371,17 +322,18 @@ function CastBar:Update(unit)
 	if self.db[unit].castIcon then
 		-- attach to icon
 		if self.db[unit].castIconPosition == "LEFT" then
-			self.frame[unit].bar:SetPoint("LEFT", self.frame[unit].icon, "RIGHT")
+			-- self.frame[unit].bar:SetPoint("LEFT", self.frame[unit].icon, "RIGHT")
+			self.frame[unit].bar:SetPoint("LEFT", height, 0)
 			self.frame[unit].bar:SetPoint("RIGHT")
 		else
 			self.frame[unit].bar:SetPoint("LEFT")
-			self.frame[unit].bar:SetPoint("RIGHT", self.frame[unit].icon, "LEFT")
+			self.frame[unit].bar:SetPoint("RIGHT", -height, 0)
+			-- self.frame[unit].bar:SetPoint("RIGHT", self.frame[unit].icon, "LEFT")
 		end
 	else
 		-- attach to frame
 		self.frame[unit].bar:SetAllPoints()
 	end
-	self.frame[unit].bar.width = width - (self.db[unit].castIcon and height or 0)
 	self.frame[unit].bar:SetHeight(height)
 	self.frame[unit].bar:SetMinMaxValues(0, 100)
 	self.frame[unit].bar:SetValue(0)
@@ -397,19 +349,6 @@ function CastBar:Update(unit)
 	self.frame[unit].spark:Hide()
 
 	-- update cast bar background
-	self.frame[unit].background:ClearAllPoints()
-	self.frame[unit].background:SetAllPoints(self.frame[unit].bar)
-
-	-- Maybe it looks better if the background covers the whole castbar
-	--[[
-	if (self.db.castIcon) then
-		self.frame[unit].background:SetWidth(self.frame[unit]:GetWidth() + self.frame[unit].icon:GetWidth())
-	else
-		self.frame[unit].background:SetWidth(self.frame[unit]:GetWidth())
-	end
-	--]]
-
-	self.frame[unit].background:SetHeight(height)
 	self.frame[unit].background:SetTexture(bar_texture)
 	self.frame[unit].background:SetVertexColor(self.db[unit].castBarBackgroundColor.r, self.db[unit].castBarBackgroundColor.g,
 		self.db[unit].castBarBackgroundColor.b, self.db[unit].castBarBackgroundColor.a)
@@ -472,25 +411,18 @@ function CastBar:Update(unit)
 		fmt = (fmt or "")  .. "%3$.01f"
 	end
 	if self.db[unit].castTimeTextDelay then
-		fmt = (fmt and (fmt .. " ") or "") .. "%4$s"
+		fmt = (fmt or "") .. "%4$s"
 	end
 
 	self.frame[unit].time_text_format = fmt;
 
-	-- update highlight texture
-	self.frame[unit].highlight:SetAllPoints(self.frame[unit])
-	self.frame[unit].highlight:SetTexture([[Interface\QuestFrame\UI-QuestTitleHighlight]])
-	self.frame[unit].highlight:SetBlendMode("ADD")
-	self.frame[unit].highlight:SetVertexColor(1.0, 1.0, 1.0, 1.0)
-	self.frame[unit].highlight:SetAlpha(0)
-
 	-- hide
-	self.frame[unit]:SetAlpha(0)
+	self.frame[unit]:Hide()
 end
 
 function CastBar:Show(unit)
 	-- show frame
-	self.frame[unit]:SetAlpha(1)
+	self.frame[unit]:Show()
 end
 
 function CastBar:Reset(unit)
@@ -516,21 +448,29 @@ function CastBar:Reset(unit)
 	self.frame[unit].spark:Hide()
 
 	-- hide
-	self.frame[unit]:SetAlpha(0)
+	self.frame[unit]:Hide()
 end
 
 function CastBar:Test(unit)
-	local value, maxValue, delay = 1.5, 2, 0.5
-	self.frame[unit].bar:SetMinMaxValues(0, maxValue)
-	self.frame[unit].bar:SetValue(value)
-	local sparkPosition = value / maxValue * self.frame[unit].bar.width
-	self.frame[unit].spark:SetPoint("CENTER", self.frame[unit].bar, "LEFT", sparkPosition, 0)
-	if self.db[unit].castSpark then self.frame[unit].spark:Show() end
-	self.frame[unit].timeText:SetFormattedText(self.frame[unit].time_text_format, value, maxValue - value, maxValue, self.delay == 0 and "" or strformat(delay_format, delay))
-	local texture = select(3, GetSpellInfo(1))
-	self.frame[unit].icon:SetTexture(texture)
-	self:SetInterruptible(unit, true)
-	self.frame[unit].castText:SetText(L["Example Spell Name"])
+	local f = self.frame[unit]
+	local spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible = L["Example Spell Name"], "", "", GetSpellTexture(1),
+		GetTime() * 1000 - 1000, GetTime() * 1000 + 1500, false, 0, false
+
+	f.spellName = spell
+	f.isChanneling = false
+	f.isCasting = true
+	f.startTime = startTime / 1000
+	f.endTime = endTime / 1000
+	f.maxValue = f.endTime - f.startTime
+	f.delay = 0.2
+
+	f.icon:SetTexture(icon)
+	self:SetInterruptible(unit, not notInterruptible)
+	f.bar:SetMinMaxValues(0, f.maxValue)
+
+	if self.db[unit].castSpark then f.spark:Show() end
+	CastUpdate(f)
+	UpdateCastText(f, spell, rank)
 end
 
 function CastBar:GetOptions(unit)
@@ -712,58 +652,15 @@ function CastBar:GetOptions(unit)
 					hidden = function() return not GladiusEx.db.base.advancedOptions end,
 					order = 3,
 					args = {
-						castBarAttachTo = {
+						castBarPosition = {
 							type = "select",
-							name = L["Attach to"],
-							desc = L["Attach to the given frame"],
-							values = function() return self:GetOtherAttachPoints(unit) end,
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							width = "double",
-							order = 5,
-						},
-						sep = {
-							type = "description",
-							name = "",
-							width = "full",
-							order = 7,
-						},
-						castBarAnchor = {
-							type = "select",
-							name = L["Anchor"],
-							desc = L["Anchor of the frame"],
-							values = function() return GladiusEx:GetPositions() end,
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							order = 10,
-						},
-						castBarRelativePoint = {
-							type = "select",
-							name = L["Relative point"],
-							desc = L["Relative point of the frame"],
-							values = function() return GladiusEx:GetPositions() end,
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							order = 15,
-						},
-						sep2 = {
-							type = "description",
-							name = "",
-							width = "full",
-							order = 17,
-						},
-						castBarOffsetX = {
-							type = "range",
-							name = L["Offset X"],
-							desc = L["X offset of the frame"],
-							softMin = -100, softMax = 100, bigStep = 1,
-							disabled = function() return  not self:IsUnitEnabled(unit) end,
-							order = 20,
-						},
-						castBarOffsetY = {
-							type = "range",
-							name = L["Offset Y"],
-							desc = L["Y offset of the frame"],
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							softMin = -100, softMax = 100, bigStep = 1,
-							order = 25,
+							name = L["Position"],
+							-- desc = L[""],
+							values = {
+								["TOP"] = L["Top"],
+								["BOTTOM"] = L["Bottom"]
+							},
+							order = 1,
 						},
 					},
 				},

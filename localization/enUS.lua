@@ -1,4 +1,4 @@
-﻿local L = LibStub("AceLocale-3.0"):NewLocale("GladiusEx", "enUS", true)
+﻿local L = LibStub("AceLocale-3.0"):NewLocale("GladiusEx", "enUS", true, true)
 
 -- Cooldowns module
 L["cat:pvp_trinket"] = "PvP Trinket"
@@ -92,7 +92,7 @@ L["DRTracker"] = "DR Tracker"
 L["HealthBar"] = "Health Bar"
 L["Tags"] = "Texts Tags"
 L["PowerBar"] = "Power Bar"
-L["TargetBar"] = "Target Bar"
+L["TargetBar"] = "Target"
 L["SkillHistory"] = "Skill History"
 
 -- General

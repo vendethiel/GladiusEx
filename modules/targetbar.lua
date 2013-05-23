@@ -1,48 +1,41 @@
 local GladiusEx = _G.GladiusEx
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
-local LSM
+local LSM = LibStub("LibSharedMedia-3.0")
+local fn = LibStub("LibFunctional-1.0")
 
 -- global functions
 local strfind = string.find
 local pairs = pairs
 local UnitClass, UnitGUID, UnitHealth, UnitHealthMax = UnitClass, UnitGUID, UnitHealth, UnitHealthMax
 
-local TargetBar = GladiusEx:NewGladiusExModule("TargetBar", false, {
-		targetBarAttachTo = "ClassIcon",
+local defaults = {
+	targetBarOffsetX = 0,
+	targetBarOffsetY = 0,
+	targetBarHeight = 20,
+	targetBarWidth = 120,
+	targetBarInverse = false,
+	targetBarColor = { r = 1, g = 1, b = 1, a = 1 },
+	targetBarClassColor = true,
+	targetBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
+	targetBarGlobalTexture = true,
+	targetBarTexture = "Minimalist",
+	targetBarIcon = true,
+	targetBarIconCrop = true,
+}
+
+local TargetBar = GladiusEx:NewGladiusExModule("TargetBar",
+	fn.merge(defaults, {
+		targetBarAttachTo = "Frame",
 		targetBarRelativePoint = "TOPLEFT",
 		targetBarAnchor = "BOTTOMLEFT",
-		targetBarOffsetX = 0,
-		targetBarOffsetY = 0,
-		targetBarHeight = 20,
-		targetBarWidth = 120,
-		targetBarInverse = false,
-		targetBarColor = { r = 1, g = 1, b = 1, a = 1 },
-		targetBarClassColor = true,
-		targetBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
-		targetBarGlobalTexture = true,
-		targetBarTexture = "Minimalist",
 		targetBarIconPosition = "LEFT",
-		targetBarIcon = true,
-		targetBarIconCrop = false,
-	},
-	{
-		targetBarAttachTo = "ClassIcon",
+	}),
+	fn.merge(defaults, {
+		targetBarAttachTo = "Frame",
 		targetBarRelativePoint = "TOPRIGHT",
 		targetBarAnchor = "BOTTOMRIGHT",
-		targetBarOffsetX = 0,
-		targetBarOffsetY = 0,
-		targetBarHeight = 20,
-		targetBarWidth = 120,
-		targetBarInverse = false,
-		targetBarColor = { r = 1, g = 1, b = 1, a = 1 },
-		targetBarClassColor = true,
-		targetBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
-		targetBarGlobalTexture = true,
-		targetBarTexture = "Minimalist",
 		targetBarIconPosition = "RIGHT",
-		targetBarIcon = true,
-		targetBarIconCrop = false,
-	})
+	}))
 
 function TargetBar:OnEnable()
 	self:RegisterEvent("UNIT_HEALTH")
@@ -51,9 +44,9 @@ function TargetBar:OnEnable()
 	self:RegisterEvent("UNIT_TARGET")
 	self:RegisterEvent("PLAYER_TARGET_CHANGED", function() self:UNIT_TARGET("PLAYER_TARGET_CHANGED", "player") end)
 
-	LSM = GladiusEx.LSM
-
-	self.frame = {}
+	if not self.frame then
+		self.frame = {}
+	end
 end
 
 function TargetBar:OnDisable()
@@ -64,17 +57,13 @@ function TargetBar:OnDisable()
 	end
 end
 
-function TargetBar:GetAttachTo(unit)
-	return self.db[unit].targetBarAttachTo
-end
-
 function TargetBar:GetModuleAttachPoints()
 	return {
 		["TargetBar"] = L["TargetBar"],
 	}
 end
 
-function TargetBar:GetAttachFrame(unit)
+function TargetBar:GetModuleAttachFrame(unit)
 	if not self.frame[unit] then
 		self:CreateBar(unit)
 	end

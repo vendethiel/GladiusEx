@@ -1,15 +1,15 @@
 local GladiusEx = _G.GladiusEx
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
-local LSM
+local LSM = LibStub("LibSharedMedia-3.0")
 
 -- global functions
 local strfind = string.find
 local pairs = pairs
 local UnitPower, UnitPowerMax, UnitPowerType = UnitPower, UnitPowerMax, UnitPowerType
 
-local PowerBar = GladiusEx:NewGladiusExModule("PowerBar", true, {
+local PowerBar = GladiusEx:NewGladiusExModule("PowerBar", {
 	powerBarAttachTo = "HealthBar",
-	powerBarHeight = 15,
+	powerBarHeight = 0,
 	powerBarAdjustWidth = true,
 	powerBarWidth = 200,
 	powerBarInverse = false,
@@ -18,8 +18,7 @@ local PowerBar = GladiusEx:NewGladiusExModule("PowerBar", true, {
 	powerBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
 	powerBarGlobalTexture = true,
 	powerBarTexture = "Minimalist",
-	powerBarOffsetX = 0,
-	powerBarOffsetY = 0,
+	powerBarOrder = 2,
 	powerBarAnchor = "TOPLEFT",
 	powerBarRelativePoint = "BOTTOMLEFT",
 })
@@ -34,10 +33,7 @@ function PowerBar:OnEnable()
 	self:RegisterEvent("UNIT_CLASSIFICATION_CHANGED","UpdateColorEvent")
 	self:RegisterEvent("UNIT_DISPLAYPOWER", "UpdateColorEvent")
 
-
-	LSM = GladiusEx.LSM
-
-	if (not self.frame) then
+	if not self.frame then
 		self.frame = {}
 	end
 end
@@ -50,21 +46,16 @@ function PowerBar:OnDisable()
 	end
 end
 
-function PowerBar:IsBar(unit)
-	-- set frame type
-	if GladiusEx:GetModule("HealthBar").db[unit].healthBarAttachTo == "Frame" or strfind(self.db[unit].powerBarRelativePoint, "BOTTOM") then
-		return true
-	else
-		return false
-	end
+function PowerBar:GetAttachType(unit)
+	return "Bar"
 end
 
 function PowerBar:GetBarHeight(unit)
 	return self.db[unit].powerBarHeight
 end
 
-function PowerBar:GetAttachTo(unit)
-	return self.db[unit].powerBarAttachTo
+function PowerBar:GetBarOrder(unit)
+	return self.db[unit].powerBarOrder
 end
 
 function PowerBar:GetModuleAttachPoints()
@@ -73,11 +64,10 @@ function PowerBar:GetModuleAttachPoints()
 	}
 end
 
-function PowerBar:GetAttachFrame(unit)
+function PowerBar:GetModuleAttachFrame(unit)
 	if not self.frame[unit] then
 		self:CreateBar(unit)
 	end
-
 	return self.frame[unit]
 end
 
@@ -128,6 +118,10 @@ function PowerBar:UpdatePower(unit, power, maxPower)
 	end
 end
 
+function PowerBar:GetBarColor(powerType)
+	return PowerBarColor[powerType]
+end
+
 function PowerBar:CreateBar(unit)
 	local button = GladiusEx.buttons[unit]
 	if (not button) then return end
@@ -135,7 +129,7 @@ function PowerBar:CreateBar(unit)
 	-- create bar + text
 	self.frame[unit] = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. unit, button)
 	self.frame[unit].background = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "Background", "BACKGROUND")
-	self.frame[unit].highlight = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "Highlight" .. unit, "OVERLAY")
+	self.frame[unit].background:SetAllPoints()
 end
 
 function PowerBar:Refresh(unit)
@@ -147,87 +141,45 @@ function PowerBar:Update(unit)
 	local testing = GladiusEx:IsTesting(unit)
 
 	-- create power bar
-	if (not self.frame[unit]) then
+	if not self.frame[unit] then
 		self:CreateBar(unit)
 	end
 
-	-- set bar type
-	local parent = GladiusEx:GetAttachFrame(unit, self.db[unit].powerBarAttachTo)
-
-	-- update power bar
-	self.frame[unit]:ClearAllPoints()
-
-	local width = self.db[unit].powerBarAdjustWidth and GladiusEx.db[unit].barWidth or self.db[unit].powerBarWidth
-
-	-- add width of the widget if attached to an widget
-	if (GladiusEx:GetModule("HealthBar").db[unit].healthBarAttachTo ~= "Frame" and not strfind(self.db[unit].powerBarRelativePoint, "BOTTOM") and self.db[unit].powerBarAdjustWidth) then
-		if (not GladiusEx:GetModule(self.db[unit].powerBarAttachTo).frame[unit]) then
-			GladiusEx:GetModule(self.db[unit].powerBarAttachTo):Update(unit)
-		end
-
-		width = width + GladiusEx:GetModule(self.db[unit].powerBarAttachTo).frame[unit]:GetWidth()
-	end
-
+	-- update statusbar
 	local bar_texture = self.db[unit].powerBarGlobalTexture and LSM:Fetch(LSM.MediaType.STATUSBAR, GladiusEx.db.base.globalBarTexture) or LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].powerBarTexture)
-
-	self.frame[unit]:SetHeight(self.db[unit].powerBarHeight)
-	self.frame[unit]:SetWidth(width)
-
-	self.frame[unit]:SetPoint(self.db[unit].powerBarAnchor, parent, self.db[unit].powerBarRelativePoint, self.db[unit].powerBarOffsetX, self.db[unit].powerBarOffsetY)
 	self.frame[unit]:SetMinMaxValues(0, 100)
 	self.frame[unit]:SetValue(100)
 	self.frame[unit]:SetStatusBarTexture(bar_texture)
-
-	-- disable tileing
 	self.frame[unit]:GetStatusBarTexture():SetHorizTile(false)
 	self.frame[unit]:GetStatusBarTexture():SetVertTile(false)
 
-	-- update power bar background
-	self.frame[unit].background:ClearAllPoints()
-	self.frame[unit].background:SetAllPoints(self.frame[unit])
-
-	self.frame[unit].background:SetWidth(self.frame[unit]:GetWidth())
-	self.frame[unit].background:SetHeight(self.frame[unit]:GetHeight())
-
+	-- update background
 	self.frame[unit].background:SetTexture(bar_texture)
-
 	self.frame[unit].background:SetVertexColor(self.db[unit].powerBarBackgroundColor.r, self.db[unit].powerBarBackgroundColor.g,
 		self.db[unit].powerBarBackgroundColor.b, self.db[unit].powerBarBackgroundColor.a)
-
-	-- disable tileing
 	self.frame[unit].background:SetHorizTile(false)
 	self.frame[unit].background:SetVertTile(false)
 
-	-- update highlight texture
-	self.frame[unit].highlight:SetAllPoints(self.frame[unit])
-	self.frame[unit].highlight:SetTexture([[Interface\QuestFrame\UI-QuestTitleHighlight]])
-	self.frame[unit].highlight:SetBlendMode("ADD")
-	self.frame[unit].highlight:SetVertexColor(1.0, 1.0, 1.0, 1.0)
-	self.frame[unit].highlight:SetAlpha(0)
-
 	-- hide frame
-	self.frame[unit]:SetAlpha(0)
-end
-
-function PowerBar:GetBarColor(powerType)
-	return PowerBarColor[powerType]
+	self.frame[unit]:Hide()
 end
 
 function PowerBar:Show(unit)
+	if not self.frame[unit] then return end
+
 	-- show frame
-	self.frame[unit]:SetAlpha(1)
-	self:UpdatePowerEvent("Show", unit)
+	self.frame[unit]:Show()
 end
 
 function PowerBar:Reset(unit)
 	if not self.frame[unit] then return end
 
 	-- reset bar
-	self.frame[unit]:SetMinMaxValues(0, 1)
-	self.frame[unit]:SetValue(1)
+	self.frame[unit]:SetMinMaxValues(0, 100)
+	self.frame[unit]:SetValue(100)
 
 	-- hide
-	self.frame[unit]:SetAlpha(0)
+	self.frame[unit]:Hide()
 end
 
 function PowerBar:Test(unit)
@@ -328,32 +280,11 @@ function PowerBar:GetOptions(unit)
 					inline = true,
 					order = 2,
 					args = {
-						powerBarAdjustWidth = {
-							type = "toggle",
-							name = L["Adjust width"],
-							desc = L["Adjust bar width to the frame width"],
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							order = 5,
-						},
-						sep = {
-							type = "description",
-							name = "",
-							width = "full",
-							order = 13,
-						},
-						powerBarWidth = {
-							type = "range",
-							name = L["Width"],
-							desc = L["Width of the bar"],
-							min = 10, max = 500, step = 1,
-							disabled = function() return self.db[unit].powerBarAdjustWidth or not self:IsUnitEnabled(unit) end,
-							order = 15,
-						},
 						powerBarHeight = {
 							type = "range",
 							name = L["Height"],
 							desc = L["Height of the power bar"],
-							min = 10, max = 200, step = 1,
+							softMin = -25, softMax = 25, bigStep = 1,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 20,
 						},
@@ -367,64 +298,13 @@ function PowerBar:GetOptions(unit)
 					hidden = function() return not GladiusEx.db.base.advancedOptions end,
 					order = 3,
 					args = {
-						powerBarAttachTo = {
-							type = "select",
-							name = L["Attach to"],
-							desc = L["Attach to the given frame"],
-							values = function() return self:GetOtherAttachPoints(unit) end,
-							set = function(info, value)
-								local key = info.arg or info[#info]
-
-								self.db[unit][key] = value
-								GladiusEx:UpdateFrames()
-							end,
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							width = "double",
-							order = 5,
-						},
-						sep = {
-							type = "description",
-							name = "",
-							width = "full",
-							order = 7,
-						},
-						powerBarAnchor = {
-							type = "select",
-							name = L["Anchor"],
-							desc = L["Anchor of the frame"],
-							values = function() return GladiusEx:GetPositions() end,
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							order = 10,
-						},
-						powerBarRelativePoint = {
-							type = "select",
-							name = L["Relative point"],
-							desc = L["Relative point of the frame"],
-							values = function() return GladiusEx:GetPositions() end,
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							order = 15,
-						},
-						sep2 = {
-							type = "description",
-							name = "",
-							width = "full",
-							order = 17,
-						},
-						powerBarOffsetX = {
+						powerBarOrder = {
 							type = "range",
-							name = L["Offset X"],
-							desc = L["X offset of the frame"],
-							softMin = -100, softMax = 100, bigStep = 1,
+							name = L["Bar order"],
+							desc = L["Bar order"],
+							softMin = 1, softMax = 10, bigStep = 1,
 							disabled = function() return  not self:IsUnitEnabled(unit) end,
-							order = 20,
-						},
-						powerBarOffsetY = {
-							type = "range",
-							name = L["Offset Y"],
-							desc = L["X offset of the frame"],
-							softMin = -100, softMax = 100, bigStep = 1,
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							order = 25,
+							order = 1,
 						},
 					},
 				},

@@ -1,6 +1,7 @@
 local GladiusEx = _G.GladiusEx
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
-local LSM
+local fn = LibStub("LibFunctional-1.0")
+local LSM = LibStub("LibSharedMedia-3.0")
 
 -- global functions
 local strfind = string.find
@@ -210,48 +211,28 @@ local function GetDefaultImportantAuras()
 	}
 end
 
-local ClassIcon = GladiusEx:NewGladiusExModule("ClassIcon", true, {
-		classIconAttachTo = "Frame",
-		classIconAnchor = "TOPRIGHT",
-		classIconRelativePoint = "TOPLEFT",
-		classIconMode = "SPEC",
-		classIconAdjustSize = false,
-		classIconSize = 40,
-		classIconOffsetX = 0,
-		classIconOffsetY = 0,
-		classIconFrameLevel = 2,
-		classIconGloss = false,
-		classIconGlossColor = { r = 1, g = 1, b = 1, a = 0.4 },
-		classIconImportantAuras = true,
-		classIconCrop = false,
-		classIconCooldown = true,
-		classIconCooldownReverse = false,
-		classIconAuras = GetDefaultImportantAuras()
-	},
-	{
-		classIconAttachTo = "Frame",
-		classIconAnchor = "TOPLEFT",
-		classIconRelativePoint = "TOPRIGHT",
-		classIconMode = "SPEC",
-		classIconAdjustSize = false,
-		classIconSize = 40,
-		classIconOffsetX = 0,
-		classIconOffsetY = 0,
-		classIconFrameLevel = 2,
-		classIconGloss = false,
-		classIconGlossColor = { r = 1, g = 1, b = 1, a = 0.4 },
-		classIconImportantAuras = true,
-		classIconCrop = false,
-		classIconCooldown = true,
-		classIconCooldownReverse = false,
-		classIconAuras = GetDefaultImportantAuras()
-	})
+local defaults = {
+	classIconMode = "SPEC",
+	classIconGloss = false,
+	classIconGlossColor = { r = 1, g = 1, b = 1, a = 0.4 },
+	classIconImportantAuras = true,
+	classIconCrop = true,
+	classIconCooldown = true,
+	classIconCooldownReverse = false,
+	classIconAuras = GetDefaultImportantAuras()
+}
+
+local ClassIcon = GladiusEx:NewGladiusExModule("ClassIcon",
+	fn.merge(defaults, {
+		classIconPosition = "LEFT",
+	}),
+	fn.merge(defaults, {
+		classIconPosition = "RIGHT",
+	}))
 
 function ClassIcon:OnEnable()
 	self:RegisterEvent("UNIT_AURA")
 	self:RegisterMessage("GLADIUS_SPEC_UPDATE")
-
-	LSM = GladiusEx.LSM
 
 	if not self.frame then
 		self.frame = {}
@@ -263,16 +244,20 @@ function ClassIcon:OnDisable()
 	self:UnregisterAllMessages()
 
 	for unit in pairs(self.frame) do
-		self.frame[unit]:SetAlpha(0)
+		self.frame[unit]:Hide()
 	end
 end
 
-function ClassIcon:IsBar()
-	return false
+function ClassIcon:GetAttachType(unit)
+	return "InFrame"
 end
 
-function ClassIcon:GetAttachTo(unit)
-	return self.db[unit].classIconAttachTo
+function ClassIcon:GetAttachPoint(unit)
+	return self.db[unit].classIconPosition
+end
+
+function ClassIcon:GetAttachSize(unit)
+	return GladiusEx:GetBarsHeight(unit)
 end
 
 function ClassIcon:GetModuleAttachPoints()
@@ -281,7 +266,7 @@ function ClassIcon:GetModuleAttachPoints()
 	}
 end
 
-function ClassIcon:GetAttachFrame(unit)
+function ClassIcon:GetModuleAttachFrame(unit)
 	if not self.frame[unit] then
 		self:CreateFrame(unit)
 	end
@@ -361,17 +346,18 @@ function ClassIcon:SetTexture(unit, texture, needs_crop, left, right, top, botto
 	-- so instead of using the border already present in the icons, we crop them and add
 	-- our own (this would have been a lot easier if wow allowed alpha mask textures)
 	local needs_border = needs_crop and not self.db[unit].classIconCrop
+	local size = self:GetAttachSize(unit)
 	if needs_border then
 		self.frame[unit].texture:ClearAllPoints()
 		self.frame[unit].texture:SetPoint("CENTER")
-		self.frame[unit].texture:SetWidth(self.db[unit].classIconSize * (1 - 6 / 64))
-		self.frame[unit].texture:SetHeight(self.db[unit].classIconSize * (1 - 6 / 64))
+		self.frame[unit].texture:SetWidth(size * (1 - 6 / 64))
+		self.frame[unit].texture:SetHeight(size * (1 - 6 / 64))
 		self.frame[unit].texture_border:Show()
 	else
 		self.frame[unit].texture:ClearAllPoints()
 		self.frame[unit].texture:SetPoint("CENTER")
-		self.frame[unit].texture:SetWidth(self.db[unit].classIconSize)
-		self.frame[unit].texture:SetHeight(self.db[unit].classIconSize)
+		self.frame[unit].texture:SetWidth(size)
+		self.frame[unit].texture:SetHeight(size)
 		self.frame[unit].texture_border:Hide()
 	end
 
@@ -387,6 +373,14 @@ function ClassIcon:SetTexture(unit, texture, needs_crop, left, right, top, botto
 	-- set texture
 	self.frame[unit].texture:SetTexture(texture)
 	self.frame[unit].texture:SetTexCoord(left, right, top, bottom)
+
+	-- hide portrait
+	if self.frame[unit].portrait3d then
+		self.frame[unit].portrait3d:Hide()
+	end
+	if self.frame[unit].portrait2d then
+		self.frame[unit].portrait2d:Hide()
+	end
 end
 
 function ClassIcon:SetClassIcon(unit)
@@ -434,27 +428,44 @@ function ClassIcon:SetClassIcon(unit)
 	-- hide cooldown frame
 	self.frame[unit].cooldown:Hide()
 
-	-- portrait2d
-	-- SetPortraitTexture(self.frame[unit].texture, unit)
-	-- portrait3d
-	--if not self.frame[unit].portrait then
-	--	self.frame[unit].portrait = CreateFrame("PlayerModel", nil, self.frame[unit])
-	--	self.frame[unit].portrait:SetAllPoints()
-	--	self.frame[unit].portrait:SetScript("OnShow", function(f) f:SetPortraitZoom(1) end)
-	--	self.frame[unit].portrait:SetScript("OnHide", function(f) f.guid = nil end)
-	--end
-	--if not UnitIsVisible(unit) or not UnitIsConnected(unit) then
-	--	self.frame[unit].portrait:Hide()
-	--else
-	--	local guid = UnitGUID(unit)
-	--	if self.frame[unit].portrait.guid ~= guid then
-	--		self.frame[unit].portrait.guid = guid
-	--		self.frame[unit].portrait:SetUnit(unit)
-	--		self.frame[unit].portrait:SetPortraitZoom(1)
-	--		self.frame[unit].portrait:SetPosition(0, 0, 0)
-	--		self.frame[unit].portrait:Show()
-	--	end
-	--end
+	if self.db[unit].classIconMode == "PORTRAIT2D" then
+		-- portrait2d
+		if not self.frame[unit].portrait2d then
+			self.frame[unit].portrait2d = self.frame[unit]:CreateTexture(nil, "OVERLAY")
+			self.frame[unit].portrait2d:SetAllPoints()
+			local n = 9 / 64
+			self.frame[unit].portrait2d:SetTexCoord(n, 1 - n, n, 1 - n)
+		end
+		if not UnitIsVisible(unit) or not UnitIsConnected(unit) then
+			self.frame[unit].portrait2d:Hide()
+		else
+			SetPortraitTexture(self.frame[unit].portrait2d, unit)
+			self.frame[unit].portrait2d:Show()
+			self.frame[unit].texture:SetTexture(0, 0, 0, 1)
+		end
+	elseif self.db[unit].classIconMode == "PORTRAIT3D" then
+		-- portrait3d
+		local zoom = 1.0
+		if not self.frame[unit].portrait3d then
+			self.frame[unit].portrait3d = CreateFrame("PlayerModel", nil, self.frame[unit])
+			self.frame[unit].portrait3d:SetAllPoints()
+			self.frame[unit].portrait3d:SetScript("OnShow", function(f) f:SetPortraitZoom(zoom) end)
+			self.frame[unit].portrait3d:SetScript("OnHide", function(f) f.guid = nil end)
+		end
+		if not UnitIsVisible(unit) or not UnitIsConnected(unit) then
+			self.frame[unit].portrait3d:Hide()
+		else
+			local guid = UnitGUID(unit)
+			if self.frame[unit].portrait3d.guid ~= guid then
+				self.frame[unit].portrait3d.guid = guid
+				self.frame[unit].portrait3d:SetUnit(unit)
+				self.frame[unit].portrait3d:SetPortraitZoom(zoom)
+				self.frame[unit].portrait3d:SetPosition(0, 0, 0)
+			end
+			self.frame[unit].portrait3d:Show()
+			self.frame[unit].texture:SetTexture(0, 0, 0, 1)
+		end
+	end
 end
 
 function ClassIcon:CreateFrame(unit)
@@ -468,7 +479,7 @@ function ClassIcon:CreateFrame(unit)
 	self.frame[unit].normalTexture = _G[self.frame[unit]:GetName().."NormalTexture"]
 	self.frame[unit].cooldown = _G[self.frame[unit]:GetName().."Cooldown"]
 	self.frame[unit].texture_border = self.frame[unit]:CreateTexture(nil, "BACKGROUND", nil, -1)
-	self.frame[unit].texture_border:SetTexture([[Interface\AddOns\GladiusEx\images\icon_border]])
+	self.frame[unit].texture_border:SetTexture([[Interface\AddOns\GladiusEx\media\icon_border]])
 	self.frame[unit].texture_border:SetAllPoints()
 end
 
@@ -478,50 +489,13 @@ function ClassIcon:Update(unit)
 		self:CreateFrame(unit)
 	end
 
-	-- update frame
-	self.frame[unit]:ClearAllPoints()
-
-	local parent = GladiusEx:GetAttachFrame(unit, self.db[unit].classIconAttachTo)
-	self.frame[unit]:SetPoint(self.db[unit].classIconAnchor, parent, self.db[unit].classIconRelativePoint, self.db[unit].classIconOffsetX, self.db[unit].classIconOffsetY)
-
-	-- frame level
-	self.frame[unit]:SetFrameLevel(self.db[unit].classIconFrameLevel)
-
-	-- size
-	if self.db[unit].classIconAdjustSize then
-		self.frame[unit]:SetWidth(GladiusEx.buttons[unit].frameHeight)
-		self.frame[unit]:SetHeight(GladiusEx.buttons[unit].frameHeight)
-	else
-		self.frame[unit]:SetWidth(self.db[unit].classIconSize)
-		self.frame[unit]:SetHeight(self.db[unit].classIconSize)
-	end
-
-	-- set frame mouse-interactable area
-	if self:GetAttachTo(unit) == "Frame" then
-		local left, right, top, bottom = GladiusEx.buttons[unit]:GetHitRectInsets()
-
-		if strfind(self.db[unit].classIconRelativePoint, "LEFT") then
-			left = -self.frame[unit]:GetWidth() + self.db[unit].classIconOffsetX
-		else
-			right = -self.frame[unit]:GetWidth() - self.db[unit].classIconOffsetX
-		end
-
-		-- top / bottom
-		-- if self.frame[unit]:GetHeight() > GladiusEx.buttons[unit]:GetHeight() then
-		-- 	bottom = -(self.frame[unit]:GetHeight() - GladiusEx.buttons[unit]:GetHeight()) + self.db[unit].classIconOffsetY
-		-- end
-
-		GladiusEx.buttons[unit]:SetHitRectInsets(left, right, top, bottom)
-		GladiusEx.buttons[unit].secure:SetHitRectInsets(left, right, top, bottom)
-	end
-
 	-- style action button
 	self.frame[unit].normalTexture:SetHeight(self.frame[unit]:GetHeight() + self.frame[unit]:GetHeight() * 0.4)
 	self.frame[unit].normalTexture:SetWidth(self.frame[unit]:GetWidth() + self.frame[unit]:GetWidth() * 0.4)
 
 	self.frame[unit].normalTexture:ClearAllPoints()
 	self.frame[unit].normalTexture:SetPoint("CENTER")
-	self.frame[unit]:SetNormalTexture([[Interface\AddOns\GladiusEx\images\gloss]])
+	self.frame[unit]:SetNormalTexture([[Interface\AddOns\GladiusEx\media\gloss]])
 
 	self.frame[unit].texture:ClearAllPoints()
 	self.frame[unit].texture:SetPoint("TOPLEFT", self.frame[unit], "TOPLEFT")
@@ -533,7 +507,7 @@ function ClassIcon:Update(unit)
 	self.frame[unit].cooldown:SetReverse(self.db[unit].classIconCooldownReverse)
 
 	-- hide
-	self.frame[unit]:SetAlpha(0)
+	self.frame[unit]:Hide()
 end
 
 function ClassIcon:Refresh(unit)
@@ -543,7 +517,7 @@ end
 
 function ClassIcon:Show(unit)
 	-- show frame
-	self.frame[unit]:SetAlpha(1)
+	self.frame[unit]:Show()
 
 	-- set class icon
 	self:SetClassIcon(unit)
@@ -554,7 +528,7 @@ function ClassIcon:Reset(unit)
 	if not self.frame[unit] then return end
 
 	-- hide
-	self.frame[unit]:SetAlpha(0)
+	self.frame[unit]:Hide()
 end
 
 function ClassIcon:Test(unit)
@@ -586,7 +560,13 @@ function ClassIcon:GetOptions(unit)
 						classIconMode = {
 							type = "select",
 							name = L["Show"],
-							values = { ["CLASS"] = L["Class"], ["SPEC"] = L["Spec"], ["ROLE"] = L["Role"] },
+							values = {
+								["CLASS"] = L["Class"],
+								["SPEC"] = L["Spec"],
+								["ROLE"] = L["Role"],
+								["PORTRAIT2D"] = L["Portrait 2D"],
+								["PORTRAIT3D"] = L["Portrait 3D"],
+							},
 							desc = L["When available, show specialization instead of class icons"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 3,
@@ -704,82 +684,13 @@ function ClassIcon:GetOptions(unit)
 					inline = true,
 					order = 3,
 					args = {
-						classIconAttachTo = {
-							type = "select",
-							name = L["Attach to"],
-							desc = L["Attach to the given frame"],
-							values = function() return self:GetOtherAttachPoints(unit) end,
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
-							width = "double",
-							order = 5,
-						},
 						classIconPosition = {
 							type = "select",
 							name = L["Position"],
 							desc = L["Position of the frame"],
 							values = { ["LEFT"] = L["Left"], ["RIGHT"] = L["Right"] },
-							get = function() return strfind(self.db[unit].classIconAnchor, "RIGHT") and "LEFT" or "RIGHT" end,
-							set = function(info, value)
-								if value == "LEFT" then
-									self.db[unit].classIconAnchor = "TOPRIGHT"
-									self.db[unit].classIconRelativePoint = "TOPLEFT"
-								else
-									self.db[unit].classIconAnchor = "TOPLEFT"
-									self.db[unit].classIconRelativePoint = "TOPRIGHT"
-								end
-
-								GladiusEx:UpdateFrames()
-							end,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return GladiusEx.db.base.advancedOptions end,
-							order = 6,
-						},
-						sep = {
-							type = "description",
-							name = "",
-							width = "full",
-							order = 7,
-						},
-						classIconAnchor = {
-							type = "select",
-							name = L["Anchor"],
-							desc = L["Anchor of the frame"],
-							values = function() return GladiusEx:GetPositions() end,
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
-							order = 10,
-						},
-						classIconRelativePoint = {
-							type = "select",
-							name = L["Relative point"],
-							desc = L["Relative point of the frame"],
-							values = function() return GladiusEx:GetPositions() end,
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
-							order = 15,
-						},
-						sep2 = {
-							type = "description",
-							name = "",
-							width = "full",
-							order = 17,
-						},
-						classIconOffsetX = {
-							type = "range",
-							name = L["Offset X"],
-							desc = L["X offset of the frame"],
-							softMin = -100, softMax = 100, bigStep = 1,
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							order = 20,
-						},
-						classIconOffsetY = {
-							type = "range",
-							name = L["Offset Y"],
-							desc = L["Y offset of the frame"],
-							softMin = -100, softMax = 100, bigStep = 1,
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							order = 25,
+							order = 1,
 						},
 					},
 				},

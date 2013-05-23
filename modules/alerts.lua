@@ -3,7 +3,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 
 -- globals
 local pairs = pairs
-local max = math.max
+local min, max = math.min, math.max
 local tinsert, tremove = table.insert, table.remove
 local UnitBuff, UnitDebuff, UnitHealth, UnitHealthMax, UnitIsDeadOrGhost = UnitBuff, UnitDebuff, UnitHealth, UnitHealthMax, UnitIsDeadOrGhost
 local GetTime = GetTime
@@ -219,7 +219,7 @@ local function GetDefaultAuraSpells()
 	}
 end
 
-local Alerts = GladiusEx:NewGladiusExModule("Alerts", false, {
+local Alerts = GladiusEx:NewGladiusExModule("Alerts", {
 		minAlpha = 0.2,
 		maxAlpha = 0.6,
 		duration = 0.35,
@@ -233,7 +233,7 @@ local Alerts = GladiusEx:NewGladiusExModule("Alerts", false, {
 
 		casts = true,
 		castsSpells = GetDefaultCastsSpells(),
-		
+
 		auras = true,
 		aurasSpells = GetDefaultAuraSpells(),
 	})
@@ -285,10 +285,8 @@ function Alerts:Update(unit)
 
 	-- frame
 	local parent = GladiusEx:GetAttachFrame(unit, "Frame")
-	local left, right, top, bottom = parent:GetHitRectInsets()
 	self.frame[unit]:ClearAllPoints()
-	self.frame[unit]:SetPoint("TOPLEFT", parent, "TOPLEFT", left, -top)
-	self.frame[unit]:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -right, bottom)
+	self.frame[unit]:SetAllPoints()
 	self.frame[unit]:SetFrameLevel(100)
 
 	-- texture
@@ -331,7 +329,7 @@ end
 function Alerts:StartFlash(unit, color)
 	local f = self.frame[unit]
 	f.texture:SetVertexColor(color.r, color.g, color.b, color.a)
-	
+
 	f:SetAlpha(self.db[unit].maxAlpha)
 	f:Show()
 	f.ag:Play()
@@ -386,7 +384,7 @@ function Alerts:SetAlert(unit, alert, priority, color)
 		alerts[unit].alerts[alert] = priority
 		alerts_color[unit][alert] = color
 		alerts[unit].count = alerts[unit].count + 1
-		
+
 		if alerts[unit].count == 1 or alerts[unit].priority < priority then
 			alerts[unit].priority = priority
 			alerts[unit].current = alert
@@ -792,7 +790,7 @@ function Alerts:GetOptions(unit)
 	for aura in pairs(self.db[unit].aurasSpells) do
 		options.auras.args[aura] = self:SetupAuraOptions(options, unit, aura)
 	end
-	
+
 	return options
 end
 

@@ -1,6 +1,6 @@
 local GladiusEx = _G.GladiusEx
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
-local LSM
+local LSM = LibStub("LibSharedMedia-3.0")
 
 -- global functions
 local strfind = string.find
@@ -12,7 +12,7 @@ local FILTER_TYPE_DISABLED = 0
 local FILTER_TYPE_WHITELIST = 1
 local FILTER_TYPE_BLACKLIST = 2
 
-local Auras = GladiusEx:NewGladiusExModule("Auras", false, {
+local Auras = GladiusEx:NewGladiusExModule("Auras", {
 		aurasBuffsAttachTo = "ClassIcon",
 		aurasBuffsAnchor = "BOTTOMLEFT",
 		aurasBuffsRelativePoint = "TOPLEFT",
@@ -90,8 +90,6 @@ local Auras = GladiusEx:NewGladiusExModule("Auras", false, {
 function Auras:OnEnable()
 	self:RegisterEvent("UNIT_AURA", "UpdateUnitAuras")
 
-	LSM = GladiusEx.LSM
-
 	self.buffFrame = self.buffFrame or {}
 	self.debuffFrame = self.debuffFrame or {}
 end
@@ -108,8 +106,8 @@ function Auras:OnDisable()
 	end
 end
 
-function Auras:GetAttachTo(unit)
-	return self.db[unit].aurasAttachTo
+function Auras:GetFrames(unit)
+	return { self.buffFrame[unit], self.debuffFrame[unit] }
 end
 
 function Auras:GetModuleAttachPoints(unit)
@@ -119,7 +117,7 @@ function Auras:GetModuleAttachPoints(unit)
 	}
 end
 
-function Auras:GetAttachFrame(unit, point)
+function Auras:GetModuleAttachFrame(unit, point)
 	if point == "Buffs" then
 		if not self.buffFrame[unit] then
 			self:CreateFrame(unit)

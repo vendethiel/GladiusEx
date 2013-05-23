@@ -1,6 +1,7 @@
 ﻿local GladiusEx = _G.GladiusEx
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
-local LSM
+local fn = LibStub("LibFunctional-1.0")
+local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0")
 
 -- global functions
@@ -8,45 +9,38 @@ local strfind = string.find
 local pairs, unpack = pairs, unpack
 local GetTime, GetSpellTexture, UnitGUID = GetTime, GetSpellTexture, UnitGUID
 
-local DRTracker = GladiusEx:NewGladiusExModule("DRTracker", false, {
+local defaults = {
+	drTrackerAdjustSize = false,
+	drTrackerMargin = 2,
+	drTrackerSize = 40,
+	drTrackerCrop = true,
+	drTrackerOffsetX = 0,
+	drTrackerOffsetY = 0,
+	drTrackerFrameLevel = 2,
+	drTrackerGloss = false,
+	drTrackerGlossColor = { r = 1, g = 1, b = 1, a = 0.4 },
+	drTrackerCooldown = true,
+	drTrackerCooldownReverse = false,
+	drFontSize = 18,
+	drFontColor = { r = 0, g = 1, b = 0, a = 1 },
+	drCategories = {},
+}
+
+local DRTracker = GladiusEx:NewGladiusExModule("DRTracker",
+	fn.merge(defaults, {
 		drTrackerAttachTo = "ClassIcon",
 		drTrackerAnchor = "TOPRIGHT",
 		drTrackerRelativePoint = "TOPLEFT",
 		drTrackerGrowDirection = "LEFT",
-		drTrackerAdjustSize = false,
-		drTrackerMargin = 2,
-		drTrackerSize = 40,
-		drTrackerCrop = false,
 		drTrackerOffsetX = -2,
-		drTrackerOffsetY = 0,
-		drTrackerFrameLevel = 2,
-		drTrackerGloss = false,
-		drTrackerGlossColor = { r = 1, g = 1, b = 1, a = 0.4 },
-		drTrackerCooldown = true,
-		drTrackerCooldownReverse = false,
-		drFontSize = 18,
-		drFontColor = { r = 0, g = 1, b = 0, a = 1 },
-		drCategories = {},
-	}, {
+	}),
+	fn.merge(defaults, {
 		drTrackerAttachTo = "ClassIcon",
 		drTrackerAnchor = "TOPLEFT",
 		drTrackerRelativePoint = "TOPRIGHT",
 		drTrackerGrowDirection = "RIGHT",
-		drTrackerAdjustSize = false,
-		drTrackerMargin = 2,
-		drTrackerSize = 40,
-		drTrackerCrop = false,
 		drTrackerOffsetX = 2,
-		drTrackerOffsetY = 0,
-		drTrackerFrameLevel = 2,
-		drTrackerGloss = false,
-		drTrackerGlossColor = { r = 1, g = 1, b = 1, a = 0.4 },
-		drTrackerCooldown = true,
-		drTrackerCooldownReverse = false,
-		drFontSize = 18,
-		drFontColor = { r = 0, g = 1, b = 0, a = 1 },
-		drCategories = {},
-	})
+	}))
 
 local drTexts = {
 	[1] =    { "½", 0, 1, 0 },
@@ -56,8 +50,6 @@ local drTexts = {
 }
 
 function DRTracker:OnEnable()
-	LSM = GladiusEx.LSM
-
 	if not self.frame then
 		self.frame = {}
 	end
@@ -73,8 +65,8 @@ function DRTracker:OnDisable()
 	end
 end
 
-function DRTracker:GetAttachTo(unit)
-	return self.db[unit].drTrackerAttachTo
+function DRTracker:GetFrames()
+	return nil
 end
 
 function DRTracker:GetModuleAttachPoints()
@@ -83,7 +75,7 @@ function DRTracker:GetModuleAttachPoints()
 	}
 end
 
-function DRTracker:GetAttachFrame(unit)
+function DRTracker:GetModuleAttachFrame(unit)
 	if not self.frame[unit] then
 		self:CreateFrame(unit)
 	end
@@ -96,6 +88,7 @@ function DRTracker:CreateIcon(unit, drCat)
 	f.texture = _G[f:GetName().."Icon"]
 	f.normalTexture = _G[f:GetName().."NormalTexture"]
 	f.cooldown = _G[f:GetName().."Cooldown"]
+	f.text = f:CreateFontString(nil, "OVERLAY")
 
 	self.frame[unit].tracker[drCat] = f
 end
@@ -109,7 +102,7 @@ function DRTracker:UpdateIcon(unit, drCat)
 	tracked:SetWidth(self.frame[unit]:GetHeight())
 	tracked:SetHeight(self.frame[unit]:GetHeight())
 
-	tracked:SetNormalTexture([[Interface\AddOns\GladiusEx\images\gloss]])
+	tracked:SetNormalTexture([[Interface\AddOns\GladiusEx\media\gloss]])
 	tracked.normalTexture:SetVertexColor(self.db[unit].drTrackerGlossColor.r, self.db[unit].drTrackerGlossColor.g,
 		self.db[unit].drTrackerGlossColor.b, self.db[unit].drTrackerGloss and self.db[unit].drTrackerGlossColor.a or 0)
 
@@ -122,12 +115,12 @@ function DRTracker:UpdateIcon(unit, drCat)
 	end
 
 	-- text
-	tracked.text = tracked:CreateFontString(nil, "OVERLAY")
+	tracked.text:SetFont(LSM:Fetch(LSM.MediaType.FONT, "2002"), self.db[unit].drFontSize, "OUTLINE")
+	tracked.text:SetTextColor(self.db[unit].drFontColor.r, self.db[unit].drFontColor.g, self.db[unit].drFontColor.b, self.db[unit].drFontColor.a)
+	tracked.text:ClearAllPoints()
+	tracked.text:SetPoint("BOTTOMRIGHT", tracked, -2, 0)
 	tracked.text:SetDrawLayer("OVERLAY")
 	tracked.text:SetJustifyH("RIGHT")
-	tracked.text:SetPoint("BOTTOMRIGHT", tracked, -2, 0)
-	tracked.text:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont), self.db[unit].drFontSize, "OUTLINE")
-	tracked.text:SetTextColor(self.db[unit].drFontColor.r, self.db[unit].drFontColor.g, self.db[unit].drFontColor.b, self.db[unit].drFontColor.a)
 
 	-- style action button
 	tracked.normalTexture:SetHeight(self.frame[unit]:GetHeight() + self.frame[unit]:GetHeight() * 0.4)
@@ -175,10 +168,12 @@ function DRTracker:DRFaded(unit, spellID)
 
 	if self.db[unit].drTrackerCooldown then
 		tracked.cooldown:SetCooldown(GetTime(), time_left)
+		tracked.cooldown:SetBlingDuration(50)
 	end
 
 	tracked:SetScript("OnUpdate", function(f, elapsed)
-		if GetTime() >= f.reset_time then
+		-- add extra time to allow the cooldown frame to play the bling animation
+		if GetTime() >= (f.reset_time + 0.5) then
 			tracked.active = false
 			self:SortIcons(unit)
 			f:SetScript("OnUpdate", nil)
@@ -255,22 +250,14 @@ function DRTracker:Update(unit)
 	-- frame level
 	self.frame[unit]:SetFrameLevel(self.db[unit].drTrackerFrameLevel)
 
+	local size = self.db[unit].drTrackerSize
 	if self.db[unit].drTrackerAdjustSize then
-		if self:GetAttachTo(unit) == "Frame" then
-			self.frame[unit]:SetWidth(GladiusEx.buttons[unit].frameHeight)
-			self.frame[unit]:SetHeight(GladiusEx.buttons[unit].frameHeight)
-		else
-			local f = GladiusEx:GetAttachFrame(unit, self.db[unit].drTrackerAttachTo)
-			self.frame[unit]:SetWidth(f and f:GetHeight() or 1)
-			self.frame[unit]:SetHeight(f and f:GetHeight() or 1)
-		end
-	else
-		self.frame[unit]:SetWidth(self.db[unit].drTrackerSize)
-		self.frame[unit]:SetHeight(self.db[unit].drTrackerSize)
+		size = parent:GetHeight()
 	end
+	self.frame[unit]:SetSize(size, size)
 
 	-- update icons
-	if (not self.frame[unit].tracker) then
+	if not self.frame[unit].tracker then
 		self.frame[unit].tracker = {}
 	else
 		for cat, frame in pairs(self.frame[unit].tracker) do

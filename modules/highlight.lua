@@ -1,6 +1,6 @@
 local GladiusEx = _G.GladiusEx
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
-local LSM
+local LSM = LibStub("LibSharedMedia-3.0")
 
 -- global functions
 local strfind, pairs = string.find, pairs
@@ -8,8 +8,8 @@ local abs = math.abs
 local GetRealNumRaidMembers, GetPartyAssignment, GetRaidTargetIndex = GetRealNumRaidMembers, GetPartyAssignment, GetRaidTargetIndex
 local UnitGUID = UnitGUID
 
-local Highlight = GladiusEx:NewGladiusExModule("Highlight", false, {
-	highlightBorderWidth = 3,
+local Highlight = GladiusEx:NewGladiusExModule("Highlight", {
+	highlightBorderWidth = 2,
 
 	highlightHover = true,
 	highlightHoverColor = { r = 1.0, g = 1.0, b = 1.0, a = 1.0 },
@@ -65,10 +65,8 @@ function Highlight:OnEnable()
 	self:RegisterEvent("PLAYER_TARGET_CHANGED", "UNIT_TARGET")
 	self:RegisterEvent("RAID_TARGET_UPDATE", "UNIT_TARGET")
 
-	LSM = GladiusEx.LSM
-
 	-- frame
-	if (not self.frame) then
+	if not self.frame then
 		self.frame = {}
 	end
 end
@@ -77,6 +75,10 @@ function Highlight:OnDisable()
 	for unit in pairs(self.frame) do
 		self.frame[unit]:SetAlpha(0)
 	end
+end
+
+function Highlight:GetFrames()
+	return nil
 end
 
 function Highlight:UNIT_TARGET(event, unit)
@@ -130,12 +132,15 @@ end
 
 function Highlight:CreateFrame(unit)
 	local button = GladiusEx.buttons[unit]
-	if (not button) then return end
+	if not button then return end
 
 	-- create frame
-	self.frame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. unit, button)
-
-	self.frame[unit]:SetFrameLevel(20)
+	self.frame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. "Border" .. unit, button)
+	self.frame[unit].highlight = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. unit, button)
+	self.frame[unit].highlight:SetAllPoints()
+	self.frame[unit].highlight:SetFrameStrata("HIGH")
+	self.frame[unit].highlight_texture = self.frame[unit].highlight:CreateTexture(nil, "OVERLAY")
+	self.frame[unit].highlight_texture:SetAllPoints()
 
 	-- set priority
 	self.frame[unit].priority = -1
@@ -148,18 +153,21 @@ function Highlight:Update(unit)
 	end
 
 	-- update frame
-	local left, right, top, bottom = GladiusEx.buttons[unit]:GetHitRectInsets()
-
+	local w = GladiusEx:AdjustPixels(self.frame[unit], self.db[unit].highlightBorderWidth)
 	self.frame[unit]:ClearAllPoints()
-	self.frame[unit]:SetPoint("TOPLEFT", GladiusEx.buttons[unit], "TOPLEFT", left - 3, top + 3)
+	self.frame[unit]:SetPoint("TOPLEFT", GladiusEx.buttons[unit], "TOPLEFT", -w, w)
+	self.frame[unit]:SetPoint("BOTTOMRIGHT", GladiusEx.buttons[unit], "BOTTOMRIGHT", w, -w)
 
-	self.frame[unit]:SetWidth(GladiusEx.buttons[unit]:GetWidth() + abs(left) + abs(right) + 3)
-	self.frame[unit]:SetHeight(GladiusEx.buttons[unit]:GetHeight() + abs(bottom) + abs(top) + 3)
+	-- update hightlight
+	self.frame[unit].highlight_texture:SetTexture([[Interface\QuestFrame\UI-QuestTitleHighlight]])
+	self.frame[unit].highlight_texture:SetBlendMode("ADD")
+	local color = self.db[unit].highlightHoverColor
+	self.frame[unit].highlight_texture:SetVertexColor(color.r, color.g, color.b, color.a)
+	self.frame[unit].highlight_texture:SetAlpha(1)
+	self.frame[unit].highlight:SetAlpha(0)
 
-	self.frame[unit]:SetBackdrop({edgeFile = "Interface\\ChatFrame\\ChatFrameBackground", edgeSize = self.db[unit].highlightBorderWidth})
+	self.frame[unit]:SetBackdrop({ edgeFile = "Interface\\ChatFrame\\ChatFrameBackground", edgeSize = w })
 	self.frame[unit]:SetBackdropBorderColor(0, 0, 0, 0)
-
-	self.frame[unit]:SetFrameStrata("LOW")
 
 	-- update highlight
 	local button = GladiusEx.buttons[unit]
@@ -172,26 +180,13 @@ function Highlight:Update(unit)
 
 			local onenterhook = function(f, motion)
 				if motion and f:GetAlpha() > 0 then
-					for name, m in GladiusEx:IterateModules() do
-						if GladiusEx:IsModuleEnabled(unit, name) and m.frame and m.frame[unit] and m.frame[unit].highlight then
-							-- set color
-							m.frame[unit].highlight:SetVertexColor(self.db[unit].highlightHoverColor.r, self.db[unit].highlightHoverColor.g,
-								self.db[unit].highlightHoverColor.b, self.db[unit].highlightHoverColor.a)
-
-							-- set alpha
-							m.frame[unit].highlight:SetAlpha(0.5)
-						end
-					end
+					self.frame[unit].highlight:SetAlpha(0.5)
 				end
 			end
 
 			local onleavehook = function(f, motion)
 				if motion then
-					for name, m in GladiusEx:IterateModules() do
-						if GladiusEx:IsModuleEnabled(unit, name) and m.frame and m.frame[unit] and m.frame[unit].highlight then
-							m.frame[unit].highlight:SetAlpha(0)
-						end
-					end
+					self.frame[unit].highlight:SetAlpha(0)
 				end
 			end
 
@@ -204,7 +199,7 @@ function Highlight:Update(unit)
 	end
 
 	-- hide
-	self.frame[unit]:SetAlpha(0)
+	self.frame[unit]:Hide()
 
 	-- update
 	self:UNIT_TARGET("UNIT_TARGET", unit)
@@ -212,15 +207,7 @@ end
 
 function Highlight:Show(unit)
 	-- show
-	self.frame[unit]:SetAlpha(1)
-
-	local left, right, top, bottom = GladiusEx.buttons[unit]:GetHitRectInsets()
-
-	self.frame[unit]:ClearAllPoints()
-	self.frame[unit]:SetPoint("TOPLEFT", GladiusEx.buttons[unit], "TOPLEFT", left - 3, top + 3)
-
-	self.frame[unit]:SetWidth(GladiusEx.buttons[unit]:GetWidth() + abs(left) + abs(right) + 3)
-	self.frame[unit]:SetHeight(GladiusEx.buttons[unit]:GetHeight() + abs(bottom) + abs(top) + 3)
+	self.frame[unit]:Show()
 end
 
 function Highlight:Reset(unit)

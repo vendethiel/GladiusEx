@@ -9,10 +9,10 @@ local tinsert, tremove = table.insert, table.remove
 local GetSpellTexture, GetTime = GetSpellTexture, GetTime
 
 local defaults = {
-	MaxIcons = 8,
-	IconSize = 24,
+	MaxIcons = 10,
+	IconSize = 20,
 	Margin = 2,
-	PaddingX = 2,
+	PaddingX = 0,
 	PaddingY = 2,
 	OffsetX = 0,
 	OffsetY = 0,
@@ -29,7 +29,7 @@ local defaults = {
 
 local MAX_ICONS = 40
 
-local SkillHistory = GladiusEx:NewGladiusExModule("SkillHistory", false,
+local SkillHistory = GladiusEx:NewGladiusExModule("SkillHistory",
 	fn.merge(defaults, {
 		AttachTo = "ClassIcon",
 		Anchor = "BOTTOMLEFT",
@@ -56,7 +56,7 @@ function SkillHistory:OnDisable()
 	self:UnregisterAllEvents()
 
 	for unit in pairs(self.frame) do
-		self.frame[unit]:SetAlpha(0)
+		self.frame[unit]:Hide()
 	end
 end
 
@@ -78,7 +78,6 @@ function SkillHistory:Update(unit)
 
 	-- frame
 	local parent = GladiusEx:GetAttachFrame(unit, self.db[unit].AttachTo)
-	local left, right, top, bottom = parent:GetHitRectInsets()
 	self.frame[unit]:ClearAllPoints()
 	self.frame[unit]:SetPoint(self.db[unit].Anchor, parent, self.db[unit].RelativePoint, self.db[unit].OffsetX, self.db[unit].OffsetY)
 
@@ -88,7 +87,7 @@ function SkillHistory:Update(unit)
 
 	-- backdrop
 	local bgcolor = self.db[unit].BackgroundColor
-	self.frame[unit]:SetBackdrop({ bgFile = [[Interface\Buttons\WHITE8X8]], tile = true, tileSize = 16 })
+	self.frame[unit]:SetBackdrop({ bgFile = [[Interface\Buttons\WHITE8X8]], tile = true, tileSize = 8 })
 	self.frame[unit]:SetBackdropColor(bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a)
 
 	-- icons
@@ -97,6 +96,9 @@ function SkillHistory:Update(unit)
 		if not self.frame[unit][i] then break end
 		self:UpdateIcon(unit, i)
 	end
+
+	self:StopAnimation(unit)
+	self:UpdateSpells(unit)
 
 	self.frame[unit]:Hide()
 end
@@ -133,10 +135,12 @@ end
 function SkillHistory:Refresh(unit)
 end
 
+local prev_lineid = {}
 function SkillHistory:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, rank, lineID, spellId)
 	if self.frame[unit] then
 		-- casts with lineID = 0 seem to be secondary effects not directly casted by the unit
-		if lineID ~= 0 then
+		if lineID ~= 0 and lineID ~= prev_lineid[unit] then
+			prev_lineid[unit] = lineID
 			self:QueueSpell(unit, spellId, GetTime())
 			GladiusEx:Log("QUEUEING:", unit, spellName, rank, lineID, spellId)
 		else
@@ -179,7 +183,7 @@ function SkillHistory:QueueSpell(unit, spellid, time)
 
 	tinsert(uq, entry)
 
-	if #uq == 1 then
+	if not self:IsAnimating(unit) then
 		self:SetupAnimation(unit)
 	end
 end
@@ -229,6 +233,11 @@ local function GetEaseFunc(method, func)
 	return ease_cache[func][method]
 end
 
+function SkillHistory:IsAnimating(unit)
+	local frame = self.frame[unit]
+	return frame and frame.animating
+end
+
 function SkillHistory:SetupAnimation(unit)
 	local frame = self.frame[unit]
 	local uq = unit_queue[unit]
@@ -261,7 +270,7 @@ function SkillHistory:SetupAnimation(unit)
 	enter.icon:ClearAllPoints()
 
 	local ease = GetEaseFunc(self.db[unit].EnterAnimEase, self.db[unit].EnterAnimEaseMode)
-	
+
 	-- while this could be implemented with AnimationGroups, they are more
 	-- trouble than it is worth, sadly
 	local function AnimationFrame()
@@ -346,14 +355,17 @@ function SkillHistory:SetupAnimation(unit)
 		end
 	end
 
+	frame.animating = true
 	frame:SetScript("OnUpdate", AnimationFrame)
 	AnimationFrame()
 end
 
 function SkillHistory:StopAnimation(unit)
-	self.frame[unit]:SetScript("OnUpdate", nil)
-	if self.frame[unit].enter then
-		self.frame[unit].enter:Hide()
+	local frame = self.frame[unit]
+	frame.animating = false
+	frame:SetScript("OnUpdate", nil)
+	if frame.enter then
+		frame.enter:Hide()
 	end
 end
 
@@ -380,8 +392,9 @@ end
 function SkillHistory:UpdateSpells(unit)
 	local frame = self.frame[unit]
 	local us = unit_spells[unit]
-	local now = GetTime()
+	if not frame or not us then return end
 
+	local now = GetTime()
 	local timeout = self.db[unit].Timeout
 	local timeout_duration = self.db[unit].TimeoutAnimDuration
 	local ease = GetEaseFunc(self.db[unit].EnterAnimEase, self.db[unit].EnterAnimEaseMode)
@@ -402,7 +415,7 @@ function SkillHistory:UpdateSpells(unit)
 			self:CreateIcon(unit, i)
 			self:UpdateIcon(unit, i)
 		end
-	
+
 		self:UpdateIconPosition(unit, i, 0, 0)
 
 		local entry = unit_spells[unit][i]
@@ -728,6 +741,6 @@ function SkillHistory:GetOptions(unit)
 			},
 		},
 	}
-	
+
 	return options
 end

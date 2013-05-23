@@ -1,11 +1,12 @@
-﻿-- globals
+﻿GladiusEx = LibStub("AceAddon-3.0"):NewAddon("GladiusEx", "AceEvent-3.0")
+local fn = LibStub("LibFunctional-1.0")
+
+-- upvalues
 local select, type, pairs, tonumber, wipe = select, type, pairs, tonumber, wipe
 local strfind, strmatch, max, abs = string.find, string.match, math.max, math.abs
 local UnitIsDeadOrGhost, UnitGUID, UnitExists = UnitIsDeadOrGhost, UnitGUID, UnitExists
 local InCombatLockdown = InCombatLockdown
 local GetNumArenaOpponents, GetNumArenaOpponentSpecs, GetNumGroupMembers = GetNumArenaOpponents, GetNumArenaOpponentSpecs, GetNumGroupMembers
-
-GladiusEx = LibStub("AceAddon-3.0"):NewAddon("GladiusEx", "AceEvent-3.0")
 
 local arena_units = {
 	["arena1"] = true,
@@ -26,7 +27,7 @@ local party_units = {
 GladiusEx.party_units = party_units
 GladiusEx.arena_units = arena_units
 
-local anchor_width = 220
+local anchor_width = 260
 local anchor_height = 20
 
 local STATE_NORMAL = 0
@@ -37,6 +38,7 @@ local RANGE_UPDATE_INTERVAL = 1 / 5
 local LSR = LibStub("LibSpecRoster-1.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local RC = LibStub("LibRangeCheck-2.0")
+local LSM = LibStub("LibSharedMedia-3.0")
 
 -- debugging output
 local log_frame
@@ -108,6 +110,16 @@ end
 -- Module prototype
 local modulePrototype = {}
 
+function modulePrototype:GetAttachType()
+	return "Widget"
+end
+
+function modulePrototype:GetFrames(unit)
+	if self.frame and self.frame[unit] then
+		return { self.frame[unit] }
+	end
+end
+
 function modulePrototype:GetOtherAttachPoints(unit)
 	return GladiusEx:GetAttachPoints(unit, self)
 end
@@ -144,10 +156,6 @@ function modulePrototype:OnProfileChanged()
 	wipe(self.db)
 end
 
-function modulePrototype:IsBar()
-	return false
-end
-
 function modulePrototype:IsUnitEnabled(unit)
 	return GladiusEx:IsModuleEnabled(unit, self:GetName())
 end
@@ -156,12 +164,17 @@ GladiusEx:SetDefaultModulePrototype(modulePrototype)
 GladiusEx:SetDefaultModuleLibraries("AceEvent-3.0")
 GladiusEx:SetDefaultModuleState(false)
 
-function GladiusEx:NewGladiusExModule(name, isbar, defaults_arena, defaults_party, ...)
+
+-- Bar
+-- InFrame
+-- Widget
+-- None
+
+function GladiusEx:NewGladiusExModule(name, defaults_arena, defaults_party, ...)
 	local module = self:NewModule(name, ...)
 	module.super = modulePrototype
 	module.defaults_arena = defaults_arena
 	module.defaults_party = defaults_party or defaults_arena
-	module.isBarOption = isbar
 	return module
 end
 
@@ -191,8 +204,8 @@ function GladiusEx:GetAttachFrame(unit, point, nodefault)
 			if self:IsModuleEnabled(unit, name) then
 				local points = m.GetModuleAttachPoints and m:GetModuleAttachPoints(unit)
 				if points and points[point] then
-					local f = m:GetAttachFrame(unit, point)
-					return f
+					local f = m:GetModuleAttachFrame(unit, point)
+					return f or (not nodefault and self.buttons[unit])
 				end
 			end
 		end
@@ -204,8 +217,8 @@ end
 function GladiusEx:OnInitialize()
 	-- init db+
 	self.dbi = LibStub("AceDB-3.0"):New("GladiusExDB", self.defaults)
-	self.dbi_arena = self.dbi:RegisterNamespace("arena", self.defaults_arena)
-	self.dbi_party = self.dbi:RegisterNamespace("party", self.defaults_party)
+	self.dbi_arena = self.dbi:RegisterNamespace("arena", { profile = self.defaults_arena })
+	self.dbi_party = self.dbi:RegisterNamespace("party", { profile = self.defaults_party })
 	self.db = setmetatable({}, {
 		__index = function(t, k)
 			local v
@@ -224,8 +237,10 @@ function GladiusEx:OnInitialize()
 	})
 
 	-- libsharedmedia
-	self.LSM = LibStub("LibSharedMedia-3.0")
-	self.LSM:Register("statusbar", "Minimalist", "Interface\\Addons\\GladiusEx\\images\\Minimalist")
+	LSM:Register("statusbar", "Minimalist (GladiusEx)", [[Interface\Addons\GladiusEx\media\Minimalist]])
+	LSM:Register("statusbar", "Wglass (GladiusEx)", [[Interface\Addons\GladiusEx\media\Wglass]])
+	LSM:Register("font", "Designosaur (GladiusEx)", [[Interface\Addons\GladiusEx\media\Designosaur-Regular.ttf]])
+	LSM:Register("font", "Designosaur Italic (GladiusEx)", [[Interface\Addons\GladiusEx\media\Designosaur-Italic.ttf]])
 
 	-- test environment
 	self.test = false
@@ -406,12 +421,15 @@ function GladiusEx:UpdatePartyFrames()
 	local group_members = self.arena_size
 
 	log("UpdatePartyFrames", group_members)
+	self:UpdateAnchor("party")
 
 	for i = 1, 5 do
 		local unit = i == 1 and "player" or ("party" .. (i - 1))
 		if group_members >= i then
 			self:UpdateUnit(unit)
 			self:ShowUnit(unit)
+
+			self:UpdateUnitState(unit, false)
 
 			if not self:IsTesting() and not UnitExists(unit) then
 				self:SoftHideUnit(unit)
@@ -423,14 +441,12 @@ function GladiusEx:UpdatePartyFrames()
 			else
 				self:RefreshUnit(unit)
 			end
-
-			self:UpdateUnitState(unit, false)
 		else
 			self:HideUnit(unit)
 		end
 	end
 
-	self:UpdateAnchor("party")
+	self:UpdateBackground("party")
 end
 
 function GladiusEx:UpdateArenaFrames()
@@ -442,11 +458,14 @@ function GladiusEx:UpdateArenaFrames()
 
 	log("UpdateArenaFrames:", numOpps, GetNumArenaOpponents(), GetNumArenaOpponentSpecs())
 
+	self:UpdateAnchor("arena")
+
 	for i = 1, 5 do
 		local unit = "arena" .. i
 		if numOpps >= i then
 			self:UpdateUnit(unit)
 			self:ShowUnit(unit)
+			self:UpdateUnitState(unit, self.buttons[unit].unit_state == STATE_STEALTH)
 
 			-- test environment
 			if self:IsTesting(unit) then
@@ -454,22 +473,22 @@ function GladiusEx:UpdateArenaFrames()
 			else
 				self:RefreshUnit(unit)
 			end
-
-			self:UpdateUnitState(unit, self.buttons[unit].unit_state == STATE_STEALTH)
 		else
 			self:HideUnit(unit)
 		end
 	end
 
-	self:UpdateAnchor("arena")
+	self:UpdateBackground("arena")
 end
 
 function GladiusEx:UpdateFrames()
-	log("UpdateFrames")
+	log(">>>>>>> UpdateFrames")
+
 	if not self:IsPartyShown() and not self:IsArenaShown() then return end
 
 	if not self.arena_size then
 		self:CheckArenaSize()
+		return -- CheckArenaSize will call us back
 	end
 
 	self:UpdatePartyFrames()
@@ -830,7 +849,7 @@ end
 function GladiusEx:SoftHideUnit(unit)
 	log("SoftHideUnit", unit)
 	if not self.buttons[unit] then return end
-	
+
 	-- hide modules
 	for n, m in self:IterateModules() do
 		if self:IsModuleEnabled(unit, n) then
@@ -905,6 +924,7 @@ function GladiusEx:CreateUnit(unit)
 
 	-- secure button
 	button.secure = CreateFrame("Button", "GladiusExSecureButton" .. unit, button, "SecureActionButtonTemplate")
+	button.secure:SetAllPoints()
 	button.secure:SetAttribute("unit", unit)
 	button.secure:RegisterForClicks("AnyDown")
 	button.secure:SetAttribute("*type1", "target")
@@ -930,14 +950,14 @@ end
 function GladiusEx:CreateAnchor(anchor_type)
 	-- background
 	local background = CreateFrame("Frame", "GladiusExButtonBackground" .. anchor_type, anchor_type == "party" and self.party_parent or self.arena_parent)
-	background:SetBackdrop({ bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16 })
+	background:SetBackdrop({ bgFile = [[Interface\Buttons\WHITE8X8]], tile = true, tileSize = 8 })
 	background:SetFrameStrata("BACKGROUND")
 
 	-- anchor
 	local anchor = CreateFrame("Frame", "GladiusExButtonAnchor" .. anchor_type, anchor_type == "party" and self.party_parent or self.arena_parent)
-	anchor:SetBackdrop({ bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16 })
-	anchor:SetBackdropColor(0, 0, 0, 1)
-	anchor:SetFrameStrata("MEDIUM")
+	anchor:SetBackdrop({ bgFile = [[Interface\Buttons\WHITE8X8]], tile = true, tileSize = 8 })
+	anchor:SetBackdropColor(0, 0, 0, 0.7)
+	anchor:SetFrameStrata("DIALOG")
 	anchor:Raise()
 
 	anchor:SetClampedToScreen(true)
@@ -1018,111 +1038,252 @@ function GladiusEx:GetUnitAnchor(unit)
 	return self:IsArenaUnit(unit) and self.arena_anchor or self.party_anchor
 end
 
+function GladiusEx:GetWidgetsBounds(unit)
+	local button = self.buttons[unit]
+
+	local mods = fn.filter(fn.from_iterator(function(n, m) return m end, self:IterateModules()), function(m) return self:IsModuleEnabled(unit, m:GetName()) end)
+	local widget_mods = fn.filter(mods, function(m) return m:GetAttachType(unit) == "Widget" end)
+
+	local left, right, top, bottom = 0, 0, 0, 0
+	fn.each(widget_mods, function(m)
+		local mframes = m:GetFrames(unit)
+		if mframes then
+			fn.each(mframes, function(mf)
+				local mleft = (button:GetLeft() or 0) - (mf:GetLeft() or 0)
+				local mright = (mf:GetRight() or 0) - (button:GetRight() or 0)
+				local mtop = (mf:GetTop() or 0) - (button:GetTop() or 0)
+				local mbottom = (button:GetBottom() or 0) - (mf:GetBottom() or 0)
+				left = max(mleft, left)
+				right = max(mright, right)
+				top = max(mtop, top)
+				bottom = max(mbottom, bottom)
+			end)
+		end
+	end)
+
+	return left, right, top, bottom
+end
+
 function GladiusEx:UpdateUnitPosition(unit)
-	local left, right, top, bottom = self.buttons[unit]:GetHitRectInsets()
-	self.buttons[unit]:ClearAllPoints()
+	local button = self.buttons[unit]
+
+	local left, right, top, bottom = self:GetWidgetsBounds(unit)
+
+	button:ClearAllPoints()
 
 	if self.db[unit].groupButtons then
 		local unit_index = self:GetUnitIndex(unit) - 1
 		local num_frames = self.arena_size
 		local anchor = self:GetUnitAnchor(unit)
-		local frame_width = self.buttons[unit].frameWidth
-		local frame_height = self.buttons[unit].frameHeight
+		local frame_width = button.frame_width
+		local frame_height = button.frame_height
 		local real_width = frame_width + abs(left) + abs(right)
 		local real_height = frame_height + abs(top) + abs(bottom)
 		local margin_x = (real_width + self.db[unit].margin) * unit_index
 		local margin_y = (real_height + self.db[unit].margin) * unit_index
 
 		if self.db[unit].growDirection == "UP" then
-			self.buttons[unit]:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", abs(left), margin_y + abs(top))
+			button:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", abs(left), margin_y + abs(top))
 		elseif self.db[unit].growDirection == "DOWN" then
-			self.buttons[unit]:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", abs(left), -margin_y - abs(top))
+			button:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", abs(left), -margin_y - abs(top))
 		elseif self.db[unit].growDirection == "LEFT" then
-			self.buttons[unit]:SetPoint("TOPRIGHT", anchor, "BOTTOMRIGHT", -margin_x - abs(right), -abs(top))
+			button:SetPoint("TOPRIGHT", anchor, "BOTTOMRIGHT", -margin_x - abs(right), -abs(top))
 		elseif self.db[unit].growDirection == "RIGHT" then
-			self.buttons[unit]:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", margin_x + abs(left), -abs(top))
+			button:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", margin_x + abs(left), -abs(top))
 		elseif self.db[unit].growDirection == "HCENTER" then
 			local offset = (real_width * (num_frames - 1) + self.db[unit].margin * (num_frames - 1) - abs(left) - abs(right)) / 2
-			self.buttons[unit]:SetPoint("TOP", anchor, "BOTTOM", -offset + margin_x, -abs(top))
+			button:SetPoint("TOP", anchor, "BOTTOM", -offset + margin_x, -abs(top))
 		elseif self.db[unit].growDirection == "VCENTER" then
 			local offset = (real_height * (num_frames - 1) + self.db[unit].margin * (num_frames - 1)) / 2
-			self.buttons[unit]:SetPoint("LEFT", anchor, "LEFT", abs(left), offset - margin_y)
+			button:SetPoint("LEFT", anchor, "LEFT", abs(left), offset - margin_y)
 		end
 	else
 		local x, y = self.db[unit].x[unit], self.db[unit].y[unit]
 		if x and y then
-			local eff = self.buttons[unit]:GetEffectiveScale()
-			self.buttons[unit]:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", self.db[unit].x[unit] / eff, self.db[unit].y[unit] / eff)
+			local eff = button:GetEffectiveScale()
+			button:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", self.db[unit].x[unit] / eff, self.db[unit].y[unit] / eff)
 		else
-			self.buttons[unit]:SetPoint("CENTER", UIParent, "CENTER")
+			button:SetPoint("CENTER", UIParent, "CENTER")
 		end
 	end
 end
 
-function GladiusEx:UpdateUnit(unit, module)
+function GladiusEx:GetBarWidth(unit)
+	return self:AdjustPositionOffset(self.buttons[unit], self.db[unit].barWidth)
+	-- return self.db[unit].barWidth
+end
+
+function GladiusEx:GetBarsHeight(unit)
+	return self:AdjustPositionOffset(self.buttons[unit], self.db[unit].barsHeight)
+	-- return self.db[unit].barsHeight
+end
+
+local perfect_scale
+function GladiusEx:GetPerfectScale()
+	if not perfect_scale then
+		perfect_scale = 768 / string.match(({GetScreenResolutions()})[GetCurrentResolution()], "%d+x(%d+)")
+	end
+	return perfect_scale
+end
+
+function GladiusEx:AdjustPixels(frame, size)
+	while not frame.GetEffectiveScale do frame = frame:GetParent() end
+	local frameScale = frame:GetEffectiveScale()
+	local perfectScale = self:GetPerfectScale()
+	local size_adjusted = size / (frameScale / perfectScale)
+	return size_adjusted
+end
+
+function GladiusEx:AdjustPositionOffset(frame, p, pos)
+	while not frame.GetEffectiveScale do frame = frame:GetParent() end
+	local frameScale = frame:GetEffectiveScale()
+	local perfectScale = self:GetPerfectScale()
+	local pp = p * frameScale / perfectScale
+	local pa = pos and (math.ceil(pp) - pp) or (pp - math.floor(pp))
+	if pa > 0.5 then pa = pa - 1 end
+	return p + pa * perfectScale / frameScale
+end
+
+function GladiusEx:AdjustFrameOffset(frame, relative_point)
+	local x, y
+	local ax, ay
+
+	if strfind(relative_point, "LEFT") then
+		x = frame:GetLeft() or 0
+		ax = self:AdjustPositionOffset(frame, x, true) - x
+	else
+		x = frame:GetRight() or 0
+		ax = x - self:AdjustPositionOffset(frame, x, false)
+	end
+	if strfind(relative_point, "TOP") then
+		y = frame:GetTop() or 0
+		ay = y - self:AdjustPositionOffset(frame, y, false)
+	else
+		y = frame:GetBottom() or 0
+		ay = self:AdjustPositionOffset(frame, y, true) - y
+	end
+
+	return ax, ay
+end
+
+function GladiusEx:UpdateUnit(unit)
 	if not self:IsHandledUnit(unit) then return end
+
+	log("=========> UpdateUnit", unit)
 
 	if InCombatLockdown() then
 		self:QueueUpdate()
 	end
 
+	-- create
 	if not self.buttons[unit] then
 		self:CreateUnit(unit)
 	end
 
-	local height = 0
-	local frameWidth = self.db[unit].barWidth
-	local frameHeight = 0
+	local button = self.buttons[unit]
+	local backdrop_color = self.db[unit].backdropColor
+	button:SetBackdrop({ bgFile = [[Interface\Buttons\WHITE8X8]], tile = true, tileSize = 16 })
+	button:SetBackdropColor(backdrop_color.r, backdrop_color.g, backdrop_color.b, backdrop_color.a)
 
-	-- reset hit rect
-	self.buttons[unit]:SetHitRectInsets(0, 0, 0, 0)
-	self.buttons[unit].secure:SetHitRectInsets(0, 0, 0, 0)
+	-- the frame needs to be anchored somewhere to be able to compute positions
+	button:ClearAllPoints()
+	button:SetPoint("CENTER", UIParent, "CENTER")
 
-	-- update modules (bars first, because we need the height)
-	for n, m in self:IterateModules() do
-		if self:IsModuleEnabled(unit, n) then
-			-- update and get bar height
-			if m.isBarOption then
-				m:Update(unit)
+	local bars_width = self:GetBarWidth(unit)
+	local bars_height = self:GetBarsHeight(unit)
+	local border_size = self:AdjustPixels(button, self.db[unit].borderSize)
+	local mod_margin = self:AdjustPixels(button, self.db[unit].modMargin)
 
-				if m:IsBar(unit) then
-					frameHeight = frameHeight + m:GetBarHeight(unit)
-				end
-			end
+	-- update mods
+	local mods = fn.filter(fn.from_iterator(function(n, m) return m end, self:IterateModules()), function(m) return self:IsModuleEnabled(unit, m:GetName()) end)
+	local bar_mods = fn.sort(fn.filter(mods, function(m) return m:GetAttachType(unit) == "Bar" end), function(a, b) return a:GetBarOrder(unit) < b:GetBarOrder(unit) end)
+	local inframe_mods = fn.filter(mods, function(m) return m:GetAttachType(unit) == "InFrame" end)
+	local widget_mods = fn.filter(mods, function(m) return m:GetAttachType(unit) == "Widget" end)
+
+	-- calculate inframe mods size
+	local left, right, top, bottom = 0, 0, 0, 0
+	local h_count, v_count = 0, 0
+	fn.each(inframe_mods, function(m)
+		local point = m:GetAttachPoint(unit)
+		local size = m:GetAttachSize(unit)
+		if point == "LEFT" then
+			left = left + size
+			h_count = h_count + 1
+		elseif point == "RIGHT" then
+			right = right + size
+			h_count = h_count + 1
+		elseif point == "TOP" then
+			top = top + size
+			v_count = v_count + 1
+		elseif point == "BOTTOM" then
+			bottom = bottom + size
+			v_count = v_count + 1
 		end
-	end
+	end)
 
-	self.buttons[unit].frameWidth = frameWidth
-	self.buttons[unit].frameHeight = frameHeight
+	-- update button size
+	local frame_width = bars_width + left + right + border_size * 2 + h_count * mod_margin
+	local frame_height = bars_height + top + bottom + border_size * 2 + v_count * mod_margin
+	button.frame_width = frame_width
+	button.frame_height = frame_height
+	button:SetScale(self.db[unit].frameScale)
+	button:SetSize(frame_width, frame_height)
 
-	-- update button
-	self.buttons[unit]:SetScale(self.db[unit].frameScale)
-	self.buttons[unit]:SetSize(frameWidth, frameHeight)
-
-	-- update modules (indicator)
-	for n, m in self:IterateModules() do
-		if self:IsModuleEnabled(unit, n) and not m.isBarOption and m.Update then
-			m:Update(unit)
+	-- update inframe mods
+	fn.each(inframe_mods, function(m)
+		local point = m:GetAttachPoint(unit)
+		local size = m:GetAttachSize(unit)
+		m:Update(unit)
+		local mf = m.frame[unit]
+		mf:ClearAllPoints()
+		if point == "LEFT" then
+			mf:SetPoint("TOPLEFT", border_size, -top - border_size)
+			mf:SetSize(size, bars_height)
+		elseif point == "RIGHT" then
+			mf:SetPoint("TOPRIGHT", -border_size, -top - border_size)
+			mf:SetSize(size, bars_height)
+		elseif point == "TOP" then
+			mf:SetPoint("TOPLEFT", border_size, -border_size)
+			mf:SetSize(bars_width + left + right, size)
+		elseif point == "BOTTOM" then
+			mf:SetPoint("BOTTOMLEFT", border_size, border_size)
+			mf:SetPoint("BOTTOMRIGHT", -border_size, border_size)
+			mf:SetHeight(size)
 		end
-	end
+	end)
+
+	-- update bars
+	local bar_height_diff = fn.reduce(bar_mods, function(r, m) return r + m:GetBarHeight(unit) end, 0)
+	local std_bar_height = (bars_height - bar_height_diff - mod_margin * (#bar_mods - 1)) / #bar_mods
+	local bar_y = -top - border_size
+	local bar_x = left + border_size + (left > 0 and mod_margin or 0)
+	fn.each(bar_mods, function(m)
+		m:Update(unit)
+		local mf = m.frame[unit]
+		local bar_height = std_bar_height + m:GetBarHeight(unit)
+		mf:ClearAllPoints()
+		mf:SetPoint("TOPLEFT", button, "TOPLEFT", bar_x, bar_y)
+		mf:SetSize(bars_width, bar_height)
+		bar_y = bar_y - bar_height - mod_margin
+	end)
+
+	-- update widgets
+	fn.each(widget_mods, function(m)
+		if m.Update then m:Update(unit) end
+	end)
 
 	-- update position
 	self:UpdateUnitPosition(unit)
 
-	-- update secure frame
-	self.buttons[unit].secure:ClearAllPoints()
-	self.buttons[unit].secure:SetAllPoints(self.buttons[unit])
-
 	-- show the secure frame
-	if self:IsTesting() then
-		self.buttons[unit].secure:Hide()
+	if self:IsTesting() and not self:IsDebugging() then
+		button.secure:Hide()
 	else
-		self.buttons[unit].secure:Show()
-		self.buttons[unit].secure:SetAlpha(1)
+		button.secure:Show()
 	end
 
-	self.buttons[unit]:SetFrameStrata("LOW")
-	self.buttons[unit].secure:SetFrameStrata("MEDIUM")
+	button:SetFrameStrata("LOW")
+	button.secure:SetFrameStrata("MEDIUM")
 end
 
 function GladiusEx:GetAnchorFrames(anchor_type)
@@ -1150,7 +1311,7 @@ function GladiusEx:UpdateAnchor(anchor_type)
 	end
 
 	anchor.text:SetPoint("CENTER", anchor, "CENTER")
-	anchor.text:SetFont(self.LSM:Fetch(self.LSM.MediaType.FONT, self.db.base.globalFont), self.db.base.globalFontSize, self.db.base.globalFontOutline)
+	anchor.text:SetFont(LSM:Fetch(LSM.MediaType.FONT, self.db.base.globalFont), self.db.base.globalFontSize, self.db.base.globalFontOutline)
 	anchor.text:SetTextColor(1, 1, 1, 1)
 	anchor.text:SetShadowOffset(1, -1)
 	anchor.text:SetShadowColor(0, 0, 0, 1)
@@ -1161,12 +1322,16 @@ function GladiusEx:UpdateAnchor(anchor_type)
 	else
 		anchor:Hide()
 	end
+end
+
+function GladiusEx:UpdateBackground(anchor_type)
+	local anchor, background = self:GetAnchorFrames(anchor_type)
 
 	-- background
 	local unit = background.background_type == "party" and "player" or "arena1"
 	local left, right, top, bottom = self.buttons[unit]:GetHitRectInsets()
-	local frame_width = self.buttons[unit].frameWidth
-	local frame_height = self.buttons[unit].frameHeight
+	local frame_width = self.buttons[unit].frame_width
+	local frame_height = self.buttons[unit].frame_height
 
 	local num_frames = self.arena_size
 	local width, height = self.db[anchor_type].backgroundPadding * 2, self.db[anchor_type].backgroundPadding * 2
@@ -1206,3 +1371,92 @@ function GladiusEx:UpdateAnchor(anchor_type)
 		background:Hide()
 	end
 end
+
+-- SuperFS
+function GladiusEx:CreateSuperFS(fsparent, layer)
+	if false then return parent:CreateFontString(nil, layer) end
+
+	local superfs = { }
+
+	function superfs:ApplyAll(func, ...)
+		for i = 1, #self.fs do
+			self.fs[i][func](self.fs[i], ...)
+		end
+	end
+
+	local function AddWrapperAll(func)
+		superfs[func] = fn.bind_nth(superfs.ApplyAll, 2, func)
+	end
+
+	local function AddWrapperOne(func)
+		superfs[func] = function(self, ...)
+			return self.fs[1][func](self.fs[1], ...)
+		end
+	end
+
+	AddWrapperAll("ClearAllPoints")
+	AddWrapperAll("Hide")
+	AddWrapperAll("SetFormattedText")
+	AddWrapperAll("SetJustifyH")
+	AddWrapperAll("SetJustifyV")
+	AddWrapperAll("SetShadowColor")
+	AddWrapperAll("SetShadowOffset")
+	AddWrapperAll("SetAlpha")
+	AddWrapperAll("SetText")
+	AddWrapperAll("SetTextColor")
+	AddWrapperAll("Show")
+	AddWrapperOne("GetFont")
+
+	superfs.fs = {}
+
+	function superfs:SetPoint(point, parent, relative, offsetx, offsety)
+		self.fs[1]:SetPoint(point, parent, relative, offsetx or 0, offsety or 0)
+		self:UpdatePoints(point, parent, relative, offsetx or 0, offsety or 0)
+	end
+
+	function superfs:SetFont(font, size, flags)
+		local i = 1
+		local w = (flags == "OUTLINE" and 1) or (flags == "THICKOUTLINE" and 2) or 0
+		local count = ((w * 2) + 1) ^ 2
+
+		-- create first one last so that it is the last one rendered
+		for i = count, 1, -1 do
+			if not self.fs[i] then
+				self.fs[i] = fsparent:CreateFontString(nil, layer)
+			end
+			self.fs[i]:SetFont(font, size)
+			self.fs[i]:Show()
+			i = i + 1
+		end
+
+		for i = count + 1, #self.fs do
+			self.fs[i]:Hide()
+		end
+
+		self.w = w
+		self.count = count
+	end
+
+	function superfs:UpdatePoints(point, parent, relative, offsetx, offsety)
+		local i = 2
+		local w = self.w
+		local wp = GladiusEx:AdjustPixels(parent, 1)
+		local wp_x = wp
+		local wp_y = wp
+		for x = -w, w do
+			for y = -w, w do
+				if not (x == 0 and y == 0) then
+					self.fs[i]:SetPoint(point, parent, relative, offsetx + wp_x * x, offsety + wp_y * y)
+					self.fs[i]:SetTextColor(0, 0, 0, 1)
+					i = i + 1
+				end
+			end
+		end
+	end
+
+	return superfs
+end
+
+
+
+

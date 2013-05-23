@@ -10,7 +10,7 @@ local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 local GetSpellInfo = GetSpellInfo
 local GetRealNumPartyMembers, GetRealNumRaidMembers, IsRaidLeader, IsRaidOfficer = GetRealNumPartyMembers, GetRealNumRaidMembers, IsRaidLeader, IsRaidOfficer
 
-local Announcements = GladiusEx:NewGladiusExModule("Announcements", false, {
+local Announcements = GladiusEx:NewGladiusExModule("Announcements", {
 		drinks = true,
 		health = true,
 		resurrect = true,

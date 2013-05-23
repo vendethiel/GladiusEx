@@ -4,7 +4,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 -- global functions
 local tinsert, tsort = table.insert, table.sort
 
-local Clicks = GladiusEx:NewGladiusExModule("Clicks", false, {
+local Clicks = GladiusEx:NewGladiusExModule("Clicks", {
 	clickAttributes = {
 		["Left"] = { button = "1", modifier = "", action = "target", macro = "" },
 		["Right"] = { button = "2", modifier = "", action = "focus", macro = "" },
