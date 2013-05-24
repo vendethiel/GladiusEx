@@ -303,10 +303,16 @@ function GladiusEx:MakeGroupOptions(group, unit, order)
 								},
 								disabled = function() return not self.db[unit].groupButtons end,
 							},
+							sep2 = {
+								type = "description",
+								name = "",
+								width = "full",
+								order = 16,
+							},
 							backgroundColor = {
 								type = "color",
 								name = L["Background color"],
-								desc = L["Color of the frame background"],
+								desc = L["Color of the background"],
 								hasAlpha = true,
 								get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
 								set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
@@ -321,7 +327,7 @@ function GladiusEx:MakeGroupOptions(group, unit, order)
 								disabled = function() return not self.db[unit].groupButtons end,
 								order = 30,
 							},
-							sep2 = {
+							sep3 = {
 								type = "description",
 								name = "",
 								width = "full",
@@ -346,8 +352,8 @@ function GladiusEx:MakeGroupOptions(group, unit, order)
 						args = {
 							backdropColor = {
 								type = "color",
-								name = L["Background color"],
-								desc = L["Color of the frame background"],
+								name = L["Frame background color"],
+								desc = L["Color of the frames background"],
 								hasAlpha = true,
 								get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
 								set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,

@@ -96,6 +96,11 @@ L["TargetBar"] = "Target"
 L["SkillHistory"] = "Skill History"
 
 -- General
+L["Lock the frames to hide"] = true
+L["Color of the background"] = true
+L["Frame background color"] = true
+L["Color of the frames background"] = true
+
 L["Grouping"] = true
 L["Frame grouping"] = true
 L["Mod margin"] = true

@@ -28,7 +28,7 @@ GladiusEx.party_units = party_units
 GladiusEx.arena_units = arena_units
 
 local anchor_width = 260
-local anchor_height = 20
+local anchor_height = 40
 
 local STATE_NORMAL = 0
 local STATE_DEAD = 1
@@ -973,8 +973,12 @@ function GladiusEx:CreateAnchor(anchor_type)
 
 	-- anchor
 	local anchor = CreateFrame("Frame", "GladiusExButtonAnchor" .. anchor_type, anchor_type == "party" and self.party_parent or self.arena_parent)
-	anchor:SetBackdrop({ bgFile = [[Interface\Buttons\WHITE8X8]], tile = true, tileSize = 8 })
-	anchor:SetBackdropColor(0, 0, 0, 0.7)
+	anchor:SetBackdrop({
+		edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1,
+		bgFile = [[Interface\Buttons\WHITE8X8]], tile = true, tileSize = 8,
+	})
+	anchor:SetBackdropColor(0, 0, 0, 1)
+	anchor:SetBackdropBorderColor(1, 1, 1, 1)
 	anchor:SetFrameLevel(200)
 	anchor:SetFrameStrata("MEDIUM")
 
@@ -1024,6 +1028,7 @@ function GladiusEx:CreateAnchor(anchor_type)
 	end)
 
 	anchor.text = anchor:CreateFontString("GladiusExButtonAnchorText", "OVERLAY")
+	anchor.text2 = anchor:CreateFontString("GladiusExButtonAnchorText2", "OVERLAY")
 
 	background.background_type = anchor_type
 	anchor.anchor_type = anchor_type
@@ -1105,19 +1110,19 @@ function GladiusEx:UpdateUnitPosition(unit)
 		local margin_y = (real_height + self.db[unit].margin) * unit_index
 
 		if self.db[unit].growDirection == "UP" then
-			button:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", abs(left), margin_y + abs(top))
+			button:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", abs(left), margin_y + abs(bottom))
 		elseif self.db[unit].growDirection == "DOWN" then
 			button:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", abs(left), -margin_y - abs(top))
+		elseif self.db[unit].growDirection == "VCENTER" then
+			local offset = (real_height * (num_frames - 1) + self.db[unit].margin * (num_frames - 1)) / 2
+			button:SetPoint("LEFT", anchor, "LEFT", abs(left), offset - margin_y + abs(bottom) / 2 - abs(top) / 2)
 		elseif self.db[unit].growDirection == "LEFT" then
 			button:SetPoint("TOPRIGHT", anchor, "BOTTOMRIGHT", -margin_x - abs(right), -abs(top))
 		elseif self.db[unit].growDirection == "RIGHT" then
 			button:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", margin_x + abs(left), -abs(top))
 		elseif self.db[unit].growDirection == "HCENTER" then
-			local offset = (real_width * (num_frames - 1) + self.db[unit].margin * (num_frames - 1) - abs(left) - abs(right)) / 2
+			local offset = (real_width * (num_frames - 1) + self.db[unit].margin * (num_frames - 1) - abs(left) + abs(right)) / 2
 			button:SetPoint("TOP", anchor, "BOTTOM", -offset + margin_x, -abs(top))
-		elseif self.db[unit].growDirection == "VCENTER" then
-			local offset = (real_height * (num_frames - 1) + self.db[unit].margin * (num_frames - 1)) / 2
-			button:SetPoint("LEFT", anchor, "LEFT", abs(left), offset - margin_y)
 		end
 	else
 		local x, y = self.db[unit].x[unit], self.db[unit].y[unit]
@@ -1332,12 +1337,19 @@ function GladiusEx:UpdateAnchor(anchor_type)
 		anchor:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", self.db[anchor_type].x["anchor_" .. anchor.anchor_type] / eff, self.db[anchor_type].y["anchor_" .. anchor.anchor_type] / eff)
 	end
 
-	anchor.text:SetPoint("CENTER", anchor, "CENTER")
-	anchor.text:SetFont(LSM:Fetch(LSM.MediaType.FONT, self.db.base.globalFont), self.db.base.globalFontSize, self.db.base.globalFontOutline)
+	anchor.text:SetPoint("TOP", anchor, "TOP", 0, -7)
+	anchor.text:SetFont(LSM:Fetch(LSM.MediaType.FONT, self.db.base.globalFont), 11, self.db.base.globalFontOutline)
 	anchor.text:SetTextColor(1, 1, 1, 1)
 	anchor.text:SetShadowOffset(1, -1)
 	anchor.text:SetShadowColor(0, 0, 0, 1)
 	anchor.text:SetText(anchor.anchor_type == "party" and L["GladiusEx Party Anchor - click to move"] or L["GladiusEx Enemy Anchor - click to move"])
+
+	anchor.text2:SetPoint("BOTTOM", anchor, "BOTTOM", 0, 7)
+	anchor.text2:SetFont(LSM:Fetch(LSM.MediaType.FONT, self.db.base.globalFont), 11, self.db.base.globalFontOutline)
+	anchor.text2:SetTextColor(1, 1, 1, 1)
+	anchor.text2:SetShadowOffset(1, -1)
+	anchor.text2:SetShadowColor(0, 0, 0, 1)
+	anchor.text2:SetText(L["Lock the frames to hide"])
 
 	if self.db[anchor_type].groupButtons and not self.db.base.locked then
 		anchor:Show()
@@ -1351,7 +1363,7 @@ function GladiusEx:UpdateBackground(anchor_type)
 
 	-- background
 	local unit = background.background_type == "party" and "player" or "arena1"
-	local left, right, top, bottom = self.buttons[unit]:GetHitRectInsets()
+	local left, right, top, bottom = self:GetWidgetsBounds(unit)
 	local frame_width = self.buttons[unit].frame_width
 	local frame_height = self.buttons[unit].frame_height
 
@@ -1375,14 +1387,14 @@ function GladiusEx:UpdateBackground(anchor_type)
 		background:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", -self.db[anchor_type].backgroundPadding, -self.db[anchor_type].backgroundPadding)
 	elseif self.db[anchor_type].growDirection == "DOWN" then
 		background:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", -self.db[anchor_type].backgroundPadding, self.db[anchor_type].backgroundPadding)
+	elseif self.db[anchor_type].growDirection == "VCENTER" then
+		background:SetPoint("LEFT", anchor, "LEFT", -self.db[anchor_type].backgroundPadding, 0)
 	elseif self.db[anchor_type].growDirection == "LEFT" then
 		background:SetPoint("TOPRIGHT", anchor, "BOTTOMRIGHT", self.db[anchor_type].backgroundPadding, self.db[anchor_type].backgroundPadding)
 	elseif self.db[anchor_type].growDirection == "RIGHT" then
 		background:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", -self.db[anchor_type].backgroundPadding, self.db[anchor_type].backgroundPadding)
 	elseif self.db[anchor_type].growDirection == "HCENTER" then
 		background:SetPoint("TOP", anchor, "BOTTOM", 0, self.db[anchor_type].backgroundPadding)
-	elseif self.db[anchor_type].growDirection == "VCENTER" then
-		background:SetPoint("LEFT", anchor, "LEFT", -self.db[anchor_type].backgroundPadding, 0)
 	end
 
 	background:SetBackdropColor(self.db[anchor_type].backgroundColor.r, self.db[anchor_type].backgroundColor.g, self.db[anchor_type].backgroundColor.b, self.db[anchor_type].backgroundColor.a)
@@ -1401,7 +1413,7 @@ end
 function GladiusEx:CreateSuperFS(fsparent, layer)
 	if false then return fsparent:CreateFontString(nil, layer) end
 
-	local superfs = { }
+	local superfs = {}
 
 	function superfs:ApplyAll(func, ...)
 		for i = 1, #self.fs do
