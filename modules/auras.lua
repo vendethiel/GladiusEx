@@ -7,18 +7,23 @@ local fn = LibStub("LibFunctional-1.0")
 local strfind = string.find
 local pairs = pairs
 local UnitAura, UnitBuff, UnitDebuff, GetSpellInfo = UnitAura, UnitBuff, UnitDebuff, GetSpellInfo
+local band = bit.band
 local ceil = math.ceil
 
 local FILTER_TYPE_DISABLED = 0
 local FILTER_TYPE_WHITELIST = 1
 local FILTER_TYPE_BLACKLIST = 2
 
+local FILTER_WHAT_BUFFS = 2
+local FILTER_WHAT_DEBUFFS = 4
+local FILTER_WHAT_BOTH = 6
+
 local defaults = {
 	aurasBuffs = true,
 	aurasBuffsOnlyDispellable = false,
 	aurasDebuffsOnlyMine = false,
-	aurasBuffsSpacingX = 0,
-	aurasBuffsSpacingY = 0,
+	aurasBuffsSpacingX = 1,
+	aurasBuffsSpacingY = 1,
 	aurasBuffsPerColumn = 6,
 	aurasBuffsMax = 12,
 	aurasBuffsSize = 16,
@@ -30,8 +35,8 @@ local defaults = {
 	aurasDebuffs = true,
 	aurasDebuffsOnlyDispellable = false,
 	aurasDebuffsOnlyMine = false,
-	aurasDebuffsSpacingX = 0,
-	aurasDebuffsSpacingY = 0,
+	aurasDebuffsSpacingX = 1,
+	aurasDebuffsSpacingY = 1,
 	aurasDebuffsPerColumn = 6,
 	aurasDebuffsMax = 12,
 	aurasDebuffsSize = 16,
@@ -40,6 +45,7 @@ local defaults = {
 	aurasDebuffsCrop = true,
 
 	aurasFilterType = FILTER_TYPE_DISABLED,
+	aurasFilterWhat = FILTER_WHAT_BOTH,
 	aurasFilterAuras = {},
 }
 
@@ -155,8 +161,10 @@ local function SetDebuff(debuffFrame, unit, i)
 	debuffFrame.border:SetVertexColor(color.r, color.g, color.b)
 end
 
-function Auras:IsAuraFiltered(unit, name)
+function Auras:IsAuraFiltered(unit, name, what)
 	if self.db[unit].aurasFilterType == FILTER_TYPE_DISABLED then
+		return true
+	elseif band(self.db[unit].aurasFilterWhat, what) ~= what then
 		return true
 	elseif self.db[unit].aurasFilterType == FILTER_TYPE_WHITELIST then
 		return self.db[unit].aurasFilterAuras[name]
@@ -175,7 +183,7 @@ function Auras:UpdateUnitAuras(event, unit)
 			local name, rank, icon, count, debuffType, duration, expires, caster, isStealable = UnitBuff(unit, i)
 
 			if name then
-				if self:IsAuraFiltered(unit, name) and (not self.db[unit].aurasBuffsOnlyDispellable or isStealable) then
+				if self:IsAuraFiltered(unit, name, FILTER_WHAT_BUFFS) and (not self.db[unit].aurasBuffsOnlyDispellable or isStealable) then
 					SetBuff(self.buffFrame[unit][sidx], unit, i)
 					sidx = sidx + 1
 				end
@@ -205,7 +213,7 @@ function Auras:UpdateUnitAuras(event, unit)
 			local name, rank, icon, count, debuffType, duration, expires, caster, isStealable = UnitDebuff(unit, i)
 
 			if name then
-				if self:IsAuraFiltered(unit, name) and (not self.db[unit].aurasDebuffsOnlyDispellable or isStealable) then
+				if self:IsAuraFiltered(unit, name, FILTER_WHAT_DEBUFFS) and (not self.db[unit].aurasDebuffsOnlyDispellable or isStealable) then
 					SetDebuff(debuffFrame[sidx], unit, i)
 					debuffFrame[sidx]:Show()
 					sidx = sidx + 1
@@ -504,7 +512,7 @@ function Auras:GetOptions(unit)
 								},
 								aurasBuffsGrow = {
 									type = "select",
-									name = L["Column grow"],
+									name = L["Grow direction"],
 									desc = L["Grow direction of the icons"],
 									values = {
 										["UPLEFT"] = L["Up left"],
@@ -713,8 +721,8 @@ function Auras:GetOptions(unit)
 								},
 								aurasDebuffsGrow = {
 									type = "select",
-									name = L["Column grow"],
-									desc = L["Grow direction"],
+									name = L["Grow direction"],
+									desc = L["Grow direction of the icons"],
 									values = function() return {
 										["UPLEFT"] = L["Up left"],
 										["UPRIGHT"] = L["Up right"],
@@ -821,7 +829,6 @@ function Auras:GetOptions(unit)
 							name = L["Position"],
 							desc = L["Position settings"],
 							inline = true,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 3,
 							args = {
 								aurasDebuffsAttachTo = {
@@ -829,14 +836,41 @@ function Auras:GetOptions(unit)
 									name = L["Attach to"],
 									desc = L["Attach to the given frame"],
 									values = function() return self:GetOtherAttachPoints(unit) end,
-									disabled = function() return not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) end,
-									width = "double",
+									disabled = function() return self.db[unit].aurasDebuffsWithBuffs or not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) end,
 									order = 5,
+								},
+								aurasDebuffsPosition = {
+									type = "select",
+									name = L["Position"],
+									desc = L["Position of the frame"],
+									values = {
+										["LEFT"] = L["Left"],
+										["RIGHT"] = L["Right"],
+										["TOP"] = L["Top"],
+										["BOTTOM"] = L["Bottom"]
+									},
+									get = function() return
+										strfind(self.db[unit].aurasDebuffsAnchor, "RIGHT") and "LEFT" or "RIGHT"
+									end,
+									set = function(info, value)
+										if value == "LEFT" then
+											self.db[unit].aurasDebuffsAnchor = "TOPRIGHT"
+											self.db[unit].aurasDebuffsRelativePoint = "TOPLEFT"
+										else
+											self.db[unit].aurasDebuffsAnchor = "TOPLEFT"
+											self.db[unit].aurasDebuffsRelativePoint = "TOPRIGHT"
+										end
+										GladiusEx:UpdateFrames()
+									end,
+									disabled = function() return self.db[unit].aurasDebuffsWithBuffs or not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) end,
+									hidden = function() return GladiusEx.db.base.advancedOptions end,
+									order = 6,
 								},
 								sep = {
 									type = "description",
 									name = "",
 									width = "full",
+									hidden = function() return not GladiusEx.db.base.advancedOptions end,
 									order = 7,
 								},
 								aurasDebuffsAnchor = {
@@ -844,7 +878,8 @@ function Auras:GetOptions(unit)
 									name = L["Anchor"],
 									desc = L["Anchor of the frame"],
 									values = function() return GladiusEx:GetPositions() end,
-									disabled = function() return not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) end,
+									disabled = function() return self.db[unit].aurasDebuffsWithBuffs or not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) end,
+									hidden = function() return not GladiusEx.db.base.advancedOptions end,
 									order = 10,
 								},
 								aurasDebuffsRelativePoint = {
@@ -852,7 +887,8 @@ function Auras:GetOptions(unit)
 									name = L["Relative point"],
 									desc = L["Relative point of the frame"],
 									values = function() return GladiusEx:GetPositions() end,
-									disabled = function() return not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) end,
+									disabled = function() return self.db[unit].aurasDebuffsWithBuffs or not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) end,
+									hidden = function() return not GladiusEx.db.base.advancedOptions end,
 									order = 15,
 								},
 								sep2 = {
@@ -866,14 +902,14 @@ function Auras:GetOptions(unit)
 									name = L["Offset X"],
 									desc = L["X offset"],
 									softMin = -100, softMax = 100, bigStep = 1,
-									disabled = function() return not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) end,
+									disabled = function() return self.db[unit].aurasDebuffsWithBuffs or not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) end,
 									order = 20,
 								},
 								aurasDebuffsOffsetY = {
 									type = "range",
 									name = L["Offset Y"],
 									desc = L["Y offset"],
-									disabled = function() return not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) end,
+									disabled = function() return self.db[unit].aurasDebuffsWithBuffs or not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) end,
 									softMin = -100, softMax = 100, bigStep = 1,
 									order = 25,
 								},
@@ -902,12 +938,25 @@ function Auras:GetOptions(unit)
 					disabled = function() return not self:IsUnitEnabled(unit) end,
 					order = 1,
 				},
+				aurasFilterWhat = {
+					type = "select",
+					style = "radio",
+					name = L["Apply filter to"],
+					desc = L["What auras types to filter"],
+					values = {
+						[FILTER_WHAT_BUFFS] = L["Buffs"],
+						[FILTER_WHAT_DEBUFFS] = L["Debuffs"],
+						[FILTER_WHAT_BOTH] = L["Both"],
+					},
+					disabled = function() return not self:IsUnitEnabled(unit) end,
+					order = 2,
+				},
 				newAura = {
 					type = "group",
 					name = L["Add new aura filter"],
 					desc = L["Add new aura filter"],
 					inline = true,
-					order = 2,
+					order = 3,
 					args = {
 						name = {
 							type = "input",
