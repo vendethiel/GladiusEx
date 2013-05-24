@@ -17,7 +17,7 @@ local PowerBar = GladiusEx:NewGladiusExModule("PowerBar", {
 	powerBarColor = { r = 1, g = 1, b = 1, a = 1 },
 	powerBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
 	powerBarGlobalTexture = true,
-	powerBarTexture = "Minimalist",
+	powerBarTexture = GladiusEx.default_bar_texture,
 	powerBarOrder = 2,
 	powerBarAnchor = "TOPLEFT",
 	powerBarRelativePoint = "BOTTOMLEFT",

@@ -411,6 +411,9 @@ function ClassIcon:SetClassIcon(unit)
 		else
 			SetPortraitTexture(self.frame[unit].portrait2d, unit)
 			self.frame[unit].portrait2d:Show()
+			if self.frame[unit].portrait3d then
+				self.frame[unit].portrait3d:Hide()
+			end
 			self.frame[unit].texture:SetTexture(0, 0, 0, 1)
 			return
 		end
@@ -436,6 +439,9 @@ function ClassIcon:SetClassIcon(unit)
 			end
 			self.frame[unit].portrait3d:Show()
 			self.frame[unit].texture:SetTexture(0, 0, 0, 1)
+			if self.frame[unit].portrait2d then
+				self.frame[unit].portrait2d:Hide()
+			end
 			return
 		end
 	end
@@ -604,11 +610,16 @@ function ClassIcon:GetOptions(unit)
 							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 6,
 						},
+						sep2 = {
+							type = "description",
+							name = "",
+							width = "full",
+							order = 7,
+						},
 						classIconCooldown = {
 							type = "toggle",
 							name = L["Cooldown spiral"],
 							desc = L["Display the cooldown spiral for the important auras"],
-							width = "full",
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 10,
@@ -617,12 +628,11 @@ function ClassIcon:GetOptions(unit)
 							type = "toggle",
 							name = L["Cooldown reverse"],
 							desc = L["Invert the dark/bright part of the cooldown spiral"],
-							width = "full",
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 15,
 						},
-						sep2 = {
+						sep3 = {
 							type = "description",
 							name = "",
 							width = "full",
@@ -646,46 +656,6 @@ function ClassIcon:GetOptions(unit)
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 25,
-						},
-						sep3 = {
-							type = "description",
-							name = "",
-							width = "full",
-							order = 27,
-						},
-						classIconFrameLevel = {
-							type = "range",
-							name = L["Frame level"],
-							desc = L["Frame level of the frame"],
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
-							min = 1, max = 5, step = 1,
-							width = "double",
-							order = 30,
-						},
-					},
-				},
-				size = {
-					type = "group",
-					name = L["Size"],
-					desc = L["Size settings"],
-					inline = true,
-					order = 2,
-					args = {
-						classIconAdjustSize = {
-							type = "toggle",
-							name = L["Adjust size"],
-							desc = L["Adjust size to the frame size"],
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							order = 5,
-						},
-						classIconSize = {
-							type = "range",
-							name = L["Icon size"],
-							desc = L["Size of the icon"],
-							min = 10, max = 100, step = 1,
-							disabled = function() return self.db[unit].classIconAdjustSize or not self:IsUnitEnabled(unit) end,
-							order = 10,
 						},
 					},
 				},

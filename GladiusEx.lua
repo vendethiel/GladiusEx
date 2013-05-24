@@ -3,7 +3,8 @@ local fn = LibStub("LibFunctional-1.0")
 
 -- upvalues
 local select, type, pairs, tonumber, wipe = select, type, pairs, tonumber, wipe
-local strfind, strmatch, max, abs = string.find, string.match, math.max, math.abs
+local strfind, strmatch = string.find, string.match
+local max, abs, floor, ceil = math.max, math.abs, math.floor, math.ceil
 local UnitIsDeadOrGhost, UnitGUID, UnitExists = UnitIsDeadOrGhost, UnitGUID, UnitExists
 local InCombatLockdown = InCombatLockdown
 local GetNumArenaOpponents, GetNumArenaOpponentSpecs, GetNumGroupMembers = GetNumArenaOpponents, GetNumArenaOpponentSpecs, GetNumGroupMembers
@@ -973,20 +974,6 @@ function GladiusEx:CreateAnchor(anchor_type)
 
 	-- anchor
 	local anchor = CreateFrame("Frame", "GladiusExButtonAnchor" .. anchor_type, anchor_type == "party" and self.party_parent or self.arena_parent)
-	anchor:SetBackdrop({
-		edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1,
-		bgFile = [[Interface\Buttons\WHITE8X8]], tile = true, tileSize = 8,
-	})
-	anchor:SetBackdropColor(0, 0, 0, 1)
-	anchor:SetBackdropBorderColor(1, 1, 1, 1)
-	anchor:SetFrameLevel(200)
-	anchor:SetFrameStrata("MEDIUM")
-
-	anchor:SetClampedToScreen(true)
-	anchor:EnableMouse(true)
-	anchor:SetMovable(true)
-	anchor:RegisterForDrag("LeftButton")
-
 	anchor:SetScript("OnMouseDown", function(f, button)
 		if button == "LeftButton" then
 			if IsShiftKeyDown() then
@@ -1166,7 +1153,7 @@ function GladiusEx:AdjustPositionOffset(frame, p, pos)
 	local frameScale = frame:GetEffectiveScale()
 	local perfectScale = self:GetPerfectScale()
 	local pp = p * frameScale / perfectScale
-	local pa = pos and (math.ceil(pp) - pp) or (pp - math.floor(pp))
+	local pa = pos and (ceil(pp) - pp) or (pp - floor(pp))
 	if pa > 0.5 then pa = pa - 1 end
 	return p + pa * perfectScale / frameScale
 end
@@ -1224,7 +1211,14 @@ function GladiusEx:UpdateUnit(unit)
 	-- update mods
 	local mods = fn.filter(fn.from_iterator(function(n, m) return m end, self:IterateModules()), function(m) return self:IsModuleEnabled(unit, m:GetName()) end)
 	local bar_mods = fn.sort(fn.filter(mods, function(m) return m:GetAttachType(unit) == "Bar" end), function(a, b) return a:GetBarOrder(unit) < b:GetBarOrder(unit) end)
-	local inframe_mods = fn.filter(mods, function(m) return m:GetAttachType(unit) == "InFrame" end)
+	-- get and sort in-frame top to bottom
+	local point_order = {
+		["TOP"] = 1,
+		["LEFT"] = 2,
+		["RIGHT"] = 3,
+		["BOTTOM"] = 4,
+	}
+	local inframe_mods = fn.sort(fn.filter(mods, function(m) return m:GetAttachType(unit) == "InFrame" end), function(a, b) return point_order[a:GetAttachPoint(unit)] < point_order[b:GetAttachPoint(unit)] end)
 	local widget_mods = fn.filter(mods, function(m) return m:GetAttachType(unit) == "Widget" end)
 
 	-- calculate inframe mods size
@@ -1264,14 +1258,15 @@ function GladiusEx:UpdateUnit(unit)
 		local mf = m.frame[unit]
 		mf:ClearAllPoints()
 		if point == "LEFT" then
-			mf:SetPoint("TOPLEFT", border_size, -top - border_size)
+			mf:SetPoint("TOPLEFT", border_size, -top - border_size - (top > 0 and mod_margin or 0))
 			mf:SetSize(size, bars_height)
 		elseif point == "RIGHT" then
-			mf:SetPoint("TOPRIGHT", -border_size, -top - border_size)
+			mf:SetPoint("TOPRIGHT", -border_size, -top - border_size - (top > 0 and mod_margin or 0))
 			mf:SetSize(size, bars_height)
 		elseif point == "TOP" then
 			mf:SetPoint("TOPLEFT", border_size, -border_size)
-			mf:SetSize(bars_width + left + right, size)
+			mf:SetPoint("TOPRIGHT", -border_size, border_size)
+			mf:SetHeight(size)
 		elseif point == "BOTTOM" then
 			mf:SetPoint("BOTTOMLEFT", border_size, border_size)
 			mf:SetPoint("BOTTOMRIGHT", -border_size, border_size)
@@ -1282,7 +1277,7 @@ function GladiusEx:UpdateUnit(unit)
 	-- update bars
 	local bar_height_diff = fn.reduce(bar_mods, function(r, m) return r + m:GetBarHeight(unit) end, 0)
 	local std_bar_height = (bars_height - bar_height_diff - mod_margin * (#bar_mods - 1)) / #bar_mods
-	local bar_y = -top - border_size
+	local bar_y = -top - border_size - (top > 0 and mod_margin or 0)
 	local bar_x = left + border_size + (left > 0 and mod_margin or 0)
 	fn.each(bar_mods, function(m)
 		m:Update(unit)
@@ -1337,6 +1332,21 @@ function GladiusEx:UpdateAnchor(anchor_type)
 		anchor:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", self.db[anchor_type].x["anchor_" .. anchor.anchor_type] / eff, self.db[anchor_type].y["anchor_" .. anchor.anchor_type] / eff)
 	end
 
+	anchor:SetBackdrop({
+		edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = self:AdjustPixels(anchor, max(1, floor(self.db[anchor_type].frameScale + 0.5))),
+		bgFile = [[Interface\Buttons\WHITE8X8]], tile = true, tileSize = 8,
+	})
+	anchor:SetBackdropColor(0, 0, 0, 1)
+	anchor:SetBackdropBorderColor(1, 1, 1, 1)
+	anchor:SetFrameLevel(200)
+	anchor:SetFrameStrata("MEDIUM")
+
+	anchor:SetClampedToScreen(true)
+	anchor:EnableMouse(true)
+	anchor:SetMovable(true)
+	anchor:RegisterForDrag("LeftButton")
+
+	-- anchor texts
 	anchor.text:SetPoint("TOP", anchor, "TOP", 0, -7)
 	anchor.text:SetFont(LSM:Fetch(LSM.MediaType.FONT, self.db.base.globalFont), 11, self.db.base.globalFontOutline)
 	anchor.text:SetTextColor(1, 1, 1, 1)

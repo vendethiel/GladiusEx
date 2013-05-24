@@ -19,7 +19,7 @@ local HealthBar = GladiusEx:NewGladiusExModule("HealthBar", {
 	healthBarClassColor = true,
 	healthBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
 	healthBarGlobalTexture = true,
-	healthBarTexture = "Minimalist",
+	healthBarTexture = GladiusEx.default_bar_texture,
 	healthBarOrder = 1,
 	healthBarAnchor = "TOPLEFT",
 	healthBarRelativePoint = "TOPLEFT",

@@ -21,7 +21,7 @@ local defaults = {
 		castBarNotIntColor = { r = 1, g = 0, b = 0, a = 1 },
 		castBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
 		castBarGlobalTexture = true,
-		castBarTexture = "Minimalist",
+		castBarTexture = GladiusEx.default_bar_texture,
 		castIcon = true,
 		castSpark = true,
 		castShieldIcon = true,

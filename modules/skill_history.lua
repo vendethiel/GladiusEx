@@ -31,13 +31,13 @@ local MAX_ICONS = 40
 
 local SkillHistory = GladiusEx:NewGladiusExModule("SkillHistory",
 	fn.merge(defaults, {
-		AttachTo = "ClassIcon",
+		AttachTo = "Frame",
 		Anchor = "BOTTOMLEFT",
 		RelativePoint = "TOPLEFT",
 		GrowDirection = "RIGHT",
 	}),
 	fn.merge(defaults, {
-		AttachTo = "ClassIcon",
+		AttachTo = "Frame",
 		Anchor = "BOTTOMRIGHT",
 		RelativePoint = "TOPRIGHT",
 		GrowDirection = "LEFT",

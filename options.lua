@@ -2,6 +2,7 @@
 local fn = LibStub("LibFunctional-1.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 
+GladiusEx.default_bar_texture = "Wglass (GladiusEx)"
 GladiusEx.defaults = {
 	profile = {
 		locked = false,
@@ -10,7 +11,7 @@ GladiusEx.defaults = {
 		globalFontSize = 11,
 		globalFontOutline = "OUTLINE",
 		globalFontShadowColor = { r = 0, g = 0, b = 0, a = 0 },
-		globalBarTexture = "Wglass (GladiusEx)",
+		globalBarTexture = GladiusEx.default_bar_texture,
 		showParty = true,
 		testUnits = {
 			["arena1"] = { health = 320000, maxHealth = 320000, power = 18000, maxPower = 18000, powerType = 0, unitClass = "MAGE", unitRace = "Scourge", unitSpec = "Frost", specID = 64 },
@@ -231,37 +232,6 @@ function GladiusEx:MakeGroupOptions(group, unit, order)
 				desc = L["General settings"],
 				order = 1,
 				args = {
-					units = {
-						type = "group",
-						name = L["Units"],
-						desc = L["Unit settings"],
-						inline = true,
-						order = 4,
-						args = {
-							oorAlpha = {
-								type = "range",
-								name = L["Out of range alpha"],
-								desc = L["Transparency for units out of range"],
-								min = 0, max = 1, bigStep = 0.1,
-								order = 0,
-							},
-							stealthAlpha = {
-								type = "range",
-								name = L["Stealth alpha"],
-								desc = L["Transparency for units in stealth"],
-								min = 0, max = 1, bigStep = 0.1,
-								hidden = function() return self:IsPartyUnit(unit) end,
-								order = 1,
-							},
-							deadAlpha = {
-								type = "range",
-								name = L["Dead alpha"],
-								desc = L["Transparency for dead units"],
-								min = 0, max = 1, bigStep = 0.1,
-								order = 2,
-							},
-						},
-					},
 					grouping = {
 						type = "group",
 						name = L["Grouping"],
@@ -271,7 +241,7 @@ function GladiusEx:MakeGroupOptions(group, unit, order)
 						args = {
 							groupButtons = {
 								type = "toggle",
-								name = L["Group frames"],
+								name = L["Group unit frames"],
 								desc = L["Disable this to be able to move the frames separately"],
 								set = function(info, value)
 									if not value then
@@ -303,15 +273,29 @@ function GladiusEx:MakeGroupOptions(group, unit, order)
 								},
 								disabled = function() return not self.db[unit].groupButtons end,
 							},
-							sep2 = {
+							--sep2 = {
+							--	type = "description",
+							--	name = "",
+							--	width = "full",
+							--	order = 16,
+							--},
+							margin = {
+								type = "range",
+								name = L["Margin"],
+								desc = L["Margin between each button"],
+								softMin = 0, softMax = 100, bigStep = 1,
+								disabled = function() return not self.db[unit].groupButtons end,
+								order = 17,
+							},
+							sep3 = {
 								type = "description",
 								name = "",
 								width = "full",
-								order = 16,
+								order = 18,
 							},
 							backgroundColor = {
 								type = "color",
-								name = L["Background color"],
+								name = L["Group background color"],
 								desc = L["Color of the background"],
 								hasAlpha = true,
 								get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
@@ -327,26 +311,12 @@ function GladiusEx:MakeGroupOptions(group, unit, order)
 								disabled = function() return not self.db[unit].groupButtons end,
 								order = 30,
 							},
-							sep3 = {
-								type = "description",
-								name = "",
-								width = "full",
-								order = 35,
-							},
-							margin = {
-								type = "range",
-								name = L["Margin"],
-								desc = L["Margin between each button"],
-								softMin = 0, softMax = 100, bigStep = 1,
-								disabled = function() return not self.db[unit].groupButtons end,
-								order = 40,
-							},
 						},
 					},
 					frame = {
 						type = "group",
-						name = L["Frame"],
-						desc = L["Frame settings"],
+						name = L["Unit frames"],
+						desc = L["Unit frames settings"],
 						inline = true,
 						order = 2,
 						args = {
@@ -357,57 +327,88 @@ function GladiusEx:MakeGroupOptions(group, unit, order)
 								hasAlpha = true,
 								get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
 								set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
-								order = 20,
+								order = 10,
 							},
 							sep = {
 								type = "description",
 								name = "",
 								width = "full",
-								order = 25,
+								order = 20,
 							},
 							modMargin = {
 								type = "range",
 								name = L["Mod margin"],
-								-- desc = L["Margin between each button"],
+								desc = L["Margin between each module"],
 								softMin = 0, softMax = 10, bigStep = 1,
 								order = 30,
 							},
 							borderSize = {
 								type = "range",
 								name = L["Border size"],
-								-- desc = L["Margin between each button"],
+								desc = L["Size of the frames border"],
 								softMin = 0, softMax = 10, bigStep = 1,
 								order = 40,
 							},
-						},
-					},
-					size = {
-						type = "group",
-						name = L["Size"],
-						desc = L["Size settings"],
-						inline = true,
-						order = 3,
-						args = {
-							barWidth = {
-								type = "range",
-								name = L["Bar width"],
-								desc = L["Width of the bars"],
-								min = 10, max = 500, step = 1,
-								order = 1,
+							size = {
+								type = "group",
+								name = L["Size"],
+								desc = L["Size settings"],
+								inline = true,
+								order = 45,
+								args = {
+									barWidth = {
+										type = "range",
+										name = L["Bar width"],
+										desc = L["Width of the bars"],
+										softMin = 10, softMax = 500, bigStep = 1,
+										order = 50,
+									},
+									barsHeight = {
+										type = "range",
+										name = L["Bars height"],
+										desc = L["Height of the bars"],
+										softMin = 10, softMax = 100, bigStep = 1,
+										order = 60,
+									},
+									frameScale = {
+										type = "range",
+										name = L["Frame scale"],
+										desc = L["Scale of the frame"],
+										min = 0.1, softMax = 2, bigStep = 0.1,
+										order = 70,
+									},
+								},
 							},
-							barsHeight = {
-								type = "range",
-								name = L["Bars height"],
-								desc = L["Height of the bars"],
-								min = 10, max = 500, step = 1,
-								order = 1,
-							},
-							frameScale = {
-								type = "range",
-								name = L["Frame scale"],
-								desc = L["Scale of the frame"],
-								min = 0.1, max = 2, bigStep = 0.1,
-								order = 5,
+							units = {
+								type = "group",
+								name = L["Transparency"],
+								desc = L["Transparency settings"],
+								inline = true,
+								order = 75,
+								args = {
+									oorAlpha = {
+										type = "range",
+										name = L["Out of range alpha"],
+										desc = L["Transparency for units out of range"],
+										min = 0, max = 1, bigStep = 0.1,
+										order = 80,
+									},
+									stealthAlpha = {
+										type = "range",
+										name = L["Stealth alpha"],
+										desc = L["Transparency for units in stealth"],
+										min = 0, max = 1, bigStep = 0.1,
+										hidden = function() return self:IsPartyUnit(unit) end,
+										order = 90,
+									},
+									deadAlpha = {
+										type = "range",
+										name = L["Dead alpha"],
+										desc = L["Transparency for dead units"],
+										min = 0, max = 1, bigStep = 0.1,
+										order = 100,
+									},
+								},
 							},
 						},
 					},
@@ -415,6 +416,7 @@ function GladiusEx:MakeGroupOptions(group, unit, order)
 			},
 		},
 	}
+
 
 	-- Add module options
 	local mods = fn.sort(fn.from_iterator(self:IterateModules()), function(x, y) return x[1] < y[1] end)

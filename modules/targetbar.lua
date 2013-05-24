@@ -18,7 +18,7 @@ local defaults = {
 	targetBarClassColor = true,
 	targetBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
 	targetBarGlobalTexture = true,
-	targetBarTexture = "Minimalist",
+	targetBarTexture = GladiusEx.default_bar_texture,
 	targetBarIcon = true,
 	targetBarIconCrop = true,
 }

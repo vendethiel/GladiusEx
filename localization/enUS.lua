@@ -96,6 +96,17 @@ L["TargetBar"] = "Target"
 L["SkillHistory"] = "Skill History"
 
 -- General
+L["Unit frames"] = true
+L["Unit frames settings"] = true
+L["Transparency"] = true
+L["Transparency settings"] = true
+L["Group unit frames"] = true
+L["Group background color"] = true
+L["Margin between each module"] = true
+L["Transparency"] = true
+L["Transparency settings"] = true
+L["Size of the frames border"] = true
+
 L["Lock the frames to hide"] = true
 L["Color of the background"] = true
 L["Frame background color"] = true
