@@ -428,24 +428,7 @@ end
 function CastBar:Reset(unit)
 	if not self.frame[unit] then return end
 
-	-- reset bar
-	self.frame[unit].bar:SetMinMaxValues(0, 1)
-	self.frame[unit].bar:SetValue(0)
-
-	-- reset text
-	if self.frame[unit].castText:GetFont() then
-		self.frame[unit].castText:SetText("")
-	end
-
-	if self.frame[unit].timeText:GetFont() then
-		self.frame[unit].timeText:SetText("")
-	end
-
-	-- reset shield
-	self.frame[unit].icon.shield:Hide()
-
-	-- reset spark
-	self.frame[unit].spark:Hide()
+	self:CastEnd(self.frame[unit])
 
 	-- hide
 	self.frame[unit]:Hide()
