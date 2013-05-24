@@ -909,7 +909,6 @@ local function UpdateCooldownGroup(
 
 		cooldownFrame[i]:ClearAllPoints()
 		cooldownFrame[i]:SetPoint(anchor, parent, relativePoint, offsetX, offsetY)
-		cooldownFrame[i]:SetFrameStrata("MEDIUM")
 
 		if cooldownTooltips then
 			cooldownFrame[i]:SetScript("OnEnter", function(self)

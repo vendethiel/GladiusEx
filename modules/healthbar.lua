@@ -128,7 +128,7 @@ function HealthBar:UpdateHealth(unit, health, maxHealth)
 	self.frame[unit]:SetMinMaxValues(0, maxHealth)
 
 	-- inverse bar
-	if (self.db[unit].healthBarInverse) then
+	if self.db[unit].healthBarInverse then
 		self.frame[unit]:SetValue(maxHealth - health)
 	else
 		self.frame[unit]:SetValue(health)
@@ -144,21 +144,35 @@ function HealthBar:SetIncomingBarAmount(unit, bar, incamount, inccap)
 	local maxHealth = self.frame[unit].maxHealth
 	local barWidth = self.frame[unit]:GetWidth()
 
+
 	-- cap amount
 	incamount = min((maxHealth * (1 + inccap)) - health, incamount)
+
+	local value
+	if self.db[unit].healthBarInverse then
+		value = maxHealth - health
+	else
+		value = health
+	end
 
 	if incamount == 0 then
 		bar:Hide()
 	else
 		local parent = self.frame[unit]
-		local ox = health / maxHealth * barWidth
-		bar:SetPoint("TOPLEFT", parent, "TOPLEFT", ox, 0)
-		bar:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", ox, 0)
+		local ox = value / maxHealth * barWidth
+
+		if self.db[unit].healthBarInverse then
+			bar:SetPoint("TOPRIGHT", parent, "TOPLEFT", ox, 0)
+			bar:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", ox, 0)
+		else
+			bar:SetPoint("TOPLEFT", parent, "TOPLEFT", ox, 0)
+			bar:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", ox, 0)
+		end
 		bar:SetWidth(incamount / maxHealth * barWidth)
 
 		-- set tex coords so that the incoming bar follows the bar texture
-		local left = health / maxHealth
-		local right = (health + incamount) / maxHealth
+		local left = value / maxHealth
+		local right = (value + incamount) / maxHealth
 		bar:SetTexCoord(left, right, 0, 1)
 		bar:Show()
 	end
