@@ -329,6 +329,8 @@ function Tags:Update(unit)
 
 			-- update frame
 			local position = self.db[unit].tagsTexts[text].position
+			local hjustify = (strfind(position, "RIGHT") and "RIGHT") or (strfind(position, "LEFT") and "LEFT") or "CENTER"
+			local vjustify = (strfind(position, "TOP") and "TOP") or (strfind(position, "BOTTOM") and "BOTTOM") or "CENTER"
 			local ox = self.db[unit].tagsTexts[text].offsetX
 			local oy = self.db[unit].tagsTexts[text].offsetY
 			self.frame[unit][text]:SetParent(attachframe)
@@ -342,7 +344,8 @@ function Tags:Update(unit)
 			self.frame[unit][text].fs:SetTextColor(self.db[unit].tagsTexts[text].color.r, self.db[unit].tagsTexts[text].color.g, self.db[unit].tagsTexts[text].color.b, self.db[unit].tagsTexts[text].color.a)
 			self.frame[unit][text].fs:SetShadowOffset(1, -1)
 			self.frame[unit][text].fs:SetShadowColor(GladiusEx.db.base.globalFontShadowColor.r, GladiusEx.db.base.globalFontShadowColor.g, GladiusEx.db.base.globalFontShadowColor.b, GladiusEx.db.base.globalFontShadowColor.a)
-			self.frame[unit][text].fs:SetJustifyH(position)
+			self.frame[unit][text].fs:SetJustifyH(hjustify)
+			self.frame[unit][text].fs:SetJustifyV(vjustify)
 			self.frame[unit][text].fs:ClearAllPoints()
 			self.frame[unit][text].fs:SetPoint(position, attachframe, position, ox, oy)
 
@@ -407,6 +410,7 @@ function Tags:GetOptions(unit)
 				name = L["Add text"],
 				inline = true,
 				order = 1,
+				hidden = function() return not GladiusEx.db.base.advancedOptions end,
 				args = {
 					name = {
 						type = "input",
@@ -728,7 +732,17 @@ function Tags:GetTextOptionTable(options, unit, text, order)
 						type = "select",
 						name = L["Text align"],
 						desc = L["Align of the text"],
-						values = { ["LEFT"] = L["Left"], ["CENTER"] = L["Center"], ["RIGHT"] = L["Right"] },
+						values = {
+							["BOTTOM"] = L["Bottom"],
+							["BOTTOMLEFT"] = L["Bottom left"],
+							["BOTTOMRIGHT"] = L["Bottom right"],
+							["CENTER"] = L["Center"],
+							["LEFT"] = L["Left"],
+							["RIGHT"] = L["Right"],
+							["TOP"] = L["Top"],
+							["TOPLEFT"] = L["Top left"],
+							["TOPRIGHT"] = L["Top right"],
+						},
 						disabled = function() return not self:IsUnitEnabled(unit) end,
 						width = "double",
 						order = 5,
@@ -765,6 +779,7 @@ function Tags:GetTextOptionTable(options, unit, text, order)
 					GladiusEx:UpdateFrames()
 				end,
 				disabled = function() return not self:IsUnitEnabled(unit) end,
+				hidden = function() return not GladiusEx.db.base.advancedOptions end,
 				order = 5,
 			},
 		},
