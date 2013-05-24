@@ -292,8 +292,8 @@ function CastBar:Update(unit)
 	self.frame[unit].icon.bg:ClearAllPoints()
 	self.frame[unit].icon.bg:SetPoint(self.db[unit].castIconPosition, self.frame[unit], self.db[unit].castIconPosition, 0, 0)
 	self.frame[unit].icon.bg:SetSize(height, height)
-	--self.frame[unit].icon.bg:SetTexture(bar_texture)
-	self.frame[unit].icon.bg:SetTexture(1, 1, 1, 1)
+	self.frame[unit].icon.bg:SetTexture(bar_texture)
+	-- self.frame[unit].icon.bg:SetTexture(1, 1, 1, 1)
 	self.frame[unit].icon.bg:SetVertexColor(self.db[unit].castBarBackgroundColor.r, self.db[unit].castBarBackgroundColor.g,
 		self.db[unit].castBarBackgroundColor.b, self.db[unit].castBarBackgroundColor.a)
 
