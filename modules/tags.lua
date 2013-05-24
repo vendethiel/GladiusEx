@@ -787,36 +787,12 @@ function Tags:GetTagOptionTable(options, unit, tag, order)
 		disabled = function() return not self:IsUnitEnabled(unit) end,
 		order = order,
 		args = {
-			delete = {
-				type = "execute",
-				name = L["Delete tag"],
-				func = function()
-					-- remove from db
-					self.db[unit].tags[tag] = nil
-					self.db[unit].tagEvents[tag] = nil
-
-					-- remove from options
-					options.tagList.args[tag] = nil
-
-					-- remove from text option tags
-					for text, v in pairs(options.textList.args) do
-						if (v.args.tag and v.args.tag.args[tag]) then
-							options.textList.args[text].args.tag.args[tag] = nil
-						end
-					end
-
-					-- update
-					GladiusEx:UpdateFrames()
-				end,
-				disabled = function() return not self:IsUnitEnabled(unit) end,
-				order = 1,
-			},
 			tag = {
 				type = "group",
 				name = L["Tag"],
 				desc = L["Tag settings"],
 				inline = true,
-				order = 2,
+				order = 10,
 				args = {
 					name = {
 						type = "input",
@@ -886,6 +862,30 @@ function Tags:GetTagOptionTable(options, unit, tag, order)
 						order = 15,
 					},
 				},
+			},
+			delete = {
+				type = "execute",
+				name = L["Delete tag"],
+				func = function()
+					-- remove from db
+					self.db[unit].tags[tag] = nil
+					self.db[unit].tagEvents[tag] = nil
+
+					-- remove from options
+					options.tagList.args[tag] = nil
+
+					-- remove from text option tags
+					for text, v in pairs(options.textList.args) do
+						if (v.args.tag and v.args.tag.args[tag]) then
+							options.textList.args[text].args.tag.args[tag] = nil
+						end
+					end
+
+					-- update
+					GladiusEx:UpdateFrames()
+				end,
+				disabled = function() return not self:IsUnitEnabled(unit) end,
+				order = 20,
 			},
 		},
 	}

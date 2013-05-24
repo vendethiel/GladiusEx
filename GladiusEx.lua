@@ -1503,7 +1503,3 @@ function GladiusEx:CreateSuperFS(fsparent, layer)
 
 	return superfs
 end
-
-
-
-

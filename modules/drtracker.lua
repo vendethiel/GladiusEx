@@ -10,7 +10,7 @@ local pairs, unpack = pairs, unpack
 local GetTime, GetSpellTexture, UnitGUID = GetTime, GetSpellTexture, UnitGUID
 
 local defaults = {
-	drTrackerAdjustSize = false,
+	drTrackerAdjustSize = true,
 	drTrackerMargin = 2,
 	drTrackerSize = 40,
 	drTrackerCrop = true,
@@ -22,7 +22,6 @@ local defaults = {
 	drTrackerCooldown = true,
 	drTrackerCooldownReverse = false,
 	drFontSize = 18,
-	drFontColor = { r = 0, g = 1, b = 0, a = 1 },
 	drCategories = {},
 }
 
@@ -116,7 +115,6 @@ function DRTracker:UpdateIcon(unit, drCat)
 
 	-- text
 	tracked.text:SetFont(LSM:Fetch(LSM.MediaType.FONT, "2002"), self.db[unit].drFontSize, "OUTLINE")
-	tracked.text:SetTextColor(self.db[unit].drFontColor.r, self.db[unit].drFontColor.g, self.db[unit].drFontColor.b, self.db[unit].drFontColor.a)
 	tracked.text:ClearAllPoints()
 	tracked.text:SetPoint("BOTTOMRIGHT", tracked, -2, 0)
 	tracked.text:SetDrawLayer("OVERLAY")
@@ -438,7 +436,7 @@ function DRTracker:GetOptions(unit)
 							type = "range",
 							name = L["Icon size"],
 							desc = L["Size of the icons"],
-							min = 10, max = 100, step = 1,
+							min = 1, softMin = 10, softMax = 100, bigStep = 1,
 							disabled = function() return self.db[unit].drTrackerAdjustSize or not self:IsUnitEnabled(unit) end,
 							order = 10,
 						},
@@ -452,16 +450,6 @@ function DRTracker:GetOptions(unit)
 					hidden = function() return not GladiusEx.db.base.advancedOptions end,
 					order = 3,
 					args = {
-						drFontColor = {
-							type = "color",
-							name = L["Text color"],
-							desc = L["Text color of the DR text"],
-							hasAlpha = true,
-							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
-							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							order = 10,
-						},
 						drFontSize = {
 							type = "range",
 							name = L["Text size"],

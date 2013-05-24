@@ -613,32 +613,11 @@ function CastBar:GetOptions(unit)
 					inline = true,
 					order = 2,
 					args = {
-						castBarAdjustWidth = {
-							type = "toggle",
-							name = L["Adjust width"],
-							desc = L["Adjust bar width to the frame width"],
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							order = 5,
-						},
-						sep = {
-							type = "description",
-							name = "",
-							width = "full",
-							order = 13,
-						},
-						castBarWidth = {
-							type = "range",
-							name = L["Bar width"],
-							desc = L["Width of the cast bar"],
-							min = 10, max = 500, step = 1,
-							disabled = function() return self.db[unit].castBarAdjustWidth or not self:IsUnitEnabled(unit) end,
-							order = 15,
-						},
 						castBarHeight = {
 							type = "range",
 							name = L["Height"],
 							desc = L["Height of the cast bar"],
-							min = 10, max = 200, step = 1,
+							min = 1, softMin = 5, softMax = 100, bigStep = 1,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 20,
 						},
