@@ -470,7 +470,7 @@ function DRTracker:GetOptions(unit)
 						drTrackerAttachTo = {
 							type = "select",
 							name = L["Attach to"],
-							desc = L["Attach drTracker to the given frame"],
+							desc = L["Attach to the given frame"],
 							values = function() return self:GetOtherAttachPoints(unit) end,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							width = "double",
@@ -479,7 +479,7 @@ function DRTracker:GetOptions(unit)
 						drTrackerPosition = {
 							type = "select",
 							name = L["Position"],
-							desc = L["Position of the drTracker"],
+							desc = L["Position of the frame"],
 							values = { ["LEFT"] = L["Left"], ["RIGHT"] = L["Right"] },
 							get = function() return strfind(self.db[unit].drTrackerAnchor, "RIGHT") and "LEFT" or "RIGHT" end,
 							set = function(info, value)

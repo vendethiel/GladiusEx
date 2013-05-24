@@ -1,5 +1,10 @@
 ﻿GladiusEx = LibStub("AceAddon-3.0"):NewAddon("GladiusEx", "AceEvent-3.0")
+
 local fn = LibStub("LibFunctional-1.0")
+local LSR = LibStub("LibSpecRoster-1.0")
+local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
+local RC = LibStub("LibRangeCheck-2.0")
+local LSM = LibStub("LibSharedMedia-3.0")
 
 -- upvalues
 local select, type, pairs, tonumber, wipe = select, type, pairs, tonumber, wipe
@@ -35,11 +40,6 @@ local STATE_NORMAL = 0
 local STATE_DEAD = 1
 local STATE_STEALTH = 2
 local RANGE_UPDATE_INTERVAL = 1 / 5
-
-local LSR = LibStub("LibSpecRoster-1.0")
-local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
-local RC = LibStub("LibRangeCheck-2.0")
-local LSM = LibStub("LibSharedMedia-3.0")
 
 -- debugging output
 local log_frame
@@ -165,12 +165,6 @@ GladiusEx:SetDefaultModulePrototype(modulePrototype)
 GladiusEx:SetDefaultModuleLibraries("AceEvent-3.0")
 GladiusEx:SetDefaultModuleState(false)
 
-
--- Bar
--- InFrame
--- Widget
--- None
-
 function GladiusEx:NewGladiusExModule(name, defaults_arena, defaults_party, ...)
 	local module = self:NewModule(name, ...)
 	module.super = modulePrototype
@@ -254,6 +248,42 @@ function GladiusEx:OnInitialize()
 
 	-- buttons
 	self.buttons = {}
+
+	-- debugging code for finding unused locale strings
+	--[[
+	setmetatable(L, {})
+	local myl = fn.clone(L)
+	local myl_count = fn.clone(L)
+	for k in pairs(myl_count) do
+		myl_count[k] = 0
+	end
+
+	wipe(L)
+	setmetatable(L, {
+		__index = function(self, k, v)
+			myl_count[k] = myl_count[k] + 1
+			return "!" .. tostring(myl[k])
+		end
+		})
+
+	function GladiusEx:PrintUnused()
+		local l = {}
+		for k, v in pairs(myl_count) do
+			if v == 0 then
+				tinsert(l, k)
+			end
+		end
+		l = fn.filter(l, function(k)
+				if k:match("Tag$") or k:match(":short$")
+					then
+					return false
+				end
+				return true
+			end)
+		l = fn.sort(l)
+		print(table.concat(l, "\n"))
+	end
+	]]
 end
 
 function GladiusEx:IsModuleEnabled(unit, name)
