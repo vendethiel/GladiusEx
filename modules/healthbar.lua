@@ -219,7 +219,7 @@ function HealthBar:Update(unit)
 	self.frame[unit]:SetValue(100)
 
 	-- incframe
-	self.frame[unit].inc_frame:SetFrameStrata("MEDIUM")
+	self.frame[unit].inc_frame:SetFrameLevel(10)
 
 	-- incoming heals
 	self.frame[unit].incheals:ClearAllPoints()

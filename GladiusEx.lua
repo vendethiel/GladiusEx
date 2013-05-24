@@ -298,6 +298,8 @@ function GladiusEx:OnEnable()
 	-- anchor & background
 	self.party_parent = CreateFrame("Frame", "GladiusExPartyFrame", UIParent)
 	self.arena_parent = CreateFrame("Frame", "GladiusExArenaFrame", UIParent)
+	self.party_parent:Hide()
+	self.arena_parent:Hide()
 
 	self.arena_anchor, self.arena_background = self:CreateAnchor("arena")
 	self.party_anchor, self.party_background = self:CreateAnchor("party")
@@ -401,10 +403,15 @@ function GladiusEx:IsTesting(unit)
 end
 
 function GladiusEx:GetArenaSize(min)
-	-- try to guess the current arena size
-	local guess = max(min or 0, 2, GetNumArenaOpponents(), GetNumArenaOpponentSpecs(), GetNumGroupMembers(LE_PARTY_CATEGORY_HOME), GetNumGroupMembers(LE_PARTY_CATEGORY_INSTANCE), self:IsTesting() or 0)
+	if self:IsTesting() then
+		log("GetArenaSize => testing")
+		return self:IsTesting()
+	end
 
-	log("GetArenaSize", min, GetNumArenaOpponents(), GetNumArenaOpponentSpecs(), GetNumGroupMembers(LE_PARTY_CATEGORY_HOME), GetNumGroupMembers(LE_PARTY_CATEGORY_INSTANCE), self:IsTesting() or 0,
+	-- try to guess the current arena size
+	local guess = max(min or 0, 2, GetNumArenaOpponents(), GetNumArenaOpponentSpecs(), GetNumGroupMembers(LE_PARTY_CATEGORY_HOME), GetNumGroupMembers(LE_PARTY_CATEGORY_INSTANCE))
+
+	log("GetArenaSize", min, GetNumArenaOpponents(), GetNumArenaOpponentSpecs(), GetNumGroupMembers(LE_PARTY_CATEGORY_HOME), GetNumGroupMembers(LE_PARTY_CATEGORY_INSTANCE),
 		" => ", guess)
 
 	if guess >= 4 then
@@ -968,8 +975,8 @@ function GladiusEx:CreateAnchor(anchor_type)
 	local anchor = CreateFrame("Frame", "GladiusExButtonAnchor" .. anchor_type, anchor_type == "party" and self.party_parent or self.arena_parent)
 	anchor:SetBackdrop({ bgFile = [[Interface\Buttons\WHITE8X8]], tile = true, tileSize = 8 })
 	anchor:SetBackdropColor(0, 0, 0, 0.7)
-	anchor:SetFrameStrata("DIALOG")
-	anchor:Raise()
+	anchor:SetFrameLevel(200)
+	anchor:SetFrameStrata("MEDIUM")
 
 	anchor:SetClampedToScreen(true)
 	anchor:EnableMouse(true)
@@ -1020,6 +1027,9 @@ function GladiusEx:CreateAnchor(anchor_type)
 
 	background.background_type = anchor_type
 	anchor.anchor_type = anchor_type
+
+	anchor:Hide()
+	background:Hide()
 
 	return anchor, background
 end
@@ -1384,9 +1394,12 @@ function GladiusEx:UpdateBackground(anchor_type)
 	end
 end
 
--- SuperFS
+-- FontStrings with OUTLINE look blurry, so instead we do our own for the
+-- cheap, cheap cost of only 9 times more FontStrings.
+-- This returns a FontString-like object that renders the outlines
+-- by creating several more FontStrings around the around the one.
 function GladiusEx:CreateSuperFS(fsparent, layer)
-	if false then return parent:CreateFontString(nil, layer) end
+	if false then return fsparent:CreateFontString(nil, layer) end
 
 	local superfs = { }
 

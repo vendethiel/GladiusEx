@@ -332,7 +332,8 @@ function Tags:Update(unit)
 			local ox = self.db[unit].tagsTexts[text].offsetX
 			local oy = self.db[unit].tagsTexts[text].offsetY
 			self.frame[unit][text]:SetParent(attachframe)
-			self.frame[unit][text]:SetFrameStrata("MEDIUM")
+			-- self.frame[unit][text]:SetFrameStrata("MEDIUM")
+			self.frame[unit][text]:SetFrameStrata(attachframe:GetFrameStrata())
 			self.frame[unit][text]:SetFrameLevel(50)
 
 			-- update fontstring
