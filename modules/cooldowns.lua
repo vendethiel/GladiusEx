@@ -1102,7 +1102,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 							cooldownsGrow = {
 								type = "select",
 								name = L["Grow direction"],
-								desc = L["Grow direction of the cooldowns"],
+								desc = L["Grow direction of the icons"],
 								values = function() return {
 										["UPLEFT"] = L["Up left"],
 										["UPRIGHT"] = L["Up right"],
@@ -1329,7 +1329,6 @@ function Cooldowns:MakeGroupOptions(unit, group)
 						name = L["Position"],
 						desc = L["Position settings"],
 						inline = true,
-						hidden = function() return not GladiusEx.db.base.advancedOptions end,
 						order = 3,
 						args = {
 							cooldownsAttachTo = {
@@ -1398,7 +1397,14 @@ function Cooldowns:MakeGroupOptions(unit, group)
 			},
 			cooldowns = {
 				type = "group",
-				name = L["Cooldowns"],
+				name = function()
+					local count = 0
+					local cooldownsSpells = self:GetGroupDB(unit, group).cooldownsSpells
+					for spellid in pairs(CT:GetCooldownsData()) do
+						if cooldownsSpells[spellid] then count = count + 1 end
+					end
+					return string.format("%s [%i]", L["Cooldowns"], count)
+				end,
 				order = 3,
 				args = {
 					cooldownsHideTalentsUntilDetected = {
