@@ -59,9 +59,10 @@ end
 function Announcements:GLADIUS_SPEC_UPDATE(event, unit)
 	if not self:IsHandledUnit(unit) or not self.db[unit].spec then return end
 
-	if GladiusEx.buttons[unit].spec then
+	if GladiusEx.buttons[unit].specID then
 		local class = UnitClass(unit) or LOCALIZED_CLASS_NAMES_MALE[GladiusEx.buttons[unit].class] or "??"
-		self:Send(string.format(L["Enemy spec: %s (%s/%s)"], UnitName(unit) or unit, class, GladiusEx.buttons[unit].spec), 15, unit)
+		local spec = select(2, GetSpecializationInfoByID(GladiusEx.buttons[unit].specID))
+		self:Send(string.format(L["Enemy spec: %s (%s/%s)"], UnitName(unit) or unit, class, spec), 15, unit)
 	end
 end
 

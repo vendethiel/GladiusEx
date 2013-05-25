@@ -96,11 +96,17 @@ L["TargetBar"] = "Target"
 L["SkillHistory"] = "Skill History"
 
 -- General
+L["Left top"] = true
+L["Left bottom"] = true
+L["Right top"] = true
+L["Right bottom"] = true
+L["Width"] = true
+L["Frame width"] = true
+L["Frame height"] = true
+
 L["Apply filter to"] = true
 L["What auras to filter"] = true
 L["Both"] = true
-
-
 L[" |T%s:20|t %s [%ss] %s"] = true
 L["%s settings"] = true
 L["** If this is not your first run please lock or move the frame to prevent this from happening **"] = true
@@ -580,7 +586,6 @@ L["Whitelist"] = true
 L["Widget settings"] = true
 L["Widget"] = true
 L["Width of the bars"] = true
-L["Width of the health bar"] = true
 L["X offset of the cast text"] = true
 L["X offset of the cast time text"] = true
 L["X offset of the frame"] = true

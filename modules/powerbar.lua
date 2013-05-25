@@ -213,13 +213,6 @@ function PowerBar:GetOptions(unit)
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 5,
 						},
-						sep = {
-							type = "description",
-							name = "",
-							width = "full",
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
-							order = 7,
-						},
 						powerBarColor = {
 							type = "color",
 							name = L["Color"],
@@ -240,6 +233,12 @@ function PowerBar:GetOptions(unit)
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 15,
+						},
+						sep = {
+							type = "description",
+							name = "",
+							width = "full",
+							order = 16,
 						},
 						powerBarInverse = {
 							type = "toggle",

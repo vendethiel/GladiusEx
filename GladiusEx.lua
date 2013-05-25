@@ -140,7 +140,7 @@ function modulePrototype:OnInitialize()
 		__index = function(t, k)
 			local v
 			k = strmatch(k, "^(.+)target$") or k
-			if GladiusEx:IsPartyUnit(k) then
+			if k == "target" or GladiusEx:IsPartyUnit(k) then
 				v = self.dbi_party.profile
 			elseif GladiusEx:IsArenaUnit(k) then
 				v = self.dbi_arena.profile
@@ -590,7 +590,6 @@ function GladiusEx:HideFrames()
 	for unit, button in pairs(self.buttons) do
 		-- reset spec data
 		button.class = nil
-		button.spec = nil
 		button.specID = nil
 		button.unit_state = nil
 
@@ -818,7 +817,6 @@ function GladiusEx:UpdateUnitSpecialization(unit, specID)
 
 	if self.buttons[unit] and self.buttons[unit].specID ~= specID then
 		self.buttons[unit].class = class
-		self.buttons[unit].spec = spec
 		self.buttons[unit].specID = specID
 
 		log("UpdateUnitSpecialization", unit, "is", class, "/", spec)
@@ -890,7 +888,7 @@ function GladiusEx:ShowUnit(unit)
 	end
 
 	-- update spec
-	if self:IsPartyUnit(unit) and not self.buttons[unit].spec then
+	if self:IsPartyUnit(unit) and not self.buttons[unit].specID then
 		self:CheckUnitSpecialization(unit)
 	end
 end

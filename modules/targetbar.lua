@@ -5,8 +5,9 @@ local fn = LibStub("LibFunctional-1.0")
 
 -- global functions
 local strfind = string.find
-local pairs = pairs
-local UnitClass, UnitGUID, UnitHealth, UnitHealthMax = UnitClass, UnitGUID, UnitHealth, UnitHealthMax
+local select, pairs, unpack = select, pairs, unpack
+local UnitExists, UnitIsUnit, UnitClass = UnitExists, UnitIsUnit, UnitClass
+local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
 
 local defaults = {
 	targetBarOffsetX = 0,
@@ -53,7 +54,7 @@ function TargetBar:OnDisable()
 	self:UnregisterAllEvents()
 
 	for unit in pairs(self.frame) do
-		self.frame[unit]:SetAlpha(0)
+		self.frame[unit]:Hide()
 	end
 end
 
@@ -74,10 +75,6 @@ end
 function TargetBar:SetClassIcon(unit)
 	if not self.frame[unit] then return end
 
-	-- self.frame[unit]:Hide()
-	self.frame[unit].icon:Hide()
-	self.frame[unit]:SetAlpha(0)
-
 	-- get unit class
 	local class
 	if not GladiusEx:IsTesting(unit) then
@@ -86,34 +83,23 @@ function TargetBar:SetClassIcon(unit)
 		class = GladiusEx.testing[unit].unitClass
 	end
 
-	if (class) then
+	if class then
 		-- color
-		local colorx = self:GetBarColor(class)
-		if (colorx == nil) then
-			--fallback, when targeting a pet or totem
-			colorx = self.db[unit].targetBarColor
-		end
+		-- fallback, when targeting a pet or totem
+		local color = self:GetBarColor(class) or self.db[unit].targetBarColor
 
-		self.frame[unit].statusbar:SetStatusBarColor(colorx.r, colorx.g, colorx.b, colorx.a or 1)
-
-		local healthx, maxHealthx = UnitHealth(unit .. "target"), UnitHealthMax(unit .. "target")
-		self:UpdateHealth(unit, healthx, maxHealthx)
-
-		self.frame[unit].icon:SetTexture("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes")
+		self.frame[unit].statusbar:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
+		self.frame[unit].icon:SetTexture([[Interface\Glues\CharacterCreate\UI-CharacterCreate-Classes]])
 
 		local left, right, top, bottom = unpack(CLASS_BUTTONS[class])
-
-		if (self.db[unit].targetBarIconCrop) then
+		if self.db[unit].targetBarIconCrop then
+			local n = 5
 			-- zoom class icon
-			left = left + (right - left) * 0.07
-			right = right - (right - left) * 0.07
-			top = top + (bottom - top) * 0.07
-			bottom = bottom - (bottom - top) * 0.07
+			left = left + (right - left) * (n / 64)
+			right = right - (right - left) * (n / 64)
+			top = top + (bottom - top) * (n / 64)
+			bottom = bottom - (bottom - top) * (n / 64)
 		end
-
-		-- self.frame[unit]:Show()
-		self.frame[unit]:SetAlpha(1)
-		self.frame[unit].icon:Show()
 
 		self.frame[unit].icon:SetTexCoord(left, right, top, bottom)
 	end
@@ -121,28 +107,19 @@ end
 
 function TargetBar:UNIT_TARGET(event, unit)
 	if not self.frame[unit] then return end
-	if UnitExists(unit .. "target") then
-		self:SetClassIcon(unit)
-		self.frame[unit]:SetAlpha(1)
-	else
-		self.frame[unit]:SetAlpha(0)
-	end
+
+	self:Refresh(unit)
 end
 
 function TargetBar:UNIT_HEALTH(event, unit)
-	local foundUnit = nil
-
-	for u, _ in pairs(self.frame) do
-		if UnitIsUnit(unit, u .. "target") then
-			foundUnit = u
-			break
+	-- while the target units are polled, most targets will actually be
+	-- a valid unit, so we search for it here
+	for owner_unit, frame in pairs(self.frame) do
+		if UnitIsUnit(unit, frame.unit) then
+			self:UpdateHealth(owner_unit, UnitHealth(unit), UnitHealthMax(unit))
+			return
 		end
 	end
-
-	if (not foundUnit) then return end
-
-	local health, maxHealth = UnitHealth(foundUnit .. "target"), UnitHealthMax(foundUnit .. "target")
-	self:UpdateHealth(foundUnit, health, maxHealth)
 end
 
 function TargetBar:UpdateHealth(unit, health, maxHealth)
@@ -150,39 +127,103 @@ function TargetBar:UpdateHealth(unit, health, maxHealth)
 	self.frame[unit].statusbar:SetMinMaxValues(0, maxHealth)
 
 	-- inverse bar
-	if (self.db[unit].targetBarInverse) then
+	if self.db[unit].targetBarInverse then
 		self.frame[unit].statusbar:SetValue(maxHealth - health)
 	else
 		self.frame[unit].statusbar:SetValue(health)
 	end
 end
 
+function TargetBar:GetBarColor(class)
+	return RAID_CLASS_COLORS[class]
+end
+
+function TargetBar:Show(unit)
+	local testing = GladiusEx:IsTesting(unit)
+
+	if self.frame[unit].unit ~= "target" then
+		-- not a real unit so it needs to be polled
+		self.frame[unit]:SetScript("OnUpdate", TargetBar_OnUpdate)
+	end
+
+	-- show frame
+	self.frame[unit]:Show()
+end
+
+function TargetBar:Refresh(unit)
+	local tunit = self.frame[unit].unit
+	if UnitExists(tunit) then
+		self:SetClassIcon(unit)
+		self:UpdateHealth(unit, UnitHealth(tunit), UnitHealthMax(tunit))
+		self.frame[unit]:Show()
+	else
+		self.frame[unit]:Hide()
+	end
+end
+
+function TargetBar:Reset(unit)
+	if not self.frame[unit] then return end
+
+	-- reset bar
+	self.frame[unit].statusbar:SetMinMaxValues(0, 1)
+	self.frame[unit].statusbar:SetValue(1)
+
+	-- reset texture
+	self.frame[unit].icon:SetTexture("")
+
+	-- hide
+	self.frame[unit]:Hide()
+	self.frame[unit]:SetScript("OnUpdate", nil)
+end
+
+function TargetBar:Test(unit)
+	-- set test values
+	local maxHealth = GladiusEx.testing[unit].maxHealth
+	local health = GladiusEx.testing[unit].health
+	self:SetClassIcon(unit)
+	self:UpdateHealth(unit, health, maxHealth)
+	self.frame[unit]:Show()
+	self.frame[unit]:SetScript("OnUpdate", nil)
+end
+
+local polling_time = 0.5
+local function TargetBar_OnUpdate(frame, elapsed)
+	frame.next_update = frame.next_update - elapsed
+	if frame.next_update <= 0 then
+		frame.next_update = polling_time
+		TargetBar:Refresh(frame.owner_unit)
+	end
+end
+
 function TargetBar:CreateBar(unit)
 	local button = GladiusEx.buttons[unit]
-	if (not button) then return end
+	if not button then return end
+
+	local tunit = unit == "player" and "target" or (unit .. "target")
 
 	-- create bar + text
 	self.frame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. unit, button)
 	self.frame[unit].statusbar = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. "Bar" .. unit, self.frame[unit])
-	self.frame[unit].secure = CreateFrame("Button", "GladiusEx" .. self:GetName() .. "Secure" .. unit, self.frame[unit], "SecureActionButtonTemplate")
+	self.frame[unit].secure = CreateFrame("Button", "GladiusEx" .. self:GetName() .. "Secure" .. unit, button, "SecureActionButtonTemplate")
 	self.frame[unit].background = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "Background", "BACKGROUND")
-	self.frame[unit].highlight = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "Highlight" .. unit, "OVERLAY")
 	self.frame[unit].icon = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "IconFrame" .. unit, "ARTWORK")
-	self.frame[unit].statusbar.unit = unit .. "target"
+	self.frame[unit].statusbar.unit = tunit
+	self.frame[unit].unit = tunit
+	self.frame[unit].owner_unit = unit
+	self.frame[unit].next_update = 0
 
+	-- clique support
 	ClickCastFrames = ClickCastFrames or {}
 	ClickCastFrames[self.frame[unit].secure] = true
 end
 
 function TargetBar:Update(unit)
 	-- create bar
-	if (not self.frame[unit]) then
+	if not self.frame[unit] then
 		self:CreateBar(unit)
 	end
 
-	-- update health bar
 	local parent = GladiusEx:GetAttachFrame(unit, self.db[unit].targetBarAttachTo)
-
 	local width = self.db[unit].targetBarWidth
 	local height = self.db[unit].targetBarHeight
 	local bar_texture = self.db[unit].targetBarGlobalTexture and LSM:Fetch(LSM.MediaType.STATUSBAR, GladiusEx.db.base.globalBarTexture) or LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].targetBarTexture)
@@ -204,6 +245,7 @@ function TargetBar:Update(unit)
 		self.frame[unit].icon:Hide()
 	end
 
+	-- update health bar
 	self.frame[unit].statusbar:ClearAllPoints()
 	if self.db[unit].targetBarIcon then
 		if self.db[unit].targetBarIconPosition == "LEFT" then
@@ -234,93 +276,64 @@ function TargetBar:Update(unit)
 
 	-- update secure frame
 	self.frame[unit].secure:ClearAllPoints()
-	self.frame[unit].secure:SetAllPoints(self.frame[unit])
-	self.frame[unit].secure:SetWidth(self.frame[unit]:GetWidth())
-	self.frame[unit].secure:SetHeight(self.frame[unit]:GetHeight())
+	self.frame[unit].secure:SetPoint(self.db[unit].targetBarAnchor, parent, self.db[unit].targetBarRelativePoint, self.db[unit].targetBarOffsetX, self.db[unit].targetBarOffsetY)
+	self.frame[unit].secure:SetWidth(width)
+	self.frame[unit].secure:SetHeight(height)
 	self.frame[unit].secure:SetFrameStrata("MEDIUM")
 	self.frame[unit].secure:RegisterForClicks("AnyDown")
 	self.frame[unit].secure:SetAttribute("unit", unit .. "target")
 	self.frame[unit].secure:SetAttribute("type1", "target")
 
-	-- update highlight texture
-	self.frame[unit].highlight:ClearAllPoints()
-	self.frame[unit].highlight:SetAllPoints(self.frame[unit])
-	self.frame[unit].highlight:SetTexture([[Interface\QuestFrame\UI-QuestTitleHighlight]])
-	self.frame[unit].highlight:SetBlendMode("ADD")
-	self.frame[unit].highlight:SetVertexColor(1.0, 1.0, 1.0, 1.0)
-	self.frame[unit].highlight:SetAlpha(0)
-
 	-- hide frame
-	self.frame[unit]:Show()
-	self.frame[unit]:SetAlpha(0)
-end
-
-function TargetBar:GetBarColor(class)
-	return RAID_CLASS_COLORS[class]
-end
-
-function TargetBar:Show(unit)
-	local testing = GladiusEx:IsTesting(unit)
-
-	-- show frame
-	self.frame[unit]:SetAlpha(1)
-
-	-- get unit class
-	local class
-	if (not testing) then
-		class = select(2, UnitClass(unit .. "target"))
-	else
-		class = GladiusEx.testing[unit].unitClass
-	end
-
-	-- set color
-	if (not self.db[unit].targetBarClassColor) then
-		local color = self.db[unit].targetBarColor
-		self.frame[unit].statusbar:SetStatusBarColor(color.r, color.g, color.b, color.a)
-	else
-		local color = self:GetBarColor(class)
-		if (color == nil) then
-			-- fallback, when targeting a pet or totem
-			color = self.db[unit].targetBarColor
-		end
-
-		self.frame[unit].statusbar:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
-	end
-
-	-- set class icon
-	TargetBar:SetClassIcon(unit)
-
-	-- call event
-	if (not testing) then
-		if not UnitExists(unit .. "target") then
-			self.frame[unit]:SetAlpha(0)
-		end
-		self:UNIT_HEALTH("UNIT_HEALTH", unit)
-	end
-end
-
-function TargetBar:Reset(unit)
-	if not self.frame[unit] then return end
-
-	-- reset bar
-	self.frame[unit].statusbar:SetMinMaxValues(0, 1)
-	self.frame[unit].statusbar:SetValue(1)
-
-	-- reset texture
-	self.frame[unit].icon:SetTexture("")
-
-	-- hide
-	self.frame[unit]:SetAlpha(0)
-end
-
-function TargetBar:Test(unit)
-	-- set test values
-	local maxHealth = GladiusEx.testing[unit].maxHealth
-	local health = GladiusEx.testing[unit].health
-	self:UpdateHealth(unit, health, maxHealth)
+	self.frame[unit]:Hide()
 end
 
 function TargetBar:GetOptions(unit)
+	-- values for simple positioning
+	local positions = {
+		["TOPLEFT"] = L["Top left"],
+		["TOPRIGHT"] = L["Top right"],
+		["LEFTTOP"] = L["Left top"],
+		["LEFTBOTTOM"] = L["Left bottom"],
+		["RIGHTTOP"] = L["Right top"],
+		["RIGHTBOTTOM"] = L["Right bottom"],
+		["BOTTOMLEFT"] = L["Bottom left"],
+		["BOTTOMRIGHT"] = L["Bottom right"],
+	}
+
+	local pos_rel = {
+		["LEFTTOP"] = "TOPLEFT",
+		["LEFTBOTTOM"] = "BOTTOMLEFT",
+		["RIGHTTOP"] = "TOPRIGHT",
+		["RIGHTBOTTOM"] = "BOTTOMRIGHT",
+	}
+
+	local pos_anchor = {
+		["TOPLEFT"] = "BOTTOMLEFT",
+		["TOPRIGHT"] = "BOTTOMRIGHT",
+		["LEFTTOP"] = "TOPRIGHT",
+		["LEFTBOTTOM"] = "BOTTOMRIGHT",
+		["RIGHTTOP"] = "TOPLEFT",
+		["RIGHTBOTTOM"] = "BOTTOMLEFT",
+		["BOTTOMLEFT"] = "TOPLEFT",
+		["BOTTOMRIGHT"] = "TOPRIGHT",
+	}
+
+	local function pos_to_anchor(pos)
+		local anchor = pos_anchor[pos]
+		local relative = pos_rel[pos] or pos
+		return anchor, relative
+	end
+
+	local function anchor_to_pos(anchor, relative)
+		for pos in pairs(positions) do
+			local panchor, prelative = pos_to_anchor(pos)
+			if panchor == anchor and prelative == relative then
+				return pos
+			end
+		end
+	end
+
 	return {
 		general = {
 			type = "group",
@@ -340,12 +353,6 @@ function TargetBar:GetOptions(unit)
 							desc = L["Toggle health bar class color"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 5,
-						},
-						sep2 = {
-							type = "description",
-							name = "",
-							width = "full",
-							order = 7,
 						},
 						targetBarColor = {
 							type = "color",
@@ -394,6 +401,7 @@ function TargetBar:GetOptions(unit)
 							name = L["Use global texture"],
 							desc = L["Use the global bar texture"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 22,
 						},
 						targetBarTexture = {
@@ -403,6 +411,7 @@ function TargetBar:GetOptions(unit)
 							dialogControl = "LSM30_Statusbar",
 							values = AceGUIWidgetLSMlists.statusbar,
 							disabled = function() return self.db[unit].targetBarGlobalTexture or not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 25,
 						},
 						sep5 = {
@@ -426,12 +435,6 @@ function TargetBar:GetOptions(unit)
 							disabled = function() return not self.db[unit].targetBarIcon or not self:IsUnitEnabled(unit) end,
 							order = 35,
 						},
-						sep6 = {
-							type = "description",
-							name = "",
-							width = "full",
-							order = 37,
-						},
 						targetBarIconCrop = {
 							type = "toggle",
 							name = L["Crop borders"],
@@ -451,17 +454,17 @@ function TargetBar:GetOptions(unit)
 					args = {
 						targetBarWidth = {
 							type = "range",
-							name = L["Bar width"],
-							desc = L["Width of the health bar"],
-							min = 10, max = 500, step = 1,
+							name = L["Width"],
+							desc = L["Frame width"],
+							softMin = 10, softMax = 500, bigStep = 1,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 15,
 						},
 						targetBarHeight = {
 							type = "range",
-							name = L["Bar height"],
-							desc = L["Height of the health bar"],
-							min = 10, max = 200, step = 1,
+							name = L["Height"],
+							desc = L["Frame height"],
+							softMin = 10, softMax = 200, bigStep = 1,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 20,
 						},
@@ -472,7 +475,6 @@ function TargetBar:GetOptions(unit)
 					name = L["Position"],
 					desc = L["Position settings"],
 					inline = true,
-					hidden = function() return not GladiusEx.db.base.advancedOptions end,
 					order = 3,
 					args = {
 						targetBarAttachTo = {
@@ -481,8 +483,23 @@ function TargetBar:GetOptions(unit)
 							desc = L["Attach to the given frame"],
 							values = function() return self:GetOtherAttachPoints(unit) end,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							width = "double",
-							order = 5,
+							order = 1,
+						},
+						targetBarPosition = {
+							type = "select",
+							name = L["Position"],
+							desc = L["Position of the frame"],
+							values = positions,
+							get = function()
+								return anchor_to_pos(self.db[unit].targetBarAnchor, self.db[unit].targetBarRelativePoint)
+							end,
+							set = function(info, value)
+								self.db[unit].targetBarAnchor, self.db[unit].targetBarRelativePoint = pos_to_anchor(value)
+								GladiusEx:UpdateFrames()
+							end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return GladiusEx.db.base.advancedOptions end,
+							order = 2,
 						},
 						sep = {
 							type = "description",
@@ -494,16 +511,18 @@ function TargetBar:GetOptions(unit)
 							type = "select",
 							name = L["Anchor"],
 							desc = L["Anchor of the frame"],
-							values = function() return GladiusEx:GetPositions() end,
+							values = GladiusEx:GetPositions(),
 							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 10,
 						},
 						targetBarRelativePoint = {
 							type = "select",
 							name = L["Relative point"],
 							desc = L["Relative point of the frame"],
-							values = function() return GladiusEx:GetPositions() end,
+							values = GladiusEx:GetPositions(),
 							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 15,
 						},
 						sep2 = {

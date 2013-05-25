@@ -13,6 +13,7 @@ local UnitClass, UnitRace = UnitClass, UnitRace
 local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
 local UnitPower, UnitPowerMax = UnitPower, UnitPowerMax
 local UnitGetTotalAbsorbs = UnitGetTotalAbsorbs
+local UnitExists, UnitIsConnected, GetSpecializationInfoByID = UnitExists, UnitIsConnected, GetSpecializationInfoByID
 
 local Tags = GladiusEx:NewGladiusExModule("Tags", {
 	tags = {},
@@ -133,7 +134,7 @@ function Tags:UpdateEvents(unit)
 
 	self:RegisterEvent("UNIT_NAME_UPDATE")
 	self:RegisterEvent("UNIT_TARGET")
-	self:RegisterEvent("PLAYER_TARGET_CHANGED", function() self:UNIT_TARGET("PLAYER_TARGET_CHANGED", "player") end)
+	self:RegisterEvent("PLAYER_TARGET_CHANGED", function() self:UNIT_TARGET("PLAYER_TARGET_CHANGED", "") end)
 
 	for unit, events in pairs(self.events) do
 		for event in pairs(events) do
@@ -175,8 +176,6 @@ function Tags:UNIT_TARGET(event, unit)
 end
 
 function Tags:OnEvent(event, unit)
-	if unit == "target" then unit = "playertarget" end
-
 	if self.events[unit] and self.events[unit][event] then
 		-- update texts
 		for text, _ in pairs(self.events[unit][event]) do
@@ -321,8 +320,23 @@ function Tags:Update(unit)
 			if not self.frame[unit][text] then
 				self:CreateFrame(unit, text)
 				if attachframe.unit then
-					if not self.frame[attachframe.unit] then self.frame[attachframe.unit] = {} end
+					if not self.frame[attachframe.unit] then
+						self.frame[attachframe.unit] = {}
+						self.events[attachframe.unit] = self.events[unit]
+					end
 					self.frame[attachframe.unit][text] = self.frame[unit][text]
+					if attachframe.unit ~= "target" then
+						-- not a real unit so it needs to be polled
+						local polling_time = 0.5
+						local next_update = 0
+						self.frame[unit][text]:SetScript("OnUpdate", function(f, elapsed)
+							next_update = next_update - elapsed
+							if next_update <= 0 then
+								self:UpdateText(unit, text)
+								next_update = polling_time
+							end
+						end)
+					end
 				end
 				self.frame[unit][text].unit = attachframe.unit or unit
 			end
@@ -931,14 +945,18 @@ function Tags:GetBuiltinTags()
 			return not GladiusEx:IsTesting(unit) and UnitRace(unit) or GladiusEx.testing[unit].unitRace
 		end,
 		["spec"] = function(unit)
-			return GladiusEx:IsTesting(unit) and GladiusEx.testing[unit].unitSpec or GladiusEx.buttons[unit].spec or ""
-		end,
-		["spec:short"] = function(unit)
-			local spec = GladiusEx:IsTesting(unit) and GladiusEx.testing[unit].specID or GladiusEx.buttons[unit].specID or 0
-			if (spec == nil or spec == 0) then
+			local specID = GladiusEx:IsTesting(unit) and GladiusEx.testing[unit].specID or GladiusEx.buttons[unit].specID or 0
+			if not specID or specID == 0 then
 				return ""
 			end
-			return L["specID:" .. spec .. ":short"]
+			return select(2, GetSpecializationInfoByID(specID))
+		end,
+		["spec:short"] = function(unit)
+			local specID = GladiusEx:IsTesting(unit) and GladiusEx.testing[unit].specID or GladiusEx.buttons[unit].specID or 0
+			if not specID or specID == 0 then
+				return ""
+			end
+			return L["specID:" .. specID .. ":short"]
 		end,
 		["health"] = function(unit)
 			return not GladiusEx:IsTesting(unit) and UnitHealth(unit) or GladiusEx.testing[unit].health
