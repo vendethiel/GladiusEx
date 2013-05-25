@@ -96,6 +96,11 @@ L["TargetBar"] = "Target"
 L["SkillHistory"] = "Skill History"
 
 -- General
+L["Apply filter to"] = true
+L["What auras to filter"] = true
+L["Both"] = true
+
+
 L[" |T%s:20|t %s [%ss] %s"] = true
 L["%s settings"] = true
 L["** If this is not your first run please lock or move the frame to prevent this from happening **"] = true
@@ -209,7 +214,6 @@ L["Color of the power bar background"] = true
 L["Color of the power bar"] = true
 L["Color of the text"] = true
 L["Color"] = true
-L["Column grow"] = true
 L["Cooldown reverse"] = true
 L["Cooldown spiral"] = true
 L["Cooldown starts on dispel"] = true
@@ -298,7 +302,6 @@ L["Group background color"] = true
 L["Group unit frames"] = true
 L["Group"] = true
 L["Grouping"] = true
-L["Grow direction of the cooldowns"] = true
 L["Grow direction of the icons"] = true
 L["Grow direction"] = true
 L["HealthBar"] = true

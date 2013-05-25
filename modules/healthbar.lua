@@ -313,13 +313,6 @@ function HealthBar:GetOptions(unit)
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 5,
 						},
-						sep = {
-							type = "description",
-							name = "",
-							width = "full",
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
-							order = 7,
-						},
 						healthBarColor = {
 							type = "color",
 							name = L["Color"],
@@ -341,7 +334,7 @@ function HealthBar:GetOptions(unit)
 							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 15,
 						},
-						sep2 = {
+						sep = {
 							type = "description",
 							name = "",
 							width = "full",
@@ -359,6 +352,7 @@ function HealthBar:GetOptions(unit)
 							type = "description",
 							name = "",
 							width = "full",
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 21,
 						},
 						healthBarGlobalTexture = {
@@ -366,6 +360,7 @@ function HealthBar:GetOptions(unit)
 							name = L["Use global texture"],
 							desc = L["Use the global bar texture"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 24,
 						},
 						healthBarTexture = {
@@ -375,6 +370,7 @@ function HealthBar:GetOptions(unit)
 							dialogControl = "LSM30_Statusbar",
 							values = AceGUIWidgetLSMlists.statusbar,
 							disabled = function() return self.db[unit].healthBarGlobalTexture or not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 25,
 						},
 					},

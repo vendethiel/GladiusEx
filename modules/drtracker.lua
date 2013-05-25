@@ -11,12 +11,12 @@ local GetTime, GetSpellTexture, UnitGUID = GetTime, GetSpellTexture, UnitGUID
 
 local defaults = {
 	drTrackerAdjustSize = true,
-	drTrackerMargin = 2,
+	drTrackerMargin = 1,
 	drTrackerSize = 40,
 	drTrackerCrop = true,
 	drTrackerOffsetX = 0,
 	drTrackerOffsetY = 0,
-	drTrackerFrameLevel = 2,
+	drTrackerFrameLevel = 8,
 	drTrackerGloss = false,
 	drTrackerGlossColor = { r = 1, g = 1, b = 1, a = 0.4 },
 	drTrackerCooldown = true,
@@ -28,15 +28,15 @@ local defaults = {
 local DRTracker = GladiusEx:NewGladiusExModule("DRTracker",
 	fn.merge(defaults, {
 		drTrackerAttachTo = "ClassIcon",
-		drTrackerAnchor = "TOPRIGHT",
-		drTrackerRelativePoint = "TOPLEFT",
+		drTrackerAnchor = "RIGHT",
+		drTrackerRelativePoint = "LEFT",
 		drTrackerGrowDirection = "LEFT",
 		drTrackerOffsetX = -2,
 	}),
 	fn.merge(defaults, {
 		drTrackerAttachTo = "ClassIcon",
-		drTrackerAnchor = "TOPLEFT",
-		drTrackerRelativePoint = "TOPRIGHT",
+		drTrackerAnchor = "LEFT",
+		drTrackerRelativePoint = "RIGHT",
 		drTrackerGrowDirection = "RIGHT",
 		drTrackerOffsetX = 2,
 	}))
@@ -318,30 +318,11 @@ function DRTracker:GetOptions(unit)
 					inline = true,
 					order = 1,
 					args = {
-						drTrackerGrowDirection = {
-							type = "select",
-							name = L["Grow direction"],
-							values = {
-								["LEFT"]  = L["Left"],
-								["RIGHT"] = L["Right"],
-								["UP"]    = L["Up"],
-								["DOWN"]  = L["Down"],
-							},
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							order = 1,
-						},
-						sep2 = {
-							type = "description",
-							name = "",
-							width = "full",
-							order = 7,
-						},
 						drTrackerCooldown = {
 							type = "toggle",
 							name = L["Cooldown spiral"],
 							desc = L["Display the cooldown spiral for the drTracker icons"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 10,
 						},
 						drTrackerCooldownReverse = {
@@ -371,7 +352,6 @@ function DRTracker:GetOptions(unit)
 							name = L["Gloss"],
 							desc = L["Toggle gloss on the icon"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 25,
 						},
 						drTrackerGlossColor = {
@@ -382,7 +362,6 @@ function DRTracker:GetOptions(unit)
 							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
 							hasAlpha = true,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 30,
 						},
 						sep4 = {
@@ -398,8 +377,7 @@ function DRTracker:GetOptions(unit)
 							desc = L["Frame level of the frame"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							hidden = function() return not GladiusEx.db.base.advancedOptions end,
-							min = 1, max = 5, step = 1,
-							width = "double",
+							softMin = 1, softMax = 100, step = 1,
 							order = 35,
 						},
 					},
@@ -473,35 +451,57 @@ function DRTracker:GetOptions(unit)
 							desc = L["Attach to the given frame"],
 							values = function() return self:GetOtherAttachPoints(unit) end,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							width = "double",
-							order = 5,
+							order = 1,
 						},
 						drTrackerPosition = {
 							type = "select",
 							name = L["Position"],
 							desc = L["Position of the frame"],
-							values = { ["LEFT"] = L["Left"], ["RIGHT"] = L["Right"] },
-							get = function() return strfind(self.db[unit].drTrackerAnchor, "RIGHT") and "LEFT" or "RIGHT" end,
+							values = GladiusEx:GetSimplePositions(),
+							get = function()
+								return GladiusEx:SimplePositionFromAnchor(
+									self.db[unit].drTrackerAnchor,
+									self.db[unit].drTrackerRelativePoint,
+									self.db[unit].drTrackerGrowDirection)
+							end,
 							set = function(info, value)
-								if value == "LEFT" then
-									self.db[unit].drTrackerAnchor = "TOPRIGHT"
-									self.db[unit].drTrackerRelativePoint = "TOPLEFT"
-								else
-									self.db[unit].drTrackerAnchor = "TOPLEFT"
-									self.db[unit].drTrackerRelativePoint = "TOPRIGHT"
-								end
-
+								self.db[unit].drTrackerAnchor, self.db[unit].drTrackerRelativePoint =
+									GladiusEx:AnchorFromSimplePosition(value, self.db[unit].drTrackerGrowDirection)
 								GladiusEx:UpdateFrames()
 							end,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							hidden = function() return GladiusEx.db.base.advancedOptions end,
 							order = 6,
 						},
+						drTrackerGrowDirection = {
+							type = "select",
+							name = L["Grow direction"],
+							values = {
+								["LEFT"]  = L["Left"],
+								["RIGHT"] = L["Right"],
+								["UP"]    = L["Up"],
+								["DOWN"]  = L["Down"],
+							},
+							set = function(info, value)
+								if not GladiusEx.db.base.advancedOptions then
+									self.db[unit].drTrackerAnchor, self.db[unit].drTrackerRelativePoint =
+										GladiusEx:AnchorFromGrowDirection(
+											self.db[unit].drTrackerAnchor,
+											self.db[unit].drTrackerRelativePoint,
+											self.db[unit].drTrackerGrowDirection,
+											value)
+								end
+								self.db[unit].drTrackerGrowDirection = value
+								GladiusEx:UpdateFrames()
+							end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 7,
+						},
 						sep = {
 							type = "description",
 							name = "",
 							width = "full",
-							order = 7,
+							order = 8,
 						},
 						drTrackerAnchor = {
 							type = "select",

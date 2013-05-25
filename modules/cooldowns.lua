@@ -819,6 +819,7 @@ local function UpdateCooldownGroup(
 
 	cooldownFrame:ClearAllPoints()
 	cooldownFrame:SetPoint(cooldownAnchor, parent, cooldownRelativePoint, cooldownOffsetX, cooldownOffsetY)
+	cooldownFrame:SetFrameLevel(9)
 
 	-- size
 	cooldownFrame:SetWidth(cooldownSize * cooldownPerColumn + cooldownSpacingX * (cooldownPerColumn - 1) + cooldownPaddingX * 2)
@@ -1310,13 +1311,12 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								type = "select",
 								name = L["Grow direction"],
 								desc = L["Grow direction of the icons"],
-								values = function() return {
+								values = {
 										["UPLEFT"] = L["Up left"],
 										["UPRIGHT"] = L["Up right"],
 										["DOWNLEFT"] = L["Down left"],
 										["DOWNRIGHT"] = L["Down right"],
-								}
-								end,
+								},
 								set = function(info, value)
 									if not GladiusEx.db.base.advancedOptions then
 										self:GetGroupDB(unit, group).cooldownsAnchor, self:GetGroupDB(unit, group).cooldownsRelativePoint =

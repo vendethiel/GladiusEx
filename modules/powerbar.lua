@@ -253,6 +253,7 @@ function PowerBar:GetOptions(unit)
 							type = "description",
 							name = "",
 							width = "full",
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 21,
 						},
 						powerBarGlobalTexture = {
@@ -260,6 +261,7 @@ function PowerBar:GetOptions(unit)
 							name = L["Use global texture"],
 							desc = L["Use the global bar texture"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 22,
 						},
 						powerBarTexture = {
@@ -269,6 +271,7 @@ function PowerBar:GetOptions(unit)
 							dialogControl = "LSM30_Statusbar",
 							values = AceGUIWidgetLSMlists.statusbar,
 							disabled = function() return self.db[unit].powerBarGlobalTexture or not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 25,
 						},
 					},

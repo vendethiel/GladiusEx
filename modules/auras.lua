@@ -317,6 +317,7 @@ local function UpdateAuraGroup(
 	local parent = GladiusEx:GetAttachFrame(unit, aurasBuffsAttachTo)
 	auraFrame:ClearAllPoints()
 	auraFrame:SetPoint(aurasBuffsAnchor, parent, aurasBuffsRelativePoint, aurasBuffsOffsetX, aurasBuffsOffsetY)
+	auraFrame:SetFrameLevel(9)
 
 	-- size
 	auraFrame:SetWidth(aurasBuffsSize*aurasBuffsPerColumn+aurasBuffsSpacingX*aurasBuffsPerColumn)
@@ -504,25 +505,6 @@ function Auras:GetOptions(unit)
 									disabled = function() return not self:IsUnitEnabled(unit) end,
 									order = 5,
 								},
-								sep3 = {
-									type = "description",
-									name = "",
-									width = "full",
-									order = 7,
-								},
-								aurasBuffsGrow = {
-									type = "select",
-									name = L["Grow direction"],
-									desc = L["Grow direction of the icons"],
-									values = {
-										["UPLEFT"] = L["Up left"],
-										["UPRIGHT"] = L["Up right"],
-										["DOWNLEFT"] = L["Down left"],
-										["DOWNRIGHT"] = L["Down right"],
-									},
-									disabled = function() return not self.db[unit].aurasBuffs or not self:IsUnitEnabled(unit) end,
-									order = 10,
-								},
 								sep = {
 									type = "description",
 									name = "",
@@ -619,7 +601,6 @@ function Auras:GetOptions(unit)
 							name = L["Position"],
 							desc = L["Position settings"],
 							inline = true,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 3,
 							args = {
 								aurasBuffsAttachTo = {
@@ -628,14 +609,59 @@ function Auras:GetOptions(unit)
 									desc = L["Attach to the given frame"],
 									values = function() return self:GetOtherAttachPoints(unit) end,
 									disabled = function() return not self.db[unit].aurasBuffs or not self:IsUnitEnabled(unit) end,
-									width = "double",
 									order = 5,
+								},
+								aurasBuffsPosition = {
+									type = "select",
+									name = L["Position"],
+									desc = L["Position of the frame"],
+									values = GladiusEx:GetSimplePositions(),
+									get = function()
+										return GladiusEx:SimplePositionFromAnchor(
+											self.db[unit].aurasBuffsAnchor,
+											self.db[unit].aurasBuffsRelativePoint,
+											self.db[unit].aurasBuffsGrow)
+									end,
+									set = function(info, value)
+										self.db[unit].aurasBuffsAnchor, self.db[unit].aurasBuffsRelativePoint =
+											GladiusEx:AnchorFromSimplePosition(value, self.db[unit].aurasBuffsGrow)
+										GladiusEx:UpdateFrames()
+									end,
+									disabled = function() return not self.db[unit].aurasBuffs or not self:IsUnitEnabled(unit) end,
+									hidden = function() return GladiusEx.db.base.advancedOptions end,
+									order = 6,
+								},
+								aurasBuffsGrow = {
+									type = "select",
+									name = L["Grow direction"],
+									desc = L["Grow direction of the icons"],
+									values = {
+										["UPLEFT"] = L["Up left"],
+										["UPRIGHT"] = L["Up right"],
+										["DOWNLEFT"] = L["Down left"],
+										["DOWNRIGHT"] = L["Down right"],
+									},
+									set = function(info, value)
+										if not GladiusEx.db.base.advancedOptions then
+											self.db[unit].aurasBuffsAnchor, self.db[unit].aurasBuffsRelativePoint =
+												GladiusEx:AnchorFromGrowDirection(
+													self.db[unit].aurasBuffsAnchor,
+													self.db[unit].aurasBuffsRelativePoint,
+													self.db[unit].aurasBuffsGrow,
+													value)
+										end
+										self.db[unit].aurasBuffsGrow = value
+										GladiusEx:UpdateFrames()
+									end,
+									disabled = function() return not self.db[unit].aurasBuffs or not self:IsUnitEnabled(unit) end,
+									order = 7,
 								},
 								sep = {
 									type = "description",
 									name = "",
 									width = "full",
-									order = 7,
+									order = 8,
+									hidden = function() return not GladiusEx.db.base.advancedOptions end,
 								},
 								aurasBuffsAnchor = {
 									type = "select",
@@ -643,6 +669,7 @@ function Auras:GetOptions(unit)
 									desc = L["Anchor of the frame"],
 									values = function() return GladiusEx:GetPositions() end,
 									disabled = function() return not self.db[unit].aurasBuffs or not self:IsUnitEnabled(unit) end,
+									hidden = function() return not GladiusEx.db.base.advancedOptions end,
 									order = 10,
 								},
 								aurasBuffsRelativePoint = {
@@ -651,6 +678,7 @@ function Auras:GetOptions(unit)
 									desc = L["Relative point of the frame"],
 									values = function() return GladiusEx:GetPositions() end,
 									disabled = function() return not self.db[unit].aurasBuffs or not self:IsUnitEnabled(unit) end,
+									hidden = function() return not GladiusEx.db.base.advancedOptions end,
 									order = 15,
 								},
 								sep2 = {
@@ -712,26 +740,6 @@ function Auras:GetOptions(unit)
 									width = "full",
 									disabled = function() return not self:IsUnitEnabled(unit) or not self.db[unit].aurasBuffs end,
 									order = 6,
-								},
-								sep3 = {
-									type = "description",
-									name = "",
-									width = "full",
-									order = 7,
-								},
-								aurasDebuffsGrow = {
-									type = "select",
-									name = L["Grow direction"],
-									desc = L["Grow direction of the icons"],
-									values = function() return {
-										["UPLEFT"] = L["Up left"],
-										["UPRIGHT"] = L["Up right"],
-										["DOWNLEFT"] = L["Down left"],
-										["DOWNRIGHT"] = L["Down right"],
-									}
-									end,
-									disabled = function() return not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) end,
-									order = 10,
 								},
 								sep = {
 									type = "description",
@@ -843,35 +851,53 @@ function Auras:GetOptions(unit)
 									type = "select",
 									name = L["Position"],
 									desc = L["Position of the frame"],
-									values = {
-										["LEFT"] = L["Left"],
-										["RIGHT"] = L["Right"],
-										["TOP"] = L["Top"],
-										["BOTTOM"] = L["Bottom"]
-									},
-									get = function() return
-										strfind(self.db[unit].aurasDebuffsAnchor, "RIGHT") and "LEFT" or "RIGHT"
+									values = GladiusEx:GetSimplePositions(),
+									get = function()
+										return GladiusEx:SimplePositionFromAnchor(
+											self.db[unit].aurasDebuffsAnchor,
+											self.db[unit].aurasDebuffsRelativePoint,
+											self.db[unit].aurasDebuffsGrow)
 									end,
 									set = function(info, value)
-										if value == "LEFT" then
-											self.db[unit].aurasDebuffsAnchor = "TOPRIGHT"
-											self.db[unit].aurasDebuffsRelativePoint = "TOPLEFT"
-										else
-											self.db[unit].aurasDebuffsAnchor = "TOPLEFT"
-											self.db[unit].aurasDebuffsRelativePoint = "TOPRIGHT"
-										end
+										self.db[unit].aurasDebuffsAnchor, self.db[unit].aurasDebuffsRelativePoint =
+											GladiusEx:AnchorFromSimplePosition(value, self.db[unit].aurasDebuffsGrow)
 										GladiusEx:UpdateFrames()
 									end,
 									disabled = function() return self.db[unit].aurasDebuffsWithBuffs or not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) end,
 									hidden = function() return GladiusEx.db.base.advancedOptions end,
 									order = 6,
 								},
+								aurasDebuffsGrow = {
+									type = "select",
+									name = L["Grow direction"],
+									desc = L["Grow direction of the icons"],
+									values = {
+										["UPLEFT"] = L["Up left"],
+										["UPRIGHT"] = L["Up right"],
+										["DOWNLEFT"] = L["Down left"],
+										["DOWNRIGHT"] = L["Down right"],
+									},
+									set = function(info, value)
+										if not GladiusEx.db.base.advancedOptions then
+											self.db[unit].aurasDebuffsAnchor, self.db[unit].aurasDebuffsRelativePoint =
+												GladiusEx:AnchorFromGrowDirection(
+													self.db[unit].aurasDebuffsAnchor,
+													self.db[unit].aurasDebuffsRelativePoint,
+													self.db[unit].aurasDebuffsGrow,
+													value)
+										end
+										self.db[unit].aurasDebuffsGrow = value
+										GladiusEx:UpdateFrames()
+									end,
+									disabled = function() return not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) end,
+									order = 7,
+								},
 								sep = {
 									type = "description",
 									name = "",
 									width = "full",
 									hidden = function() return not GladiusEx.db.base.advancedOptions end,
-									order = 7,
+									order = 9,
 								},
 								aurasDebuffsAnchor = {
 									type = "select",
@@ -942,7 +968,7 @@ function Auras:GetOptions(unit)
 					type = "select",
 					style = "radio",
 					name = L["Apply filter to"],
-					desc = L["What auras types to filter"],
+					desc = L["What auras to filter"],
 					values = {
 						[FILTER_WHAT_BUFFS] = L["Buffs"],
 						[FILTER_WHAT_DEBUFFS] = L["Debuffs"],
@@ -970,7 +996,7 @@ function Auras:GetOptions(unit)
 						},
 						add = {
 							type = "execute",
-							name = L["Add new aura"],
+							name = L["Add new aura filter"],
 							func = function(info)
 								self.db[unit].aurasFilterAuras[self.newAuraName] = true
 								options.filters.args[self.newAuraName] = self:SetupAuraOptions(options, unit, self.newAuraName)
@@ -1034,7 +1060,7 @@ function Auras:SetupAuraOptions(options, unit, aura)
 				dialogControl = HasAuraEditBox() and "Aura_EditBox" or nil,
 				name = L["Name"],
 				desc = L["Name of the aura"],
-				disabled = function() return not self:IsUnitEnabled(unit) end,
+				disabled = function() return not self:IsUnitEnabled(unit)  or self.db[unit].aurasFilterType == FILTER_TYPE_DISABLED end,
 				order = 1,
 			},
 			delete = {
@@ -1047,7 +1073,7 @@ function Auras:SetupAuraOptions(options, unit, aura)
 
 					GladiusEx:UpdateFrames()
 				end,
-				disabled = function() return not self:IsUnitEnabled(unit) end,
+				disabled = function() return not self:IsUnitEnabled(unit) or self.db[unit].aurasFilterType == FILTER_TYPE_DISABLED end,
 				order = 3,
 			},
 		},

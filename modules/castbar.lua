@@ -19,7 +19,7 @@ local defaults = {
 		castBarInverse = false,
 		castBarColor = { r = 1, g = 1, b = 0, a = 1 },
 		castBarNotIntColor = { r = 1, g = 0, b = 0, a = 1 },
-		castBarBackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
+		castBarBackgroundColor = { r = 0.5, g = 0.5, b = 0.5, a = 0.3 },
 		castBarGlobalTexture = true,
 		castBarTexture = GladiusEx.default_bar_texture,
 		castIcon = true,
@@ -265,8 +265,9 @@ function CastBar:CreateBar(unit)
 	self.frame[unit].background:SetAllPoints()
 	-- self.frame[unit].castText = self.frame[unit].bar:CreateFontString("GladiusEx" .. self:GetName() .. "CastText" .. unit, "OVERLAY")
 	-- self.frame[unit].timeText = self.frame[unit].bar:CreateFontString("GladiusEx" .. self:GetName() .. "TimeText" .. unit, "OVERLAY")
-	self.frame[unit].castText = GladiusEx:CreateSuperFS(self.frame[unit].bar, "OVERLAY")
-	self.frame[unit].timeText = GladiusEx:CreateSuperFS(self.frame[unit].bar, "OVERLAY")
+	self.frame[unit].textsFrame = CreateFrame("Frame", nil, self.frame[unit])
+	self.frame[unit].castText = GladiusEx:CreateSuperFS(self.frame[unit].textsFrame, "OVERLAY")
+	self.frame[unit].timeText = GladiusEx:CreateSuperFS(self.frame[unit].textsFrame, "OVERLAY")
 
 	self.frame[unit].icon = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "IconFrame" .. unit, "ARTWORK")
 	self.frame[unit].icon.bg = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "IconFrameBackground" .. unit, "BACKGROUND")
@@ -361,6 +362,9 @@ function CastBar:Update(unit)
 	self.frame[unit].background:SetHorizTile(false)
 	self.frame[unit].background:SetVertTile(false)
 
+	-- texts frame
+	self.frame[unit].textsFrame:SetFrameLevel(50)
+
 	-- update cast text
 	if self.db[unit].castText then
 		self.frame[unit].castText:Show()
@@ -440,24 +444,27 @@ end
 
 function CastBar:Test(unit)
 	local f = self.frame[unit]
-	local spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible = L["Example Spell Name"], "", "", GetSpellTexture(1),
-		GetTime() * 1000 - 1000, GetTime() * 1000 + 1500, false, 0, false
 
-	f.spellName = spell
-	f.isChanneling = false
-	f.isCasting = true
-	f.startTime = startTime / 1000
-	f.endTime = endTime / 1000
-	f.maxValue = f.endTime - f.startTime
-	f.delay = 0.2
+	if GladiusEx.testing[unit].powerType == 0 then
+		local spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible = L["Example Spell Name"], "", "", GetSpellTexture(1),
+			GetTime() * 1000 - 1000, GetTime() * 1000 + 1500, false, 0, false
 
-	f.icon:SetTexture(icon)
-	self:SetInterruptible(unit, not notInterruptible)
-	f.bar:SetMinMaxValues(0, f.maxValue)
+		f.spellName = spell
+		f.isChanneling = false
+		f.isCasting = true
+		f.startTime = startTime / 1000
+		f.endTime = endTime / 1000
+		f.maxValue = f.endTime - f.startTime
+		f.delay = 0.2
 
-	if self.db[unit].castSpark then f.spark:Show() end
-	CastUpdate(f)
-	UpdateCastText(f, spell, rank)
+		f.icon:SetTexture(icon)
+		self:SetInterruptible(unit, not notInterruptible)
+		f.bar:SetMinMaxValues(0, f.maxValue)
+
+		if self.db[unit].castSpark then f.spark:Show() end
+		CastUpdate(f)
+		UpdateCastText(f, spell, rank)
+	end
 end
 
 function CastBar:GetOptions(unit)
@@ -510,7 +517,6 @@ function CastBar:GetOptions(unit)
 							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
 							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 10,
 						},
 						sep2 = {

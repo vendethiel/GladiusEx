@@ -1084,28 +1084,7 @@ end
 function GladiusEx:GetWidgetsBounds(unit)
 	local button = self.buttons[unit]
 
-	-- todo: these lists of mods are already generated in UpdateUnit
-	local mods = fn.filter(fn.from_iterator(function(n, m) return m end, self:IterateModules()), function(m) return self:IsModuleEnabled(unit, m:GetName()) end)
-	local widget_mods = fn.filter(mods, function(m) return m:GetAttachType(unit) == "Widget" end)
-
-	local left, right, top, bottom = 0, 0, 0, 0
-	fn.each(widget_mods, function(m)
-		local mframes = m:GetFrames(unit)
-		if mframes then
-			fn.each(mframes, function(mf)
-				local mleft = (button:GetLeft() or 0) - (mf:GetLeft() or 0)
-				local mright = (mf:GetRight() or 0) - (button:GetRight() or 0)
-				local mtop = (mf:GetTop() or 0) - (button:GetTop() or 0)
-				local mbottom = (button:GetBottom() or 0) - (mf:GetBottom() or 0)
-				left = max(mleft, left)
-				right = max(mright, right)
-				top = max(mtop, top)
-				bottom = max(mbottom, bottom)
-			end)
-		end
-	end)
-
-	return left, right, top, bottom
+	return button.wleft, button.wright, button.wtop, button.wbottom
 end
 
 function GladiusEx:UpdateUnitPosition(unit)
@@ -1320,9 +1299,31 @@ function GladiusEx:UpdateUnit(unit)
 	end)
 
 	-- update widgets
+	local wleft, wright, wtop, wbottom = 0, 0, 0, 0
 	fn.each(widget_mods, function(m)
 		if m.Update then m:Update(unit) end
+		-- calculate widget bounds
+		local mframes = m:GetFrames(unit)
+		if mframes then
+			fn.each(mframes, function(mf)
+				if mf then
+					local mleft = (button:GetLeft() or 0) - (mf:GetLeft() or 0)
+					local mright = (mf:GetRight() or 0) - (button:GetRight() or 0)
+					local mtop = (mf:GetTop() or 0) - (button:GetTop() or 0)
+					local mbottom = (button:GetBottom() or 0) - (mf:GetBottom() or 0)
+					wleft = max(mleft, wleft)
+					wright = max(mright, wright)
+					wtop = max(mtop, wtop)
+					wbottom = max(mbottom, wbottom)
+				end
+			end)
+		end
 	end)
+
+	button.wleft = wleft
+	button.wright = wright
+	button.wtop = wtop
+	button.wbottom = wbottom
 
 	-- update position
 	self:UpdateUnitPosition(unit)
@@ -1532,4 +1533,14 @@ function GladiusEx:CreateSuperFS(fsparent, layer)
 	end
 
 	return superfs
+end
+
+-- Returns the spellid if the spell doesn't exist, so that it doesn't break tables
+function GladiusEx:SafeGetSpellName(spellid)
+	local name = GetSpellInfo(spellid)
+	if not name then
+		geterrorhandler()("GladiusEx: invalid spellid " .. tostring(spellid))
+		return tostring(spellid)
+	end
+	return name
 end
