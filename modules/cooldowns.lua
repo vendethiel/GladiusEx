@@ -227,13 +227,6 @@ local function MakeGroupDb(settings)
 			["defensive"] =   { r = 0, g = 1, b = 0 }, ["heal"] =      { r = 0, g = 1, b = 0 },
 			["uncat"] =       { r = 1, g = 1, b = 1 },
 		},
-		cooldownsCatGroups = {
-			["pvp_trinket"] = 1, ["dispel"] =    1, ["mass_dispel"] = 1,
-			["immune"] =      1, ["interrupt"] = 1, ["silence"] =     1,
-			["stun"] =        1, ["knockback"] = 1, ["cc"] =          1,
-			["offensive"] =   1, ["defensive"] = 1, ["heal"] =        1,
-			["uncat"] =       1,
-		},
 		cooldownsHideTalentsUntilDetected = true,
 	}
 	return fn.merge(defaults, settings or {})
@@ -647,46 +640,14 @@ local function UpdateGroupIconFrames(unit, group, sorted_spells)
 
 	local cat_priority = db.cooldownsCatPriority
 	local border_colors = db.cooldownsCatColors
-	local cat_groups = db.cooldownsCatGroups
 	local cooldownsPerColumn = db.cooldownsPerColumn
 
 	local sidx = 1
 	local shown = 0
-	local prev_group
 	for i = 1, #sorted_spells do
 		local spellid = sorted_spells[i]
 		local spelldata = CT:GetCooldownData(spellid)
 		local tracked = CT:GetUnitCooldownInfo(unit, spellid)
-
-		-- icon grouping
-		local cat, group
-		for i = 1, #cat_priority do
-			local key = cat_priority[i]
-			if spelldata[key] then
-				cat = key
-				group = cat_groups[cat]
-				break
-			end
-		end
-		if not cat and not group then
-			cat = "uncat"
-			group = cat_groups["uncat"]
-		end
-
-		if prev_group and group ~= prev_group and sidx ~= 1 then
-			local skip = cooldownsPerColumn - ((sidx - 1) % cooldownsPerColumn)
-			if skip ~= cooldownsPerColumn then
-				for i = 1, skip do
-					gs.frame[sidx]:Hide()
-					sidx = sidx + 1
-					if sidx > #gs.frame then
-						-- ran out of space
-						return
-					end
-				end
-			end
-		end
-		prev_group = group
 		local frame = gs.frame[sidx]
 
 		-- icon
@@ -700,11 +661,11 @@ local function UpdateGroupIconFrames(unit, group, sorted_spells)
 		end
 
 		-- set border color
-		local c
+		local color
 		for i = 1, #cat_priority do
 			local key = cat_priority[i]
 			if spelldata[key] then
-				c = border_colors[key]
+				color = border_colors[key]
 				break
 			end
 		end
@@ -722,7 +683,7 @@ local function UpdateGroupIconFrames(unit, group, sorted_spells)
 		frame.spelldata = spelldata
 		frame.state = 0
 		frame.tracked = tracked
-		frame.color = c or border_colors["uncat"]
+		frame.color = color or border_colors["uncat"]
 
 		-- refresh frame
 		frame.icon:SetTexture(icon)
@@ -1099,20 +1060,6 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								disabled = function() return not self:IsUnitEnabled(unit) end,
 								order = 1,
 							},
-							cooldownsGrow = {
-								type = "select",
-								name = L["Grow direction"],
-								desc = L["Grow direction of the icons"],
-								values = function() return {
-										["UPLEFT"] = L["Up left"],
-										["UPRIGHT"] = L["Up right"],
-										["DOWNLEFT"] = L["Down left"],
-										["DOWNRIGHT"] = L["Down right"],
-								}
-								end,
-								disabled = function() return not self:IsUnitEnabled(unit) end,
-								order = 10,
-							},
 							sep = {
 								type = "description",
 								name = "",
@@ -1124,7 +1071,6 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								name = L["Crop borders"],
 								desc = L["Toggle if the icon borders should be cropped or not"],
 								disabled = function() return not self:IsUnitEnabled(unit) end,
-								hidden = function() return not GladiusEx.db.base.advancedOptions end,
 								order = 14,
 							},
 							cooldownsTooltips = {
@@ -1221,6 +1167,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 						name = L["Border transparency"],
 						desc = L["Border transparency settings"],
 						inline = true,
+						hidden = function() return not GladiusEx.db.base.advancedOptions end,
 						order = 1.2,
 						args = {
 							cooldownsBorderAvailAlpha = {
@@ -1337,8 +1284,53 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								desc = L["Attach to the given frame"],
 								values = function() return self:GetOtherAttachPoints(unit) end,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
-								width = "double",
-								order = 5,
+								order = 1,
+							},
+							cooldownsPosition = {
+								type = "select",
+								name = L["Position"],
+								desc = L["Position of the frame"],
+								values = GladiusEx:GetSimplePositions(),
+								get = function()
+									return GladiusEx:SimplePositionFromAnchor(
+										self:GetGroupDB(unit, group).cooldownsAnchor,
+										self:GetGroupDB(unit, group).cooldownsRelativePoint,
+										self:GetGroupDB(unit, group).cooldownsGrow)
+								end,
+								set = function(info, value)
+									self:GetGroupDB(unit, group).cooldownsAnchor, self:GetGroupDB(unit, group).cooldownsRelativePoint =
+										GladiusEx:AnchorFromSimplePosition(value, self:GetGroupDB(unit, group).cooldownsGrow)
+									GladiusEx:UpdateFrames()
+								end,
+								disabled = function() return not self:IsUnitEnabled(unit) end,
+								hidden = function() return GladiusEx.db.base.advancedOptions end,
+								order = 2,
+							},
+							cooldownsGrow = {
+								type = "select",
+								name = L["Grow direction"],
+								desc = L["Grow direction of the icons"],
+								values = function() return {
+										["UPLEFT"] = L["Up left"],
+										["UPRIGHT"] = L["Up right"],
+										["DOWNLEFT"] = L["Down left"],
+										["DOWNRIGHT"] = L["Down right"],
+								}
+								end,
+								set = function(info, value)
+									if not GladiusEx.db.base.advancedOptions then
+										self:GetGroupDB(unit, group).cooldownsAnchor, self:GetGroupDB(unit, group).cooldownsRelativePoint =
+											GladiusEx:AnchorFromGrowDirection(
+												self:GetGroupDB(unit, group).cooldownsAnchor,
+												self:GetGroupDB(unit, group).cooldownsRelativePoint,
+												self:GetGroupDB(unit, group).cooldownsGrow,
+												value)
+									end
+									self:GetGroupDB(unit, group).cooldownsGrow = value
+									GladiusEx:UpdateFrames()
+								end,
+								disabled = function() return not self:IsUnitEnabled(unit) end,
+								order = 3,
 							},
 							sep = {
 								type = "description",
@@ -1352,6 +1344,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								desc = L["Anchor of the frame"],
 								values = function() return GladiusEx:GetPositions() end,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
+								hidden = function() return not GladiusEx.db.base.advancedOptions end,
 								order = 10,
 							},
 							cooldownsRelativePoint = {
@@ -1360,6 +1353,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								desc = L["Relative point of the frame"],
 								values = function() return GladiusEx:GetPositions() end,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
+								hidden = function() return not GladiusEx.db.base.advancedOptions end,
 								order = 15,
 							},
 							sep2 = {
@@ -1477,7 +1471,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 				header = {
 					type = "description",
 					name = L["cat:" .. cat],
-					order = 0,
+					order = 1,
 				},
 				color = {
 					type = "color",
@@ -1492,20 +1486,13 @@ function Cooldowns:MakeGroupOptions(unit, group)
 						GladiusEx:UpdateFrames()
 					end,
 					disabled = function() return not self:IsUnitEnabled(unit) end,
-					order = 0.5,
+					order = 2,
 				},
-				group = {
-					type = "range",
-					softMin = 1, softMax = 20, step = 1,
-					name = L["Group"],
-					desc = L["Spells in each group have their own row or column"],
-					get = function() return self:GetGroupDB(unit, group).cooldownsCatGroups[cat] end,
-					set = function(self, value)
-						self:GetGroupDB(unit, group).cooldownsCatGroups[cat] = value
-						GladiusEx:UpdateFrames()
-					end,
-					disabled = function() return not self:IsUnitEnabled(unit) end,
-					order = 1,
+				sep = {
+					type = "description",
+					name = "",
+					width = "full",
+					order = 5,
 				},
 				moveup = {
 					type = "execute",
