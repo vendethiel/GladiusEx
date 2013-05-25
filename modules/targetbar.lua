@@ -138,6 +138,15 @@ function TargetBar:GetBarColor(class)
 	return RAID_CLASS_COLORS[class]
 end
 
+local polling_time = 0.5
+local function TargetBar_OnUpdate(frame, elapsed)
+	frame.next_update = frame.next_update - elapsed
+	if frame.next_update <= 0 then
+		frame.next_update = polling_time
+		TargetBar:Refresh(frame.owner_unit)
+	end
+end
+
 function TargetBar:Show(unit)
 	local testing = GladiusEx:IsTesting(unit)
 
@@ -184,15 +193,6 @@ function TargetBar:Test(unit)
 	self:UpdateHealth(unit, health, maxHealth)
 	self.frame[unit]:Show()
 	self.frame[unit]:SetScript("OnUpdate", nil)
-end
-
-local polling_time = 0.5
-local function TargetBar_OnUpdate(frame, elapsed)
-	frame.next_update = frame.next_update - elapsed
-	if frame.next_update <= 0 then
-		frame.next_update = polling_time
-		TargetBar:Refresh(frame.owner_unit)
-	end
 end
 
 function TargetBar:CreateBar(unit)
