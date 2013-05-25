@@ -117,7 +117,6 @@ function TargetBar:UNIT_HEALTH(event, unit)
 	for owner_unit, frame in pairs(self.frame) do
 		if UnitIsUnit(unit, frame.unit) then
 			self:UpdateHealth(owner_unit, UnitHealth(unit), UnitHealthMax(unit))
-			return
 		end
 	end
 end

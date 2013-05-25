@@ -51,6 +51,7 @@ local function log(...)
 		log_frame = CreateFrame("ScrollingMessageFrame", "GladiusExLogFrame")
 
 		log_frame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 10, -50)
+		log_frame:SetFrameStrata("LOW")
 
 		log_frame:SetScript("OnMouseWheel", FloatingChatFrame_OnMouseScroll)
 		log_frame:EnableMouseWheel(true)
