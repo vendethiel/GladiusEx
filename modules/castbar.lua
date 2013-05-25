@@ -270,8 +270,11 @@ function CastBar:CreateBar(unit)
 
 	self.frame[unit].icon = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "IconFrame" .. unit, "ARTWORK")
 	self.frame[unit].icon.bg = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "IconFrameBackground" .. unit, "BACKGROUND")
-	self.frame[unit].icon.shield = self.frame[unit].bar:CreateTexture(nil, "OVERLAY")
+
+	self.frame[unit].icon.shield_frame = CreateFrame("Frame", nil, self.frame[unit])
+	self.frame[unit].icon.shield = self.frame[unit].icon.shield_frame:CreateTexture(nil, "OVERLAY")
 	self.frame[unit].icon.shield:SetTexture([[Interface\AddOns\GladiusEx\media\shield]])
+
 	self.frame[unit].spark = self.frame[unit].bar:CreateTexture(nil, "OVERLAY")
 	self.frame[unit].spark:SetTexture([[Interface\AddOns\GladiusEx\media\spark]])
 	self.frame[unit].spark:SetBlendMode("ADD")
@@ -313,6 +316,7 @@ function CastBar:Update(unit)
 	self.frame[unit].icon:SetTexture(nil)
 
 	-- update not interruptible shield
+	self.frame[unit].icon.shield_frame:SetFrameLevel(25)
 	self.frame[unit].icon.shield:SetSize(height * 64 / 20, height * 64 / 20)
 	self.frame[unit].icon.shield:SetPoint("CENTER", self.frame[unit].icon, "CENTER")
 	self.frame[unit].icon.shield:Hide()
@@ -528,6 +532,7 @@ function CastBar:GetOptions(unit)
 							type = "description",
 							name = "",
 							width = "full",
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 16,
 						},
 						castBarGlobalTexture = {
@@ -535,6 +540,7 @@ function CastBar:GetOptions(unit)
 							name = L["Use global texture"],
 							desc = L["Use the global bar texture"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 17,
 						},
 						castBarTexture = {
@@ -544,6 +550,7 @@ function CastBar:GetOptions(unit)
 							dialogControl = "LSM30_Statusbar",
 							values = AceGUIWidgetLSMlists.statusbar,
 							disabled = function() return self.db[unit].castBarGlobalTexture or not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 18,
 						},
 						sep4 = {
@@ -611,7 +618,6 @@ function CastBar:GetOptions(unit)
 					name = L["Position"],
 					desc = L["Position settings"],
 					inline = true,
-					hidden = function() return not GladiusEx.db.base.advancedOptions end,
 					order = 3,
 					args = {
 						castBarPosition = {
