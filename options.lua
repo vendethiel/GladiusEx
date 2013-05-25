@@ -1,5 +1,4 @@
-﻿-- global functions
-local fn = LibStub("LibFunctional-1.0")
+﻿local fn = LibStub("LibFunctional-1.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 
 GladiusEx.default_bar_texture = "Wglass (GladiusEx)"
@@ -14,17 +13,17 @@ GladiusEx.defaults = {
 		globalBarTexture = GladiusEx.default_bar_texture,
 		showParty = true,
 		testUnits = {
-			["arena1"] = { health = 320000, maxHealth = 320000, power = 18000, maxPower = 18000, powerType = 0, unitClass = "MAGE", unitRace = "Scourge", unitSpec = "Frost", specID = 64 },
-			["arena2"] = { health = 300000, maxHealth = 320000, power = 10000, maxPower = 12000, powerType = 2, unitClass = "HUNTER", unitRace = "NightElf", unitSpec = "Beast Mastery", specID = 253 },
-			["arena3"] = { health = 240000, maxHealth = 350000, power = 90, maxPower = 120, powerType = 3, unitClass = "ROGUE", unitRace = "Human", unitSpec = "Subtlety", specID = 261 },
-			["arena4"] = { health = 200000, maxHealth = 400000, power = 80, maxPower = 130, powerType = 6, unitClass = "DEATHKNIGHT", unitRace = "Dwarf", unitSpec = "Unholy", specID = 252 },
-			["arena5"] = { health = 100000, maxHealth = 300000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Gnome", unitSpec = "Arms", specID = 71 },
+			["arena1"] = { health = 350000, maxHealth = 350000, power = 180000, maxPower = 300000, powerType = 0, unitClass = "MAGE", unitRace = "Scourge", unitSpec = "Frost", specID = 64 },
+			["arena2"] = { health = 275000, maxHealth = 320000, power = 10, maxPower = 100, powerType = 2, unitClass = "HUNTER", unitRace = "NightElf", unitSpec = "Beast Mastery", specID = 253 },
+			["arena3"] = { health = 220000, maxHealth = 350000, power = 175000, maxPower = 300000, powerType = 0, unitClass = "DRUID", unitRace = "Worgen", unitSpec = "Restoration", specID = 105 },
+			["arena4"] = { health = 240000, maxHealth = 350000, power = 90, maxPower = 110, powerType = 3, unitClass = "ROGUE", unitRace = "Human", unitSpec = "Subtlety", specID = 261 },
+			["arena5"] = { health = 100000, maxHealth = 370000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Gnome", unitSpec = "Arms", specID = 71 },
 
-			["player"] = { health = 320000, maxHealth = 320000, power = 18000, maxPower = 18000, powerType = 0, unitClass = "PRIEST", unitRace = "Draenei", unitSpec = "Discipline", specID = 256 },
+			["player"] = { health = 250000, maxHealth = 350000, power = 18000, maxPower = 300000, powerType = 0, unitClass = "PRIEST", unitRace = "Draenei", unitSpec = "Discipline", specID = 256 },
 			["party1"] = { health = 300000, maxHealth = 320000, power = 10000, maxPower = 12000, powerType = 3, unitClass = "MONK", unitRace = "Pandaren", unitSpec = "Windwalker", specID = 269 },
-			["party2"] = { health = 100000, maxHealth = 300000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Gnome", unitSpec = "Arms", specID = 71 },
-			["party3"] = { health = 200000, maxHealth = 400000, power = 80, maxPower = 130, powerType = 6, unitClass = "DEATHKNIGHT", unitRace = "Dwarf", unitSpec = "Unholy", specID = 252 },
-			["party4"] = { health = 100000, maxHealth = 300000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Gnome", unitSpec = "Arms", specID = 71 },
+			["party2"] = { health = 220000, maxHealth = 350000, power = 280000, maxPower = 300000, powerType = 0, unitClass = "WARLOCK", unitRace = "Orc", unitSpec = "Destruction", specID = 267 },
+			["party3"] = { health = 100000, maxHealth = 300000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Gnome", unitSpec = "Arms", specID = 71 },
+			["party4"] = { health = 200000, maxHealth = 400000, power = 80, maxPower = 130, powerType = 6, unitClass = "DEATHKNIGHT", unitRace = "Dwarf", unitSpec = "Unholy", specID = 252 },
 		},
 		--@debug@
 		debug = true,
@@ -58,7 +57,6 @@ GladiusEx.defaults_arena = fn.merge(group_defaults, {
 		["Clicks"] = false,
 		["Auras"] = false,
 		["Alerts"] = false,
-		["SkillHistory"] = false,
 	},
 })
 
@@ -70,9 +68,12 @@ GladiusEx.defaults_party = fn.merge(group_defaults, {
 		["Announcements"] = false,
 		["Auras"] = false,
 		["Alerts"] = false,
-		["SkillHistory"] = false,
 	},
 })
+
+-- upvalues
+local strfind = string.find
+
 
 SLASH_GLADIUSEX1 = "/gladiusex"
 SLASH_GLADIUSEX2 = "/gex"
@@ -835,4 +836,54 @@ end
 function GladiusEx:ShowOptionsDialog()
 	-- InterfaceOptionsFrame_OpenToCategory("GladiusEx")
 	LibStub("AceConfigDialog-3.0"):Open("GladiusEx")
+end
+
+-- helper functions for simple position settings
+function GladiusEx:GetSimplePositions()
+	return {
+		["LEFT"] = L["Left"],
+		["RIGHT"] = L["Right"],
+		["TOP"] = L["Top"],
+		["BOTTOM"] = L["Bottom"]
+	}
+end
+
+function GladiusEx:SimplePositionFromAnchor(anchor, relative, grow)
+	for position in pairs(self:GetSimplePositions()) do
+		local panchor, prelative = self:AnchorFromSimplePosition(position, grow)
+		if panchor == anchor and prelative == relative then
+			return position
+		end
+	end
+end
+
+function GladiusEx:AnchorFromSimplePosition(position, grow)
+	local grow_v = (strfind(grow, "UP") and "BOTTOM") or (strfind(grow, "DOWN") and "TOP") or ""
+	local grow_h = (strfind(grow, "LEFT") and "RIGHT") or (strfind(grow, "RIGHT") and "LEFT") or ""
+
+	local anchor, relative
+
+	if position == "LEFT" then
+		anchor = grow_v .. "RIGHT"
+		relative = grow_v .. "LEFT"
+	elseif position == "RIGHT" then
+		anchor = grow_v .. "LEFT"
+		relative = grow_v .. "RIGHT"
+	elseif position == "TOP" then
+		anchor = "BOTTOM" .. grow_h
+		relative = "TOP" .. grow_h
+	elseif position == "BOTTOM" then
+		anchor = "TOP" .. grow_h
+		relative = "BOTTOM" .. grow_h
+	end
+
+	return anchor, relative
+end
+
+function GladiusEx:AnchorFromGrowDirection(anchor, relative, grow, newgrow)
+	local position = GladiusEx:SimplePositionFromAnchor(anchor, relative, grow)
+	if position then
+		anchor, relative = GladiusEx:AnchorFromSimplePosition(position, newgrow)
+	end
+	return anchor, relative
 end

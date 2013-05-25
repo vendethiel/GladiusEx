@@ -9,17 +9,15 @@ local tinsert, tremove = table.insert, table.remove
 local GetSpellTexture, GetTime = GetSpellTexture, GetTime
 
 local defaults = {
-	MaxIcons = 10,
+	MaxIcons = 2,
 	IconSize = 20,
 	Margin = 2,
 	PaddingX = 0,
-	PaddingY = 2,
-	OffsetX = 0,
-	OffsetY = 0,
-	BackgroundColor = { r = 0, g = 0, b = 0, a = 0.5 },
+	PaddingY = 0,
+	BackgroundColor = { r = 0, g = 0, b = 0, a = 0 },
 	Crop = true,
 
-	Timeout = 10,
+	Timeout = 5,
 	TimeoutAnimDuration = 0.5,
 
 	EnterAnimDuration = 1.0,
@@ -31,16 +29,20 @@ local MAX_ICONS = 40
 
 local SkillHistory = GladiusEx:NewGladiusExModule("SkillHistory",
 	fn.merge(defaults, {
-		AttachTo = "Frame",
-		Anchor = "BOTTOMLEFT",
-		RelativePoint = "TOPLEFT",
-		GrowDirection = "RIGHT",
+		AttachTo = "CastBar",
+		Anchor = "RIGHT",
+		RelativePoint = "LEFT",
+		GrowDirection = "LEFT",
+		OffsetX = -2,
+		OffsetY = 0,
 	}),
 	fn.merge(defaults, {
-		AttachTo = "Frame",
-		Anchor = "BOTTOMRIGHT",
-		RelativePoint = "TOPRIGHT",
-		GrowDirection = "LEFT",
+		AttachTo = "CastBar",
+		Anchor = "LEFT",
+		RelativePoint = "RIGHT",
+		GrowDirection = "RIGHT",
+		OffsetX = 2,
+		OffsetY = 0,
 	}))
 
 function SkillHistory:OnEnable()
@@ -80,6 +82,7 @@ function SkillHistory:Update(unit)
 	local parent = GladiusEx:GetAttachFrame(unit, self.db[unit].AttachTo)
 	self.frame[unit]:ClearAllPoints()
 	self.frame[unit]:SetPoint(self.db[unit].Anchor, parent, self.db[unit].RelativePoint, self.db[unit].OffsetX, self.db[unit].OffsetY)
+	self.frame[unit]:SetFrameLevel(9)
 
 	-- size
 	self.frame[unit]:SetWidth(self.db[unit].MaxIcons * self.db[unit].IconSize + (self.db[unit].MaxIcons - 1) * self.db[unit].Margin + self.db[unit].PaddingX * 2)
@@ -515,17 +518,6 @@ function SkillHistory:GetOptions(unit)
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 1,
 						},
-						GrowDirection = {
-							type = "select",
-							name = L["Grow direction"],
-							desc = L["Grow direction of the icons"],
-							values = {
-								["LEFT"] = L["Left"],
-								["RIGHT"] = L["Right"],
-							},
-							disabled = function() return not self:IsUnitEnabled(unit) end,
-							order = 10,
-						},
 						sep = {
 							type = "description",
 							name = "",
@@ -680,7 +672,6 @@ function SkillHistory:GetOptions(unit)
 					name = L["Position"],
 					desc = L["Position settings"],
 					inline = true,
-					hidden = function() return not GladiusEx.db.base.advancedOptions end,
 					order = 4,
 					args = {
 						AttachTo = {
@@ -689,8 +680,50 @@ function SkillHistory:GetOptions(unit)
 							desc = L["Attach to the given frame"],
 							values = function() return self:GetOtherAttachPoints(unit) end,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							width = "double",
-							order = 5,
+							order = 1,
+						},
+						Position = {
+							type = "select",
+							name = L["Position"],
+							desc = L["Position of the frame"],
+							values = GladiusEx:GetSimplePositions(),
+							get = function()
+								return GladiusEx:SimplePositionFromAnchor(
+									self.db[unit].Anchor,
+									self.db[unit].RelativePoint,
+									self.db[unit].GrowDirection)
+							end,
+							set = function(info, value)
+								self.db[unit].Anchor, self.db[unit].RelativePoint =
+									GladiusEx:AnchorFromSimplePosition(value, self.db[unit].GrowDirection)
+								GladiusEx:UpdateFrames()
+							end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return GladiusEx.db.base.advancedOptions end,
+							order = 2,
+						},
+						GrowDirection = {
+							type = "select",
+							name = L["Grow direction"],
+							desc = L["Grow direction of the icons"],
+							values = {
+								["LEFT"] = L["Left"],
+								["RIGHT"] = L["Right"],
+							},
+							set = function(info, value)
+								if not GladiusEx.db.base.advancedOptions then
+									self.db[unit].Anchor, self.db[unit].RelativePoint =
+										GladiusEx:AnchorFromGrowDirection(
+											self.db[unit].Anchor,
+											self.db[unit].RelativePoint,
+											self.db[unit].GrowDirection,
+											value)
+								end
+								self.db[unit].GrowDirection = value
+								GladiusEx:UpdateFrames()
+							end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 3,
 						},
 						sep = {
 							type = "description",
@@ -704,6 +737,7 @@ function SkillHistory:GetOptions(unit)
 							desc = L["Anchor of the frame"],
 							values = function() return GladiusEx:GetPositions() end,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 10,
 						},
 						RelativePoint = {
@@ -712,6 +746,7 @@ function SkillHistory:GetOptions(unit)
 							desc = L["Relative point of the frame"],
 							values = function() return GladiusEx:GetPositions() end,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 15,
 						},
 						sep2 = {
