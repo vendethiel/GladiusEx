@@ -167,6 +167,7 @@ local function GetDefaultSpells()
 			[48020] = true, -- Warlock/Demonic Circle: Teleport
 			[5484] = true, -- Warlock/Howl of Terror
 			[6789] = true, -- Warlock/Mortal Coil
+			[115781] = true, -- Warlock/Optical Blast
 			[30283] = true, -- Warlock/Shadowfury
 			[89808] = true, -- Warlock/Singe Magic
 			[19647] = true, -- Warlock/Spell Lock
