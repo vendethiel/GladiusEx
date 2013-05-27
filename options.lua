@@ -12,6 +12,7 @@ GladiusEx.defaults = {
 		globalFontShadowColor = { r = 0, g = 0, b = 0, a = 0 },
 		globalBarTexture = GladiusEx.default_bar_texture,
 		showParty = true,
+		superFS = true,
 		testUnits = {
 			["arena1"] = { health = 350000, maxHealth = 350000, power = 180000, maxPower = 300000, powerType = 0, unitClass = "MAGE", unitRace = "Scourge", specID = 64 },
 			["arena2"] = { health = 275000, maxHealth = 320000, power = 10, maxPower = 100, powerType = 2, unitClass = "HUNTER", unitRace = "NightElf", specID = 253 },
@@ -274,12 +275,6 @@ function GladiusEx:MakeGroupOptions(group, unit, order)
 								},
 								disabled = function() return not self.db[unit].groupButtons end,
 							},
-							--sep2 = {
-							--	type = "description",
-							--	name = "",
-							--	width = "full",
-							--	order = 16,
-							--},
 							margin = {
 								type = "range",
 								name = L["Margin"],
@@ -375,7 +370,7 @@ function GladiusEx:MakeGroupOptions(group, unit, order)
 										type = "range",
 										name = L["Frame scale"],
 										desc = L["Scale of the frame"],
-										min = 0.1, softMax = 2, bigStep = 0.1,
+										min = 0.1, softMax = 2, bigStep = 0.01,
 										order = 70,
 									},
 								},
@@ -527,6 +522,14 @@ function GladiusEx:SetupOptions()
 								get = function(info) return GladiusEx:GetColorOption(self.db.base, info) end,
 								set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db.base, info, r, g, b, a) end,
 								order = 4,
+							},
+							superFS = {
+								type = "toggle",
+								name = L["Advanced font rendering"],
+								desc = L["Disable this if you are experiencing problems with the texts (requires a UI reload to take effect)"],
+								width = "double",
+								hidden = function() return not self.db.base.advancedOptions end,
+								order = 5,
 							},
 							sep = {
 								type = "description",

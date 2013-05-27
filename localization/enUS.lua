@@ -96,6 +96,8 @@ L["TargetBar"] = "Target"
 L["SkillHistory"] = "Skill History"
 
 -- General
+L["Advanced font rendering"] = true
+L["Disable this if you are experiencing problems with the texts (requires a UI reload to take effect)"] = true
 L["Left top"] = true
 L["Left bottom"] = true
 L["Right top"] = true

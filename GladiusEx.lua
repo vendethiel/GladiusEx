@@ -1451,7 +1451,9 @@ end
 -- This returns a FontString-like object that renders the outlines
 -- by creating several more FontStrings around the around the one.
 function GladiusEx:CreateSuperFS(fsparent, layer)
-	if false then return fsparent:CreateFontString(nil, layer) end
+	if not self.db.base.superFS then
+		return fsparent:CreateFontString(nil, layer)
+	end
 
 	local superfs = {}
 

@@ -8,7 +8,7 @@ local strfind, strformat = string.find, string.format
 local pairs = pairs
 local min = math.min
 local GetTime = GetTime
-local GetSpellInfo, UnitCastingInfo, UnitChannelInfo = GetSpellInfo, UnitCastingInfo, UnitChannelInfo
+local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
 
 local time_text_format_normal = "%.01f "
 local time_text_format_delay = "+%.01f %.01f "
