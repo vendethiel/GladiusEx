@@ -145,9 +145,6 @@ function SkillHistory:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, rank, lin
 		if lineID ~= 0 and lineID ~= prev_lineid[unit] then
 			prev_lineid[unit] = lineID
 			self:QueueSpell(unit, spellId, GetTime())
-			GladiusEx:Log("QUEUEING:", unit, spellName, rank, lineID, spellId)
-		else
-			GladiusEx:Log("SKIPPING:", unit, spellName, rank, lineID, spellId)
 		end
 	end
 end

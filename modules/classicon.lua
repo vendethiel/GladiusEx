@@ -425,7 +425,7 @@ function ClassIcon:SetClassIcon(unit)
 			self.frame[unit].portrait3d = CreateFrame("PlayerModel", nil, self.frame[unit])
 			self.frame[unit].portrait3d:SetAllPoints()
 			self.frame[unit].portrait3d:SetScript("OnShow", function(f) f:SetPortraitZoom(zoom) end)
-			self.frame[unit].portrait3d:SetScript("OnHide", function(f) GladiusEx:Log("Removing") f.guid = nil end)
+			self.frame[unit].portrait3d:SetScript("OnHide", function(f) f.guid = nil end)
 		end
 		if not UnitIsVisible(unit) or not UnitIsConnected(unit) then
 			self.frame[unit].portrait3d:Hide()
@@ -436,7 +436,6 @@ function ClassIcon:SetClassIcon(unit)
 				self.frame[unit].portrait3d:SetUnit(unit)
 				self.frame[unit].portrait3d:SetPortraitZoom(zoom)
 				self.frame[unit].portrait3d:SetPosition(0, 0, 0)
-				GladiusEx:Log("CLASSICON-PORTRAIT3D", unit, guid)
 			end
 			self.frame[unit].portrait3d:Show()
 			self.frame[unit].texture:SetTexture(0, 0, 0, 1)

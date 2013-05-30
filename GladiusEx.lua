@@ -348,7 +348,6 @@ function GladiusEx:OnEnable()
 	-- init options
 	self:SetupOptions()
 
-	log("OnEnable")
 	-- register the appropriate events
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("ARENA_OPPONENT_UPDATE")
@@ -365,12 +364,10 @@ function GladiusEx:OnEnable()
 	self.dbi.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
 	self.dbi.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
 	self.dbi.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")
-	log("Done")
 end
 
 local first_run = false
 function GladiusEx:CheckFirstRun()
-	log("CheckFirstRun")
 	if first_run then return end
 	first_run = true
 	-- display help message
@@ -549,9 +546,10 @@ function GladiusEx:CheckArenaSize(unit)
 	log("CheckArenaSize", unit, unit and UnitName(unit) or "none", min_size, size)
 
 	if self.arena_size ~= size then
-		log("arena size change detected", self.arena_size, " => ", size)
+		log("Arena size change detected", self.arena_size, " => ", size)
 		self.arena_size = size
 		self:UpdateFrames()
+		return true
 	end
 end
 
@@ -613,7 +611,6 @@ end
 
 function GladiusEx:PLAYER_ENTERING_WORLD()
 	local instanceType = select(2, IsInInstance())
-	log("PLAYER_ENTERING_WORLD", instanceType)
 
 	-- check if we are entering or leaving an arena
 	if instanceType == "arena" then
@@ -676,12 +673,14 @@ function GladiusEx:GROUP_ROSTER_UPDATE()
 	-- update arena as well since the group size is used as a clue of the arena size
 	if self:IsArenaShown() or self:IsPartyShown() then
 		self:UpdateAllGUIDs()
-		self:CheckArenaSize()
+		local u = self:CheckArenaSize()
+		if not u and self:IsPartyShown() then
+			self:UpdatePartyFrames()
+		end
 	end
 end
 
 function GladiusEx:QueueUpdate()
-	log("QueueUpdate")
 	self.update_pending = true
 end
 
@@ -701,8 +700,6 @@ end
 
 function GladiusEx:UNIT_NAME_UPDATE(event, unit)
 	if not self:IsHandledUnit(unit) then return end
-
-	log("UNIT_NAME_UPDATE", unit)
 
 	self:UpdateUnitGUID(event, unit)
 	self:CheckArenaSize(unit)
@@ -819,8 +816,6 @@ function GladiusEx:UpdateUnitSpecialization(unit, specID)
 	if self.buttons[unit] and self.buttons[unit].specID ~= specID then
 		self.buttons[unit].class = class
 		self.buttons[unit].specID = specID
-
-		log("UpdateUnitSpecialization", unit, "is", class, "/", spec)
 
 		self:SendMessage("GLADIUS_SPEC_UPDATE", unit)
 	end
@@ -1328,7 +1323,7 @@ function GladiusEx:UpdateUnit(unit)
 	self:UpdateUnitPosition(unit)
 
 	-- show the secure frame
-	if self:IsTesting() and not self:IsDebugging() then
+	if self:IsTesting() and not self.db.base.locked then
 		button.secure:Hide()
 	else
 		button.secure:Show()

@@ -334,7 +334,6 @@ function Alerts:SetAlert(unit, alert, priority, color)
 			alerts[unit].priority = priority
 			alerts[unit].current = alert
 			self:StartFlash(unit, color)
-			GladiusEx:Log("start", unit, alert)
 		end
 	end
 end
