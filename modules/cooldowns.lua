@@ -104,8 +104,6 @@ local function GetDefaultSpells()
 			[116705] = true, -- Monk/Spear Hand Strike
 			[116841] = true, -- Monk/Tiger's Lust
 			[122470] = true, -- Monk/Touch of Karma
-			[119996] = true, -- Monk/Transcendence: Transfer
-			[115176] = true, -- Monk/Zen Meditation
 			[115750] = true, -- Paladin/Blinding Light
 			[4987] = true, -- Paladin/Cleanse
 			[31821] = true, -- Paladin/Devotion Aura
