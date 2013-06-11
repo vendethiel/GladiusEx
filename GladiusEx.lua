@@ -466,7 +466,6 @@ function GladiusEx:UpdatePartyFrames()
 			self:UpdateUnitState(unit, false)
 			self:ShowUnit(unit)
 
-
 			if not self:IsTesting() and not UnitExists(unit) then
 				self:SoftHideUnit(unit)
 			end
@@ -577,7 +576,13 @@ function GladiusEx:ShowFrames()
 		self.party_parent:Show()
 	end
 
-	self:CheckArenaSize()
+	local updated = self:CheckArenaSize()
+	if not updated then
+		-- refresh buttons
+		for unit in pairs(self.buttons) do
+			self:RefreshUnit(unit)
+		end
+	end
 end
 
 function GladiusEx:HideFrames()
@@ -670,7 +675,6 @@ function GladiusEx:ARENA_OPPONENT_UPDATE(event, unit, type)
 end
 
 function GladiusEx:GROUP_ROSTER_UPDATE()
-	-- update arena as well since the group size is used as a clue of the arena size
 	if self:IsArenaShown() or self:IsPartyShown() then
 		self:UpdateAllGUIDs()
 		local u = self:CheckArenaSize()
