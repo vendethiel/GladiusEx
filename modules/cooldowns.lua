@@ -818,7 +818,7 @@ local function UpdateCooldownGroup(
 
 	cooldownFrame:ClearAllPoints()
 	cooldownFrame:SetPoint(cooldownAnchor, parent, cooldownRelativePoint, cooldownOffsetX, cooldownOffsetY)
-	cooldownFrame:SetFrameLevel(9)
+	cooldownFrame:SetFrameLevel(61)
 
 	-- size
 	cooldownFrame:SetWidth(cooldownSize * cooldownPerColumn + cooldownSpacingX * (cooldownPerColumn - 1) + cooldownPaddingX * 2)

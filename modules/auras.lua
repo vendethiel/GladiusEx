@@ -329,7 +329,7 @@ local function UpdateAuraGroup(
 	local parent = GladiusEx:GetAttachFrame(unit, aurasBuffsAttachTo)
 	auraFrame:ClearAllPoints()
 	auraFrame:SetPoint(aurasBuffsAnchor, parent, aurasBuffsRelativePoint, aurasBuffsOffsetX, aurasBuffsOffsetY)
-	auraFrame:SetFrameLevel(9)
+	auraFrame:SetFrameLevel(60)
 
 	-- size
 	auraFrame:SetWidth(aurasBuffsSize*aurasBuffsPerColumn+aurasBuffsSpacingX*aurasBuffsPerColumn)
