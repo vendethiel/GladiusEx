@@ -2,6 +2,7 @@ local GladiusEx = _G.GladiusEx
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local LSM = LibStub("LibSharedMedia-3.0")
 local fn = LibStub("LibFunctional-1.0")
+local LD = LibStub("LibDispellable-1.0")
 
 -- global functions
 local strfind = string.find
@@ -21,24 +22,24 @@ local FILTER_WHAT_BOTH = 6
 local defaults = {
 	aurasBuffs = true,
 	aurasBuffsOnlyDispellable = false,
-	aurasDebuffsOnlyMine = false,
+	aurasBuffsOnlyMine = false,
 	aurasBuffsSpacingX = 1,
 	aurasBuffsSpacingY = 1,
 	aurasBuffsPerColumn = 6,
-	aurasBuffsMax = 12,
+	aurasBuffsMax = 6,
 	aurasBuffsSize = 16,
 	aurasBuffsOffsetX = 0,
 	aurasBuffsOffsetY = 0,
 	aurasBuffsCrop = true,
 
-	aurasDebuffsWithBuffs = false,
 	aurasDebuffs = true,
+	aurasDebuffsWithBuffs = false,
 	aurasDebuffsOnlyDispellable = false,
 	aurasDebuffsOnlyMine = false,
 	aurasDebuffsSpacingX = 1,
 	aurasDebuffsSpacingY = 1,
 	aurasDebuffsPerColumn = 6,
-	aurasDebuffsMax = 12,
+	aurasDebuffsMax = 6,
 	aurasDebuffsSize = 16,
 	aurasDebuffsOffsetX = 0,
 	aurasDebuffsOffsetY = 0,
@@ -173,22 +174,31 @@ function Auras:IsAuraFiltered(unit, name, what)
 	end
 end
 
+local player_units = {
+	["player"] = true,
+	["vehicle"] = true,
+	["pet"] = true
+}
+
 function Auras:UpdateUnitAuras(event, unit)
 	local color
 	local sidx = 1
 
 	if self.buffFrame[unit] and self.db[unit].aurasBuffs then
-		-- buff frame
-		for i = 1, 40 do
-			local name, rank, icon, count, debuffType, duration, expires, caster, isStealable = UnitBuff(unit, i)
+		-- buffs
+		local only_mine = self.db[unit].aurasBuffsOnlyMine
+		local only_dispellable = self.db[unit].aurasBuffsOnlyDispellable
 
-			if name then
-				if self:IsAuraFiltered(unit, name, FILTER_WHAT_BUFFS) and (not self.db[unit].aurasBuffsOnlyDispellable or isStealable) then
-					SetBuff(self.buffFrame[unit][sidx], unit, i)
-					sidx = sidx + 1
-				end
-			else
-				break
+		for i = 1, 40 do
+			local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitBuff(unit, i)
+
+			if not name then break end
+
+			if self:IsAuraFiltered(unit, name, FILTER_WHAT_BUFFS) and
+				(not only_mine or player_units[caster]) and
+				(not only_dispellable or LD:CanDispel(unit, true, dispelType, spellID)) then
+				SetBuff(self.buffFrame[unit][sidx], unit, i)
+				sidx = sidx + 1
 			end
 		end
 
@@ -199,8 +209,11 @@ function Auras:UpdateUnitAuras(event, unit)
 	end
 
 	if self.debuffFrame[unit] and self.db[unit].aurasDebuffs then
-		local debuffFrame
+		-- debuffs
+		local only_mine = self.db[unit].aurasDebuffsOnlyMine
+		local only_dispellable = self.db[unit].aurasDebuffsOnlyDispellable
 
+		local debuffFrame
 		if self.db[unit].aurasBuffs and self.db[unit].aurasDebuffsWithBuffs then
 			debuffFrame = self.buffFrame[unit]
 		else
@@ -208,18 +221,17 @@ function Auras:UpdateUnitAuras(event, unit)
 			sidx = 1
 		end
 
-		-- debuff frame
 		for i = 1, 40 do
-			local name, rank, icon, count, debuffType, duration, expires, caster, isStealable = UnitDebuff(unit, i)
+			local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitDebuff(unit, i)
 
-			if name then
-				if self:IsAuraFiltered(unit, name, FILTER_WHAT_DEBUFFS) and (not self.db[unit].aurasDebuffsOnlyDispellable or isStealable) then
-					SetDebuff(debuffFrame[sidx], unit, i)
-					debuffFrame[sidx]:Show()
-					sidx = sidx + 1
-				end
-			else
-				break
+			if not name then break end
+
+			if self:IsAuraFiltered(unit, name, FILTER_WHAT_DEBUFFS) and
+				(not only_mine or player_units[caster]) and
+				(not only_dispellable or LD:CanDispel(unit, false, dispelType, spellID)) then
+				SetDebuff(debuffFrame[sidx], unit, i)
+				debuffFrame[sidx]:Show()
+				sidx = sidx + 1
 			end
 		end
 
