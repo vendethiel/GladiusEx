@@ -529,6 +529,7 @@ function Auras:GetOptions(unit)
 									width = "full",
 									name = L["Show only dispellable"],
 									disabled = function() return not self.db[unit].aurasBuffs or not self:IsUnitEnabled(unit) end,
+									hidden = function() return GladiusEx:IsPartyUnit(unit) end,
 									order = 14,
 								},
 								aurasBuffsOnlyMine = {
@@ -536,6 +537,7 @@ function Auras:GetOptions(unit)
 									width = "full",
 									name = L["Show only mine"],
 									disabled = function() return not self.db[unit].aurasBuffs or not self:IsUnitEnabled(unit) end,
+									hidden = function() return GladiusEx:IsArenaUnit(unit) end,
 									order = 14.1,
 								},
 								aurasBuffsPerColumn = {
@@ -765,6 +767,7 @@ function Auras:GetOptions(unit)
 									width = "full",
 									name = L["Show only dispellable"],
 									disabled = function() return not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) end,
+									hidden = function() return GladiusEx:IsArenaUnit(unit) end,
 									order = 14,
 								},
 								aurasDebuffsOnlyMine = {
@@ -772,6 +775,7 @@ function Auras:GetOptions(unit)
 									width = "full",
 									name = L["Show only mine"],
 									disabled = function() return not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) end,
+									hidden = function() return GladiusEx:IsPartyUnit(unit) end,
 									order = 14.1,
 								},
 								aurasDebuffsPerColumn = {
