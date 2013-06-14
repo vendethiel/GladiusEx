@@ -313,14 +313,14 @@ function ClassIcon:ScanAuras(unit)
 	-- debuffs
 	for index = 1, 40 do
 		local name, _, icon, _, _, duration, expires, _, _ = UnitDebuff(unit, index)
-		if (not name) then break end
+		if not name then break end
 		handle_aura(name, icon, duration, expires)
 	end
 
 	-- buffs
 	for index = 1, 40 do
 		local name, _, icon, _, _, duration, expires, _, _ = UnitBuff(unit, index)
-		if (not name) then break end
+		if not name then break end
 		handle_aura(name, icon, duration, expires)
 	end
 

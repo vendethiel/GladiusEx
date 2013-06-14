@@ -10,12 +10,26 @@ local GetTime = GetTime
 
 local function GetDefaultCastsSpells()
 	local h = { priority = 10, color = { r = 0, g = 1, b = 0, a = 1 } }
+	local cc = { priority = 20, color = { r = 1, g = 0, b = 0, a = 1 } }
 	return {
 		[GladiusEx:SafeGetSpellName(2060)]    = h,     -- Greater Heal
 		[GladiusEx:SafeGetSpellName(82326)]   = h,     -- Divine Light
+		[GladiusEx:SafeGetSpellName(8936)]    = h,     -- Regrowth
 		[GladiusEx:SafeGetSpellName(50464)]   = h,     -- Nourish
 		[GladiusEx:SafeGetSpellName(77472)]   = h,     -- Greater Healing Wave
 		[GladiusEx:SafeGetSpellName(115175)]  = h,     -- Soothing Mist
+
+		[GladiusEx:SafeGetSpellName(118)]      = cc,    -- Polymorph
+		[GladiusEx:SafeGetSpellName(5782)]     = cc,    -- Fear
+		[GladiusEx:SafeGetSpellName(51514)]    = cc,    -- Hex
+		[GladiusEx:SafeGetSpellName(105421)]   = cc,    -- Blinding Light
+		[GladiusEx:SafeGetSpellName(20066)]    = cc,    -- Repentance
+		[GladiusEx:SafeGetSpellName(33786)]    = cc,    -- Cyclone
+		[GladiusEx:SafeGetSpellName(102051)]   = cc,    -- Frostjaw
+		[GladiusEx:SafeGetSpellName(1513)]     = cc,    -- Scare Beast
+		[GladiusEx:SafeGetSpellName(339)]      = cc,    -- Entangling Roots
+		[GladiusEx:SafeGetSpellName(104045)]   = cc,    -- Sleep (Metamorphosis)
+		[GladiusEx:SafeGetSpellName(2637)]     = cc,    -- Hibernate
 	}
 end
 
@@ -23,144 +37,6 @@ local function GetDefaultAuraSpells()
 	local cc = { priority = 15, color = { r = 1, g = 1, b = 1, a = 1 } }
 	local im = { priority = 15, color = { r = 1, g = 1, b = 0, a = 1 } }
 	return {
-		-- Crowd control
-		[GladiusEx:SafeGetSpellName(108194)]   = cc,    -- Asphyxiate
-		[GladiusEx:SafeGetSpellName(115001)]   = cc,    -- Remorseless Winter
-		[GladiusEx:SafeGetSpellName(91800)]    = cc,    -- Gnaw
-		[GladiusEx:SafeGetSpellName(91797)]    = cc,    -- Monstrous Blow (Dark Transformation)
-		[GladiusEx:SafeGetSpellName(113801)]   = cc,    -- Bash (Force of Nature - Feral Treants)
-		[GladiusEx:SafeGetSpellName(102795)]   = cc,    -- Bear Hug
-		[GladiusEx:SafeGetSpellName(33786)]    = cc,    -- Cyclone
-		[GladiusEx:SafeGetSpellName(99)]       = cc,    -- Disorienting Roar
-		[GladiusEx:SafeGetSpellName(2637)]     = cc,    -- Hibernate
-		[GladiusEx:SafeGetSpellName(22570)]    = cc,    -- Maim
-		[GladiusEx:SafeGetSpellName(5211)]     = cc,    -- Mighty Bash
-		[GladiusEx:SafeGetSpellName(9005)]     = cc,    -- Pounce
-		[GladiusEx:SafeGetSpellName(102546)]   = cc,    -- Pounce (Incarnation)
-		[GladiusEx:SafeGetSpellName(110698)]   = cc,    -- Hammer of Justice (Paladin)
-		[GladiusEx:SafeGetSpellName(113004)]   = cc,    -- Intimidating Roar [Fleeing in fear] (Warrior)
-		[GladiusEx:SafeGetSpellName(113056)]   = cc,    -- Intimidating Roar [Cowering in fear] (Warrior)
-		[GladiusEx:SafeGetSpellName(117526)]   = cc,    -- Binding Shot
-		[GladiusEx:SafeGetSpellName(3355)]     = cc,    -- Freezing Trap
-		[GladiusEx:SafeGetSpellName(1513)]     = cc,    -- Scare Beast
-		[GladiusEx:SafeGetSpellName(19503)]    = cc,    -- Scatter Shot
-		[GladiusEx:SafeGetSpellName(19386)]    = cc,    -- Wyvern Sting
-		[GladiusEx:SafeGetSpellName(90337)]    = cc,    -- Bad Manner (Monkey)
-		[GladiusEx:SafeGetSpellName(24394)]    = cc,    -- Intimidation
-		[GladiusEx:SafeGetSpellName(126246)]   = cc,    -- Lullaby (Crane)
-		[GladiusEx:SafeGetSpellName(126355)]   = cc,    -- Paralyzing Quill (Porcupine)
-		[GladiusEx:SafeGetSpellName(126423)]   = cc,    -- Petrifying Gaze (Basilisk)
-		[GladiusEx:SafeGetSpellName(50519)]    = cc,    -- Sonic Blast (Bat)
-		[GladiusEx:SafeGetSpellName(56626)]    = cc,    -- Sting (Wasp)
-		[GladiusEx:SafeGetSpellName(96201)]    = cc,    -- Web Wrap (Shale Spider)
-		[GladiusEx:SafeGetSpellName(118271)]   = cc,    -- Combustion Impact
-		[GladiusEx:SafeGetSpellName(44572)]    = cc,    -- Deep Freeze
-		[GladiusEx:SafeGetSpellName(31661)]    = cc,    -- Dragon's Breath
-		[GladiusEx:SafeGetSpellName(118)]      = cc,    -- Polymorph
-		[GladiusEx:SafeGetSpellName(61305)]    = cc,    -- Polymorph: Black Cat
-		[GladiusEx:SafeGetSpellName(28272)]    = cc,    -- Polymorph: Pig
-		[GladiusEx:SafeGetSpellName(61721)]    = cc,    -- Polymorph: Rabbit
-		[GladiusEx:SafeGetSpellName(61780)]    = cc,    -- Polymorph: Turkey
-		[GladiusEx:SafeGetSpellName(28271)]    = cc,    -- Polymorph: Turtle
-		[GladiusEx:SafeGetSpellName(82691)]    = cc,    -- Ring of Frost
-		[GladiusEx:SafeGetSpellName(123393)]   = cc,    -- Breath of Fire (Glyph of Breath of Fire)
-		[GladiusEx:SafeGetSpellName(126451)]   = cc,    -- Clash
-		[GladiusEx:SafeGetSpellName(122242)]   = cc,    -- Clash (not sure which one is right)
-		[GladiusEx:SafeGetSpellName(119392)]   = cc,    -- Charging Ox Wave
-		[GladiusEx:SafeGetSpellName(120086)]   = cc,    -- Fists of Fury
-		[GladiusEx:SafeGetSpellName(119381)]   = cc,    -- Leg Sweep
-		[GladiusEx:SafeGetSpellName(115078)]   = cc,    -- Paralysis
-		[GladiusEx:SafeGetSpellName(105421)]   = cc,    -- Blinding Light
-		[GladiusEx:SafeGetSpellName(115752)]   = cc,    -- Blinding Light (Glyph of Blinding Light)
-		[GladiusEx:SafeGetSpellName(105593)]   = cc,    -- Fist of Justice
-		[GladiusEx:SafeGetSpellName(853)]      = cc,    -- Hammer of Justice
-		[GladiusEx:SafeGetSpellName(119072)]   = cc,    -- Holy Wrath
-		[GladiusEx:SafeGetSpellName(20066)]    = cc,    -- Repentance
-		[GladiusEx:SafeGetSpellName(10326)]    = cc,    -- Turn Evil
-		[GladiusEx:SafeGetSpellName(113506)]   = cc,    -- Cyclone (Symbiosis)
-		[GladiusEx:SafeGetSpellName(605)]      = cc,    -- Dominate Mind
-		[GladiusEx:SafeGetSpellName(88625)]    = cc,    -- Holy Word: Chastise
-		[GladiusEx:SafeGetSpellName(64044)]    = cc,    -- Psychic Horror
-		[GladiusEx:SafeGetSpellName(8122)]     = cc,    -- Psychic Scream
-		[GladiusEx:SafeGetSpellName(113792)]   = cc,    -- Psychic Terror (Psyfiend)
-		[GladiusEx:SafeGetSpellName(9484)]     = cc,    -- Shackle Undead
-		[GladiusEx:SafeGetSpellName(87204)]    = cc,    -- Sin and Punishment
-		[GladiusEx:SafeGetSpellName(2094)]     = cc,    -- Blind
-		[GladiusEx:SafeGetSpellName(1833)]     = cc,    -- Cheap Shot
-		[GladiusEx:SafeGetSpellName(1776)]     = cc,    -- Gouge
-		[GladiusEx:SafeGetSpellName(408)]      = cc,    -- Kidney Shot
-		[GladiusEx:SafeGetSpellName(113953)]   = cc,    -- Paralysis (Paralytic Poison)
-		[GladiusEx:SafeGetSpellName(6770)]     = cc,    -- Sap
-		[GladiusEx:SafeGetSpellName(76780)]    = cc,    -- Bind Elemental
-		[GladiusEx:SafeGetSpellName(77505)]    = cc,    -- Earthquake
-		[GladiusEx:SafeGetSpellName(51514)]    = cc,    -- Hex
-		[GladiusEx:SafeGetSpellName(118905)]   = cc,    -- Static Charge (Capacitor Totem)
-		[GladiusEx:SafeGetSpellName(710)]      = cc,    -- Banish
-		[GladiusEx:SafeGetSpellName(137143)]   = cc,    -- Blood Horror
-		[GladiusEx:SafeGetSpellName(54786)]    = cc,    -- Demonic Leap (Metamorphosis)
-		[GladiusEx:SafeGetSpellName(5782)]     = cc,    -- Fear
-		[GladiusEx:SafeGetSpellName(118699)]   = cc,    -- Fear
-		[GladiusEx:SafeGetSpellName(130616)]   = cc,    -- Fear (Glyph of Fear)
-		[GladiusEx:SafeGetSpellName(5484)]     = cc,    -- Howl of Terror
-		[GladiusEx:SafeGetSpellName(22703)]    = cc,    -- Infernal Awakening
-		[GladiusEx:SafeGetSpellName(6789)]     = cc,    -- Mortal Coil
-		[GladiusEx:SafeGetSpellName(132412)]   = cc,    -- Seduction (Grimoire of Sacrifice)
-		[GladiusEx:SafeGetSpellName(30283)]    = cc,    -- Shadowfury
-		[GladiusEx:SafeGetSpellName(104045)]   = cc,    -- Sleep (Metamorphosis)
-		[GladiusEx:SafeGetSpellName(7922)]     = cc,    -- Charge Stun
-		[GladiusEx:SafeGetSpellName(118895)]   = cc,    -- Dragon Roar
-		[GladiusEx:SafeGetSpellName(5246)]     = cc,    -- Intimidating Shout (aoe)
-		[GladiusEx:SafeGetSpellName(20511)]    = cc,    -- Intimidating Shout (targeted)
-		[GladiusEx:SafeGetSpellName(132168)]   = cc,    -- Shockwave
-		[GladiusEx:SafeGetSpellName(107570)]   = cc,    -- Storm Bolt
-		[GladiusEx:SafeGetSpellName(105771)]   = cc,    -- Warbringer
-		[GladiusEx:SafeGetSpellName(107079)]   = cc,    -- Quaking Palm
-		[GladiusEx:SafeGetSpellName(20549)]    = cc,    -- War Stomp
-		[GladiusEx:SafeGetSpellName(118345)]   = cc,    -- Pulverize
-		[GladiusEx:SafeGetSpellName(89766)]    = cc,    -- Axe Toss (Felguard/Wrathguard)
-		[GladiusEx:SafeGetSpellName(115268)]   = cc,    -- Mesmerize (Shivarra)
-		[GladiusEx:SafeGetSpellName(6358)]     = cc,    -- Seduction (Succubus)
-
-		-- Silences
-		[GladiusEx:SafeGetSpellName(47476)]    = cc,    -- Strangulate
-		[GladiusEx:SafeGetSpellName(114238)]   = cc,    -- Fae Silence (Glyph of Fae Silence)
-		[GladiusEx:SafeGetSpellName(81261)]    = cc,    -- Solar Beam
-		[GladiusEx:SafeGetSpellName(34490)]    = cc,    -- Silencing Shot
-		[GladiusEx:SafeGetSpellName(102051)]   = cc,    -- Frostjaw (also a root)
-		[GladiusEx:SafeGetSpellName(55021)]    = cc,    -- Silenced - Improved Counterspell
-		[GladiusEx:SafeGetSpellName(116709)]   = cc,    -- Spear Hand Strike
-		[GladiusEx:SafeGetSpellName(31935)]    = cc,    -- Avenger's Shield
-		[GladiusEx:SafeGetSpellName(15487)]    = cc,    -- Silence
-		[GladiusEx:SafeGetSpellName(1330)]     = cc,    -- Garrote - Silence
-		[GladiusEx:SafeGetSpellName(113287)]   = cc,    -- Solar Beam (Symbiosis)
-		[GladiusEx:SafeGetSpellName(132409)]   = cc,    -- Spell Lock (Grimoire of Sacrifice)
-		[GladiusEx:SafeGetSpellName(31117)]    = cc,    -- Unstable Affliction
-		[GladiusEx:SafeGetSpellName(115782)]   = cc,    -- Optical Blast (Observer)
-		[GladiusEx:SafeGetSpellName(24259)]    = cc,    -- Spell Lock (Felhunter
-		[GladiusEx:SafeGetSpellName(25046)]    = cc,    -- Arcane Torrent (Energy)
-		[GladiusEx:SafeGetSpellName(28730)]    = cc,    -- Arcane Torrent (Mana)
-		[GladiusEx:SafeGetSpellName(50613)]    = cc,    -- Arcane Torrent (Runic Power)
-		[GladiusEx:SafeGetSpellName(69179)]    = cc,    -- Arcane Torrent (Rage)
-		[GladiusEx:SafeGetSpellName(80483)]    = cc,    -- Arcane Torrent (Focus)
-		[GladiusEx:SafeGetSpellName(129597)]   = cc,    -- Arcane Torrent (Chi)
-
-		-- Immunities
-		[GladiusEx:SafeGetSpellName(115018)]   = im,    -- Desecrated Ground
-		[GladiusEx:SafeGetSpellName(48707)]    = im,    -- Anti-Magic Shell
-		[GladiusEx:SafeGetSpellName(110617)]   = im,    -- Deterrence (Hunter)
-		[GladiusEx:SafeGetSpellName(110715)]   = im,    -- Dispersion (Priest)
-		[GladiusEx:SafeGetSpellName(110700)]   = im,    -- Divine Shield (Paladin)
-		[GladiusEx:SafeGetSpellName(110696)]   = im,    -- Ice Block (Mage)
-		[GladiusEx:SafeGetSpellName(110570)]   = im,    -- Anti-Magic Shell (Death Knight)
-		[GladiusEx:SafeGetSpellName(110788)]   = im,    -- Cloak of Shadows (Rogue)
-		[GladiusEx:SafeGetSpellName(19263)]    = im,    -- Deterrence
-		[GladiusEx:SafeGetSpellName(45438)]    = im,    -- Ice Block
-		[GladiusEx:SafeGetSpellName(115760)]   = im,    -- Glyph of Ice Block
-		[GladiusEx:SafeGetSpellName(131523)]   = im,    -- Zen Meditation
-		[GladiusEx:SafeGetSpellName(642)]      = im,    -- Divine Shield
-		[GladiusEx:SafeGetSpellName(47585)]    = im,    -- Dispersion
-		[GladiusEx:SafeGetSpellName(31224)]    = im,    -- Cloak of Shadows
-		[GladiusEx:SafeGetSpellName(46924)]    = im,    -- Bladestorm
 	}
 end
 

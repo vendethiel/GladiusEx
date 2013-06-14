@@ -142,6 +142,7 @@ function Auras:UpdateUnitAuras(event, unit)
 	local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
 	local icon_index = 1
 	local frame
+	local max
 
 	local function SetAura(index)
 		local aura_frame = frame[icon_index]
@@ -166,15 +167,15 @@ function Auras:UpdateUnitAuras(event, unit)
 		end
 
 		aura_frame:Show()
+		icon_index = icon_index + 1
 	end
 
 	-- buffs
 	if self.db[unit].aurasBuffs then
 		frame = self.buffFrame[unit]
-
+		max = self.db[unit].aurasBuffsMax
 		local only_mine = self.db[unit].aurasBuffsOnlyMine
 		local only_dispellable = self.db[unit].aurasBuffsOnlyDispellable
-		local max = self.db[unit].aurasBuffsMax
 
 		for i = 1, 40 do
 			name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitBuff(unit, i)
@@ -185,7 +186,6 @@ function Auras:UpdateUnitAuras(event, unit)
 				(not only_mine or player_units[caster]) and
 				(not only_dispellable or LD:CanDispel(unit, true, dispelType, spellID)) then
 				SetAura(i)
-				icon_index = icon_index + 1
 				if icon_index > max then break end
 			end
 		end
@@ -200,13 +200,8 @@ function Auras:UpdateUnitAuras(event, unit)
 	if self.db[unit].aurasDebuffs then
 		local only_mine = self.db[unit].aurasDebuffsOnlyMine
 		local only_dispellable = self.db[unit].aurasDebuffsOnlyDispellable
-		local max
 
-		local debuffFrame
-		if self.db[unit].aurasBuffs and self.db[unit].aurasDebuffsWithBuffs then
-			frame = self.buffFrame[unit]
-			max = self.db[unit].aurasBuffsMax
-		else
+		if self.db[unit].aurasBuffs and not self.db[unit].aurasDebuffsWithBuffs then
 			frame = self.debuffFrame[unit]
 			max = self.db[unit].aurasDebuffsMax
 			icon_index = 1
@@ -223,7 +218,6 @@ function Auras:UpdateUnitAuras(event, unit)
 				(not only_mine or player_units[caster]) and
 				(not only_dispellable or LD:CanDispel(unit, false, dispelType, spellID)) then
 				SetAura(i)
-				icon_index = icon_index + 1
 				if icon_index > max then break end
 			end
 		end
