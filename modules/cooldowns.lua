@@ -102,6 +102,7 @@ local function GetDefaultSpells()
 			[115310] = true, -- Monk/Revival
 			[116844] = true, -- Monk/Ring of Peace
 			[116705] = true, -- Monk/Spear Hand Strike
+			[116680] = true, -- Monk/Thunder Focus Tea
 			[116841] = true, -- Monk/Tiger's Lust
 			[122470] = true, -- Monk/Touch of Karma
 			[115750] = true, -- Paladin/Blinding Light
