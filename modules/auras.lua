@@ -118,50 +118,6 @@ function Auras:GetModuleAttachFrame(unit, point)
 	end
 end
 
-local function SetBuff(buffFrame, unit, i)
-	local name, rank, icon, count, debuffType, duration, expires, caster, isStealable = UnitBuff(unit, i)
-
-	buffFrame:SetID(i)
-	buffFrame.icon:SetTexture(icon)
-	if duration > 0 then
-		buffFrame.cooldown:SetCooldown(expires - duration, duration)
-		buffFrame.cooldown:Show()
-	else
-		buffFrame.cooldown:Hide()
-	end
-	buffFrame.count:SetText(count > 1 and count or nil)
-
-	--if isStealable then
-	if true then
-		local color = DebuffTypeColor[debuffType] or DebuffTypeColor["none"]
-		buffFrame.border:SetVertexColor(color.r, color.g, color.b)
-		buffFrame.border:Show()
-	else
-		buffFrame.border:Hide()
-	end
-
-
-	buffFrame:Show()
-end
-
-local function SetDebuff(debuffFrame, unit, i)
-	local name, rank, icon, count, debuffType, duration, expires, caster, isStealable = UnitDebuff(unit, i)
-
-	debuffFrame:SetID(i)
-	debuffFrame.icon:SetTexture(icon)
-
-	if duration > 0 then
-		debuffFrame.cooldown:SetCooldown(expires - duration, duration)
-		debuffFrame.cooldown:Show()
-	else
-		debuffFrame.cooldown:Hide()
-	end
-
-	debuffFrame.count:SetText(count > 1 and count or nil)
-	local color = debuffType and DebuffTypeColor[debuffType] or DebuffTypeColor["none"]
-	debuffFrame.border:SetVertexColor(color.r, color.g, color.b)
-end
-
 function Auras:IsAuraFiltered(unit, name, what)
 	if self.db[unit].aurasFilterType == FILTER_TYPE_DISABLED then
 		return true
@@ -181,63 +137,100 @@ local player_units = {
 }
 
 function Auras:UpdateUnitAuras(event, unit)
-	local color
-	local sidx = 1
+	if not self.buffFrame[unit] and not self.debuffFrame[unit] then return end
 
-	if self.buffFrame[unit] and self.db[unit].aurasBuffs then
-		-- buffs
+	local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
+	local icon_index = 1
+	local frame
+
+	local function SetAura(index)
+		local aura_frame = frame[icon_index]
+
+		aura_frame:SetID(index)
+		aura_frame.icon:SetTexture(icon)
+		if duration > 0 then
+			aura_frame.cooldown:SetCooldown(expires - duration, duration)
+			aura_frame.cooldown:Show()
+		else
+			aura_frame.cooldown:Hide()
+		end
+		aura_frame.count:SetText(count > 1 and count or nil)
+
+		--if isStealable then
+		if true then
+			local color = DebuffTypeColor[dispelType] or DebuffTypeColor["none"]
+			aura_frame.border:SetVertexColor(color.r, color.g, color.b)
+			aura_frame.border:Show()
+		else
+			aura_frame.border:Hide()
+		end
+
+		aura_frame:Show()
+	end
+
+	-- buffs
+	if self.db[unit].aurasBuffs then
+		frame = self.buffFrame[unit]
+
 		local only_mine = self.db[unit].aurasBuffsOnlyMine
 		local only_dispellable = self.db[unit].aurasBuffsOnlyDispellable
+		local max = self.db[unit].aurasBuffsMax
 
 		for i = 1, 40 do
-			local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitBuff(unit, i)
+			name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitBuff(unit, i)
 
 			if not name then break end
 
 			if self:IsAuraFiltered(unit, name, FILTER_WHAT_BUFFS) and
 				(not only_mine or player_units[caster]) and
 				(not only_dispellable or LD:CanDispel(unit, true, dispelType, spellID)) then
-				SetBuff(self.buffFrame[unit][sidx], unit, i)
-				sidx = sidx + 1
+				SetAura(i)
+				icon_index = icon_index + 1
+				if icon_index > max then break end
 			end
 		end
 
 		-- hide unused aura frames
-		for i = sidx, 40 do
+		for i = icon_index, 40 do
 			self.buffFrame[unit][i]:Hide()
 		end
 	end
 
-	if self.debuffFrame[unit] and self.db[unit].aurasDebuffs then
-		-- debuffs
+	-- debuffs
+	if self.db[unit].aurasDebuffs then
 		local only_mine = self.db[unit].aurasDebuffsOnlyMine
 		local only_dispellable = self.db[unit].aurasDebuffsOnlyDispellable
+		local max
 
 		local debuffFrame
 		if self.db[unit].aurasBuffs and self.db[unit].aurasDebuffsWithBuffs then
-			debuffFrame = self.buffFrame[unit]
+			frame = self.buffFrame[unit]
+			max = self.db[unit].aurasBuffsMax
 		else
-			debuffFrame = self.debuffFrame[unit]
-			sidx = 1
+			frame = self.debuffFrame[unit]
+			max = self.db[unit].aurasDebuffsMax
+			icon_index = 1
 		end
 
+		if not frame then return end
+
 		for i = 1, 40 do
-			local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitDebuff(unit, i)
+			name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitDebuff(unit, i)
 
 			if not name then break end
 
 			if self:IsAuraFiltered(unit, name, FILTER_WHAT_DEBUFFS) and
 				(not only_mine or player_units[caster]) and
 				(not only_dispellable or LD:CanDispel(unit, false, dispelType, spellID)) then
-				SetDebuff(debuffFrame[sidx], unit, i)
-				debuffFrame[sidx]:Show()
-				sidx = sidx + 1
+				SetAura(i)
+				icon_index = icon_index + 1
+				if icon_index > max then break end
 			end
 		end
 
 		-- hide unused aura frames
-		for i = sidx, 40 do
-			debuffFrame[i]:Hide()
+		for i = icon_index, 40 do
+			frame[i]:Hide()
 		end
 	end
 end
