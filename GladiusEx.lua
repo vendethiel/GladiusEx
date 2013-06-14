@@ -686,6 +686,7 @@ end
 
 function GladiusEx:QueueUpdate()
 	self.update_pending = true
+	log("Update Queued")
 end
 
 function GladiusEx:IsUpdatePending()
@@ -1082,7 +1083,9 @@ end
 function GladiusEx:GetWidgetsBounds(unit)
 	local button = self.buttons[unit]
 
-	return button.wleft, button.wright, button.wtop, button.wbottom
+	if button then
+		return button.wleft, button.wright, button.wtop, button.wbottom
+	end
 end
 
 function GladiusEx:UpdateUnitPosition(unit)
@@ -1194,6 +1197,7 @@ function GladiusEx:UpdateUnit(unit)
 
 	if InCombatLockdown() then
 		self:QueueUpdate()
+		return
 	end
 
 	-- create
