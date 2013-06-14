@@ -288,51 +288,6 @@ function TargetBar:Update(unit)
 end
 
 function TargetBar:GetOptions(unit)
-	-- values for simple positioning
-	local positions = {
-		["TOPLEFT"] = L["Top left"],
-		["TOPRIGHT"] = L["Top right"],
-		["LEFTTOP"] = L["Left top"],
-		["LEFTBOTTOM"] = L["Left bottom"],
-		["RIGHTTOP"] = L["Right top"],
-		["RIGHTBOTTOM"] = L["Right bottom"],
-		["BOTTOMLEFT"] = L["Bottom left"],
-		["BOTTOMRIGHT"] = L["Bottom right"],
-	}
-
-	local pos_rel = {
-		["LEFTTOP"] = "TOPLEFT",
-		["LEFTBOTTOM"] = "BOTTOMLEFT",
-		["RIGHTTOP"] = "TOPRIGHT",
-		["RIGHTBOTTOM"] = "BOTTOMRIGHT",
-	}
-
-	local pos_anchor = {
-		["TOPLEFT"] = "BOTTOMLEFT",
-		["TOPRIGHT"] = "BOTTOMRIGHT",
-		["LEFTTOP"] = "TOPRIGHT",
-		["LEFTBOTTOM"] = "BOTTOMRIGHT",
-		["RIGHTTOP"] = "TOPLEFT",
-		["RIGHTBOTTOM"] = "BOTTOMLEFT",
-		["BOTTOMLEFT"] = "TOPLEFT",
-		["BOTTOMRIGHT"] = "TOPRIGHT",
-	}
-
-	local function pos_to_anchor(pos)
-		local anchor = pos_anchor[pos]
-		local relative = pos_rel[pos] or pos
-		return anchor, relative
-	end
-
-	local function anchor_to_pos(anchor, relative)
-		for pos in pairs(positions) do
-			local panchor, prelative = pos_to_anchor(pos)
-			if panchor == anchor and prelative == relative then
-				return pos
-			end
-		end
-	end
-
 	return {
 		general = {
 			type = "group",
@@ -488,12 +443,12 @@ function TargetBar:GetOptions(unit)
 							type = "select",
 							name = L["Position"],
 							desc = L["Position of the frame"],
-							values = positions,
+							values = GladiusEx:GetSimplePositions(),
 							get = function()
-								return anchor_to_pos(self.db[unit].targetBarAnchor, self.db[unit].targetBarRelativePoint)
+								return GladiusEx:AnchorToSimplePosition(self.db[unit].targetBarAnchor, self.db[unit].targetBarRelativePoint)
 							end,
 							set = function(info, value)
-								self.db[unit].targetBarAnchor, self.db[unit].targetBarRelativePoint = pos_to_anchor(value)
+								self.db[unit].targetBarAnchor, self.db[unit].targetBarRelativePoint = GladiusEx:SimplePositionToAnchor(value)
 								GladiusEx:UpdateFrames()
 							end,
 							disabled = function() return not self:IsUnitEnabled(unit) end,

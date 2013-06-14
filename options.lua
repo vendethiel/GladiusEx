@@ -843,7 +843,7 @@ function GladiusEx:ShowOptionsDialog()
 end
 
 -- helper functions for simple position settings
-function GladiusEx:GetSimplePositions()
+function GladiusEx:GetGrowSimplePositions()
 	return {
 		["LEFT"] = L["Left"],
 		["RIGHT"] = L["Right"],
@@ -852,16 +852,16 @@ function GladiusEx:GetSimplePositions()
 	}
 end
 
-function GladiusEx:SimplePositionFromAnchor(anchor, relative, grow)
-	for position in pairs(self:GetSimplePositions()) do
-		local panchor, prelative = self:AnchorFromSimplePosition(position, grow)
+function GladiusEx:GrowSimplePositionFromAnchor(anchor, relative, grow)
+	for position in pairs(self:GetGrowSimplePositions()) do
+		local panchor, prelative = self:AnchorFromGrowSimplePosition(position, grow)
 		if panchor == anchor and prelative == relative then
 			return position
 		end
 	end
 end
 
-function GladiusEx:AnchorFromSimplePosition(position, grow)
+function GladiusEx:AnchorFromGrowSimplePosition(position, grow)
 	local grow_v = (strfind(grow, "UP") and "BOTTOM") or (strfind(grow, "DOWN") and "TOP") or ""
 	local grow_h = (strfind(grow, "LEFT") and "RIGHT") or (strfind(grow, "RIGHT") and "LEFT") or ""
 
@@ -885,9 +885,59 @@ function GladiusEx:AnchorFromSimplePosition(position, grow)
 end
 
 function GladiusEx:AnchorFromGrowDirection(anchor, relative, grow, newgrow)
-	local position = GladiusEx:SimplePositionFromAnchor(anchor, relative, grow)
+	local position = GladiusEx:GrowSimplePositionFromAnchor(anchor, relative, grow)
 	if position then
-		anchor, relative = GladiusEx:AnchorFromSimplePosition(position, newgrow)
+		anchor, relative = GladiusEx:AnchorFromGrowSimplePosition(position, newgrow)
 	end
 	return anchor, relative
+end
+
+
+-- values for simple positioning without grow direction
+local simple_pos = {
+	["TOPLEFT"] = L["Top left"],
+	["TOPRIGHT"] = L["Top right"],
+	["LEFTTOP"] = L["Left top"],
+	["LEFTBOTTOM"] = L["Left bottom"],
+	["RIGHTTOP"] = L["Right top"],
+	["RIGHTBOTTOM"] = L["Right bottom"],
+	["BOTTOMLEFT"] = L["Bottom left"],
+	["BOTTOMRIGHT"] = L["Bottom right"],
+}
+
+local pos_rel = {
+	["LEFTTOP"] = "TOPLEFT",
+	["LEFTBOTTOM"] = "BOTTOMLEFT",
+	["RIGHTTOP"] = "TOPRIGHT",
+	["RIGHTBOTTOM"] = "BOTTOMRIGHT",
+}
+
+local pos_anchor = {
+	["TOPLEFT"] = "BOTTOMLEFT",
+	["TOPRIGHT"] = "BOTTOMRIGHT",
+	["LEFTTOP"] = "TOPRIGHT",
+	["LEFTBOTTOM"] = "BOTTOMRIGHT",
+	["RIGHTTOP"] = "TOPLEFT",
+	["RIGHTBOTTOM"] = "BOTTOMLEFT",
+	["BOTTOMLEFT"] = "TOPLEFT",
+	["BOTTOMRIGHT"] = "TOPRIGHT",
+}
+
+function GladiusEx:GetSimplePositions()
+	return simple_pos
+end
+
+function GladiusEx:SimplePositionToAnchor(pos)
+	local anchor = pos_anchor[pos]
+	local relative = pos_rel[pos] or pos
+	return anchor, relative
+end
+
+function GladiusEx:AnchorToSimplePosition(anchor, relative)
+	for pos in pairs(simple_pos) do
+		local panchor, prelative = GladiusEx:SimplePositionToAnchor(pos)
+		if panchor == anchor and prelative == relative then
+			return pos
+		end
+	end
 end

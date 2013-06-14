@@ -683,16 +683,16 @@ function SkillHistory:GetOptions(unit)
 							type = "select",
 							name = L["Position"],
 							desc = L["Position of the frame"],
-							values = GladiusEx:GetSimplePositions(),
+							values = GladiusEx:GetGrowSimplePositions(),
 							get = function()
-								return GladiusEx:SimplePositionFromAnchor(
+								return GladiusEx:GrowSimplePositionFromAnchor(
 									self.db[unit].Anchor,
 									self.db[unit].RelativePoint,
 									self.db[unit].GrowDirection)
 							end,
 							set = function(info, value)
 								self.db[unit].Anchor, self.db[unit].RelativePoint =
-									GladiusEx:AnchorFromSimplePosition(value, self.db[unit].GrowDirection)
+									GladiusEx:AnchorFromGrowSimplePosition(value, self.db[unit].GrowDirection)
 								GladiusEx:UpdateFrames()
 							end,
 							disabled = function() return not self:IsUnitEnabled(unit) end,

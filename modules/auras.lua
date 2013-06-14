@@ -620,16 +620,16 @@ function Auras:GetOptions(unit)
 									type = "select",
 									name = L["Position"],
 									desc = L["Position of the frame"],
-									values = GladiusEx:GetSimplePositions(),
+									values = GladiusEx:GetGrowSimplePositions(),
 									get = function()
-										return GladiusEx:SimplePositionFromAnchor(
+										return GladiusEx:GrowSimplePositionFromAnchor(
 											self.db[unit].aurasBuffsAnchor,
 											self.db[unit].aurasBuffsRelativePoint,
 											self.db[unit].aurasBuffsGrow)
 									end,
 									set = function(info, value)
 										self.db[unit].aurasBuffsAnchor, self.db[unit].aurasBuffsRelativePoint =
-											GladiusEx:AnchorFromSimplePosition(value, self.db[unit].aurasBuffsGrow)
+											GladiusEx:AnchorFromGrowSimplePosition(value, self.db[unit].aurasBuffsGrow)
 										GladiusEx:UpdateFrames()
 									end,
 									disabled = function() return not self.db[unit].aurasBuffs or not self:IsUnitEnabled(unit) end,
@@ -856,16 +856,16 @@ function Auras:GetOptions(unit)
 									type = "select",
 									name = L["Position"],
 									desc = L["Position of the frame"],
-									values = GladiusEx:GetSimplePositions(),
+									values = GladiusEx:GetGrowSimplePositions(),
 									get = function()
-										return GladiusEx:SimplePositionFromAnchor(
+										return GladiusEx:GrowSimplePositionFromAnchor(
 											self.db[unit].aurasDebuffsAnchor,
 											self.db[unit].aurasDebuffsRelativePoint,
 											self.db[unit].aurasDebuffsGrow)
 									end,
 									set = function(info, value)
 										self.db[unit].aurasDebuffsAnchor, self.db[unit].aurasDebuffsRelativePoint =
-											GladiusEx:AnchorFromSimplePosition(value, self.db[unit].aurasDebuffsGrow)
+											GladiusEx:AnchorFromGrowSimplePosition(value, self.db[unit].aurasDebuffsGrow)
 										GladiusEx:UpdateFrames()
 									end,
 									disabled = function() return self.db[unit].aurasDebuffsWithBuffs or not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) end,

@@ -1291,16 +1291,16 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								type = "select",
 								name = L["Position"],
 								desc = L["Position of the frame"],
-								values = GladiusEx:GetSimplePositions(),
+								values = GladiusEx:GetGrowSimplePositions(),
 								get = function()
-									return GladiusEx:SimplePositionFromAnchor(
+									return GladiusEx:GrowSimplePositionFromAnchor(
 										self:GetGroupDB(unit, group).cooldownsAnchor,
 										self:GetGroupDB(unit, group).cooldownsRelativePoint,
 										self:GetGroupDB(unit, group).cooldownsGrow)
 								end,
 								set = function(info, value)
 									self:GetGroupDB(unit, group).cooldownsAnchor, self:GetGroupDB(unit, group).cooldownsRelativePoint =
-										GladiusEx:AnchorFromSimplePosition(value, self:GetGroupDB(unit, group).cooldownsGrow)
+										GladiusEx:AnchorFromGrowSimplePosition(value, self:GetGroupDB(unit, group).cooldownsGrow)
 									GladiusEx:UpdateFrames()
 								end,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
@@ -1613,9 +1613,9 @@ function Cooldowns:MakeGroupOptions(unit, group)
 				local basecd = GetSpellBaseCooldown(spellid)
 				if basecd and basecd / 1000 ~= spelldata.cooldown then
 					local str = string.format("%s: |T%s:20|t %s [%ss/Base: %ss] %s", spelldata.class, spelldata.icon, spelldata.name, spelldata.cooldown or "??", basecd and basecd/1000 or "??", catstr or "")
-					if not debuglog then debuglog = {} end
-					if not debuglog[str] then
-						debuglog[str] = true
+					if not self.debuglog then self.debuglog = {} end
+					if not self.debuglog[str] then
+						self.debuglog[str] = true
 						GladiusEx:Log(str)
 					end
 				end

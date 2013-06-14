@@ -14,6 +14,10 @@ local time_text_format_normal = "%.01f "
 local time_text_format_delay = "+%.01f %.01f "
 
 local defaults = {
+		castBarAttachMode = "InFrame",
+		castBarOffsetX = 0,
+		castBarOffsetY = 0,
+		castBarWidth = 175,
 		castBarPosition = "BOTTOM",
 		castBarHeight = 20,
 		castBarInverse = false,
@@ -48,6 +52,10 @@ local defaults = {
 
 local CastBar = GladiusEx:NewGladiusExModule("CastBar",
 	fn.merge(defaults, {
+		castBarAttachTo = "Frame",
+		castBarRelativePoint = "TOPLEFT",
+		castBarAnchor = "TOPRIGHT",
+
 		castIconPosition = "LEFT",
 		castTextAlign = "LEFT",
 		castTextOffsetX = 2,
@@ -57,6 +65,10 @@ local CastBar = GladiusEx:NewGladiusExModule("CastBar",
 		castTimeTextOffsetY = 0,
 	}),
 	fn.merge(defaults, {
+		castBarAttachTo = "Frame",
+		castBarRelativePoint = "TOPRIGHT",
+		castBarAnchor = "TOPLEFT",
+
 		castIconPosition = "RIGHT",
 		castTextAlign = "RIGHT",
 		castTextOffsetX = -2,
@@ -91,8 +103,8 @@ function CastBar:OnDisable()
 	end
 end
 
-function CastBar:GetAttachType()
-	return "InFrame"
+function CastBar:GetAttachType(unit)
+	return self.db[unit].castBarAttachMode
 end
 
 function CastBar:GetAttachPoint(unit)
@@ -265,7 +277,7 @@ function CastBar:CreateBar(unit)
 	self.frame[unit].background:SetAllPoints()
 	-- self.frame[unit].castText = self.frame[unit].bar:CreateFontString("GladiusEx" .. self:GetName() .. "CastText" .. unit, "OVERLAY")
 	-- self.frame[unit].timeText = self.frame[unit].bar:CreateFontString("GladiusEx" .. self:GetName() .. "TimeText" .. unit, "OVERLAY")
-	self.frame[unit].textsFrame = CreateFrame("Frame", nil, self.frame[unit])
+	self.frame[unit].textsFrame = CreateFrame("Frame", nil, self.frame[unit].bar)
 	self.frame[unit].castText = GladiusEx:CreateSuperFS(self.frame[unit].textsFrame, "OVERLAY")
 	self.frame[unit].timeText = GladiusEx:CreateSuperFS(self.frame[unit].textsFrame, "OVERLAY")
 
@@ -291,6 +303,20 @@ function CastBar:Update(unit)
 
 	local bar_texture = self.db[unit].castBarGlobalTexture and LSM:Fetch(LSM.MediaType.STATUSBAR, GladiusEx.db.base.globalBarTexture) or LSM:Fetch(LSM.MediaType.STATUSBAR, self.db[unit].castBarTexture)
 	local height = self:GetAttachSize(unit)
+	-- place widget
+	if self.db[unit].castBarAttachMode == "Widget" then
+		local parent = GladiusEx:GetAttachFrame(unit, self.db[unit].castBarAttachTo)
+		local width = self.db[unit].castBarWidth
+		self.frame[unit]:ClearAllPoints()
+		self.frame[unit]:SetPoint(self.db[unit].castBarAnchor, parent, self.db[unit].castBarRelativePoint, self.db[unit].castBarOffsetX, self.db[unit].castBarOffsetY)
+		self.frame[unit]:SetWidth(width)
+		self.frame[unit]:SetHeight(height)
+		self.frame[unit]:SetFrameLevel(60)
+		self.frame[unit].textsFrame:SetFrameLevel(61)
+	else
+		self.frame[unit]:SetFrameLevel(5)
+		self.frame[unit].textsFrame:SetFrameLevel(50)
+	end
 
 	-- update icon
 	self.frame[unit].icon.bg:ClearAllPoints()
@@ -362,9 +388,6 @@ function CastBar:Update(unit)
 	self.frame[unit].background:SetHorizTile(false)
 	self.frame[unit].background:SetVertTile(false)
 
-	-- texts frame
-	self.frame[unit].textsFrame:SetFrameLevel(50)
-
 	-- update cast text
 	if self.db[unit].castText then
 		self.frame[unit].castText:Show()
@@ -379,11 +402,15 @@ function CastBar:Update(unit)
 	local color = self.db[unit].castTextColor
 	self.frame[unit].castText:SetTextColor(color.r, color.g, color.b, color.a)
 
+	local function invpos(position) return (position == "LEFT" and "RIGHT") or (position == "RIGHT" and "LEFT") end
 	self.frame[unit].castText:SetShadowOffset(1, -1)
 	self.frame[unit].castText:SetShadowColor(GladiusEx.db.base.globalFontShadowColor.r, GladiusEx.db.base.globalFontShadowColor.g, GladiusEx.db.base.globalFontShadowColor.b, GladiusEx.db.base.globalFontShadowColor.a)
 	self.frame[unit].castText:SetJustifyH(self.db[unit].castTextAlign)
 	self.frame[unit].castText:ClearAllPoints()
 	self.frame[unit].castText:SetPoint(self.db[unit].castTextAlign, self.frame[unit].bar, self.db[unit].castTextAlign, self.db[unit].castTextOffsetX, self.db[unit].castTextOffsetY)
+	if invpos(self.db[unit].castTextAlign) then
+		self.frame[unit].castText:SetPoint(invpos(self.db[unit].castTextAlign), self.frame[unit].bar, invpos(self.db[unit].castTextAlign), 0, 0)
+	end
 
 	-- update cast time text
 	if self.db[unit].castTimeText then
@@ -402,6 +429,9 @@ function CastBar:Update(unit)
 	self.frame[unit].timeText:SetJustifyH(self.db[unit].castTimeTextAlign)
 	self.frame[unit].timeText:ClearAllPoints()
 	self.frame[unit].timeText:SetPoint(self.db[unit].castTimeTextAlign, self.frame[unit].bar, self.db[unit].castTimeTextAlign, self.db[unit].castTimeTextOffsetX, self.db[unit].castTimeTextOffsetY)
+	if invpos(self.db[unit].castTimeTextAlign) then
+		self.frame[unit].timeText:SetPoint(invpos(self.db[unit].castTimeTextAlign), self.frame[unit].bar, invpos(self.db[unit].castTimeTextAlign), 0, 0)
+	end
 
 	-- time text format
 	local fmt
@@ -609,21 +639,127 @@ function CastBar:GetOptions(unit)
 					inline = true,
 					order = 2,
 					args = {
+						castBarAttachMode = {
+							type = "toggle",
+							name = L["Inside frame"],
+							desc = L["Toggle if you want the cast bar to be part of the frame or if you want to position it freely"],
+							get = function() return self.db[unit].castBarAttachMode == "InFrame" end,
+							set = function(k, v)
+								self.db[unit].castBarAttachMode = v and "InFrame" or "Widget"
+								GladiusEx:UpdateFrames()
+							end,
+							order = 10,
+						},
+						sep = {
+							type = "description",
+							name = "",
+							width = "full",
+							order = 11,
+						},
+						castBarWidth = {
+							type = "range",
+							name = L["Width"],
+							desc = L["Width of the cast bar"],
+							min = 1, softMin = 5, softMax = 500, bigStep = 1,
+							disabled = function() return not self:IsUnitEnabled(unit) or self.db[unit].castBarAttachMode == "InFrame" end,
+							order = 20,
+						},
 						castBarHeight = {
 							type = "range",
 							name = L["Height"],
 							desc = L["Height of the cast bar"],
 							min = 1, softMin = 5, softMax = 100, bigStep = 1,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							order = 20,
+							order = 30,
 						},
 					},
 				},
-				position = {
+				position_widget = {
 					type = "group",
 					name = L["Position"],
 					desc = L["Position settings"],
 					inline = true,
+					hidden = function() return self.db[unit].castBarAttachMode ~= "Widget" end,
+					order = 3,
+					args = {
+						castBarAttachTo = {
+							type = "select",
+							name = L["Attach to"],
+							desc = L["Attach to the given frame"],
+							values = function() return self:GetOtherAttachPoints(unit) end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 1,
+						},
+						castBarPosition = {
+							type = "select",
+							name = L["Position"],
+							desc = L["Position of the frame"],
+							values = GladiusEx:GetSimplePositions(),
+							get = function()
+								return GladiusEx:AnchorToSimplePosition(self.db[unit].castBarAnchor, self.db[unit].castBarRelativePoint)
+							end,
+							set = function(info, value)
+								self.db[unit].castBarAnchor, self.db[unit].castBarRelativePoint = GladiusEx:SimplePositionToAnchor(value)
+								GladiusEx:UpdateFrames()
+							end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return GladiusEx.db.base.advancedOptions end,
+							order = 2,
+						},
+						sep = {
+							type = "description",
+							name = "",
+							width = "full",
+							order = 7,
+						},
+						castBarAnchor = {
+							type = "select",
+							name = L["Anchor"],
+							desc = L["Anchor of the frame"],
+							values = GladiusEx:GetPositions(),
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
+							order = 10,
+						},
+						castBarRelativePoint = {
+							type = "select",
+							name = L["Relative point"],
+							desc = L["Relative point of the frame"],
+							values = GladiusEx:GetPositions(),
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							hidden = function() return not GladiusEx.db.base.advancedOptions end,
+							order = 15,
+						},
+						sep2 = {
+							type = "description",
+							name = "",
+							width = "full",
+							order = 17,
+						},
+						castBarOffsetX = {
+							type = "range",
+							name = L["Offset X"],
+							desc = L["X offset of the frame"],
+							softMin = -100, softMax = 100, bigStep = 1,
+							disabled = function() return  not self:IsUnitEnabled(unit) end,
+							order = 20,
+						},
+						castBarOffsetY = {
+							type = "range",
+							name = L["Offset Y"],
+							desc = L["Y offset of the frame"],
+							softMin = -100, softMax = 100, bigStep = 1,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 25,
+						},
+					},
+				},
+				position_inframe = {
+					type = "group",
+					name = L["Position"],
+					desc = L["Position settings"],
+					inline = true,
+					hidden = function() return self.db[unit].castBarAttachMode ~= "InFrame" end,
 					order = 3,
 					args = {
 						castBarPosition = {

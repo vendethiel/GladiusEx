@@ -457,16 +457,16 @@ function DRTracker:GetOptions(unit)
 							type = "select",
 							name = L["Position"],
 							desc = L["Position of the frame"],
-							values = GladiusEx:GetSimplePositions(),
+							values = GladiusEx:GetGrowSimplePositions(),
 							get = function()
-								return GladiusEx:SimplePositionFromAnchor(
+								return GladiusEx:GrowSimplePositionFromAnchor(
 									self.db[unit].drTrackerAnchor,
 									self.db[unit].drTrackerRelativePoint,
 									self.db[unit].drTrackerGrowDirection)
 							end,
 							set = function(info, value)
 								self.db[unit].drTrackerAnchor, self.db[unit].drTrackerRelativePoint =
-									GladiusEx:AnchorFromSimplePosition(value, self.db[unit].drTrackerGrowDirection)
+									GladiusEx:AnchorFromGrowSimplePosition(value, self.db[unit].drTrackerGrowDirection)
 								GladiusEx:UpdateFrames()
 							end,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
