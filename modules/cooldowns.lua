@@ -1079,7 +1079,6 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								name = L["Show tooltips"],
 								desc = L["Toggle if the icons should show the spell tooltip when hovered"],
 								disabled = function() return not self:IsUnitEnabled(unit) end,
-								hidden = function() return not GladiusEx.db.base.advancedOptions end,
 								order = 15,
 							},
 							sep2 = {
@@ -1168,7 +1167,6 @@ function Cooldowns:MakeGroupOptions(unit, group)
 						name = L["Border transparency"],
 						desc = L["Border transparency settings"],
 						inline = true,
-						hidden = function() return not GladiusEx.db.base.advancedOptions end,
 						order = 1.2,
 						args = {
 							cooldownsBorderAvailAlpha = {

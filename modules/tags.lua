@@ -767,7 +767,6 @@ function Tags:GetTextOptionTable(options, unit, text, order)
 						desc = L["X offset of the frame"],
 						softMin = -100, softMax = 100, bigStep = 1,
 						disabled = function() return not self:IsUnitEnabled(unit) end,
-						hidden = function() return not GladiusEx.db.base.advancedOptions end,
 						order = 10,
 					},
 					offsetY = {
@@ -776,7 +775,6 @@ function Tags:GetTextOptionTable(options, unit, text, order)
 						desc = L["Y offset of the frame"],
 						softMin = -100, softMax = 100, bigStep = 1,
 						disabled = function() return not self:IsUnitEnabled(unit) end,
-						hidden = function() return not GladiusEx.db.base.advancedOptions end,
 						order = 15,
 					},
 				},

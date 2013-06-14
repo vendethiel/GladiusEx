@@ -607,7 +607,6 @@ function ClassIcon:GetOptions(unit)
 							name = L["Crop borders"],
 							desc = L["Toggle if the icon borders should be cropped or not"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 6,
 						},
 						sep2 = {
@@ -621,7 +620,6 @@ function ClassIcon:GetOptions(unit)
 							name = L["Cooldown spiral"],
 							desc = L["Display the cooldown spiral for the important auras"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 10,
 						},
 						classIconCooldownReverse = {
@@ -629,7 +627,6 @@ function ClassIcon:GetOptions(unit)
 							name = L["Cooldown reverse"],
 							desc = L["Invert the dark/bright part of the cooldown spiral"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 15,
 						},
 						sep3 = {
@@ -643,7 +640,6 @@ function ClassIcon:GetOptions(unit)
 							name = L["Gloss"],
 							desc = L["Toggle gloss on the icon"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 20,
 						},
 						classIconGlossColor = {
@@ -654,7 +650,6 @@ function ClassIcon:GetOptions(unit)
 							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
 							hasAlpha = true,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 25,
 						},
 					},
@@ -683,7 +678,6 @@ function ClassIcon:GetOptions(unit)
 			name = L["Important auras"],
 			childGroups = "tree",
 			order = 3,
-			hidden = function() return not GladiusEx.db.base.advancedOptions end,
 			args = {
 				newAura = {
 					type = "group",

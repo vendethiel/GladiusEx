@@ -330,7 +330,6 @@ function DRTracker:GetOptions(unit)
 							name = L["Cooldown reverse"],
 							desc = L["Invert the dark/bright part of the cooldown spiral"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 15,
 						},
 						drTrackerCrop = {
@@ -338,7 +337,6 @@ function DRTracker:GetOptions(unit)
 							name = L["Crop borders"],
 							desc = L["Toggle if the icon borders should be cropped or not"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 16,
 						},
 						sep3 = {
@@ -368,7 +366,6 @@ function DRTracker:GetOptions(unit)
 							type = "description",
 							name = "",
 							width = "full",
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 33,
 						},
 						drTrackerFrameLevel = {
@@ -425,7 +422,6 @@ function DRTracker:GetOptions(unit)
 					name = L["Font"],
 					desc = L["Font settings"],
 					inline = true,
-					hidden = function() return not GladiusEx.db.base.advancedOptions end,
 					order = 3,
 					args = {
 						drFontSize = {

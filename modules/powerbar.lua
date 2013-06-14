@@ -231,7 +231,6 @@ function PowerBar:GetOptions(unit)
 							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
 							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 15,
 						},
 						sep = {
@@ -245,14 +244,12 @@ function PowerBar:GetOptions(unit)
 							name = L["Inverse"],
 							desc = L["Invert the bar colors"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 20,
 						},
 						sep3 = {
 							type = "description",
 							name = "",
 							width = "full",
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 21,
 						},
 						powerBarGlobalTexture = {
@@ -260,7 +257,6 @@ function PowerBar:GetOptions(unit)
 							name = L["Use global texture"],
 							desc = L["Use the global bar texture"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 22,
 						},
 						powerBarTexture = {
@@ -270,7 +266,6 @@ function PowerBar:GetOptions(unit)
 							dialogControl = "LSM30_Statusbar",
 							values = AceGUIWidgetLSMlists.statusbar,
 							disabled = function() return self.db[unit].powerBarGlobalTexture or not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 25,
 						},
 					},
@@ -297,7 +292,6 @@ function PowerBar:GetOptions(unit)
 					name = L["Position"],
 					desc = L["Position settings"],
 					inline = true,
-					hidden = function() return not GladiusEx.db.base.advancedOptions end,
 					order = 3,
 					args = {
 						powerBarOrder = {

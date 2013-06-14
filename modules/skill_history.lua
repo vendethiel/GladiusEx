@@ -526,7 +526,6 @@ function SkillHistory:GetOptions(unit)
 							name = L["Crop borders"],
 							desc = L["Toggle if the icon borders should be cropped or not"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 14,
 						},
 						sep2 = {

@@ -326,14 +326,12 @@ function TargetBar:GetOptions(unit)
 							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
 							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 15,
 						},
 						sep3 = {
 							type = "description",
 							name = "",
 							width = "full",
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 17,
 						},
 						targetBarInverse = {
@@ -341,7 +339,6 @@ function TargetBar:GetOptions(unit)
 							name = L["Inverse"],
 							desc = L["Invert the bar colors"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 20,
 						},
 						sep4 = {
@@ -355,7 +352,6 @@ function TargetBar:GetOptions(unit)
 							name = L["Use global texture"],
 							desc = L["Use the global bar texture"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 22,
 						},
 						targetBarTexture = {
@@ -365,7 +361,6 @@ function TargetBar:GetOptions(unit)
 							dialogControl = "LSM30_Statusbar",
 							values = AceGUIWidgetLSMlists.statusbar,
 							disabled = function() return self.db[unit].targetBarGlobalTexture or not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 25,
 						},
 						sep5 = {
@@ -394,7 +389,6 @@ function TargetBar:GetOptions(unit)
 							name = L["Crop borders"],
 							desc = L["Toggle if the icon borders should be cropped or not"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
-							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							order = 40,
 						},
 					},

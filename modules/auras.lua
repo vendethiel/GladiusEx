@@ -520,7 +520,6 @@ function Auras:GetOptions(unit)
 									type = "toggle",
 									name = L["Crop borders"],
 									desc = L["Toggle if the icon borders should be cropped or not"],
-									hidden = function() return not GladiusEx.db.base.advancedOptions end,
 									disabled = function() return not self.db[unit].aurasBuffs or not self:IsUnitEnabled(unit) end,
 									order = 14,
 								},
@@ -668,7 +667,6 @@ function Auras:GetOptions(unit)
 									name = "",
 									width = "full",
 									order = 8,
-									hidden = function() return not GladiusEx.db.base.advancedOptions end,
 								},
 								aurasBuffsAnchor = {
 									type = "select",
@@ -758,7 +756,6 @@ function Auras:GetOptions(unit)
 									type = "toggle",
 									name = L["Crop borders"],
 									desc = L["Toggle if the icon borders should be cropped or not"],
-									hidden = function() return not GladiusEx.db.base.advancedOptions end,
 									disabled = function() return not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) end,
 									order = 14,
 								},
@@ -905,7 +902,6 @@ function Auras:GetOptions(unit)
 									type = "description",
 									name = "",
 									width = "full",
-									hidden = function() return not GladiusEx.db.base.advancedOptions end,
 									order = 9,
 								},
 								aurasDebuffsAnchor = {
