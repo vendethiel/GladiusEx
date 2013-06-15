@@ -37,6 +37,7 @@ local function GetDefaultSpells()
 			[22812] = true, -- Druid/Barkskin
 			[122288] = true, -- Druid/Cleanse
 			[110788] = true, -- Druid/Cloak of Shadows
+			[33786] = true, -- Druid/Cyclone (feral)
 			[112970] = true, -- Druid/Demonic Circle: Teleport
 			[110617] = true, -- Druid/Deterrence
 			[99] = true, -- Druid/Disorienting Roar
