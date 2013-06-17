@@ -141,9 +141,9 @@ function GladiusEx:NewUnitBarModule(name, defaults_arena, defaults_party)
 		if UnitExists(tunit) then
 			self:SetClassIcon(unit)
 			self:UpdateHealth(unit, UnitHealth(tunit), UnitHealthMax(tunit))
-			self.frame[unit]:Show()
+			self.frame[unit].parent:Show()
 		else
-			self.frame[unit]:Hide()
+			self.frame[unit].parent:Hide()
 		end
 	end
 
@@ -153,7 +153,7 @@ function GladiusEx:NewUnitBarModule(name, defaults_arena, defaults_party)
 		local health = GladiusEx.testing[unit].health
 		self:SetClassIcon(unit)
 		self:UpdateHealth(unit, health, maxHealth)
-		self.frame[unit]:Show()
+		self.frame[unit].parent:Show()
 		self.frame[unit]:SetScript("OnUpdate", nil)
 	end
 
@@ -165,16 +165,17 @@ function GladiusEx:NewUnitBarModule(name, defaults_arena, defaults_party)
 
 		-- create bar + text
 		self.frame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. unit, button)
-		self.frame[unit].statusbar = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. "Bar" .. unit, self.frame[unit])
+		self.frame[unit].parent = CreateFrame("Frame", nil, self.frame[unit])
 		self.frame[unit].secure = CreateFrame("Button", "GladiusEx" .. self:GetName() .. "Secure" .. unit, button, "SecureActionButtonTemplate")
-		self.frame[unit].background = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "Background", "BACKGROUND")
-		self.frame[unit].icon = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "IconFrame" .. unit, "ARTWORK")
+		self.frame[unit].statusbar = CreateFrame("STATUSBAR", "GladiusEx" .. self:GetName() .. "Bar" .. unit, self.frame[unit].parent)
+		self.frame[unit].background = self.frame[unit].parent:CreateTexture("GladiusEx" .. self:GetName() .. unit .. "Background", "BACKGROUND")
+		self.frame[unit].icon = self.frame[unit].parent:CreateTexture("GladiusEx" .. self:GetName() .. "IconFrame" .. unit, "ARTWORK")
+		self.frame[unit].secure:SetAttribute("unit", tunit)
+		self.frame[unit].secure:SetAttribute("type1", "target")
 		self.frame[unit].statusbar.unit = tunit
 		self.frame[unit].statusbar.poll = poll
 		self.frame[unit].owner_unit = unit
 		self.frame[unit].next_update = 0
-		self.frame[unit].secure:SetAttribute("unit", tunit)
-		self.frame[unit].secure:SetAttribute("type1", "target")
 
 		self.unit_map[tunit] = unit
 
@@ -216,14 +217,14 @@ function GladiusEx:NewUnitBarModule(name, defaults_arena, defaults_party)
 		if self.db[unit].Icon then
 			if self.db[unit].IconPosition == "LEFT" then
 				self.frame[unit].statusbar:SetPoint("LEFT", self.frame[unit].icon, "RIGHT")
-				self.frame[unit].statusbar:SetPoint("RIGHT")
+				self.frame[unit].statusbar:SetPoint("RIGHT", self.frame[unit], "RIGHT")
 			else
-				self.frame[unit].statusbar:SetPoint("LEFT")
+				self.frame[unit].statusbar:SetPoint("LEFT", self.frame[unit], "LEFT")
 				self.frame[unit].statusbar:SetPoint("RIGHT", self.frame[unit].icon, "LEFT")
 			end
 			self.frame[unit].statusbar:SetHeight(height)
 		else
-			self.frame[unit].statusbar:SetAllPoints()
+			self.frame[unit].statusbar:SetAllPoints(self.frame[unit])
 		end
 		self.frame[unit].statusbar:SetMinMaxValues(0, 100)
 		self.frame[unit].statusbar:SetValue(100)

@@ -13,7 +13,7 @@ local defaults = {
 	BackgroundColor = { r = 1, g = 1, b = 1, a = 0.3 },
 	GlobalTexture = true,
 	Texture = GladiusEx.default_bar_texture,
-	Icon = true,
+	Icon = false,
 	IconCrop = true,
 }
 

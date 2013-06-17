@@ -453,6 +453,7 @@ end
 function GladiusEx:UpdatePartyFrames()
 	if InCombatLockdown() then
 		self:QueueUpdate()
+		return
 	end
 	local group_members = self.arena_size
 
@@ -487,6 +488,7 @@ end
 function GladiusEx:UpdateArenaFrames()
 	if InCombatLockdown() then
 		self:QueueUpdate()
+		return
 	end
 
 	local numOpps = self.arena_size
@@ -659,7 +661,6 @@ end
 
 function GladiusEx:ARENA_OPPONENT_UPDATE(event, unit, type)
 	log("ARENA_OPPONENT_UPDATE", unit, type)
-	self:RefreshUnit(unit)
 	if type == "seen" or type == "destroyed" then
 		self:ShowUnit(unit)
 		self:CheckOpponentSpecialization(unit)
@@ -672,6 +673,7 @@ function GladiusEx:ARENA_OPPONENT_UPDATE(event, unit, type)
 			self:SoftHideUnit(unit)
 		end
 	end
+	self:RefreshUnit(unit)
 end
 
 function GladiusEx:GROUP_ROSTER_UPDATE()
@@ -843,10 +845,8 @@ function GladiusEx:TestUnit(unit)
 
 	-- test modules
 	for n, m in self:IterateModules() do
-		if self:IsModuleEnabled(unit, n) then
-			if m.Test then
-				m:Test(unit)
-			end
+		if self:IsModuleEnabled(unit, n) and m.Test then
+			m:Test(unit)
 		end
 	end
 
@@ -858,7 +858,7 @@ end
 function GladiusEx:RefreshUnit(unit)
 	if not self.buttons[unit] or self:IsTesting(unit) then return end
 
-	-- show modules
+	-- refresh modules
 	for n, m in self:IterateModules() do
 		if self:IsModuleEnabled(unit, n) and m.Refresh then
 			m:Refresh(unit)
