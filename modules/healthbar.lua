@@ -194,7 +194,7 @@ function HealthBar:UpdateIncomingAbsorbs(unit)
 end
 
 function HealthBar:GetBarColor(class)
-	return RAID_CLASS_COLORS[class] or { r = 1, g = 1, b = 1, a = 1}
+	return RAID_CLASS_COLORS[class] or { r = 0, g = 1, b = 0 }
 end
 
 function HealthBar:CreateBar(unit)

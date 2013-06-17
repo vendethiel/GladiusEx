@@ -91,6 +91,30 @@ local Tags = GladiusEx:NewGladiusExModule("Tags", {
 
 			text = "[health:short]",
 		},
+		["PetBar Left Text"] = {
+			attachTo = "PetBar",
+			position = "LEFT",
+			offsetX = 2,
+			offsetY = 0,
+
+			globalFontSize = false,
+			size = 9,
+			color = { r = 1, g = 1, b = 1, a = 1 },
+
+			text = "[name:status]",
+		},
+		["PetBar Right Text"] = {
+			attachTo = "PetBar",
+			position = "RIGHT",
+			offsetX = -2,
+			offsetY = 0,
+
+			globalFontSize = false,
+			size = 9,
+			color = { r = 1, g = 1, b = 1, a = 1 },
+
+			text = "[health:short]",
+		},
 	},
 })
 
@@ -325,7 +349,8 @@ function Tags:Update(unit)
 						self.events[attachframe.unit] = self.events[unit]
 					end
 					self.frame[attachframe.unit][text] = self.frame[unit][text]
-					if attachframe.unit ~= "target" then
+					if attachframe.poll then
+						GladiusEx:Log("Polling:", unit, attachframe.unit)
 						-- not a real unit so it needs to be polled
 						local polling_time = 0.5
 						local next_update = 0

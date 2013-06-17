@@ -140,10 +140,10 @@ function modulePrototype:OnInitialize()
 	self.db = setmetatable({}, {
 		__index = function(t, k)
 			local v
-			k = strmatch(k, "^(.+)target$") or k
-			if k == "target" or GladiusEx:IsPartyUnit(k) then
+			k = strmatch(k, "^(.+)target$") or strmatch(k, "^(.+)pet(.+)$") or k
+			if k == "target" or k == "pet" or k == "party" or GladiusEx:IsPartyUnit(k) then
 				v = self.dbi_party.profile
-			elseif GladiusEx:IsArenaUnit(k) then
+			elseif k == "arena" or GladiusEx:IsArenaUnit(k) then
 				v = self.dbi_arena.profile
 			else
 				error("Bad module DB usage: not an unit (" .. tostring(k) .. ")", 2)

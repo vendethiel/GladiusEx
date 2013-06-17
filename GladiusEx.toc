@@ -22,4 +22,6 @@ modules\highlight.lua
 modules\powerbar.lua
 modules\skill_history.lua
 modules\tags.lua
+modules\unitbar.lua
 modules\targetbar.lua
+modules\petbar.lua

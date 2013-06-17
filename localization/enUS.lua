@@ -93,6 +93,7 @@ L["HealthBar"] = "Health Bar"
 L["Tags"] = "Texts Tags"
 L["PowerBar"] = "Power Bar"
 L["TargetBar"] = "Target"
+L["PetBar"] = "Pet"
 L["SkillHistory"] = "Skill History"
 
 -- General
@@ -410,7 +411,7 @@ L["Portrait 2D"] = true
 L["Portrait 3D"] = true
 L["Position of the cast bar icon"] = true
 L["Position of the frame"] = true
-L["Position of the target bar class icon"] = true
+L["Position of the class icon"] = true
 L["Position settings"] = true
 L["Position"] = true
 L["Power type"] = true
@@ -551,7 +552,7 @@ L["Toggle remaining time instead of cast time"] = true
 L["Toggle the cast bar shield icon for not interruptible spells"] = true
 L["Toggle the cast bar spark"] = true
 L["Toggle the cast bar spell icon"] = true
-L["Toggle the target bar class icon"] = true
+L["Toggle the class icon"] = true
 L["Toggle to show your party frames"] = true
 L["Toggle total time"] = true
 L["Top left"] = true
