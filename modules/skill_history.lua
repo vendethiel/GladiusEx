@@ -94,9 +94,18 @@ function SkillHistory:Update(unit)
 	self.frame[unit]:SetBackdropColor(bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a)
 
 	-- icons
-	if self.frame[unit].enter then self:UpdateIcon(unit, "enter") end
+	if not self.frame[unit].enter then
+		self:CreateIcon(unit, "enter")
+	end
+	self:UpdateIcon(unit, "enter")
 	for i = 1, MAX_ICONS do
-		if not self.frame[unit][i] then break end
+		if not self.frame[unit][i] then
+			if i <= self.db[unit].MaxIcons then
+				self:CreateIcon(unit, i)
+			else
+				break
+			end
+		end
 		self:UpdateIcon(unit, i)
 	end
 
@@ -244,16 +253,16 @@ function SkillHistory:SetupAnimation(unit)
 	local us = unit_spells[unit]
 	local entry = uq[1]
 
-	if not frame.enter then
-		self:CreateIcon(unit, "enter")
-		self:UpdateIcon(unit, "enter")
-	end
-
 	local dir = self.db[unit].GrowDirection
 	local iconsize = self.db[unit].IconSize
 	local margin = self.db[unit].Margin
 	local maxicons = self.db[unit].MaxIcons
 	local crop = self.db[unit].Crop
+	local animdur = self.db[unit].EnterAnimDuration
+	-- speed up animation if there are too many queued spells
+	if #uq >= 2 then
+		animdur = animdur * 0.5
+	end
 
 	local st = GetTime()
 	local off = iconsize + margin
@@ -274,7 +283,7 @@ function SkillHistory:SetupAnimation(unit)
 	-- while this could be implemented with AnimationGroups, they are more
 	-- trouble than it is worth, sadly
 	local function AnimationFrame()
-		local t = (GetTime() - st) / self.db[unit].EnterAnimDuration
+		local t = (GetTime() - st) / animdur
 		if t < 1 then
 			t = ease(t)
 			local ox = off * t
@@ -411,11 +420,6 @@ function SkillHistory:UpdateSpells(unit)
 	-- update icons
 	local n = min(#us, self.db[unit].MaxIcons)
 	for i = 1, n do
-		if not frame[i] then
-			self:CreateIcon(unit, i)
-			self:UpdateIcon(unit, i)
-		end
-
 		self:UpdateIconPosition(unit, i, 0, 0)
 
 		local entry = unit_spells[unit][i]
