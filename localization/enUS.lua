@@ -97,6 +97,17 @@ L["PetBar"] = "Pet"
 L["SkillHistory"] = "Skill History"
 
 -- General
+L["Detached group"] = true
+L["Detach the group from the unit frames, showing the cooldowns of all the units and allowing you to move it freely"] = true
+L["Locked"] = true
+L["Toggle if the detached group can be moved"] = true
+L["Group by unit"] = true
+L["Toggle if the cooldowns in the detached group should be grouped by unit"] = true
+L["Lock the group to hide"] = true
+L["Group %i anchor (%s)"] = true
+
+
+
 L[" |T%s:20|t %s [%ss] %s"] = true
 L["%s settings"] = true
 L["** If this is not your first run please lock or move the frame to prevent this from happening **"] = true

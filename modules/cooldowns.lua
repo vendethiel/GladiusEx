@@ -205,6 +205,9 @@ local function MakeGroupDb(settings)
 		cooldownsMax = 10,
 		cooldownsSize = 20,
 		cooldownsCrop = true,
+		cooldownsDetached = false,
+		cooldownsLocked = false,
+		cooldownsGroupByUnit = false,
 		cooldownsTooltips = true,
 		cooldownsSpells = {},
 		cooldownsBorderSize = 1,
@@ -358,6 +361,15 @@ function Cooldowns:RemoveGroup(unit, group)
 	self.db[unit].groups["group_" .. groupdb.cooldownsGroupId] = nil
 end
 
+local header_units = { ["player"] = true, ["arena1"] = true }
+local function IsHeaderUnit(unit)
+	return header_units[unit]
+end
+
+local function GetHeaderUnit(unit)
+	return GladiusEx:IsPartyUnit(unit) and "player" or "arena1"
+end
+
 function Cooldowns:OnEnable()
 	CT.RegisterCallback(self, "LCT_CooldownUsed")
 	CT.RegisterCallback(self, "LCT_CooldownsReset")
@@ -378,7 +390,10 @@ end
 function Cooldowns:GetFrames(unit)
 	local frames = {}
 	for group = 1, self:GetNumGroups(unit) do
-		tinsert(frames, self:GetGroupState(unit, group).frame)
+		local db = self:GetGroupDB(unit, group)
+		if not db.cooldownsDetached then
+			tinsert(frames, self:GetGroupState(unit, group).frame)
+		end
 	end
 	return frames
 end
@@ -392,7 +407,9 @@ function Cooldowns:GetModuleAttachPoints(unit)
 	local t = {}
 	for group = 1, self:GetNumGroups(unit) do
 		local db = self:GetGroupDB(unit, group)
-		t["Cooldowns_" .. db.cooldownsGroupId] = string.format(L["Cooldowns group %i"], group)
+		if not db.cooldownsDetached then
+			t["Cooldowns_" .. db.cooldownsGroupId] = string.format(L["Cooldowns group %i"], group)
+		end
 	end
 	return t
 end
@@ -572,7 +589,7 @@ local function GetUnitInfo(unit)
 		specID = GladiusEx.testing[unit].specID
 		class = GladiusEx.testing[unit].unitClass
 		race = GladiusEx.testing[unit].unitRace
-	else
+	elseif GladiusEx.buttons[unit] then
 		specID = GladiusEx.buttons[unit].specID
 		class = GladiusEx.buttons[unit].class or select(2, UnitClass(unit))
 		race = select(2, UnitRace(unit))
@@ -589,7 +606,7 @@ local function GetUnitFaction(unit)
 end
 
 local spell_list = {}
-local sorted_spells = {}
+local unit_sorted_spells = {}
 local function GetCooldownList(unit, group)
 	local db = Cooldowns:GetGroupDB(unit, group)
 
@@ -619,6 +636,9 @@ local function GetCooldownList(unit, group)
 	end
 
 	-- sort spells
+	unit_sorted_spells[unit] = unit_sorted_spells[unit] or {}
+	unit_sorted_spells[unit][group] = unit_sorted_spells[unit][group] or {}
+	local sorted_spells = unit_sorted_spells[unit][group]
 	wipe(sorted_spells)
 	for spellid, valid in pairs(spell_list) do
 		if valid then
@@ -637,7 +657,6 @@ end
 local function UpdateGroupIconFrames(unit, group, sorted_spells)
 	local gs = Cooldowns:GetGroupState(unit, group)
 	local db = Cooldowns:GetGroupDB(unit, group)
-	local faction = GetUnitFaction(unit)
 
 	local cat_priority = db.cooldownsCatPriority
 	local border_colors = db.cooldownsCatColors
@@ -646,9 +665,11 @@ local function UpdateGroupIconFrames(unit, group, sorted_spells)
 	local sidx = 1
 	local shown = 0
 	for i = 1, #sorted_spells do
-		local spellid = sorted_spells[i]
+		local icon_unit = type(sorted_spells[i]) == "table" and sorted_spells[i][1] or unit
+		local spellid = type(sorted_spells[i]) == "table" and sorted_spells[i][2] or sorted_spells[i]
+		local faction = GetUnitFaction(icon_unit)
 		local spelldata = CT:GetCooldownData(spellid)
-		local tracked = CT:GetUnitCooldownInfo(unit, spellid)
+		local tracked = CT:GetUnitCooldownInfo(icon_unit, spellid)
 		local frame = gs.frame[sidx]
 
 		-- icon
@@ -680,6 +701,7 @@ local function UpdateGroupIconFrames(unit, group, sorted_spells)
 		end
 
 		-- update frame state
+		frame.unit = icon_unit
 		frame.spellid = spellid
 		frame.spelldata = spelldata
 		frame.state = 0
@@ -707,13 +729,45 @@ end
 
 function Cooldowns:UpdateGroupIcons(unit, group)
 	local gs = self:GetGroupState(unit, group)
-	if not gs.frame then return end
+	local db = Cooldowns:GetGroupDB(unit, group)
 
 	-- get spells lists
 	local sorted_spells = GetCooldownList(unit, group)
 
 	-- update icon frames
-	UpdateGroupIconFrames(unit, group, sorted_spells)
+	if db.cooldownsDetached then
+		local header_unit = GetHeaderUnit(unit)
+		local header_gs = self:GetGroupState(header_unit, group)
+
+		-- save detached group spells
+		local index = GladiusEx:GetUnitIndex(unit)
+		header_gs.unit_spells = header_gs.unit_spells or { ["unit"] = unit }
+		header_gs.unit_spells[index] = sorted_spells
+
+		-- make list of the spells of all the units
+		local detached_spells = {}
+		for i = 1, 5 do
+			local us = header_gs.unit_spells[i]
+			if us then
+				local dunit = us.unit
+				for j = 1, #us do
+					tinsert(detached_spells, { dunit, us[j] })
+				end
+			end
+		end
+
+		-- sort the list
+		if not db.cooldownsGroupByUnit then
+			tsort(detached_spells,
+				function(a, b)
+					return GetSpellSortScore(unit, group, a[2]) > GetSpellSortScore(unit, group, b[2])
+				end)
+		end
+
+		UpdateGroupIconFrames(header_unit, group, detached_spells)
+	else
+		UpdateGroupIconFrames(unit, group, sorted_spells)
+	end
 end
 
 local function CreateCooldownFrame(name, parent)
@@ -759,7 +813,6 @@ function Cooldowns:CreateGroupFrame(unit, group)
 		for i = 1, MAX_ICONS do
 			gs.frame[i] = CreateCooldownFrame("GladiusEx" .. self:GetName() .. "frameIcon" .. i .. unit, gs.frame)
 			gs.frame[i]:SetScript("OnUpdate", CooldownFrame_OnUpdate)
-			gs.frame[i].unit = unit
 			gs.frame[i].group = group
 		end
 	end
@@ -783,11 +836,116 @@ local function UpdateCooldownFrame(frame, size, border_size, crop)
 	end
 end
 
+function Cooldowns:SaveAnchorPosition(unit, group)
+	local db = self:GetGroupDB(unit, group)
+	local gs = self:GetGroupState(unit, group)
+	local anchor = gs.anchor
+	local scale = anchor:GetEffectiveScale() or 1
+	db.cooldownsAnchorX = (anchor:GetLeft() or 0) * scale
+	db.cooldownsAnchorY = (anchor:GetTop() or 0) * scale
+end
+
+function Cooldowns:CreateGroupAnchor(unit, group)
+	local db = self:GetGroupDB(unit, group)
+	local gs = self:GetGroupState(unit, group)
+
+	-- anchor
+	local anchor = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. unit .. "Group" .. group .. "Anchor", UIParent)
+	anchor:SetScript("OnMouseDown", function(f, button)
+		if button == "LeftButton" then
+			if IsShiftKeyDown() then
+				-- center horizontally
+				anchor:ClearAllPoints()
+				anchor:SetPoint("BOTTOM", UIParent, "BOTTOM", 0, f:GetBottom())
+				self:SaveAnchorPosition(unit, group)
+			elseif IsAltKeyDown() then
+				-- center vertically
+				anchor:ClearAllPoints()
+				anchor:SetPoint("LEFT", UIParent, "LEFT", f:GetLeft(), 0)
+				self:SaveAnchorPosition(unit, group)
+			end
+		elseif button == "RightButton" then
+			GladiusEx:ShowOptionsDialog()
+		end
+	end)
+
+	anchor:SetScript("OnDragStart", function(f)
+		anchor:StartMoving()
+	end)
+
+	anchor:SetScript("OnDragStop", function(f)
+		anchor:StopMovingOrSizing()
+		self:SaveAnchorPosition(unit, group)
+	end)
+
+	anchor.text = anchor:CreateFontString(nil, "OVERLAY")
+	anchor.text2 = anchor:CreateFontString(nil, "OVERLAY")
+
+	gs.anchor = anchor
+end
+
+function Cooldowns:UpdateGroupAnchor(unit, group)
+	local db = self:GetGroupDB(unit, group)
+	local gs = self:GetGroupState(unit, group)
+
+	if not gs.anchor then
+		self:CreateGroupAnchor(unit, group)
+	end
+
+	local anchor = gs.anchor
+
+	-- update anchor
+	local anchor_width = 200
+	local anchor_height = 40
+
+	anchor:ClearAllPoints()
+	anchor:SetSize(anchor_width, anchor_height)
+	anchor:SetScale(GladiusEx.db[unit].frameScale)
+
+	if not db.cooldownsAnchorX or not db.cooldownsAnchorY then
+		anchor:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+	else
+		local eff = anchor:GetEffectiveScale()
+		anchor:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", db.cooldownsAnchorX / eff, db.cooldownsAnchorY / eff)
+	end
+
+	anchor:SetBackdrop({
+		edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = GladiusEx:AdjustPixels(anchor, max(1, floor(GladiusEx.db[unit].frameScale + 0.5))),
+		bgFile = [[Interface\Buttons\WHITE8X8]], tile = true, tileSize = 8,
+	})
+	anchor:SetBackdropColor(0, 0, 0, 1)
+	anchor:SetBackdropBorderColor(1, 1, 1, 1)
+	anchor:SetFrameLevel(200)
+	anchor:SetFrameStrata("MEDIUM")
+
+	anchor:SetClampedToScreen(true)
+	anchor:EnableMouse(true)
+	anchor:SetMovable(true)
+	anchor:RegisterForDrag("LeftButton")
+
+	-- anchor texts
+	anchor.text:SetPoint("TOP", anchor, "TOP", 0, -7)
+	anchor.text:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont), 11, GladiusEx.db.base.globalFontOutline)
+	anchor.text:SetTextColor(1, 1, 1, 1)
+	anchor.text:SetShadowOffset(1, -1)
+	anchor.text:SetShadowColor(0, 0, 0, 1)
+	anchor.text:SetText(string.format(L["Group %i anchor (%s)"], group, GladiusEx:IsPartyUnit(unit) and L["Party"] or L["Arena"]))
+
+	anchor.text2:SetPoint("BOTTOM", anchor, "BOTTOM", 0, 7)
+	anchor.text2:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont), 11, GladiusEx.db.base.globalFontOutline)
+	anchor.text2:SetTextColor(1, 1, 1, 1)
+	anchor.text2:SetShadowOffset(1, -1)
+	anchor.text2:SetShadowColor(0, 0, 0, 1)
+	anchor.text2:SetText(L["Lock the group to hide"])
+
+	anchor:Hide()
+end
+
 local function UpdateCooldownGroup(
 	unit,
 	cooldownFrame,
 	cooldownBackground,
-	cooldownAttachTo,
+	cooldownParent,
 	cooldownAnchor,
 	cooldownRelativePoint,
 	cooldownOffsetX,
@@ -805,7 +963,7 @@ local function UpdateCooldownGroup(
 	cooldownTooltips)
 
 	-- anchor point
-	local parent = GladiusEx:GetAttachFrame(unit, cooldownAttachTo)
+	local parent = cooldownParent
 
 	-- local xo, yo = GladiusEx:AdjustFrameOffset(parent, cooldownRelativePoint)
 	local xo, yo = 0, 0
@@ -881,9 +1039,11 @@ local function UpdateCooldownGroup(
 				end
 			end)
 			cooldownFrame[i]:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
+			cooldownFrame[i]:EnableMouse(true)
 		else
 			cooldownFrame[i]:SetScript("OnEnter", nil)
 			cooldownFrame[i]:SetScript("OnLeave", nil)
+			cooldownFrame[i]:EnableMouse(false)
 		end
 
 		UpdateCooldownFrame(cooldownFrame[i], cooldownSize, cooldownBorderSize, cooldownCrop)
@@ -900,6 +1060,9 @@ function Cooldowns:Update(unit)
 		if group_state[group].frame then
 			group_state[group].frame:Hide()
 		end
+		if group_state[group].anchor then
+			group_state[group].anchor:Hide()
+		end
 	end
 end
 
@@ -908,46 +1071,70 @@ function Cooldowns:Refresh(unit)
 end
 
 function Cooldowns:UpdateGroup(unit, group)
-	-- create frame
-	self:CreateGroupFrame(unit, group)
-
 	local db = self:GetGroupDB(unit, group)
 	local gs = self:GetGroupState(unit, group)
 
-	-- update cooldown frame
-	UpdateCooldownGroup(unit,
-		gs.frame,
-		db.cooldownsBackground,
-		db.cooldownsAttachTo,
-		db.cooldownsAnchor,
-		db.cooldownsRelativePoint,
-		db.cooldownsOffsetX,
-		db.cooldownsOffsetY,
-		db.cooldownsPerColumn,
-		db.cooldownsGrow,
-		db.cooldownsSize,
-		db.cooldownsBorderSize,
-		db.cooldownsPaddingX,
-		db.cooldownsPaddingY,
-		db.cooldownsSpacingX,
-		db.cooldownsSpacingY,
-		db.cooldownsMax,
-		db.cooldownsCrop,
-		db.cooldownsTooltips)
+	if not db.cooldownsDetached or IsHeaderUnit(unit) then
+		-- create frame
+		self:CreateGroupFrame(unit, group)
+
+		-- update anchor
+		if db.cooldownsDetached then
+			self:UpdateGroupAnchor(unit, group)
+			if db.cooldownsLocked then
+				gs.anchor:Hide()
+			else
+				gs.anchor:Show()
+			end
+		end
+
+		-- update cooldown frame
+		UpdateCooldownGroup(unit,
+			gs.frame,
+			db.cooldownsBackground,
+			db.cooldownsDetached and gs.anchor or GladiusEx:GetAttachFrame(unit, db.cooldownsAttachTo),
+			db.cooldownsAnchor,
+			db.cooldownsRelativePoint,
+			db.cooldownsOffsetX,
+			db.cooldownsOffsetY,
+			db.cooldownsPerColumn,
+			db.cooldownsGrow,
+			db.cooldownsSize,
+			db.cooldownsBorderSize,
+			db.cooldownsPaddingX,
+			db.cooldownsPaddingY,
+			db.cooldownsSpacingX,
+			db.cooldownsSpacingY,
+			db.cooldownsMax,
+			db.cooldownsCrop,
+			db.cooldownsTooltips)
+	elseif gs.frame then
+		gs.frame:SetSize(0, 0)
+	end
 
 	-- update icons
-	self:UpdateIcons(unit)
+	self:UpdateGroupIcons(unit, group)
 
 	-- hide group
-	gs.frame:Hide()
+	if gs.frame then
+		gs.frame:Hide()
+	end
 end
+
+local ct_registered = {}
 
 function Cooldowns:Show(unit)
 	for group = 1, self:GetNumGroups(unit) do
 		local gs = self:GetGroupState(unit, group)
-		if gs.frame and not gs.frame:IsShown() then
-			gs.frame:Show()
+		local db = self:GetGroupDB(unit, group)
+
+		if not ct_registered[unit] then
 			CT:RegisterUnit(unit)
+			ct_registered[unit] = true
+		end
+
+		if gs.frame and (not db.cooldownsDetached or IsHeaderUnit(unit)) then
+			gs.frame:Show()
 		end
 	end
 end
@@ -955,17 +1142,24 @@ end
 function Cooldowns:Reset(unit)
 	for group = 1, self:GetNumGroups(unit) do
 		local gs = self:GetGroupState(unit, group)
-		if gs.frame then
-			if gs.frame:IsShown() then
-				CT:UnregisterUnit(unit)
-			end
+		local db = self:GetGroupDB(unit, group)
 
+		if ct_registered[unit] then
+			CT:UnregisterUnit(unit)
+			ct_registered[unit] = false
+		end
+
+		if db.cooldownsDetached then
+			local header_gs = self:GetGroupState(GetHeaderUnit(unit), group)
+			if header_gs.unit_spells then
+				local index = GladiusEx:GetUnitIndex(unit)
+				header_gs.unit_spells[index] = nil
+			end
+		end
+
+		if gs.frame then
 			-- hide cooldown frame
 			gs.frame:Hide()
-
-			for i = 1, #gs.frame do
-				gs.frame[i]:Hide()
-			end
 		end
 	end
 end
@@ -1276,15 +1470,44 @@ function Cooldowns:MakeGroupOptions(unit, group)
 						name = L["Position"],
 						desc = L["Position settings"],
 						inline = true,
-						order = 3,
+						order = 4,
 						args = {
+							cooldownsDetached = {
+								type = "toggle",
+								name = L["Detached group"],
+								desc = L["Detach the group from the unit frames, showing the cooldowns of all the units and allowing you to move it freely"],
+								disabled = function() return not self:IsUnitEnabled(unit) end,
+								order = 1,
+							},
+							cooldownsLocked = {
+								type = "toggle",
+								name = L["Locked"],
+								desc = L["Toggle if the detached group can be moved"],
+								disabled = function() return not self:IsUnitEnabled(unit) or not self:GetGroupDB(unit, group).cooldownsDetached end,
+								order = 2,
+							},
+							cooldownsGroupByUnit = {
+								type = "toggle",
+								name = L["Group by unit"],
+								desc = L["Toggle if the cooldowns in the detached group should be grouped by unit"],
+								disabled = function() return not self:IsUnitEnabled(unit) or not self:GetGroupDB(unit, group).cooldownsDetached end,
+								order = 3,
+							},
+							sep = {
+								type = "description",
+								name = "",
+								width = "full",
+								order = 9,
+							},
+
 							cooldownsAttachTo = {
 								type = "select",
 								name = L["Attach to"],
 								desc = L["Attach to the given frame"],
 								values = function() return self:GetOtherAttachPoints(unit) end,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
-								order = 1,
+								hidden = function() return self:GetGroupDB(unit, group).cooldownsDetached end,
+								order = 10,
 							},
 							cooldownsPosition = {
 								type = "select",
@@ -1304,7 +1527,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								end,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
 								hidden = function() return GladiusEx.db.base.advancedOptions end,
-								order = 2,
+								order = 11,
 							},
 							cooldownsGrow = {
 								type = "select",
@@ -1329,13 +1552,13 @@ function Cooldowns:MakeGroupOptions(unit, group)
 									GladiusEx:UpdateFrames()
 								end,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
-								order = 3,
+								order = 13,
 							},
-							sep = {
+							sep2 = {
 								type = "description",
 								name = "",
 								width = "full",
-								order = 7,
+								order = 17,
 							},
 							cooldownsAnchor = {
 								type = "select",
@@ -1344,7 +1567,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								values = GladiusEx:GetPositions(),
 								disabled = function() return not self:IsUnitEnabled(unit) end,
 								hidden = function() return not GladiusEx.db.base.advancedOptions end,
-								order = 10,
+								order = 20,
 							},
 							cooldownsRelativePoint = {
 								type = "select",
@@ -1353,13 +1576,13 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								values = GladiusEx:GetPositions(),
 								disabled = function() return not self:IsUnitEnabled(unit) end,
 								hidden = function() return not GladiusEx.db.base.advancedOptions end,
-								order = 15,
+								order = 25,
 							},
-							sep2 = {
+							sep3 = {
 								type = "description",
 								name = "",
 								width = "full",
-								order = 17,
+								order = 27,
 							},
 							cooldownsOffsetX = {
 								type = "range",
@@ -1367,7 +1590,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								desc = L["X offset of the frame"],
 								softMin = -100, softMax = 100, bigStep = 1,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
-								order = 20,
+								order = 30,
 							},
 							cooldownsOffsetY = {
 								type = "range",
@@ -1375,7 +1598,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								desc = L["Y offset of the frame"],
 								disabled = function() return not self:IsUnitEnabled(unit) end,
 								softMin = -100, softMax = 100, bigStep = 1,
-								order = 25,
+								order = 35,
 							},
 						},
 					},

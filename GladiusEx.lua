@@ -519,7 +519,7 @@ function GladiusEx:UpdateArenaFrames()
 end
 
 function GladiusEx:UpdateFrames()
-	log(">>>>>>> UpdateFrames")
+	log("UpdateFrames")
 
 	if not self:IsPartyShown() and not self:IsArenaShown() then return end
 
@@ -1193,7 +1193,7 @@ end
 function GladiusEx:UpdateUnit(unit)
 	if not self:IsHandledUnit(unit) then return end
 
-	log("=========> UpdateUnit", unit)
+	log("UpdateUnit", unit)
 
 	if InCombatLockdown() then
 		self:QueueUpdate()
