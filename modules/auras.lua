@@ -7,8 +7,8 @@ local MSQ = LibStub("Masque", true)
 local MSQ_Buffs
 local MSQ_Debuffs
 if MSQ then
-	MSQ_Buffs = MSQ:Group("GladiusEx", "Buffs")
-	MSQ_Debuffs = MSQ:Group("GladiusEx", "Debuffs")
+	MSQ_Buffs = MSQ:Group("GladiusEx", L["Buffs"])
+	MSQ_Debuffs = MSQ:Group("GladiusEx", L["Debuffs"])
 end
 
 -- global functions
@@ -167,9 +167,8 @@ function Auras:UpdateUnitAuras(event, unit)
 		end
 		aura_frame.count:SetText(count > 1 and count or nil)
 
-		--if isStealable then
-		if true then
-			local color = DebuffTypeColor[dispelType] or DebuffTypeColor["none"]
+		local color = DebuffTypeColor[dispelType] or (not buff and DebuffTypeColor["none"])
+		if color then
 			aura_frame.border:SetVertexColor(color.r, color.g, color.b)
 			aura_frame.border:Show()
 		else
