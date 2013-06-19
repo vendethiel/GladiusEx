@@ -3,6 +3,13 @@ local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local LSM = LibStub("LibSharedMedia-3.0")
 local fn = LibStub("LibFunctional-1.0")
 local LD = LibStub("LibDispellable-1.0")
+local MSQ = LibStub("Masque", true)
+local MSQ_Buffs
+local MSQ_Debuffs
+if MSQ then
+	MSQ_Buffs = MSQ:Group("GladiusEx", "Buffs")
+	MSQ_Debuffs = MSQ:Group("GladiusEx", "Debuffs")
+end
 
 -- global functions
 local strfind = string.find
@@ -30,7 +37,6 @@ local defaults = {
 	aurasBuffsSize = 16,
 	aurasBuffsOffsetX = 0,
 	aurasBuffsOffsetY = 0,
-	aurasBuffsCrop = true,
 
 	aurasDebuffs = true,
 	aurasDebuffsWithBuffs = false,
@@ -43,7 +49,6 @@ local defaults = {
 	aurasDebuffsSize = 16,
 	aurasDebuffsOffsetX = 0,
 	aurasDebuffsOffsetY = 0,
-	aurasDebuffsCrop = true,
 
 	aurasFilterType = FILTER_TYPE_DISABLED,
 	aurasFilterWhat = FILTER_WHAT_BOTH,
@@ -230,43 +235,18 @@ function Auras:UpdateUnitAuras(event, unit)
 end
 
 local function CreateAuraFrame(name, parent)
-	local frame = CreateFrame("Frame", name, parent)
-	frame.icon = frame:CreateTexture(nil, "BORDER") -- bg
-	frame.icon:SetPoint("CENTER")
-
-	frame.border = frame:CreateTexture(nil, "BACKGROUND") -- overlay
-	frame.border:SetPoint("CENTER")
-	frame.border:SetTexture(1, 1, 1, 1)
-
-	frame.cooldown = CreateFrame("Cooldown", nil, frame)
-	frame.cooldown:SetAllPoints(frame.icon)
-	frame.cooldown:SetReverse(true)
-	frame.cooldown:Hide()
-
-	frame.count = frame:CreateFontString(nil, "OVERLAY")
-	frame.count:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont), 10, "OUTLINE")
-	frame.count:SetTextColor(1, 1, 1, 1)
-	frame.count:SetShadowColor(0, 0, 0, 1.0)
-	frame.count:SetShadowOffset(0.50, -0.50)
-	frame.count:SetHeight(1)
-	frame.count:SetWidth(1)
-	frame.count:SetAllPoints()
-	frame.count:SetJustifyV("BOTTOM")
-	frame.count:SetJustifyH("RIGHT")
-
+	local frame = CreateFrame("Button", name, parent, "ActionButtonTemplate")
+	frame.icon = _G[name .. "Icon"]
+	frame.border = _G[name .. "Border"]
+	frame.cooldown = _G[name .. "Cooldown"]
+	frame.count = _G[name .. "Count"]
 	return frame
 end
 
-local function UpdateAuraFrame(frame, size, crop)
-	frame:SetSize(size, size)
-	frame.icon:SetSize(size - 1.5, size - 1.5)
-	if crop then
-		local n = 5
-		frame.icon:SetTexCoord(n / 64, 1 - n / 64, n / 64, 1 - n / 64)
-	else
-		frame.icon:SetTexCoord(0, 1, 0, 1)
-	end
-	frame.border:SetSize(size, size)
+local function UpdateAuraFrame(frame, size)
+	frame:SetButtonState("NORMAL", true)
+	frame:SetNormalTexture("")
+	frame:SetScale(size / 36)
 end
 
 function Auras:CreateFrame(unit)
@@ -280,7 +260,12 @@ function Auras:CreateFrame(unit)
 
 		for i = 1, 40 do
 			self.buffFrame[unit][i] = CreateAuraFrame("GladiusEx" .. self:GetName() .. "BuffFrameIcon" .. i .. unit, self.buffFrame[unit])
+			self.buffFrame[unit][i]:EnableMouse(false)
 			self.buffFrame[unit][i]:Hide()
+
+			if MSQ_Buffs then
+				MSQ_Buffs:AddButton(self.buffFrame[unit][i], self.buffFrame[unit][i].ButtonData)
+			end
 		end
 	end
 
@@ -291,7 +276,12 @@ function Auras:CreateFrame(unit)
 
 		for i = 1, 40 do
 			self.debuffFrame[unit][i] = CreateAuraFrame("GladiusEx" .. self:GetName() .. "DebuffFrameIcon" .. i .. unit, self.debuffFrame[unit])
+			self.debuffFrame[unit][i]:EnableMouse(false)
 			self.debuffFrame[unit][i]:Hide()
+
+			if MSQ_Debuffs then
+				MSQ_Debuffs:AddButton(self.debuffFrame[unit][i], self.debuffFrame[unit][i].ButtonData)
+			end
 		end
 	end
 end
@@ -309,8 +299,7 @@ local function UpdateAuraGroup(
 	aurasBuffsSize,
 	aurasBuffsSpacingX,
 	aurasBuffsSpacingY,
-	aurasBuffsMax,
-	aurasBuffsCrop)
+	aurasBuffsMax)
 
 	-- anchor point
 	local parent = GladiusEx:GetAttachFrame(unit, aurasBuffsAttachTo)
@@ -357,7 +346,7 @@ local function UpdateAuraGroup(
 
 		auraFrame[i]:ClearAllPoints()
 		auraFrame[i]:SetPoint(anchor, parent, relativePoint, offsetX, offsetY)
-		UpdateAuraFrame(auraFrame[i], aurasBuffsSize, aurasBuffsCrop)
+		UpdateAuraFrame(auraFrame[i], aurasBuffsSize)
 	end
 end
 
@@ -380,8 +369,10 @@ function Auras:Update(unit)
 			self.db[unit].aurasBuffsSize,
 			self.db[unit].aurasBuffsSpacingX,
 			self.db[unit].aurasBuffsSpacingY,
-			self.db[unit].aurasBuffsMax,
-			self.db[unit].aurasBuffsCrop)
+			self.db[unit].aurasBuffsMax)
+		if MSQ_Buffs then
+			MSQ_Buffs:ReSkin()
+		end
 	end
 	-- hide
 	if self.buffFrame[unit] then
@@ -401,8 +392,10 @@ function Auras:Update(unit)
 			self.db[unit].aurasDebuffsSize,
 			self.db[unit].aurasDebuffsSpacingX,
 			self.db[unit].aurasDebuffsSpacingY,
-			self.db[unit].aurasDebuffsMax,
-			self.db[unit].aurasDebuffsCrop)
+			self.db[unit].aurasDebuffsMax)
+		if MSQ_Debuffs then
+			MSQ_Debuffs:ReSkin()
+		end
 	end
 	-- hide
 	if self.debuffFrame[unit] then
@@ -509,13 +502,6 @@ function Auras:GetOptions(unit)
 									name = "",
 									width = "full",
 									order = 13,
-								},
-								aurasBuffsCrop = {
-									type = "toggle",
-									name = L["Crop borders"],
-									desc = L["Toggle if the icon borders should be cropped or not"],
-									disabled = function() return not self.db[unit].aurasBuffs or not self:IsUnitEnabled(unit) end,
-									order = 14,
 								},
 								aurasBuffsOnlyDispellable = {
 									type = "toggle",
@@ -745,13 +731,6 @@ function Auras:GetOptions(unit)
 									name = "",
 									width = "full",
 									order = 13,
-								},
-								aurasDebuffsCrop = {
-									type = "toggle",
-									name = L["Crop borders"],
-									desc = L["Toggle if the icon borders should be cropped or not"],
-									disabled = function() return not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) end,
-									order = 14,
 								},
 								aurasDebuffsOnlyDispellable = {
 									type = "toggle",
