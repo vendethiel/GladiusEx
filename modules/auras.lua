@@ -37,6 +37,7 @@ local defaults = {
 	aurasBuffsSize = 16,
 	aurasBuffsOffsetX = 0,
 	aurasBuffsOffsetY = 0,
+	aurasBuffsTooltips = true,
 
 	aurasDebuffs = true,
 	aurasDebuffsWithBuffs = false,
@@ -49,6 +50,7 @@ local defaults = {
 	aurasDebuffsSize = 16,
 	aurasDebuffsOffsetX = 0,
 	aurasDebuffsOffsetY = 0,
+	aurasDebuffsTooltips = true,
 
 	aurasFilterType = FILTER_TYPE_DISABLED,
 	aurasFilterWhat = FILTER_WHAT_BOTH,
@@ -149,10 +151,13 @@ function Auras:UpdateUnitAuras(event, unit)
 	local frame
 	local max
 
-	local function SetAura(index)
+	local function SetAura(index, buff)
 		local aura_frame = frame[icon_index]
 
-		aura_frame:SetID(index)
+		aura_frame.unit = unit
+		aura_frame.aura_index = index
+		aura_frame.aura_buff = buff
+
 		aura_frame.icon:SetTexture(icon)
 		if duration > 0 then
 			aura_frame.cooldown:SetCooldown(expires - duration, duration)
@@ -190,7 +195,7 @@ function Auras:UpdateUnitAuras(event, unit)
 			if self:IsAuraFiltered(unit, name, FILTER_WHAT_BUFFS) and
 				(not only_mine or player_units[caster]) and
 				(not only_dispellable or LD:CanDispel(unit, true, dispelType, spellID)) then
-				SetAura(i)
+				SetAura(i, true)
 				if icon_index > max then break end
 			end
 		end
@@ -222,7 +227,7 @@ function Auras:UpdateUnitAuras(event, unit)
 			if self:IsAuraFiltered(unit, name, FILTER_WHAT_DEBUFFS) and
 				(not only_mine or player_units[caster]) and
 				(not only_dispellable or LD:CanDispel(unit, false, dispelType, spellID)) then
-				SetAura(i)
+				SetAura(i, false)
 				if icon_index > max then break end
 			end
 		end
@@ -240,12 +245,16 @@ local function CreateAuraFrame(name, parent)
 	frame.border = _G[name .. "Border"]
 	frame.cooldown = _G[name .. "Cooldown"]
 	frame.count = _G[name .. "Count"]
+	frame.ButtonData = {
+		Highlight = false
+	}
 	return frame
 end
 
 local function UpdateAuraFrame(frame, size)
 	frame:SetButtonState("NORMAL", true)
 	frame:SetNormalTexture("")
+	frame:SetHighlightTexture("")
 	frame:SetScale(size / 36)
 end
 
@@ -260,7 +269,6 @@ function Auras:CreateFrame(unit)
 
 		for i = 1, 40 do
 			self.buffFrame[unit][i] = CreateAuraFrame("GladiusEx" .. self:GetName() .. "BuffFrameIcon" .. i .. unit, self.buffFrame[unit])
-			self.buffFrame[unit][i]:EnableMouse(false)
 			self.buffFrame[unit][i]:Hide()
 
 			if MSQ_Buffs then
@@ -276,7 +284,6 @@ function Auras:CreateFrame(unit)
 
 		for i = 1, 40 do
 			self.debuffFrame[unit][i] = CreateAuraFrame("GladiusEx" .. self:GetName() .. "DebuffFrameIcon" .. i .. unit, self.debuffFrame[unit])
-			self.debuffFrame[unit][i]:EnableMouse(false)
 			self.debuffFrame[unit][i]:Hide()
 
 			if MSQ_Debuffs then
@@ -299,7 +306,8 @@ local function UpdateAuraGroup(
 	aurasBuffsSize,
 	aurasBuffsSpacingX,
 	aurasBuffsSpacingY,
-	aurasBuffsMax)
+	aurasBuffsMax,
+	aurasBuffsTooltips)
 
 	-- anchor point
 	local parent = GladiusEx:GetAttachFrame(unit, aurasBuffsAttachTo)
@@ -346,6 +354,24 @@ local function UpdateAuraGroup(
 
 		auraFrame[i]:ClearAllPoints()
 		auraFrame[i]:SetPoint(anchor, parent, relativePoint, offsetX, offsetY)
+		if aurasBuffsTooltips then
+			auraFrame[i]:EnableMouse(true)
+			auraFrame[i]:SetScript("OnEnter", function(self)
+				if self.aura_index then
+					GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+					if self.aura_buff then
+						GameTooltip:SetUnitBuff(self.unit, self.aura_index)
+					else
+						GameTooltip:SetUnitDebuff(self.unit, self.aura_index)
+					end
+				end
+			end)
+			auraFrame[i]:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
+		else
+			auraFrame[i]:EnableMouse(false)
+			auraFrame[i]:SetScript("OnEnter", nil)
+			auraFrame[i]:SetScript("OnLeave", nil)
+		end
 		UpdateAuraFrame(auraFrame[i], aurasBuffsSize)
 	end
 end
@@ -369,7 +395,8 @@ function Auras:Update(unit)
 			self.db[unit].aurasBuffsSize,
 			self.db[unit].aurasBuffsSpacingX,
 			self.db[unit].aurasBuffsSpacingY,
-			self.db[unit].aurasBuffsMax)
+			self.db[unit].aurasBuffsMax,
+			self.db[unit].aurasBuffsTooltips)
 		if MSQ_Buffs then
 			MSQ_Buffs:ReSkin()
 		end
@@ -392,7 +419,8 @@ function Auras:Update(unit)
 			self.db[unit].aurasDebuffsSize,
 			self.db[unit].aurasDebuffsSpacingX,
 			self.db[unit].aurasDebuffsSpacingY,
-			self.db[unit].aurasDebuffsMax)
+			self.db[unit].aurasDebuffsMax,
+			self.db[unit].aurasDebuffsTooltips)
 		if MSQ_Debuffs then
 			MSQ_Debuffs:ReSkin()
 		end
@@ -519,13 +547,20 @@ function Auras:GetOptions(unit)
 									hidden = function() return GladiusEx:IsArenaUnit(unit) end,
 									order = 14.1,
 								},
+								aurasBuffsTooltips = {
+									type = "toggle",
+									name = L["Show tooltips"],
+									desc = L["Toggle if the icons should show the spell tooltip when hovered"],
+									disabled = function() return not self:IsUnitEnabled(unit) end,
+									order = 15,
+								},								
 								aurasBuffsPerColumn = {
 									type = "range",
 									name = L["Icons per column"],
 									desc = L["Number of aura icons per column"],
 									min = 1, max = 50, step = 1,
 									disabled = function() return not self.db[unit].aurasBuffs or not self:IsUnitEnabled(unit) end,
-									order = 15,
+									order = 16,
 								},
 								aurasBuffsMax = {
 									type = "range",
@@ -748,13 +783,20 @@ function Auras:GetOptions(unit)
 									hidden = function() return GladiusEx:IsPartyUnit(unit) end,
 									order = 14.1,
 								},
+								aurasDebuffsTooltips = {
+									type = "toggle",
+									name = L["Show tooltips"],
+									desc = L["Toggle if the icons should show the spell tooltip when hovered"],
+									disabled = function() return not self:IsUnitEnabled(unit) end,
+									order = 15,
+								},
 								aurasDebuffsPerColumn = {
 									type = "range",
 									name = L["Icons per column"],
 									desc = L["Number of icons per column"],
 									min = 1, max = 50, step = 1,
 									disabled = function() return not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) end,
-									order = 15,
+									order = 16,
 								},
 								aurasDebuffsMax = {
 									type = "range",
