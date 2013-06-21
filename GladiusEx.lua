@@ -635,17 +635,15 @@ function GladiusEx:PLAYER_ENTERING_WORLD()
 end
 
 function GladiusEx:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
-	local numOpps = GetNumArenaOpponentSpecs()
+	self:CheckArenaSize()
 
+	local numOpps = GetNumArenaOpponentSpecs()
 	for i = 1, numOpps do
 		local specID = GetArenaOpponentSpec(i)
 		local unitid = "arena" .. i
 
 		self:UpdateUnitSpecialization(unitid, specID)
 	end
-
-	self:UpdateArenaFrames()
-	self:CheckArenaSize()
 end
 
 function GladiusEx:CheckOpponentSpecialization(unit)
