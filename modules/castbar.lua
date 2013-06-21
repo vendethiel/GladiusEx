@@ -343,7 +343,7 @@ function CastBar:Update(unit)
 	self.frame[unit].icon:SetTexture(nil)
 
 	-- update not interruptible shield
-	self.frame[unit].icon.shield_frame:SetFrameLevel(25)
+	self.frame[unit].icon.shield_frame:SetFrameLevel(70)
 	self.frame[unit].icon.shield:SetSize(height * 64 / 20, height * 64 / 20)
 	self.frame[unit].icon.shield:SetPoint("CENTER", self.frame[unit].icon, "CENTER")
 	self.frame[unit].icon.shield:Hide()
