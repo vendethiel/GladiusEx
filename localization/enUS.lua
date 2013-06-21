@@ -97,6 +97,19 @@ L["PetBar"] = "Pet"
 L["SkillHistory"] = "Skill History"
 
 -- General
+L["Show Buffs"] = true
+L["Show Debuffs"] = true
+L["Toggle if the auras should show the aura tooltip when hovered"] = true
+L["Enlarge mine"] = true
+L["Toggle if your auras should be enlarged"] = true
+L["Enlarged scale"] = true
+L["Scale of the enlarged auras"] = true
+L["Auras per row"] = true
+L["Number of auras per row"] = true
+L["Number of rows"] = true
+L["Max number of rows"] = true
+
+
 L["Detached group"] = true
 L["Detach the group from the unit frames, showing the cooldowns of all the units and allowing you to move it freely"] = true
 L["Locked"] = true
@@ -106,8 +119,7 @@ L["Toggle if the cooldowns in the detached group should be grouped by unit"] = t
 L["Lock the group to hide"] = true
 L["Group %i anchor (%s)"] = true
 
-
-
+L["Function"] = true
 L[" |T%s:20|t %s [%ss] %s"] = true
 L["%s settings"] = true
 L["** If this is not your first run please lock or move the frame to prevent this from happening **"] = true
@@ -240,7 +252,6 @@ L["ctrl-"] = true
 L["Cubic"] = true
 L["Dead alpha"] = true
 L["DEAD"] = true
-L["Debuffs with buffs"] = true
 L["Debuffs"] = true
 L["Decrease the priority of spells in this category"] = true
 L["Default color"] = true
@@ -396,9 +407,7 @@ L["New aura"] = true
 L["New cast"] = true
 L["None"] = true
 L["Not interruptible color"] = true
-L["Number of aura icons per column"] = true
 L["Number of icons per column"] = true
-L["Number of max buffs"] = true
 L["Number of max icons"] = true
 L["OFFLINE"] = true
 L["Offset X"] = true
@@ -498,7 +507,6 @@ L["Spec detection"] = true
 L["Spec"] = true
 L["Spell name / Macro text"] = true
 L["Spell name"] = true
-L["Spells in each group have their own row or column"] = true
 L["Stealth alpha"] = true
 L["Stop testing"] = true
 L["Tag settings"] = true
