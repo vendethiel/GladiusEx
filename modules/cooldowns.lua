@@ -7,7 +7,8 @@ local fn = LibStub("LibFunctional-1.0")
 -- global functions
 local tinsert, tremove, tsort = table.insert, table.remove, table.sort
 local pairs, ipairs, select, type, unpack, wipe = pairs, ipairs, select, type, unpack, wipe
-local min, max, ceil, random = math.min, math.max, math.ceil, math.random
+local min, max, ceil, floor, random = math.min, math.max, math.ceil, math.floor, math.random
+local bor, lshift = bit.bor, bit.lshift
 local GetTime, UnitExists, UnitFactionGroup, UnitClass, UnitRace = GetTime, UnitExists, UnitFactionGroup, UnitClass, UnitRace
 local UnitBuff = UnitBuff
 
@@ -325,7 +326,7 @@ end
 
 function Cooldowns:MakeGroupId()
 	-- not ideal, but should be good enough for its purpose
-	return math.random(2^31-1)
+	return random(2^31-1)
 end
 
 function Cooldowns:GetNumGroups(unit)
@@ -568,7 +569,7 @@ local function GetSpellSortScore(unit, group, spellid)
 	local max = 256^len
 	local sum = 0
 	for i = 1, len do
-		sum = bit.bor(bit.lshift(sum, 8), spelldata.name:byte(i))
+		sum = bor(lshift(sum, 8), spelldata.name:byte(i))
 	end
 	score = score + (max - sum) / max
 
@@ -1088,6 +1089,8 @@ function Cooldowns:UpdateGroup(unit, group)
 			else
 				gs.anchor:Show()
 			end
+		elseif gs.anchor then
+			gs.anchor:Hide()
 		end
 
 		-- update cooldown frame

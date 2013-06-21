@@ -67,7 +67,7 @@ local function log(...)
 		log_frame:SetBackdropColor(1, 1, 1, 0.2)
 		log_frame.starttime = GetTime()
 
-		log_frame:SetScale(0.8)
+		log_frame:SetScale(1)
 	end
 	local p = ...
 	if p == "ENABLE LOGGING" then
@@ -275,8 +275,7 @@ function GladiusEx:OnInitialize()
 			end
 		end
 		l = fn.filter(l, function(k)
-				if k:match("Tag$") or k:match(":short$")
-					then
+				if k:match("Tag$") or k:match(":short$") then
 					return false
 				end
 				return true
@@ -661,6 +660,9 @@ end
 
 function GladiusEx:ARENA_OPPONENT_UPDATE(event, unit, type)
 	log("ARENA_OPPONENT_UPDATE", unit, type)
+	-- ignore pets
+	if not self:IsArenaUnit(unit) then return end
+
 	if type == "seen" or type == "destroyed" then
 		self:ShowUnit(unit)
 		self:CheckOpponentSpecialization(unit)
@@ -1309,10 +1311,11 @@ function GladiusEx:UpdateUnit(unit)
 		if mframes then
 			fn.each(mframes, function(mf)
 				if mf then
-					local mleft = (button:GetLeft() or 0) - (mf:GetLeft() or 0)
-					local mright = (mf:GetRight() or 0) - (button:GetRight() or 0)
-					local mtop = (mf:GetTop() or 0) - (button:GetTop() or 0)
-					local mbottom = (button:GetBottom() or 0) - (mf:GetBottom() or 0)
+					local mscale = mf:GetScale()
+					local mleft = (button:GetLeft() or 0) - (mf:GetLeft() or 0) * mscale
+					local mright = (mf:GetRight() or 0) * mscale - (button:GetRight() or 0)
+					local mtop = (mf:GetTop() or 0) * mscale - (button:GetTop() or 0)
+					local mbottom = (button:GetBottom() or 0) - (mf:GetBottom() or 0) * mscale
 					wleft = max(mleft, wleft)
 					wright = max(mright, wright)
 					wtop = max(mtop, wtop)
