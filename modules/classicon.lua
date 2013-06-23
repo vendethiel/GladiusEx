@@ -219,7 +219,7 @@ local defaults = {
 	classIconImportantAuras = true,
 	classIconCrop = true,
 	classIconCooldown = true,
-	classIconCooldownReverse = false,
+	classIconCooldownReverse = true,
 	classIconAuras = GetDefaultImportantAuras()
 }
 
