@@ -97,6 +97,9 @@ L["PetBar"] = "Pet"
 L["SkillHistory"] = "Skill History"
 
 -- General
+L["Highlight player target"] = true
+L["Show border around your target"] = true
+
 L[" |T%s:20|t %s [%ss] %s"] = true
 L["%s settings"] = true
 L["** If this is not your first run please lock or move the frame to prevent this from happening **"] = true
@@ -326,7 +329,6 @@ L["Highlight focus target"] = true
 L["Highlight frame on mouseover"] = true
 L["Highlight on mouseover"] = true
 L["Highlight raid assist target"] = true
-L["Highlight the player target"] = true
 L["Highlight"] = true
 L["Horizontal padding of the icons"] = true
 L["Horizontal padding"] = true
@@ -431,8 +433,8 @@ L["Quadratic"] = true
 L["Race"] = true
 L["Raid assist settings"] = true
 L["Raid assist target"] = true
-L["Raid icon target %i"] = true
-L["Raid icon targets"] = true
+L["Raid target icon %i"] = true
+L["Raid target icons"] = true
 L["Raid Warning"] = true
 L["Relative point of the frame"] = true
 L["Relative point"] = true
@@ -469,7 +471,7 @@ L["Shared cooldown: %s (%is)"] = true
 L["Shield icon"] = true
 L["shift-"] = true
 L["Show absorbs"] = true
-L["Show border around focus target"] = true
+L["Show border around your focus target"] = true
 L["Show border around raid assist"] = true
 L["Show border around raid target %i"] = true
 L["Show Buffs"] = true

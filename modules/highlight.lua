@@ -274,8 +274,8 @@ function Highlight:GetOptions(unit)
 					args = {
 						highlightTarget = {
 							type = "toggle",
-							name = L["Highlight"],
-							desc = L["Highlight the player target"],
+							name = L["Highlight player target"],
+							desc = L["Show border around your target"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 5,
 						},
@@ -310,7 +310,7 @@ function Highlight:GetOptions(unit)
 						highlightFocus = {
 							type = "toggle",
 							name = L["Highlight focus target"],
-							desc = L["Show border around focus target"],
+							desc = L["Show border around your focus target"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 5,
 						},
@@ -374,7 +374,7 @@ function Highlight:GetOptions(unit)
 		},
 		raidTargets = {
 			type = "group",
-			name = L["Raid icon targets"],
+			name = L["Raid target icons"],
 			order = 2,
 			args = {
 			},
@@ -385,7 +385,7 @@ function Highlight:GetOptions(unit)
 	for i = 1, 8 do
 		options.raidTargets.args["raidTarget" .. i] = {
 			type = "group",
-			name = "|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_" .. i .. ".blp:0|t " .. string.format(L["Raid icon target %i"], i),
+			name = "|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_" .. i .. ".blp:0|t " .. string.format(L["Raid target icon %i"], i),
 			inline = true,
 			order = i,
 			args = {
