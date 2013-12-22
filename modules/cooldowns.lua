@@ -782,7 +782,7 @@ local function CreateCooldownFrame(name, parent)
 	frame.icon = frame.icon_frame:CreateTexture(nil, "BACKGROUND") -- bg
 	frame.icon:SetPoint("CENTER")
 
-	frame.cooldown = CreateFrame("Cooldown", nil, frame.icon_frame)
+	frame.cooldown = CreateFrame("Cooldown", name .. "Cooldown", frame.icon_frame)
 	frame.cooldown:SetAllPoints(frame.icon)
 	frame.cooldown:SetReverse(true)
 	frame.cooldown:Hide()
