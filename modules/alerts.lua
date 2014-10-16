@@ -15,7 +15,7 @@ local function GetDefaultCastsSpells()
 		[GladiusEx:SafeGetSpellName(2060)]    = h,     -- Greater Heal
 		[GladiusEx:SafeGetSpellName(82326)]   = h,     -- Divine Light
 		[GladiusEx:SafeGetSpellName(8936)]    = h,     -- Regrowth
-		[GladiusEx:SafeGetSpellName(50464)]   = h,     -- Nourish
+		-- [GladiusEx:SafeGetSpellName(50464)]   = h,     -- Nourish
 		[GladiusEx:SafeGetSpellName(77472)]   = h,     -- Greater Healing Wave
 		[GladiusEx:SafeGetSpellName(115175)]  = h,     -- Soothing Mist
 
@@ -26,10 +26,10 @@ local function GetDefaultCastsSpells()
 		[GladiusEx:SafeGetSpellName(20066)]    = cc,    -- Repentance
 		[GladiusEx:SafeGetSpellName(33786)]    = cc,    -- Cyclone
 		[GladiusEx:SafeGetSpellName(102051)]   = cc,    -- Frostjaw
-		[GladiusEx:SafeGetSpellName(1513)]     = cc,    -- Scare Beast
+		-- [GladiusEx:SafeGetSpellName(1513)]     = cc,    -- Scare Beast
 		[GladiusEx:SafeGetSpellName(339)]      = cc,    -- Entangling Roots
-		[GladiusEx:SafeGetSpellName(104045)]   = cc,    -- Sleep (Metamorphosis)
-		[GladiusEx:SafeGetSpellName(2637)]     = cc,    -- Hibernate
+		-- [GladiusEx:SafeGetSpellName(104045)]   = cc,    -- Sleep (Metamorphosis)
+		-- [GladiusEx:SafeGetSpellName(2637)]     = cc,    -- Hibernate
 	}
 end
 

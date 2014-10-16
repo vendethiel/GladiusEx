@@ -15,6 +15,7 @@ local CLASS_BUTTONS = CLASS_BUTTONS
 -- Nonetheless, if you think that we missed an important aura, please post it on the addon site at curse or wowace
 local function GetDefaultImportantAuras()
 	return {
+	--[[
 		-- Spell Name                           = Priority (higher = more priority)
 		-- Crowd control
 		[GladiusEx:SafeGetSpellName(108194)]   = 4,    -- Asphyxiate
@@ -209,6 +210,7 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(47585)]    = 1,    -- Dispersion
 		[GladiusEx:SafeGetSpellName(31224)]    = 1,    -- Cloak of Shadows
 		[GladiusEx:SafeGetSpellName(46924)]    = 1,    -- Bladestorm
+	]]
 	}
 end
 

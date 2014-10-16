@@ -166,7 +166,7 @@ function DRTracker:DRFaded(unit, spellID)
 
 	if self.db[unit].drTrackerCooldown then
 		tracked.cooldown:SetCooldown(GetTime(), time_left)
-		tracked.cooldown:SetBlingDuration(50)
+		-- tracked.cooldown:SetBlingDuration(50)
 	end
 
 	tracked:SetScript("OnUpdate", function(f, elapsed)

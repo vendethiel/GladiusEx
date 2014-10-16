@@ -782,7 +782,7 @@ local function CreateCooldownFrame(name, parent)
 	frame.icon = frame.icon_frame:CreateTexture(nil, "BACKGROUND") -- bg
 	frame.icon:SetPoint("CENTER")
 
-	frame.cooldown = CreateFrame("Cooldown", name .. "Cooldown", frame.icon_frame)
+	frame.cooldown = CreateFrame("Cooldown", name .. "Cooldown", frame.icon_frame, "CooldownFrameTemplate")
 	frame.cooldown:SetAllPoints(frame.icon)
 	frame.cooldown:SetReverse(true)
 	frame.cooldown:Hide()
@@ -1839,7 +1839,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 			if GladiusEx:IsDebugging() then
 				local basecd = GetSpellBaseCooldown(spellid)
 				if basecd and basecd / 1000 ~= spelldata.cooldown then
-					local str = string.format("%s: |T%s:20|t %s [%ss/Base: %ss] %s", spelldata.class, spelldata.icon, spelldata.name, spelldata.cooldown or "??", basecd and basecd/1000 or "??", catstr or "")
+					local str = string.format("%s: |T%s:20|t %s [%ss/Base: %ss] %s", spelldata.class or "??", spelldata.icon, spelldata.name, spelldata.cooldown or "??", basecd and basecd/1000 or "??", catstr or "")
 					if not self.debuglog then self.debuglog = {} end
 					if not self.debuglog[str] then
 						self.debuglog[str] = true
