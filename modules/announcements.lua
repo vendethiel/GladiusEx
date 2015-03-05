@@ -92,7 +92,6 @@ local RES_SPELLS = {
 	[GladiusEx:SafeGetSpellName(126393)] = true, -- Eternal Guardian (hunter pet: quilien)
 	[GladiusEx:SafeGetSpellName(61999)] = true,  -- Raise Ally (death knight)
 	[GladiusEx:SafeGetSpellName(20484)] = true,  -- Rebirth (druid)
-	-- [GladiusEx:SafeGetSpellName(113269)] = true, -- Rebirth (prot/holy paladin symbiosis)
 	[GladiusEx:SafeGetSpellName(7328)] = true,   -- Redemption (paladin)
 	[GladiusEx:SafeGetSpellName(2006)] = true,   -- Resurrection (priest)
 	[GladiusEx:SafeGetSpellName(115178)] = true, -- Resuscitate (monk)
@@ -163,6 +162,14 @@ function Announcements:Send(msg, throttle, unit)
 	elseif dest == "msbt" and IsAddOnLoaded("MikScrollingBattleText") then
 		MikSBT.DisplayMessage(msg, MikSBT.DISPLAYTYPE_NOTIFICATION, false, color.r * 255, color.g * 255, color.b * 255)
 
+	-- xCT
+	elseif dest == "xct" and IsAddOnLoaded("xCT") then
+		ct.frames[3]:AddMessage(msg, color.r * 255, color.g * 255, color.b * 255)
+
+	-- xCT+
+	elseif dest == "xctplus" and IsAddOnLoaded("xCT+") then
+		xCT_Plus:AddMessage("general", msg, {color.r, color.g, color.b})
+
 	-- Scrolling Combat Text
 	elseif dest == "sct" and IsAddOnLoaded("sct") then
 		SCT:DisplayText(msg, color, nil, "event", 1)
@@ -179,10 +186,12 @@ function Announcements:GetOptions(unit)
 		["party"] = L["Party"],
 		["say"] = L["Say"],
 		["rw"] = L["Raid Warning"],
-		["sct"] = L["Scrolling Combat Text"],
-		["msbt"] = L["MikScrollingBattleText"],
 		["fct"] = L["Blizzard's Floating Combat Text"],
-		["parrot"] = L["Parrot"]
+		["sct"] = "Scrolling Combat Text",
+		["msbt"] = "MikScrollingBattleText",
+		["parrot"] = "Parrot"
+		["xct"] = "xCT",
+		["xctplus"] = "xCT+"
 	}
 
 	return {
