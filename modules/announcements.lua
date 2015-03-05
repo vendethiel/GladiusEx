@@ -189,7 +189,7 @@ function Announcements:GetOptions(unit)
 		["fct"] = L["Blizzard's Floating Combat Text"],
 		["sct"] = "Scrolling Combat Text",
 		["msbt"] = "MikScrollingBattleText",
-		["parrot"] = "Parrot"
+		["parrot"] = "Parrot",
 		["xct"] = "xCT",
 		["xctplus"] = "xCT+"
 	}

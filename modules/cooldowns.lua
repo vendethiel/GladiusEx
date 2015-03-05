@@ -1818,7 +1818,6 @@ function Cooldowns:MakeGroupOptions(unit, group)
 					if not self.debuglog then self.debuglog = {} end
 					if not self.debuglog[str] then
 						self.debuglog[str] = true
-						GladiusEx:Log(str)
 					end
 				end
 			end
@@ -1948,6 +1947,11 @@ function Cooldowns:MakeGroupOptions(unit, group)
 				GladiusEx:Print("Bad spelldata for", spellid, ": could not find type")
 			end
 		end
+	end
+
+	if GladiusEx:IsDebugging() and self.debuglog and not self.debuglog_printed then
+		fn.each(fn.sort(fn.keys(self.debuglog)), fn.bind(GladiusEx.Log, GladiusEx))
+		self.debuglog_printed = true
 	end
 
 	return group_options
