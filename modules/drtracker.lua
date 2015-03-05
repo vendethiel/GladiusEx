@@ -83,10 +83,17 @@ function DRTracker:GetModuleAttachFrame(unit)
 end
 
 function DRTracker:CreateIcon(unit, drCat)
-	local f = CreateFrame("CheckButton", "GladiusEx" .. self:GetName() .. "FrameCat" .. drCat .. unit, self.frame[unit], "ActionButtonTemplate")
-	f.texture = _G[f:GetName().."Icon"]
-	f.normalTexture = _G[f:GetName().."NormalTexture"]
-	f.cooldown = _G[f:GetName().."Cooldown"]
+	local f = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. "FrameCat" .. drCat .. unit, self.frame[unit], nil)
+	
+	f.texture = f:CreateTexture(nil, "ARTWORK")
+	f.texture:SetAllPoints()
+
+	f.normalTexture = f:CreateTexture(nil, "OVERLAY")
+	f.normalTexture:SetAllPoints()
+
+	f.cooldown = CreateFrame("Cooldown", nil, f, "CooldownFrameTemplate")
+	f.cooldown:SetAllPoints()
+
 	f.text = f:CreateFontString(nil, "OVERLAY")
 
 	self.frame[unit].tracker[drCat] = f
@@ -101,7 +108,7 @@ function DRTracker:UpdateIcon(unit, drCat)
 	tracked:SetWidth(self.frame[unit]:GetHeight())
 	tracked:SetHeight(self.frame[unit]:GetHeight())
 
-	tracked:SetNormalTexture([[Interface\AddOns\GladiusEx\media\gloss]])
+	tracked.normalTexture:SetTexture([[Interface\AddOns\GladiusEx\media\gloss]])
 	tracked.normalTexture:SetVertexColor(self.db[unit].drTrackerGlossColor.r, self.db[unit].drTrackerGlossColor.g,
 		self.db[unit].drTrackerGlossColor.b, self.db[unit].drTrackerGloss and self.db[unit].drTrackerGlossColor.a or 0)
 
@@ -295,7 +302,7 @@ function DRTracker:Reset(unit)
 end
 
 function DRTracker:Test(unit)
-	self:DRFaded(unit, 64058)
+	self:DRFaded(unit, 5211)
 	self:DRFaded(unit, 118)
 	self:DRFaded(unit, 118)
 
