@@ -172,8 +172,7 @@ function DRTracker:DRFaded(unit, spellID)
 	tracked.texture:SetTexture(GetSpellTexture(spellID))
 
 	if self.db[unit].drTrackerCooldown then
-		tracked.cooldown:SetCooldown(GetTime(), time_left)
-		-- tracked.cooldown:SetBlingDuration(50)
+		CooldownFrame_SetTimer(tracked.cooldown, GetTime(), time_left, 1)
 	end
 
 	tracked:SetScript("OnUpdate", function(f, elapsed)

@@ -278,7 +278,7 @@ function ClassIcon:SetAura(unit, name, icon, duration, expires)
 	self:SetTexture(unit, icon, true, 0, 1, 0, 1)
 
 	if self.db[unit].classIconCooldown then
-		self.frame[unit].cooldown:SetCooldown(expires - duration, duration)
+		CooldownFrame_SetTimer(self.frame[unit].cooldown, expires - duration, duration, 1)
 		self.frame[unit].cooldown:Show()
 	end
 end
