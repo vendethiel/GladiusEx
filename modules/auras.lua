@@ -410,8 +410,8 @@ function Auras:UpdateUnitAuras(event, unit)
 		aurasBuffsSpacingY = self.db[unit].aurasBuffsSpacingY
 		aurasBuffsEnlargeMine = self.db[unit].aurasBuffsEnlargeMine
 		aurasBuffsEnlargeScale = self.db[unit].aurasBuffsEnlargeScale
-		aurasBuffsOnlyMine = self.db[unit].aurasBuffsOnlyMine
-		aurasBuffsOnlyDispellable = self.db[unit].aurasBuffsOnlyDispellable
+		aurasBuffsOnlyMine = GladiusEx:IsPartyUnit(unit) and self.db[unit].aurasBuffsOnlyMine
+		aurasBuffsOnlyDispellable = GladiusEx:IsArenaUnit(unit) and self.db[unit].aurasBuffsOnlyDispellable
 
 		scan(true)
 		hide_unused()
@@ -430,8 +430,8 @@ function Auras:UpdateUnitAuras(event, unit)
 		aurasBuffsSpacingY = self.db[unit].aurasDebuffsSpacingY
 		aurasBuffsEnlargeMine = self.db[unit].aurasDebuffsEnlargeMine
 		aurasBuffsEnlargeScale = self.db[unit].aurasDebuffsEnlargeScale
-		aurasBuffsOnlyMine = self.db[unit].aurasDebuffsOnlyMine
-		aurasBuffsOnlyDispellable = self.db[unit].aurasDebuffsOnlyDispellable
+		aurasBuffsOnlyMine = GladiusEx:IsArenaUnit(unit) and self.db[unit].aurasDebuffsOnlyMine
+		aurasBuffsOnlyDispellable = GladiusEx:IsPartyUnit() and self.db[unit].aurasDebuffsOnlyDispellable
 
 		scan(false)
 		hide_unused()
