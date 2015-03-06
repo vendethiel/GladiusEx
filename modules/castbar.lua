@@ -411,6 +411,7 @@ function CastBar:Update(unit)
 	if invpos(self.db[unit].castTextAlign) then
 		self.frame[unit].castText:SetPoint(invpos(self.db[unit].castTextAlign), self.frame[unit].bar, invpos(self.db[unit].castTextAlign), 0, 0)
 	end
+	self.frame[unit].castText:SetWordWrap(false)
 
 	-- update cast time text
 	if self.db[unit].castTimeText then
@@ -432,6 +433,7 @@ function CastBar:Update(unit)
 	if invpos(self.db[unit].castTimeTextAlign) then
 		self.frame[unit].timeText:SetPoint(invpos(self.db[unit].castTimeTextAlign), self.frame[unit].bar, invpos(self.db[unit].castTimeTextAlign), 0, 0)
 	end
+	self.frame[unit].timeText:SetWordWrap(false)
 
 	-- time text format
 	local fmt
