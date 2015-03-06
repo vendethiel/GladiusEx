@@ -385,6 +385,7 @@ function Tags:Update(unit)
 			self.frame[unit][text].fs:SetShadowColor(GladiusEx.db.base.globalFontShadowColor.r, GladiusEx.db.base.globalFontShadowColor.g, GladiusEx.db.base.globalFontShadowColor.b, GladiusEx.db.base.globalFontShadowColor.a)
 			self.frame[unit][text].fs:SetJustifyH(hjustify)
 			self.frame[unit][text].fs:SetJustifyV(vjustify)
+			self.frame[unit][text].fs:SetWordWrap(false)
 			self.frame[unit][text].fs:ClearAllPoints()
 			self.frame[unit][text].fs:SetPoint(position, attachframe, position, ox, oy)
 

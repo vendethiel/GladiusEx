@@ -1487,6 +1487,7 @@ function GladiusEx:CreateSuperFS(fsparent, layer)
 	AddWrapperAll("SetAlpha")
 	AddWrapperAll("SetText")
 	AddWrapperAll("SetTextColor")
+	AddWrapperAll("SetWordWrap")
 	AddWrapperAll("Show")
 	AddWrapperOne("GetFont")
 
