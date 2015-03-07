@@ -1,7 +1,7 @@
 ﻿GladiusEx = LibStub("AceAddon-3.0"):NewAddon("GladiusEx", "AceEvent-3.0")
 
 local fn = LibStub("LibFunctional-1.0")
-local LSR = LibStub("LibSpecRoster-1.0")
+local LGIST = LibStub:GetLibrary("LibGroupInSpecT-1.1")
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local RC = LibStub("LibRangeCheck-2.0")
 local LSM = LibStub("LibSharedMedia-3.0")
@@ -358,7 +358,7 @@ function GladiusEx:OnEnable()
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("UNIT_PET", "UpdateUnitGUID")
 	self:RegisterEvent("UNIT_PORTRAIT_UPDATE", "UpdateUnitGUID")
-	LSR.RegisterMessage(self, "LSR_SpecializationChanged")
+	LGIST.RegisterCallback(self, "GroupInSpecT_Update")
 	RC.RegisterCallback(self, RC.CHECKERS_CHANGED, "UpdateRangeCheckers")
 	self.dbi.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
 	self.dbi.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
@@ -388,7 +388,7 @@ end
 
 function GladiusEx:OnDisable()
 	self:UnregisterAllEvents()
-	LSR.UnregisterAllMessages(self)
+	LGIST.UnregisterAllEvents(self)
 	self.dbi.UnregisterAllEvents(self)
 	self:HideFrames()
 end
@@ -796,19 +796,23 @@ function GladiusEx:UpdateUnitState(unit, stealth)
 	end
 end
 
-function GladiusEx:LSR_SpecializationChanged(event, guid, unitID, specID)
+function GladiusEx:GroupInSpecT_Update(event, guid, unit, info)
 	for u, _ in pairs(party_units) do
 		if UnitGUID(u) == guid then
-			self:UpdateUnitSpecialization(u, specID)
+			self:UpdateUnitSpecialization(u, info.global_spec_id)
 			break
 		end
 	end
 end
 
 function GladiusEx:CheckUnitSpecialization(unit)
-	local _, specID = LSR:getSpecialization(UnitGUID(unit))
+	local info = LGIST:GetCachedInfo(UnitGUID(unit))
 
-	self:UpdateUnitSpecialization(unit, specID)
+	if info then
+		self:UpdateUnitSpecialization(unit, info.global_spec_id)
+	else
+		LGIST:Rescan(UnitGUID(unit))
+	end
 end
 
 function GladiusEx:UpdateUnitSpecialization(unit, specID)

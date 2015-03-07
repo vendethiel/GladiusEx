@@ -1,8 +1,8 @@
 package-as: GladiusEx
 
 externals:
-	libs/LibFunctional-1.0:
-		url: git://git.wowace.com/wow/libfunctional-1-0/mainline.git
+	libs/LibStub:
+		url: svn://svn.wowace.com/wow/libstub/mainline/trunk
 	libs/AceAddon-3.0:
 		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceAddon-3.0
 	libs/AceConfig-3.0:
@@ -23,19 +23,19 @@ externals:
 		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceSerializer-3.0
 	libs/CallbackHandler-1.0:
 		url: svn://svn.wowace.com/wow/callbackhandler/mainline/trunk/CallbackHandler-1.0
-	libs/LibStub:
-		url: svn://svn.wowace.com/wow/libstub/mainline/trunk
 	libs/DRData-1.0:
 		url: git://git.wowace.com/wow/drdata-1-0/mainline.git
-	libs/LibSharedMedia-3.0:
-		url: svn://svn.wowace.com/wow/libsharedmedia-3-0/mainline/trunk
-	libs/LibSpecRoster-1.0:
-		url: svn://svn.wowace.com/wow/libspecroster/mainline/trunk
 	libs/LibCooldownTracker-1.0:
 		url: git://git.wowace.com/wow/libcooldowntracker-1-0/mainline.git
-	libs/LibDualSpec-1.0:
-		url: git://git.wowace.com/wow/libdualspec-1-0/mainline.git
-	libs/LibRangeCheck-2.0:
-		url: svn://svn.wowace.com/wow/librangecheck-2-0/mainline/trunk
 	libs/LibDispellable-1.0:
 		url: git://git.wowace.com/wow/libdispellable-1-0/mainline.git
+	libs/LibDualSpec-1.0:
+		url: git://git.wowace.com/wow/libdualspec-1-0/mainline.git
+	libs/LibFunctional-1.0:
+		url: git://git.wowace.com/wow/libfunctional-1-0/mainline.git
+	libs/LibGroupInSpecT-1.1:
+		url: svn://svn.wowace.com/wow/libgroupinspect/mainline/trunk
+	libs/LibRangeCheck-2.0:
+		url: svn://svn.wowace.com/wow/librangecheck-2-0/mainline/trunk
+	libs/LibSharedMedia-3.0:
+		url: svn://svn.wowace.com/wow/libsharedmedia-3-0/mainline/trunk
