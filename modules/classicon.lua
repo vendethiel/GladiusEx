@@ -15,7 +15,7 @@ local CLASS_BUTTONS = CLASS_BUTTONS
 -- Nonetheless, if you think that we missed an important aura, please post it on the addon site at curse or wowace
 local function GetDefaultImportantAuras()
 	return {
-		-- Spell Name                           = Priority (higher = more priority)
+		-- Spell Name                          = Priority (higher = more priority)
 		-- Crowd control
 		[GladiusEx:SafeGetSpellName(108194)]   = 4,    -- Asphyxiate
 		[GladiusEx:SafeGetSpellName(115001)]   = 4,    -- Remorseless Winter
@@ -55,7 +55,7 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(64044)]    = 4,    -- Psychic Horror
 		[GladiusEx:SafeGetSpellName(8122)]     = 4,    -- Psychic Scream
 		[GladiusEx:SafeGetSpellName(9484)]     = 4,    -- Shackle Undead
-		[GladiusEx:SafeGetSpellName(87204)]    = 4,    -- Sin and Punishment
+		[GladiusEx:SafeGetSpellName(131556)]   = 4,    -- Sin and Punishment
 		[GladiusEx:SafeGetSpellName(2094)]     = 4,    -- Blind
 		[GladiusEx:SafeGetSpellName(1833)]     = 4,    -- Cheap Shot
 		[GladiusEx:SafeGetSpellName(1776)]     = 4,    -- Gouge
@@ -85,24 +85,9 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(89766)]    = 4,    -- Axe Toss (Felguard/Wrathguard)
 		[GladiusEx:SafeGetSpellName(115268)]   = 4,    -- Mesmerize (Shivarra)
 		[GladiusEx:SafeGetSpellName(6358)]     = 4,    -- Seduction (Succubus)
-
-		-- Roots
-		[GladiusEx:SafeGetSpellName(96294)]    = 2,    -- Chains of Ice (Chilblains)
-		[GladiusEx:SafeGetSpellName(91807)]    = 2,    -- Shambling Rush (Dark Transformation)
-		[GladiusEx:SafeGetSpellName(339)]      = 2,    -- Entangling Roots
-		[GladiusEx:SafeGetSpellName(113770)]   = 2,    -- Entangling Roots (Force of Nature - Balance Treants)
-		[GladiusEx:SafeGetSpellName(45334)]    = 2,    -- Immobilized (Wild Charge - Bear)
-		[GladiusEx:SafeGetSpellName(102359)]   = 2,    -- Mass Entanglement
-		[GladiusEx:SafeGetSpellName(128405)]   = 2,    -- Narrow Escape
-		[GladiusEx:SafeGetSpellName(122)]      = 2,    -- Frost Nova
-		[GladiusEx:SafeGetSpellName(111340)]   = 2,    -- Ice Ward
-		[GladiusEx:SafeGetSpellName(33395)]    = 2,    -- Freeze
-		[GladiusEx:SafeGetSpellName(116706)]   = 2,    -- Disable
-		[GladiusEx:SafeGetSpellName(87194)]    = 2,    -- Glyph of Mind Blast
-		[GladiusEx:SafeGetSpellName(114404)]   = 2,    -- Void Tendril's Grasp
-		[GladiusEx:SafeGetSpellName(64695)]    = 2,    -- Earthgrab (Earthgrab Totem)
-		[GladiusEx:SafeGetSpellName(63685)]    = 2,    -- Freeze (Frozen Power)
-		[GladiusEx:SafeGetSpellName(107566)]   = 2,    -- Staggering Shout
+		[GladiusEx:SafeGetSpellName(117526)]   = 4,    -- Binding Shot
+		[GladiusEx:SafeGetSpellName(91800)]    = 4,    -- Gnaw
+		[GladiusEx:SafeGetSpellName(132169)]   = 4,    -- Storm Bolt
 
 		-- Silences
 		[GladiusEx:SafeGetSpellName(47476)]    = 3,    -- Strangulate
@@ -120,6 +105,28 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(69179)]    = 3,    -- Arcane Torrent (Rage)
 		[GladiusEx:SafeGetSpellName(80483)]    = 3,    -- Arcane Torrent (Focus)
 		[GladiusEx:SafeGetSpellName(129597)]   = 3,    -- Arcane Torrent (Chi)
+		[GladiusEx:SafeGetSpellName(18498)]    = 3,    -- Silenced Gag Order
+
+		-- Roots
+		[GladiusEx:SafeGetSpellName(64803)]    = 3,    -- Entrapment
+		[GladiusEx:SafeGetSpellName(170996)]   = 3,    -- Debilitate
+		[GladiusEx:SafeGetSpellName(157997)]   = 3,    -- Ice Nova
+		[GladiusEx:SafeGetSpellName(96294)]    = 2,    -- Chains of Ice (Chilblains)
+		[GladiusEx:SafeGetSpellName(91807)]    = 2,    -- Shambling Rush (Dark Transformation)
+		[GladiusEx:SafeGetSpellName(339)]      = 2,    -- Entangling Roots
+		[GladiusEx:SafeGetSpellName(113770)]   = 2,    -- Entangling Roots (Force of Nature - Balance Treants)
+		[GladiusEx:SafeGetSpellName(45334)]    = 2,    -- Immobilized (Wild Charge - Bear)
+		[GladiusEx:SafeGetSpellName(102359)]   = 2,    -- Mass Entanglement
+		[GladiusEx:SafeGetSpellName(128405)]   = 2,    -- Narrow Escape
+		[GladiusEx:SafeGetSpellName(122)]      = 2,    -- Frost Nova
+		[GladiusEx:SafeGetSpellName(111340)]   = 2,    -- Ice Ward
+		[GladiusEx:SafeGetSpellName(33395)]    = 2,    -- Freeze
+		[GladiusEx:SafeGetSpellName(116706)]   = 2,    -- Disable
+		[GladiusEx:SafeGetSpellName(87194)]    = 2,    -- Glyph of Mind Blast
+		[GladiusEx:SafeGetSpellName(114404)]   = 2,    -- Void Tendril's Grasp
+		[GladiusEx:SafeGetSpellName(64695)]    = 2,    -- Earthgrab (Earthgrab Totem)
+		[GladiusEx:SafeGetSpellName(63685)]    = 2,    -- Freeze (Frozen Power)
+		[GladiusEx:SafeGetSpellName(107566)]   = 2,    -- Staggering Shout
 
 		-- Buffs
 		[GladiusEx:SafeGetSpellName(48792)]    = 1,    -- Icebound Fortitude
@@ -134,6 +141,7 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(110913)]   = 1,    -- Dark Bargain
 
 		-- Immunities
+		[GladiusEx:SafeGetSpellName(76577)]    = 1,    -- Smoke Bomb
 		[GladiusEx:SafeGetSpellName(115018)]   = 1,    -- Desecrated Ground
 		[GladiusEx:SafeGetSpellName(48707)]    = 1,    -- Anti-Magic Shell
 		[GladiusEx:SafeGetSpellName(19263)]    = 1,    -- Deterrence
