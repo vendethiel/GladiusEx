@@ -944,6 +944,77 @@ function Tags:GetTagOptionTable(options, unit, tag, order)
 end
 
 function Tags:GetBuiltinTags()
+	local function health(unit)
+		if GladiusEx:IsTesting(unit) then
+			return GladiusEx.testing[unit].health
+		elseif UnitExists(unit) then
+			return UnitHealth(unit)
+		else
+			return 1
+		end
+	end
+	local function maxhealth(unit)
+		if GladiusEx:IsTesting(unit) then
+			return GladiusEx.testing[unit].maxHealth
+		elseif UnitExists(unit) then
+			return UnitHealthMax(unit)
+		else
+			return 1
+		end
+	end
+	local function power(unit)
+		if GladiusEx:IsTesting(unit) then
+			return GladiusEx.testing[unit].power
+		elseif UnitExists(unit) then
+			return UnitPower(unit)
+		else
+			return 1
+		end
+	end
+	local function maxpower(unit)
+		if GladiusEx:IsTesting(unit) then
+			return GladiusEx.testing[unit].maxPower
+		elseif UnitExists(unit) then
+			return UnitPowerMax(unit)
+		else
+			return 1
+		end
+	end
+	local function absorbs(unit)
+		if GladiusEx:IsTesting(unit) then
+			return GladiusEx.testing[unit].maxHealth * 0.2
+		elseif UnitExists(unit) then
+			return UnitGetTotalAbsorbs(unit)
+		else
+			return 0
+		end
+	end
+	local function healthabsorbs(unit)
+		return health(unit) + absorbs(unit)
+	end
+	local function short(fn)
+		return function(unit)
+			local amount = fn(unit) or 0
+			if amount >= 1000 then
+				return strformat("%.1fk", (amount / 1000))
+			else
+				return amount
+			end
+		end
+	end
+	local function percentage(fn, fnmax)
+		return function(unit)
+			local amount = fn(unit)
+			local maxamount = fnmax(unit)
+
+			if not amount or not maxamount or maxamount == 0 then
+				return ""
+			else
+				return strformat("%.1f%%", (amount / maxamount * 100))
+			end
+		end
+	end
+
 	return {
 		["name"] = function(unit)
 			return UnitName(unit) or unit
@@ -960,111 +1031,66 @@ function Tags:GetBuiltinTags()
 			end
 		end,
 		["class"] = function(unit)
-			return not GladiusEx:IsTesting(unit) and UnitClass(unit) or LOCALIZED_CLASS_NAMES_MALE[GladiusEx.testing[unit].unitClass]
+			if GladiusEx:IsTesting(unit) then
+				return LOCALIZED_CLASS_NAMES_MALE[GladiusEx.testing[unit].unitClass]
+			else
+				return UnitClass(unit) or LOCALIZED_CLASS_NAMES_MALE[GladiusEx.buttons[unit].class] or ""
+			end
 		end,
 		["class:short"] = function(unit)
-			return not GladiusEx:IsTesting(unit) and L[(select(2, UnitClass(unit)) or GladiusEx.buttons[unit].class or "") .. ":short"] or L[GladiusEx.testing[unit].unitClass .. ":short"]
+			if GladiusEx:IsTesting(unit) then
+				return L[GladiusEx.testing[unit].unitClass .. ":short"]
+			else
+				return L[(select(2, UnitClass(unit)) or GladiusEx.buttons[unit].class or "") .. ":short"]
+			end
 		end,
 		["race"] = function(unit)
-			return not GladiusEx:IsTesting(unit) and UnitRace(unit) or GladiusEx.testing[unit].unitRace
+			if GladiusEx:IsTesting(unit) then
+				return GladiusEx.testing[unit].unitRace
+			else
+				return UnitRace(unit) or ""
+			end
 		end,
 		["spec"] = function(unit)
-			local specID = GladiusEx:IsTesting(unit) and GladiusEx.testing[unit].specID or GladiusEx.buttons[unit].specID or 0
+			local specID
+			if GladiusEx:IsTesting(unit) then
+				specID = GladiusEx.testing[unit].specID
+			else
+				specID = GladiusEx.buttons[unit].specID or 0
+			end
+
 			if not specID or specID == 0 then
 				return ""
 			end
 			return select(2, GetSpecializationInfoByID(specID))
 		end,
 		["spec:short"] = function(unit)
-			local specID = GladiusEx:IsTesting(unit) and GladiusEx.testing[unit].specID or GladiusEx.buttons[unit].specID or 0
+			local specID
+			if GladiusEx:IsTesting(unit) then
+				specID = GladiusEx.testing[unit].specID
+			else
+				specID = GladiusEx.buttons[unit].specID or 0
+			end
+
 			if not specID or specID == 0 then
 				return ""
 			end
 			return L["specID:" .. specID .. ":short"]
 		end,
-		["health"] = function(unit)
-			return not GladiusEx:IsTesting(unit) and UnitHealth(unit) or GladiusEx.testing[unit].health
-		end,
-		["maxhealth"] = function(unit)
-			return not GladiusEx:IsTesting(unit) and UnitHealthMax(unit) or GladiusEx.testing[unit].maxHealth
-		end,
-		["health:short"] = function(unit)
-			local health = not GladiusEx:IsTesting(unit) and UnitHealth(unit) or GladiusEx.testing[unit].health
-			if (health > 999) then
-				return strformat("%.1fk", (health / 1000))
-			else
-				return health
-			end
-		end,
-		["maxhealth:short"] = function(unit)
-			local health = not GladiusEx:IsTesting(unit) and UnitHealthMax(unit) or GladiusEx.testing[unit].maxHealth
-			if (health > 999) then
-				return strformat("%.1fk", (health / 1000))
-			else
-				return health
-			end
-		end,
-		["health:percentage"] = function(unit)
-			local health = not GladiusEx:IsTesting(unit) and UnitHealth(unit) or GladiusEx.testing[unit].health
-			local maxHealth = not GladiusEx:IsTesting(unit) and UnitHealthMax(unit) or GladiusEx.testing[unit].maxHealth
-			return (maxHealth and maxHealth > 0) and strformat("%.1f%%", (health / maxHealth * 100)) or ""
-		end,
-		["absorbs"] = function(unit)
-			local absorbs = not GladiusEx:IsTesting(unit) and UnitGetTotalAbsorbs(unit) or (GladiusEx.testing[unit].maxHealth * 0.2)
-			return absorbs > 0 and absorbs or ""
-		end,
-		["absorbs:short"] = function(unit)
-			local absorbs = not GladiusEx:IsTesting(unit) and UnitGetTotalAbsorbs(unit) or (GladiusEx.testing[unit].maxHealth * 0.2)
-			if absorbs > 999 then
-				return strformat("%.1fk", (absorbs / 1000))
-			else
-				return absorbs > 0 and absorbs or ""
-			end
-		end,
-		["healthabsorbs"] = function(unit)
-			local health = not GladiusEx:IsTesting(unit) and UnitHealth(unit) or GladiusEx.testing[unit].health
-			local absorbs = not GladiusEx:IsTesting(unit) and UnitGetTotalAbsorbs(unit) or (GladiusEx.testing[unit].maxHealth * 0.2)
-			return (health or 0) + (absorbs or 0)
-		end,
-		["healthabsorbs:short"] = function(unit)
-			local health = not GladiusEx:IsTesting(unit) and UnitHealth(unit) or GladiusEx.testing[unit].health
-			local absorbs = not GladiusEx:IsTesting(unit) and UnitGetTotalAbsorbs(unit) or (GladiusEx.testing[unit].maxHealth * 0.2)
-			local total = (health or 0) + (absorbs or 0)
-			if total > 999 then
-				return strformat("%.1fk", (total / 1000))
-			else
-				return total
-			end
-		end,
-		["power"] = function(unit)
-			return not GladiusEx:IsTesting(unit) and UnitPower(unit) or GladiusEx.testing[unit].power
-		end,
-		["maxpower"] = function(unit)
-			return not GladiusEx:IsTesting(unit) and UnitPowerMax(unit) or GladiusEx.testing[unit].maxPower
-		end,
-		["power:short"] = function(unit)
-			local power = not GladiusEx:IsTesting(unit) and UnitPower(unit) or GladiusEx.testing[unit].power
-
-			if (power > 999) then
-				return strformat("%.1fk", (power / 1000))
-			else
-				return power
-			end
-		end,
-		["maxpower:short"] = function(unit)
-			local power = not GladiusEx:IsTesting(unit) and UnitPowerMax(unit) or GladiusEx.testing[unit].maxPower
-
-			if (power > 999) then
-				return strformat("%.1fk", (power / 1000))
-			else
-				return power
-			end
-		end,
-		["power:percentage"] = function(unit)
-			local power = not GladiusEx:IsTesting(unit) and UnitPower(unit) or GladiusEx.testing[unit].power
-			local maxPower = not GladiusEx:IsTesting(unit) and UnitPowerMax(unit) or GladiusEx.testing[unit].maxPower
-			return (maxPower and maxPower > 0) and strformat("%.1f%%", (power / maxPower * 100)) or ""
-		end,
+		["health"] = health,
+		["maxhealth"] = maxHealth,
+		["health:short"] = short(health),
+		["maxhealth:short"] = short(maxhealth),
+		["health:percentage"] = percentage(health, maxhealth),
+		["absorbs"] = absorbs,
+		["absorbs:short"] = short(absorbs),
+		["healthabsorbs"] = healthabsorbs,
+		["healthabsorbs:short"] = short(healthabsorbs),
+		["power"] = power,
+		["maxpower"] = maxpower,
+		["power:short"] = short(power),
+		["maxpower:short"] = short(maxpower),
+		["power:percentage"] = percentage(power, maxpower),
 	}
 end
 
