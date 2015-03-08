@@ -160,6 +160,7 @@ function Highlight:Update(unit)
 
 	-- update hightlight
 	self.frame[unit].highlight_texture:SetTexture([[Interface\QuestFrame\UI-QuestTitleHighlight]])
+	self.frame[unit].highlight_texture:SetDesaturated(true)
 	self.frame[unit].highlight_texture:SetBlendMode("ADD")
 	local color = self.db[unit].highlightHoverColor
 	self.frame[unit].highlight_texture:SetVertexColor(color.r, color.g, color.b, color.a)
