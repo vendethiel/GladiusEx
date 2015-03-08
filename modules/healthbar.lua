@@ -82,8 +82,12 @@ function HealthBar:UpdateColorEvent(event, unit)
 end
 
 function HealthBar:UpdateHealthEvent(event, unit)
-	local health, maxHealth = UnitHealth(unit), UnitHealthMax(unit)
-	self:UpdateHealth(unit, health, maxHealth)
+	if UnitExists(unit) then
+		local health, maxHealth = UnitHealth(unit), UnitHealthMax(unit)
+		self:UpdateHealth(unit, health, maxHealth)
+	else
+		self:UpdateHealth(unit, 1, 1)
+	end
 end
 
 function HealthBar:UpdateIncomingHealsEvent(event, unit)

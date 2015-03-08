@@ -100,8 +100,12 @@ function PowerBar:UpdateColor(unit)
 end
 
 function PowerBar:UpdatePowerEvent(event, unit)
-	local power, maxPower = UnitPower(unit), UnitPowerMax(unit)
-	self:UpdatePower(unit, power, maxPower)
+	if UnitExists(unit) then
+		local power, maxPower = UnitPower(unit), UnitPowerMax(unit)
+		self:UpdatePower(unit, power, maxPower)
+	else
+		self:UpdatePower(unit, 1, 1)
+	end
 end
 
 function PowerBar:UpdatePower(unit, power, maxPower)
