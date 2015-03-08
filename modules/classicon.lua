@@ -110,7 +110,7 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(64803)]    = 3,    -- Entrapment
 		[GladiusEx:SafeGetSpellName(170996)]   = 3,    -- Debilitate
 		[GladiusEx:SafeGetSpellName(157997)]   = 3,    -- Ice Nova
-		[GladiusEx:SafeGetSpellName(96294)]    = 2,    -- Chains of Ice (Chilblains)
+		[96294]                                = 2,    -- Chains of Ice (Chilblains)
 		[GladiusEx:SafeGetSpellName(91807)]    = 2,    -- Shambling Rush (Dark Transformation)
 		[GladiusEx:SafeGetSpellName(339)]      = 2,    -- Entangling Roots
 		[GladiusEx:SafeGetSpellName(113770)]   = 2,    -- Entangling Roots (Force of Nature - Balance Treants)
