@@ -41,7 +41,6 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(82691)]    = 4,    -- Ring of Frost
 		[GladiusEx:SafeGetSpellName(123393)]   = 4,    -- Breath of Fire (Glyph of Breath of Fire)
 		[GladiusEx:SafeGetSpellName(119392)]   = 4,    -- Charging Ox Wave
-		[GladiusEx:SafeGetSpellName(120086)]   = 4,    -- Fists of Fury
 		[GladiusEx:SafeGetSpellName(119381)]   = 4,    -- Leg Sweep
 		[GladiusEx:SafeGetSpellName(115078)]   = 4,    -- Paralysis
 		[GladiusEx:SafeGetSpellName(105421)]   = 4,    -- Blinding Light
@@ -65,7 +64,6 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(51514)]    = 4,    -- Hex
 		[GladiusEx:SafeGetSpellName(118905)]   = 4,    -- Static Charge (Capacitor Totem)
 		[GladiusEx:SafeGetSpellName(710)]      = 4,    -- Banish
-		[GladiusEx:SafeGetSpellName(137143)]   = 4,    -- Blood Horror
 		[GladiusEx:SafeGetSpellName(5782)]     = 4,    -- Fear
 		[GladiusEx:SafeGetSpellName(118699)]   = 4,    -- Fear
 		[GladiusEx:SafeGetSpellName(130616)]   = 4,    -- Fear (Glyph of Fear)
@@ -85,9 +83,10 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(89766)]    = 4,    -- Axe Toss (Felguard/Wrathguard)
 		[GladiusEx:SafeGetSpellName(115268)]   = 4,    -- Mesmerize (Shivarra)
 		[GladiusEx:SafeGetSpellName(6358)]     = 4,    -- Seduction (Succubus)
-		[GladiusEx:SafeGetSpellName(117526)]   = 4,    -- Binding Shot
-		[GladiusEx:SafeGetSpellName(91800)]    = 4,    -- Gnaw
 		[GladiusEx:SafeGetSpellName(132169)]   = 4,    -- Storm Bolt
+		[137143]                               = 4,    -- Blood Horror
+		[163505]                               = 4,    -- Rake
+		[120086]                               = 4,    -- Fists of Fury
 
 		-- Silences
 		[GladiusEx:SafeGetSpellName(47476)]    = 3,    -- Strangulate
@@ -241,9 +240,9 @@ function ClassIcon:ScanAuras(unit)
 	local best_priority = 0
 	local best_name, best_icon, best_duration, best_expires
 
-	local function handle_aura(name, icon, duration, expires)
-		local prio = self:GetImportantAura(unit, name)
-		if prio and prio >= best_priority then
+	local function handle_aura(name, spellid, icon, duration, expires)
+		local prio = self:GetImportantAura(unit, name) or self:GetImportantAura(unit, spellid)
+		if prio and prio > best_priority or (prio == best_priority and expires < best_expires) then
 			best_name = name
 			best_icon = icon
 			best_duration = duration
@@ -254,16 +253,16 @@ function ClassIcon:ScanAuras(unit)
 
 	-- debuffs
 	for index = 1, 40 do
-		local name, _, icon, _, _, duration, expires, _, _ = UnitDebuff(unit, index)
+		local name, _, icon, _, _, duration, expires, _, _, _, spellid = UnitDebuff(unit, index)
 		if not name then break end
-		handle_aura(name, icon, duration, expires)
+		handle_aura(name, spellid, icon, duration, expires)
 	end
 
 	-- buffs
 	for index = 1, 40 do
-		local name, _, icon, _, _, duration, expires, _, _ = UnitBuff(unit, index)
+		local name, _, icon, _, _, duration, expires, _, _, _, spellid = UnitBuff(unit, index)
 		if not name then break end
-		handle_aura(name, icon, duration, expires)
+		handle_aura(name, spellid, icon, duration, expires)
 	end
 
 	return best_name, best_icon, best_duration, best_expires
@@ -633,8 +632,13 @@ function ClassIcon:GetOptions(unit)
 							dialogControl = HasAuraEditBox() and "Aura_EditBox" or nil,
 							name = L["Name"],
 							desc = L["Name of the aura"],
-							get = function() return self.newAuraName or "" end,
-							set = function(info, value) self.newAuraName = GetSpellInfo(value) or value end,
+							get = function() return self.newAuraName and tostring(self.newAuraName) or "" end,
+							set = function(info, value)
+								if tonumber(value) and GetSpellInfo(value) then
+									value = tonumber(value)
+								end
+								self.newAuraName = value
+							end,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 1,
 						},
@@ -655,7 +659,7 @@ function ClassIcon:GetOptions(unit)
 							name = L["Add new aura"],
 							func = function(info)
 								self.db[unit].classIconAuras[self.newAuraName] = self.newAuraPriority
-								options.auraList.args[self.newAuraName] = self:SetupAuraOptions(options, unit, self.newAuraName)
+								options.auraList.args[tostring(self.newAuraName)] = self:SetupAuraOptions(options, unit, self.newAuraName)
 								self.newAuraName = nil
 								GladiusEx:UpdateFrames()
 							end,
@@ -673,7 +677,7 @@ function ClassIcon:GetOptions(unit)
 
 	-- setup auras
 	for aura, priority in pairs(self.db[unit].classIconAuras) do
-		options.auraList.args[aura] = self:SetupAuraOptions(options, unit, aura)
+		options.auraList.args[tostring(aura)] = self:SetupAuraOptions(options, unit, aura)
 	end
 
 	return options
@@ -682,15 +686,18 @@ end
 function ClassIcon:SetupAuraOptions(options, unit, aura)
 	local function setAura(info, value)
 		if (info[#(info)] == "name") then
-			local old_name = info[#(info) - 1]
+			local new_name = value
+			if tonumber(new_name) and GetSpellInfo(new_name) then
+				new_name = tonumber(new_name)
+			end
 
 			-- create new aura
-			self.db[unit].classIconAuras[value] = self.db[unit].classIconAuras[old_name]
-			options.auraList.args[value] = self:SetupAuraOptions(options, unit, value)
+			self.db[unit].classIconAuras[new_name] = self.db[unit].classIconAuras[aura]
+			options.auraList.args[new_name] = self:SetupAuraOptions(options, unit, new_name)
 
 			-- delete old aura
-			self.db[unit].classIconAuras[old_name] = nil
-			options.auraList.args[old_name] = nil
+			self.db[unit].classIconAuras[aura] = nil
+			options.auraList.args[aura] = nil
 		else
 			self.db[unit].classIconAuras[info[#(info) - 1]] = value
 		end
@@ -700,16 +707,21 @@ function ClassIcon:SetupAuraOptions(options, unit, aura)
 
 	local function getAura(info)
 		if (info[#(info)] == "name") then
-			return info[#(info) - 1]
+			return tostring(aura)
 		else
-			return self.db[unit].classIconAuras[info[#(info) - 1]]
+			return self.db[unit].classIconAuras[aura]
 		end
+	end
+
+	local name = aura
+	if type(aura) == "number" then
+		name = string.format("%s [%s]", GladiusEx:SafeGetSpellName(aura), aura)
 	end
 
 	return {
 		type = "group",
-		name = aura,
-		desc = aura,
+		name = name,
+		desc = name,
 		get = getAura,
 		set = setAura,
 		disabled = function() return not self:IsUnitEnabled(unit) end,
