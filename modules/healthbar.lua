@@ -37,7 +37,6 @@ function HealthBar:OnEnable()
 	self:RegisterEvent("UNIT_MAXHEALTH", "UpdateHealthEvent")
 	self:RegisterEvent("UNIT_HEAL_PREDICTION", "UpdateIncomingHealsEvent")
 	self:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED", "UpdateIncomingAbsorbsEvent")
-	self:RegisterEvent("UNIT_NAME_UPDATE", "UpdateColorEvent")
 	self:RegisterMessage("GLADIUS_SPEC_UPDATE", "UpdateColorEvent")
 
 	if not self.frame then

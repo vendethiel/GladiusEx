@@ -32,6 +32,7 @@ function PowerBar:OnEnable()
 	self:RegisterEvent("UNIT_POWER_BAR_HIDE","UpdatePowerEvent")
 	self:RegisterEvent("UNIT_CLASSIFICATION_CHANGED","UpdateColorEvent")
 	self:RegisterEvent("UNIT_DISPLAYPOWER", "UpdateColorEvent")
+	self:RegisterMessage("GLADIUS_SPEC_UPDATE", "UpdateColorEvent")
 
 	if not self.frame then
 		self.frame = {}
@@ -82,13 +83,13 @@ function PowerBar:UpdateColor(unit)
 	local powerType
 	if GladiusEx:IsTesting(unit) then
 		powerType = GladiusEx.testing[unit].powerType
-	else
+	elseif UnitExists(unit) then
 		powerType = UnitPowerType(unit)
 	end
 
 	-- set color
 	local color
-	if self.db[unit].powerBarDefaultColor then
+	if powerType and self.db[unit].powerBarDefaultColor then
 		color = self:GetBarColor(powerType)
 	else
 		color = self.db[unit].powerBarColor
