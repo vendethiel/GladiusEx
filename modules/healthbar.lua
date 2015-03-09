@@ -37,6 +37,8 @@ function HealthBar:OnEnable()
 	self:RegisterEvent("UNIT_MAXHEALTH", "UpdateHealthEvent")
 	self:RegisterEvent("UNIT_HEAL_PREDICTION", "UpdateIncomingHealsEvent")
 	self:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED", "UpdateIncomingAbsorbsEvent")
+	self:RegisterEvent("UNIT_NAME_UPDATE", "UpdateColorEvent")
+	self:RegisterMessage("GLADIUS_SPEC_UPDATE", "UpdateColorEvent")
 
 	if not self.frame then
 		self.frame = {}
@@ -105,15 +107,12 @@ function HealthBar:UpdateColor(unit)
 	if GladiusEx:IsTesting(unit) then
 		class = GladiusEx.testing[unit].unitClass
 	else
-		class = select(2, UnitClass(unit))
-	end
-	if not class then
-		class = GladiusEx.testing[unit].unitClass
+		class = select(2, UnitClass(unit)) or GladiusEx.buttons[unit].class
 	end
 
 	-- set color
 	local color
-	if self.db[unit].healthBarClassColor then
+	if self.db[unit].healthBarClassColor and class then
 		color = self:GetBarColor(class)
 	else
 		color = self.db[unit].healthBarColor
