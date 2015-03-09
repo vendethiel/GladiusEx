@@ -661,12 +661,12 @@ function GladiusEx:ARENA_OPPONENT_UPDATE(event, unit, type)
 	-- ignore pets
 	if not self:IsArenaUnit(unit) then return end
 
-	if type == "seen" or type == "destroyed" then
+	if type == "seen" then
 		self:ShowUnit(unit)
 		self:CheckOpponentSpecialization(unit)
 		self:UpdateUnitState(unit, false)
 		self:CheckArenaSize(unit)
-	elseif type == "unseen" then
+	elseif type == "unseen" or type == "destroyed" then
 		self:UpdateUnitState(unit, true)
 	elseif type == "cleared" then
 		if not self:IsTesting() then
@@ -1386,14 +1386,18 @@ function GladiusEx:UpdateAnchor(anchor_type)
 
 	-- anchor texts
 	anchor.text:SetPoint("TOP", anchor, "TOP", 0, -7)
-	anchor.text:SetFont(LSM:Fetch(LSM.MediaType.FONT, self.db.base.globalFont), 11, self.db.base.globalFontOutline)
+	anchor.text:SetPoint("LEFT")
+	anchor.text:SetPoint("RIGHT")
+	anchor.text:SetFont(STANDARD_TEXT_FONT, 11, "OUTLINE")
 	anchor.text:SetTextColor(1, 1, 1, 1)
 	anchor.text:SetShadowOffset(1, -1)
 	anchor.text:SetShadowColor(0, 0, 0, 1)
 	anchor.text:SetText(anchor.anchor_type == "party" and L["GladiusEx Party Anchor - click to move"] or L["GladiusEx Enemy Anchor - click to move"])
 
 	anchor.text2:SetPoint("BOTTOM", anchor, "BOTTOM", 0, 7)
-	anchor.text2:SetFont(LSM:Fetch(LSM.MediaType.FONT, self.db.base.globalFont), 11, self.db.base.globalFontOutline)
+	anchor.text2:SetPoint("LEFT")
+	anchor.text2:SetPoint("RIGHT")
+	anchor.text2:SetFont(STANDARD_TEXT_FONT, 11, "OUTLINE")
 	anchor.text2:SetTextColor(1, 1, 1, 1)
 	anchor.text2:SetShadowOffset(1, -1)
 	anchor.text2:SetShadowColor(0, 0, 0, 1)

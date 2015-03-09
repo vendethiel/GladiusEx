@@ -903,14 +903,14 @@ function Cooldowns:UpdateGroupAnchor(unit, group)
 
 	-- anchor texts
 	anchor.text:SetPoint("TOP", anchor, "TOP", 0, -7)
-	anchor.text:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont), 11, GladiusEx.db.base.globalFontOutline)
+	anchor.text:SetFont(STANDARD_TEXT_FONT, 11, "OUTLINE")
 	anchor.text:SetTextColor(1, 1, 1, 1)
 	anchor.text:SetShadowOffset(1, -1)
 	anchor.text:SetShadowColor(0, 0, 0, 1)
 	anchor.text:SetText(string.format(L["Group %i anchor (%s)"], group, GladiusEx:IsPartyUnit(unit) and L["Party"] or L["Arena"]))
 
 	anchor.text2:SetPoint("BOTTOM", anchor, "BOTTOM", 0, 7)
-	anchor.text2:SetFont(LSM:Fetch(LSM.MediaType.FONT, GladiusEx.db.base.globalFont), 11, GladiusEx.db.base.globalFontOutline)
+	anchor.text2:SetFont(STANDARD_TEXT_FONT, 11, "OUTLINE")
 	anchor.text2:SetTextColor(1, 1, 1, 1)
 	anchor.text2:SetShadowOffset(1, -1)
 	anchor.text2:SetShadowColor(0, 0, 0, 1)
