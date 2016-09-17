@@ -431,7 +431,7 @@ local function CooldownFrame_OnUpdate(frame)
 			if frame.state == 0 then
 				if tracked.used_end then
 					frame.cooldown:SetReverse(true)
-					CooldownFrame_SetTimer(frame.cooldown, tracked.used_start, tracked.used_end - tracked.used_start, 1)
+					CooldownFrame_Set(frame.cooldown, tracked.used_start, tracked.used_end - tracked.used_start, 1)
 					frame.cooldown:Show()
 				else
 					frame.cooldown:Hide()
@@ -460,7 +460,7 @@ local function CooldownFrame_OnUpdate(frame)
 			-- in cooldown
 			if frame.state ~= 3 then
 				frame.cooldown:SetReverse(false)
-				CooldownFrame_SetTimer(frame.cooldown, tracked.cooldown_start, tracked.cooldown_end - tracked.cooldown_start, 1)
+				CooldownFrame_Set(frame.cooldown, tracked.cooldown_start, tracked.cooldown_end - tracked.cooldown_start, 1)
 				local a = Cooldowns:GetGroupDB(frame.unit, frame.group).cooldownsIconCooldownAlpha
 				local ab = Cooldowns:GetGroupDB(frame.unit, frame.group).cooldownsBorderCooldownAlpha
 				frame:SetBackdropBorderColor(frame.color.r, frame.color.g, frame.color.b, ab)
@@ -476,10 +476,10 @@ local function CooldownFrame_OnUpdate(frame)
 	if frame.tracked and frame.tracked.charges_detected and frame.tracked.charges < frame.tracked.max_charges then
 		-- show the charge cooldown
 		frame.cooldown:SetReverse(false)
-		CooldownFrame_SetTimer(frame.cooldown, tracked.cooldown_start, tracked.cooldown_end - tracked.cooldown_start, 1, frame.tracked.charges, frame.tracked.max_charges)
+		CooldownFrame_Set(frame.cooldown, tracked.cooldown_start, tracked.cooldown_end - tracked.cooldown_start, 1, frame.tracked.charges, frame.tracked.max_charges)
 		frame.cooldown:Show()
 	else
-		CooldownFrame_SetTimer(frame.cooldown, 0, 0, 0)
+		CooldownFrame_Set(frame.cooldown, 0, 0, 0)
 	end
 	local a = Cooldowns:GetGroupDB(frame.unit, frame.group).cooldownsIconAvailAlpha
 	local ab = Cooldowns:GetGroupDB(frame.unit, frame.group).cooldownsBorderAvailAlpha

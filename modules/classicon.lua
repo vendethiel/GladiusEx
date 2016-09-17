@@ -285,7 +285,7 @@ function ClassIcon:SetAura(unit, name, icon, duration, expires)
 	self:SetTexture(unit, icon, true, 0, 1, 0, 1)
 
 	if self.db[unit].classIconCooldown then
-		CooldownFrame_SetTimer(self.frame[unit].cooldown, expires - duration, duration, 1)
+		CooldownFrame_Set(self.frame[unit].cooldown, expires - duration, duration, 1)
 		self.frame[unit].cooldown:Show()
 	end
 end
@@ -420,7 +420,7 @@ function ClassIcon:SetClassIcon(unit)
 		needs_crop = true
 	else
 		texture = [[Interface\Glues\CharacterCreate\UI-CharacterCreate-Classes]]
-		left, right, top, bottom = unpack(CLASS_BUTTONS[class])
+		left, right, top, bottom = unpack(CLASS_ICON_TCOORDS[class])
 		needs_crop = true
 	end
 

@@ -144,7 +144,7 @@ function Announcements:Send(msg, throttle, unit)
 
 	-- party chat
 	if (dest == "party") and (GetNumGroupMembers() > 0) then
-		SendChatMessage(msg, "PARTY")
+		SendChatMessage(msg, IsInGroup(LE_PARTY_CATEGORY_INSTANCE) and "INSTANCE_CHAT" or "PARTY")
 
 	-- say
 	elseif dest == "say" then

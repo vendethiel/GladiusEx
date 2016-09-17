@@ -198,10 +198,10 @@ function Auras:UpdateUnitAuras(event, unit)
 
 		-- cooldown
 		if duration > 0 then
-			CooldownFrame_SetTimer(aura_frame.cooldown, expires - duration, duration, 1)
+			CooldownFrame_Set(aura_frame.cooldown, expires - duration, duration, 1)
 			aura_frame.cooldown:Show()
 		else
-			CooldownFrame_SetTimer(aura_frame.cooldown, 0, 0, 0)
+			CooldownFrame_Set(aura_frame.cooldown, 0, 0, 0)
 			aura_frame.cooldown:Hide()
 		end
 
