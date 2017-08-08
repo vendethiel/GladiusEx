@@ -1,8 +1,12 @@
-﻿## Interface: 70000
+﻿## Interface: 70200
 ## Title: GladiusEx
 ## Notes: Arena unit frames
 ## SavedVariables: GladiusExDB
 ## OptionalDeps: LibStub, LibFunctional-1.0, Ace3, DRData-1.0, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, AceGUI-3.0-Spell-EditBox, LibGroupInSpecT-1.1, LibCooldownTracker-1.0, LibDualSpec-1.0, LibRangeCheck-2.0, LibDispellable-1.0, Clique, Masque
+## X-Curse-Packaged-Version: v0.35-beta-4-ga06b19c
+## X-Curse-Project-Name: GladiusEx
+## X-Curse-Project-ID: gladiusex
+## X-Curse-Repository-ID: wow/gladiusex/mainline
 
 embeds.xml
 localization\enUS.lua
@@ -25,3 +29,4 @@ modules\tags.lua
 modules\unitbar.lua
 modules\targetbar.lua
 modules\petbar.lua
+modules\interrupts.lua

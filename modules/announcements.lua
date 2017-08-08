@@ -98,7 +98,7 @@ local RES_SPELLS = {
 	[GladiusEx:SafeGetSpellName(50769)] = true,  -- Revive (druid)
 	[GladiusEx:SafeGetSpellName(982)] = true,    -- Revive Pet (hunter)
 	[GladiusEx:SafeGetSpellName(20707)] = true,  -- Soulstone (warlock)
-	[GladiusEx:SafeGetSpellName(83968)] = true,  -- Mass Resurrection
+-- V: removed in legion	[GladiusEx:SafeGetSpellName(83968)] = true,  -- Mass Resurrection
 }
 
 function Announcements:UNIT_SPELLCAST_START(event, unit, spell, rank)

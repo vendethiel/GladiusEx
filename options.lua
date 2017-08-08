@@ -26,9 +26,9 @@ GladiusEx.defaults = {
 			["party3"] = { health = 100000, maxHealth = 300000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Troll", specID = 71 },
 			["party4"] = { health = 200000, maxHealth = 400000, power = 80, maxPower = 130, powerType = 6, unitClass = "DEATHKNIGHT", unitRace = "Dwarf", specID = 252 },
 		},
-		--@debug@
+		--[===[@debug@
 		debug = true,
-		--@end-debug@
+		--@end-debug@]===]
 	}
 }
 
@@ -649,7 +649,7 @@ function GladiusEx:SetupOptions()
 					get = function() return self.db.base.testUnits[unit].specID end,
 					set = function(info, value)
 						self.db.base.testUnits[unit].specID = value
-						self.db.base.testUnits[unit].unitClass = select(7, GetSpecializationInfoByID(value))
+						self.db.base.testUnits[unit].unitClass = select(6, GetSpecializationInfoByID(value))
 						self:UpdateFrames()
 					end,
 					values = function()

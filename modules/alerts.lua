@@ -24,7 +24,7 @@ local function GetDefaultCastsSpells()
 		[GladiusEx:SafeGetSpellName(105421)]   = cc,    -- Blinding Light
 		[GladiusEx:SafeGetSpellName(20066)]    = cc,    -- Repentance
 		[GladiusEx:SafeGetSpellName(33786)]    = cc,    -- Cyclone
-		[GladiusEx:SafeGetSpellName(102051)]   = cc,    -- Frostjaw
+		--V: removed in legion [GladiusEx:SafeGetSpellName(102051)]   = cc,    -- Frostjaw
 		[GladiusEx:SafeGetSpellName(339)]      = cc,    -- Entangling Roots
 	}
 end
@@ -82,7 +82,7 @@ end
 
 function Alerts:CreateFrame(unit)
 	local button = GladiusEx.buttons[unit]
-	if not button then return end
+	if not button then return false end
 
 	-- create frame
 	self.frame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. unit, button)
@@ -90,6 +90,7 @@ function Alerts:CreateFrame(unit)
 	self.frame[unit].texture:SetAllPoints()
 	self.frame[unit].ag = self.frame[unit]:CreateAnimationGroup()
 	self.frame[unit].ag.aa = self.frame[unit].ag:CreateAnimation("Alpha")
+	return true
 end
 
 function Alerts:Update(unit)
@@ -97,7 +98,10 @@ function Alerts:Update(unit)
 
 	-- create frame
 	if not self.frame[unit] then
-		self:CreateFrame(unit)
+		-- V: check that CreateFrame returns a truthy value
+		if not self:CreateFrame(unit) then
+			return
+		end
 	end
 
 	-- frame
@@ -113,7 +117,11 @@ function Alerts:Update(unit)
 	-- animation group
 	self.frame[unit]:SetAlpha(self.db[unit].maxAlpha)
 	self.frame[unit].ag:SetLooping("BOUNCE")
-	self.frame[unit].ag.aa:SetChange(-(self.db[unit].maxAlpha - self.db[unit].minAlpha))
+	if self.frame[unit].ag.aa and self.frame[unit].ag.aa.SetChange then
+		-- V: this is not the correct fix! It just disables opacity tuning.
+		-- but I don't know why SetChange is nil in some cases
+		self.frame[unit].ag.aa:SetChange(-(self.db[unit].maxAlpha - self.db[unit].minAlpha))
+	end
 	self.frame[unit].ag.aa:SetDuration(self.db[unit].duration)
 	self.frame[unit].ag.aa:SetSmoothing(self.db[unit].ease)
 	self.frame[unit].ag:Stop()
