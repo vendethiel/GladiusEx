@@ -1,0 +1,13 @@
+## Interface: 60000
+## Title: Lib: Functional-1.0
+## Notes: Helper functions to enable functional style programming in lua
+## Author: Slaren
+## X-Category: Library
+## X-Curse-Packaged-Version: v1.1-2-g0480f27
+## X-Curse-Project-Name: LibFunctional-1.0
+## X-Curse-Project-ID: libfunctional-1-0
+## X-Curse-Repository-ID: wow/libfunctional-1-0/mainline
+
+Libs\LibStub\LibStub.lua
+
+lib.xml
