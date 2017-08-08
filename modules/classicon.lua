@@ -10,8 +10,6 @@ local GetTime, SetPortraitTexture = GetTime, SetPortraitTexture
 local GetSpellInfo, UnitAura, UnitClass, UnitGUID, UnitBuff, UnitDebuff = GetSpellInfo, UnitAura, UnitClass, UnitGUID, UnitBuff, UnitDebuff
 local UnitIsVisible, UnitIsConnected, GetSpecializationInfoByID, GetTexCoordsForRole = UnitIsVisible, UnitIsConnected, GetSpecializationInfoByID, GetTexCoordsForRole
 
---local CLASS_BUTTONS = CLASS_BUTTONS
-
 -- NOTE: this list can be modified from the ClassIcon module options, no need to edit it here
 -- Nonetheless, if you think that we missed an important aura, please post it on the addon site at curse or wowace
 -- V: list imported from Gladius 5.1.6
@@ -396,7 +394,7 @@ function ClassIcon:SetClassIcon(unit)
 			local n = 9 / 64
 			self.frame[unit].portrait2d:SetTexCoord(n, 1 - n, n, 1 - n)
 		end
-		if false then -- and not UnitIsVisible(unit) or not UnitIsConnected(unit) then
+		if not UnitIsVisible(unit) or not UnitIsConnected(unit) then
 			self.frame[unit].portrait2d:Hide()
 		else
 			SetPortraitTexture(self.frame[unit].portrait2d, unit)

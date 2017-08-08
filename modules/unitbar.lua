@@ -62,22 +62,6 @@ function GladiusEx:NewUnitBarModule(name, defaults_arena, defaults_party)
 
 			self.frame[unit].statusbar:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
 			self.frame[unit].icon:SetTexture([[Interface\Glues\CharacterCreate\UI-CharacterCreate-Classes]])
-
-			-- V: wtf is "CLASS_BUTTONS"?
-			if not CLASS_BUTTONS then
-				return
-			end
-			local left, right, top, bottom = unpack(CLASS_BUTTONS[class])
-			if self.db[unit].IconCrop then
-				local n = 5
-				-- zoom class icon
-				left = left + (right - left) * (n / 64)
-				right = right - (right - left) * (n / 64)
-				top = top + (bottom - top) * (n / 64)
-				bottom = bottom - (bottom - top) * (n / 64)
-			end
-
-			self.frame[unit].icon:SetTexCoord(left, right, top, bottom)
 		end
 	end
 

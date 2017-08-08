@@ -822,14 +822,11 @@ function GladiusEx:CheckUnitSpecialization(unit)
 end
 
 function GladiusEx:UpdateUnitSpecialization(unit, specID)
-	log("updateunit:"..unit)
-	local _, class, spec
-
 	if not specID or specID < 1 then
 		return
 	end
 	-- V: note that "background" was removed (after icon)
-	local id, name, description, icon, role, class = GetSpecializationInfoByID(specID)
+	local _, _, _, _, _, class = GetSpecializationInfoByID(specID)
 
 	specID = (specID and specID > 0) and specID or nil
 

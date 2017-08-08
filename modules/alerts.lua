@@ -24,7 +24,6 @@ local function GetDefaultCastsSpells()
 		[GladiusEx:SafeGetSpellName(105421)]   = cc,    -- Blinding Light
 		[GladiusEx:SafeGetSpellName(20066)]    = cc,    -- Repentance
 		[GladiusEx:SafeGetSpellName(33786)]    = cc,    -- Cyclone
-		--V: removed in legion [GladiusEx:SafeGetSpellName(102051)]   = cc,    -- Frostjaw
 		[GladiusEx:SafeGetSpellName(339)]      = cc,    -- Entangling Roots
 	}
 end
