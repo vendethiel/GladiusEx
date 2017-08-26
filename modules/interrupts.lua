@@ -70,7 +70,8 @@ function Interrupt:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
 	if sub_event ~= "SPELL_CAST_SUCCESS" and sub_event ~= "SPELL_INTERRUPT" then
 		return
 	end
-	if sub_event == "SPELL_CAST_SUCCESS" and select(8,UnitChannelInfo(unit)) then
+	-- it is necessary to check ~= false, as if the unit isn't casting a channeled spell, it will be nil
+	if sub_event == "SPELL_CAST_SUCCESS" and select(8,UnitChannelInfo(unit)) ~= false then
 		-- not interruptible
 		return
 	end
