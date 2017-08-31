@@ -8,4 +8,4 @@ Port to Legion: vendethiel.
 
 -----
 
-Repository: https://github.com/vendethiel/gladiusex-legion
+Repository: https://github.com/slaren/GladiusEx

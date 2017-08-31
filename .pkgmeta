@@ -21,12 +21,10 @@ externals:
 		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceLocale-3.0
 	libs/AceSerializer-3.0:
 		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceSerializer-3.0
+	libs/AceGUI-3.0-SharedMediaWidgets
+		url: https://repos.wowace.com/wow/ace-gui-3-0-shared-media-widgets/trunk
 	libs/CallbackHandler-1.0:
 		url: svn://svn.wowace.com/wow/callbackhandler/mainline/trunk/CallbackHandler-1.0
-	libs/DRData-1.0:
-		url: git://git.wowace.com/wow/drdata-1-0/mainline.git
-	libs/LibCooldownTracker-1.0:
-		url: git://git.wowace.com/wow/libcooldowntracker-1-0/mainline.git
 	libs/LibDispellable-1.0:
 		url: git://git.wowace.com/wow/libdispellable-1-0/mainline.git
 	libs/LibDualSpec-1.0:
@@ -39,3 +37,7 @@ externals:
 		url: svn://svn.wowace.com/wow/librangecheck-2-0/mainline/trunk
 	libs/LibSharedMedia-3.0:
 		url: svn://svn.wowace.com/wow/libsharedmedia-3-0/mainline/trunk
+	libs/LibCooldownTracker-1.0:
+		url: https://github.com/slaren/LibCooldownTracker-10.git
+	libs/DRData-1.0:
+		url: https://github.com/Rainrider/DRData-1.0.git

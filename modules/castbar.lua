@@ -580,7 +580,7 @@ function CastBar:GetOptions(unit)
 							name = L["Texture"],
 							desc = L["Texture of the cast bar"],
 							dialogControl = "LSM30_Statusbar",
-							values = AceGUIWidgetLSMlists.statusbar,
+							values = LSM.MediaTable.statusbar,
 							disabled = function() return self.db[unit].castBarGlobalTexture or not self:IsUnitEnabled(unit) end,
 							order = 18,
 						},

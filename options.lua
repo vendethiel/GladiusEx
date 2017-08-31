@@ -1,5 +1,6 @@
 ﻿local fn = LibStub("LibFunctional-1.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
+local LSM = LibStub("LibSharedMedia-3.0")
 
 GladiusEx.default_bar_texture = "Wglass (GladiusEx)"
 GladiusEx.defaults = {
@@ -495,7 +496,7 @@ function GladiusEx:SetupOptions()
 								name = L["Font"],
 								desc = L["Global font, used by the modules"],
 								dialogControl = "LSM30_Font",
-								values = AceGUIWidgetLSMlists.font,
+								values = LSM.MediaTable.font,
 								order = 1,
 							},
 							globalFontSize = {
@@ -544,7 +545,7 @@ function GladiusEx:SetupOptions()
 								name = L["Bar texture"],
 								desc = L["Global texture of the bars"],
 								dialogControl = "LSM30_Statusbar",
-								values = AceGUIWidgetLSMlists.statusbar,
+								values = LSM.MediaTable.statusbar,
 								order = 10,
 							},
 						},

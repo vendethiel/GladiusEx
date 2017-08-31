@@ -1,10 +1,10 @@
 ﻿GladiusEx = LibStub("AceAddon-3.0"):NewAddon("GladiusEx", "AceEvent-3.0")
 
-local fn = LibStub("LibFunctional-1.0")
 local LGIST = LibStub:GetLibrary("LibGroupInSpecT-1.1")
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local RC = LibStub("LibRangeCheck-2.0")
 local LSM = LibStub("LibSharedMedia-3.0")
+local fn = LibStub("LibFunctional-1.0")
 
 -- upvalues
 local select, type, pairs, tonumber, wipe = select, type, pairs, tonumber, wipe
