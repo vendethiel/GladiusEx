@@ -45,7 +45,7 @@ local DRTracker = GladiusEx:NewGladiusExModule("DRTracker",
 local drTexts = {
 	[1] =    { "½", 0, 1, 0 },
 	[0.5] =  { "¼", 1, 0.65,0 },
-	[0.25] = { "¼", 1, 0, 0 }, -- V: changed this for Legion
+	[0.25] = { "Ø", 1, 0, 0 },
 	[0] =    { "Ø", 1, 0, 0 },
 }
 
