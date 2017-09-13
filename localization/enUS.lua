@@ -95,6 +95,7 @@ L["PowerBar"] = "Power Bar"
 L["TargetBar"] = "Target"
 L["PetBar"] = "Pet"
 L["SkillHistory"] = "Skill History"
+L["Interrupts"] = true
 
 -- General
 L["Highlight player target"] = true
@@ -616,4 +617,3 @@ L["Y offset of the cast text"] = true
 L["Y offset of the cast time text"] = true
 L["Y offset of the frame"] = true
 L["Y offset"] = true
-L["Interrupts"] = true
