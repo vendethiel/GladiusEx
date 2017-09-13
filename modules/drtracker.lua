@@ -604,7 +604,7 @@ function DRTracker:GetOptions(unit)
 		local seen_icons = {}
 		local idx = 1
 		local spellid_by_idx = {}
-		for spellid, _ in pairs(DRData:GetSpellsByCategory(key)) do
+		for spellid, _ in DRData:IterateProviders(key) do
 			local spellname, _, spellicon = GetSpellInfo(spellid)
 			if not seen_icons[spellicon] then
 				spellid_by_idx[idx] = spellid

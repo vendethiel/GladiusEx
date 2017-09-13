@@ -40,4 +40,4 @@ externals:
 	libs/LibCooldownTracker-1.0:
 		url: https://github.com/slaren/LibCooldownTracker-10.git
 	libs/DRData-1.0:
-		url: https://github.com/Rainrider/DRData-1.0.git
+		url: https://github.com/vendethiel/DRData-1.0.git
