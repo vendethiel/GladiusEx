@@ -21,7 +21,7 @@ externals:
 		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceLocale-3.0
 	libs/AceSerializer-3.0:
 		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceSerializer-3.0
-	libs/AceGUI-3.0-SharedMediaWidgets
+	libs/AceGUI-3.0-SharedMediaWidgets:
 		url: https://repos.wowace.com/wow/ace-gui-3-0-shared-media-widgets/trunk
 	libs/CallbackHandler-1.0:
 		url: svn://svn.wowace.com/wow/callbackhandler/mainline/trunk/CallbackHandler-1.0
