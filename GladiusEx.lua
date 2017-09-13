@@ -1,10 +1,10 @@
 ﻿GladiusEx = LibStub("AceAddon-3.0"):NewAddon("GladiusEx", "AceEvent-3.0")
 
-local fn = LibStub("LibFunctional-1.0")
 local LGIST = LibStub:GetLibrary("LibGroupInSpecT-1.1")
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local RC = LibStub("LibRangeCheck-2.0")
 local LSM = LibStub("LibSharedMedia-3.0")
+local fn = LibStub("LibFunctional-1.0")
 
 -- upvalues
 local select, type, pairs, tonumber, wipe = select, type, pairs, tonumber, wipe
@@ -621,7 +621,7 @@ function GladiusEx:PLAYER_ENTERING_WORLD()
 	-- check if we are entering or leaving an arena
 	if instanceType == "arena" then
 		self:SetTesting(false)
-		self:ShowFrames()
+		-- self:ShowFrames()
 		self:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
 		log("ENABLE LOGGING")
 	else
@@ -636,23 +636,29 @@ end
 
 function GladiusEx:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
 	self:CheckArenaSize()
+	self:ShowFrames()
 
 	local numOpps = GetNumArenaOpponentSpecs()
 	for i = 1, numOpps do
 		local specID = GetArenaOpponentSpec(i)
 		local unitid = "arena" .. i
 
-		self:UpdateUnitSpecialization(unitid, specID)
+		if specID and specID > 0 then
+			self:ShowUnit(unitid)
+			self:UpdateUnitSpecialization(unitid, specID)
+			self:UpdateUnit(unitid)
+			self:UpdateUnitState(unitid, true)
+			self:RefreshUnit(unitid)
+		end
 	end
+	self:UpdateFrames()
 end
 
 function GladiusEx:CheckOpponentSpecialization(unit)
 	local id = strmatch(unit, "^arena(%d+)$")
 	if id then
 		local specID = GetArenaOpponentSpec(tonumber(id))
-		if specID and specID > 0 then
-			self:UpdateUnitSpecialization(unit, specID)
-		end
+		self:UpdateUnitSpecialization(unit, specID)
 	end
 end
 
@@ -816,11 +822,11 @@ function GladiusEx:CheckUnitSpecialization(unit)
 end
 
 function GladiusEx:UpdateUnitSpecialization(unit, specID)
-	local _, class, spec
-
-	if specID and specID > 0 then
-		_, spec, _, _, _, _, class = GetSpecializationInfoByID(specID)
+	if not specID or specID < 1 then
+		return
 	end
+	-- V: note that "background" was removed (after icon)
+	local _, _, _, _, _, class = GetSpecializationInfoByID(specID)
 
 	specID = (specID and specID > 0) and specID or nil
 
@@ -1149,7 +1155,7 @@ end
 local perfect_scale
 function GladiusEx:GetPerfectScale()
 	if not perfect_scale then
-		perfect_scale = 768 / string.match(({GetScreenResolutions()})[GetCurrentResolution()], "%d+x(%d+)")
+		perfect_scale = 768 / GetScreenHeight()
 	end
 	return perfect_scale
 end

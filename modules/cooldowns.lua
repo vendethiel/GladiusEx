@@ -15,26 +15,26 @@ local UnitBuff = UnitBuff
 local function GetDefaultSpells()
 	return {
 		{ -- group 1
-			[28730] = true, -- BloodElf/Arcane Torrent
-			[107079] = true, -- Pandaren/Quaking Palm
-			[69070] = true, -- Goblin/Rocket Jump
-			[7744] = true, -- Scourge/Will of the Forsaken
+			--[28730] = true, -- BloodElf/Arcane Torrent
+			--[107079] = true, -- Pandaren/Quaking Palm
+			--[69070] = true, -- Goblin/Rocket Jump
+			--[7744] = true, -- Scourge/Will of the Forsaken
 
 			[48707] = true, -- Death Knight/Anti-Magic Shell
-			[42650] = true, -- Death Knight/Army of the Dead
 			[108194] = true, -- Death Knight/Asphyxiate
 			[49576] = true, -- Death Knight/Death Grip
-			[48743] = true, -- Death Knight/Death Pact
-			[108201] = true, -- Death Knight/Desecrated Ground
-			[47568] = true, -- Death Knight/Empower Rune Weapon
 			[48792] = true, -- Death Knight/Icebound Fortitude
 			[49039] = true, -- Death Knight/Lichborne
 			[47528] = true, -- Death Knight/Mind Freeze
 			[51271] = true, -- Death Knight/Pillar of Frost
-			[61999] = true, -- Death Knight/Raise Ally
-			[108200] = true, -- Death Knight/Remorseless Winter
 			[47476] = true, -- Death Knight/Strangulate
 			[49206] = true, -- Death Knight/Summon Gargoyle
+
+			[191427] = true, -- Demon Hunter/Metamorphosis (Havoc)
+			[187827] = true, -- Demon Hunter/Metamorphosis (Vengeance)
+			[196555] = true, -- Demon Hunter/Netherwalk
+			[196718] = true, -- Demon Hunter/Darkness
+			[198589] = true, -- Demon Hunter/Blur
 
 			[22812] = true, -- Druid/Barkskin
 			[33786] = true, -- Druid/Cyclone (feral)
@@ -45,7 +45,6 @@ local function GetDefaultSpells()
 			[102359] = true, -- Druid/Mass Entanglement
 			[5211] = true, -- Druid/Mighty Bash
 			[88423] = true, -- Druid/Nature's Cure
-			[132158] = true, -- Druid/Nature's Swiftness
 			[132158] = true, -- Druid/Nature's Swiftness
 			[2782] = true, -- Druid/Remove Corruption
 			[78675] = true, -- Druid/Solar Beam
@@ -64,12 +63,9 @@ local function GetDefaultSpells()
 
 			[108843] = true, -- Mage/Blazing Speed
 			[1953] = true, -- Mage/Blink
-			[11958] = true, -- Mage/Cold Snap
+			[235219] = true, -- Mage/Cold Snap. V: changed ID in legion
 			[2139] = true, -- Mage/Counterspell
-			[44572] = true, -- Mage/Deep Freeze
 			[122] = true, -- Mage/Frost Nova
-			[102051] = true, -- Mage/Frostjaw
-			[113074] = true, -- Mage/Healing Touch
 			[45438] = true, -- Mage/Ice Block
 
 			[115450] = true, -- Monk/Detox
@@ -78,7 +74,6 @@ local function GetDefaultSpells()
 			[115203] = true, -- Monk/Fortifying Brew
 			[119381] = true, -- Monk/Leg Sweep
 			[116849] = true, -- Monk/Life Cocoon
-			[137562] = true, -- Monk/Nimble Brew
 			[115078] = true, -- Monk/Paralysis
 			[115310] = true, -- Monk/Revival
 			[116844] = true, -- Monk/Ring of Peace
@@ -86,16 +81,15 @@ local function GetDefaultSpells()
 			[116680] = true, -- Monk/Thunder Focus Tea
 			[116841] = true, -- Monk/Tiger's Lust
 			[122470] = true, -- Monk/Touch of Karma
-
+--
 			[115750] = true, -- Paladin/Blinding Light
 			[4987] = true, -- Paladin/Cleanse
 			[31821] = true, -- Paladin/Devotion Aura
 			[642] = true, -- Paladin/Divine Shield
-			[105593] = true, -- Paladin/Fist of Justice
 			[853] = true, -- Paladin/Hammer of Justice
 			[96231] = true, -- Paladin/Rebuke
 			[20066] = true, -- Paladin/Repentance
-
+--
 			[19236] = true, -- Priest/Desperate Prayer
 			[47585] = true, -- Priest/Dispersion
 			[47788] = true, -- Priest/Guardian Spirit
@@ -104,42 +98,31 @@ local function GetDefaultSpells()
 			[8122] = true, -- Priest/Psychic Scream
 			[527] = true, -- Priest/Purify
 			[15487] = true, -- Priest/Silence
-			[112833] = true, -- Priest/Spectral Guise
-			[108920] = true, -- Priest/Void Tendrils
-
+			[10060] = true, -- V: Priest/Power Infusion
+--
 			[13750] = true, -- Rogue/Adrenaline Rush
 			[2094] = true, -- Rogue/Blind
-			[31230] = true, -- Rogue/Cheat Death
 			[31224] = true, -- Rogue/Cloak of Shadows
 			[1766] = true, -- Rogue/Kick
 			[137619] = true, -- Rogue/Marked for Death
-			[14185] = true, -- Rogue/Preparation
-			[51713] = true, -- Rogue/Shadow Dance
+			[121471] = true, -- Rogue/Shadow Blades
+			[185313] = true, -- Rogue/Shadow Dance. V: changed ID in legion
 			[76577] = true, -- Rogue/Smoke Bomb
 			[1856] = true, -- Rogue/Vanish
 			[79140] = true, -- Rogue/Vendetta
-
+--
 			[114049] = true, -- Shaman/Ascendance
 			[51886] = true, -- Shaman/Cleanse Spirit
-			[8177] = true, -- Shaman/Grounding Totem
 			[108280] = true, -- Shaman/Healing Tide Totem
 			[51514] = true, -- Shaman/Hex
 			[77130] = true, -- Shaman/Purify Spirit
-			[30823] = true, -- Shaman/Shamanistic Rage
 			[113286] = true, -- Shaman/Solar Beam
 			[98008] = true, -- Shaman/Spirit Link Totem
 			[79206] = true, -- Shaman/Spiritwalker's Grace
 			[51490] = true, -- Shaman/Thunderstorm
-			[8143] = true, -- Shaman/Tremor Totem
 			[57994] = true, -- Shaman/Wind Shear
-
+--
 			[89766] = true, -- Warlock/Axe Toss
-			[111397] = true, -- Warlock/Blood Horror
-			[110913] = true, -- Warlock/Dark Bargain
-			[108359] = true, -- Warlock/Dark Regeneration
-			[113858] = true, -- Warlock/Dark Soul: Instability
-			[113861] = true, -- Warlock/Dark Soul: Knowledge
-			[113860] = true, -- Warlock/Dark Soul: Misery
 			[48020] = true, -- Warlock/Demonic Circle: Teleport
 			[5484] = true, -- Warlock/Howl of Terror
 			[6789] = true, -- Warlock/Mortal Coil
@@ -148,7 +131,7 @@ local function GetDefaultSpells()
 			[89808] = true, -- Warlock/Singe Magic
 			[19647] = true, -- Warlock/Spell Lock
 			[104773] = true, -- Warlock/Unending Resolve
-
+--
 			[107574] = true, -- Warrior/Avatar
 			[118038] = true, -- Warrior/Die by the Sword
 			[5246] = true, -- Warrior/Intimidating Shout
@@ -159,7 +142,8 @@ local function GetDefaultSpells()
 			[23920] = true, -- Warrior/Spell Reflection
 		},
 		{ -- group 2
-			[42292] = true, -- ITEMS/PvP Trinket
+			[195710] = true, -- honorable medallion
+			[208683] = true, -- gladiator's medallion
 		}
 	}
 end
@@ -232,8 +216,8 @@ local g1_defaults = MakeGroupDb {
 
 local g2_defaults = MakeGroupDb {
 	cooldownsGroupId = 2,
-	cooldownsPerColumn = 1,
-	cooldownsMax = 1,
+	cooldownsPerColumn = 2,
+	cooldownsMax = 2,
 	cooldownsSize = 42,
 	cooldownsCrop = true,
 	cooldownsTooltips = false,
@@ -349,6 +333,7 @@ end
 function Cooldowns:OnEnable()
 	CT.RegisterCallback(self, "LCT_CooldownUsed")
 	CT.RegisterCallback(self, "LCT_CooldownsReset")
+	CT.RegisterCallback(self, "LCT_CooldownDetected")
 	self:RegisterEvent("UNIT_NAME_UPDATE")
 	self:RegisterMessage("GLADIUS_SPEC_UPDATE")
 end
@@ -402,9 +387,6 @@ function Cooldowns:GetModuleAttachFrame(unit, point)
 	return self:GetGroupState(unit, gidx).frame
 end
 
-function Cooldowns:GLADIUS_SPEC_UPDATE(event, unit)
-	self:UpdateIcons(unit)
-end
 
 function Cooldowns:UNIT_NAME_UPDATE(event, unit)
 	-- hopefully at this point the opponent's faction is known
@@ -413,11 +395,19 @@ function Cooldowns:UNIT_NAME_UPDATE(event, unit)
 	end
 end
 
+function Cooldowns:GLADIUS_SPEC_UPDATE(event, unit)
+	self:UpdateIcons(unit)
+end
+
 function Cooldowns:LCT_CooldownsReset(event, unit)
 	self:UpdateIcons(unit)
 end
 
 function Cooldowns:LCT_CooldownUsed(event, unit, spellid)
+	self:UpdateIcons(unit)
+end
+
+function Cooldowns:LCT_CooldownDetected(event, unit, spellid)
 	self:UpdateIcons(unit)
 end
 
@@ -594,8 +584,10 @@ local function GetCooldownList(unit, group)
 		-- check if the spell is enabled by the user
 		if db.cooldownsSpells[spellid] or (spelldata.replaces and db.cooldownsSpells[spelldata.replaces]) then
 			local tracked = CT:GetUnitCooldownInfo(unit, spellid)
+			local detected = tracked and tracked.detected
 			-- check if the spell has a cooldown valid for an arena, and check if it is a talent that has not yet been detected
-			if (not spelldata.cooldown or spelldata.cooldown < 600) and ((not spelldata.glyph and not spelldata.talent and not spelldata.pet) or (tracked and tracked.detected) or not db.cooldownsHideTalentsUntilDetected) then
+			if (not spelldata.cooldown or spelldata.cooldown < 600) and
+			   (not (spelldata.glyph or spelldata.talent or spelldata.pet) or detected or not db.cooldownsHideTalentsUntilDetected) then
 				-- check if the spell requires an aura
 				if not spelldata.requires_aura or UnitBuff(unit, spelldata.requires_aura_name) then
 					if spelldata.replaces then
@@ -1831,6 +1823,12 @@ function Cooldowns:MakeGroupOptions(unit, group)
 				if spelldata.replaces then table.insert(extradesc, string.format(L["Replaces: %s"], GetSpellInfo(spelldata.replaces))) end
 				if spelldata.requires_aura then table.insert(extradesc, string.format(L["Required aura: %s"], GetSpellInfo(spelldata.requires_aura))) end
 				if spelldata.sets_cooldown then table.insert(extradesc, string.format(L["Shared cooldown: %s (%is)"], GetSpellInfo(spelldata.sets_cooldown.spellid), spelldata.sets_cooldown.cooldown)) end
+				if spelldata.sets_cooldowns then
+					for i = 1, #spelldata.sets_cooldowns do
+						local cd = spelldata.sets_cooldowns[i]
+						table.insert(extradesc, string.format(L["Shared cooldown: %s (%is)"], GetSpellInfo(cd.spellid), cd.cooldown))
+					end
+				end
 				if spelldata.cooldown_starts_on_aura_fade then table.insert(extradesc, L["Cooldown starts when aura fades"]) end
 				if spelldata.cooldown_starts_on_dispel then table.insert(extradesc, L["Cooldown starts on dispel"]) end
 				if spelldata.resets then table.insert(extradesc, string.format(L["Resets: %s"], table.concat(fn.sort(fn.map(spelldata.resets, GetSpellInfo)), ", "))) end
@@ -1868,7 +1866,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 					-- spec
 					for _, specID in ipairs(spelldata.specID) do
 						if not args[spelldata.class].args["spec" .. specID] then
-							local _, name, description, icon, background, role, class = GetSpecializationInfoByID(specID)
+							local _, name, description, icon, role, class = GetSpecializationInfoByID(specID)
 							args[spelldata.class].args["spec" .. specID] = {
 								type = "group",
 								name = name,
@@ -1943,6 +1941,17 @@ function Cooldowns:MakeGroupOptions(unit, group)
 					}
 				end
 				args.items.args["spell" .. spellid] = spellconfig
+			elseif spelldata.pvp_trinket then
+				if not args.pvp_trinket then
+					args.pvp_trinket = {
+						type = "group",
+						name = "PVP Trinket",
+						disabled = function() return not self:IsUnitEnabled(unit) end,
+						order = 15,
+						args = {}
+					}
+				end
+				args.pvp_trinket.args["spell" .. spellid] = spellconfig
 			else
 				GladiusEx:Print("Bad spelldata for", spellid, ": could not find type")
 			end

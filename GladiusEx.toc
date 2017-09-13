@@ -1,4 +1,4 @@
-﻿## Interface: 70000
+﻿## Interface: 70300
 ## Title: GladiusEx
 ## Notes: Arena unit frames
 ## SavedVariables: GladiusExDB
@@ -25,3 +25,4 @@ modules\tags.lua
 modules\unitbar.lua
 modules\targetbar.lua
 modules\petbar.lua
+modules\interrupts.lua

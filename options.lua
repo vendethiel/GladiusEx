@@ -1,5 +1,6 @@
 ﻿local fn = LibStub("LibFunctional-1.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
+local LSM = LibStub("LibSharedMedia-3.0")
 
 GladiusEx.default_bar_texture = "Wglass (GladiusEx)"
 GladiusEx.defaults = {
@@ -26,9 +27,9 @@ GladiusEx.defaults = {
 			["party3"] = { health = 100000, maxHealth = 300000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Troll", specID = 71 },
 			["party4"] = { health = 200000, maxHealth = 400000, power = 80, maxPower = 130, powerType = 6, unitClass = "DEATHKNIGHT", unitRace = "Dwarf", specID = 252 },
 		},
-		--@debug@
+		--[===[@debug@
 		debug = true,
-		--@end-debug@
+		--@end-debug@]===]
 	}
 }
 
@@ -495,7 +496,7 @@ function GladiusEx:SetupOptions()
 								name = L["Font"],
 								desc = L["Global font, used by the modules"],
 								dialogControl = "LSM30_Font",
-								values = AceGUIWidgetLSMlists.font,
+								values = LSM.MediaTable.font,
 								order = 1,
 							},
 							globalFontSize = {
@@ -544,7 +545,7 @@ function GladiusEx:SetupOptions()
 								name = L["Bar texture"],
 								desc = L["Global texture of the bars"],
 								dialogControl = "LSM30_Statusbar",
-								values = AceGUIWidgetLSMlists.statusbar,
+								values = LSM.MediaTable.statusbar,
 								order = 10,
 							},
 						},
@@ -649,7 +650,7 @@ function GladiusEx:SetupOptions()
 					get = function() return self.db.base.testUnits[unit].specID end,
 					set = function(info, value)
 						self.db.base.testUnits[unit].specID = value
-						self.db.base.testUnits[unit].unitClass = select(7, GetSpecializationInfoByID(value))
+						self.db.base.testUnits[unit].unitClass = select(6, GetSpecializationInfoByID(value))
 						self:UpdateFrames()
 					end,
 					values = function()

@@ -616,3 +616,4 @@ L["Y offset of the cast text"] = true
 L["Y offset of the cast time text"] = true
 L["Y offset of the frame"] = true
 L["Y offset"] = true
+L["Interrupts"] = true

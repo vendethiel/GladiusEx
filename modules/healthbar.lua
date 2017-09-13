@@ -365,7 +365,7 @@ function HealthBar:GetOptions(unit)
 							name = L["Texture"],
 							desc = L["Texture of the health bar"],
 							dialogControl = "LSM30_Statusbar",
-							values = AceGUIWidgetLSMlists.statusbar,
+							values = LSM.MediaTable.statusbar,
 							disabled = function() return self.db[unit].healthBarGlobalTexture or not self:IsUnitEnabled(unit) end,
 							order = 25,
 						},

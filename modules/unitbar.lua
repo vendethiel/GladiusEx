@@ -62,8 +62,7 @@ function GladiusEx:NewUnitBarModule(name, defaults_arena, defaults_party)
 
 			self.frame[unit].statusbar:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
 			self.frame[unit].icon:SetTexture([[Interface\Glues\CharacterCreate\UI-CharacterCreate-Classes]])
-
-			local left, right, top, bottom = unpack(CLASS_BUTTONS[class])
+			local left, right, top, bottom = unpack(CLASS_ICON_TCOORDS[class])
 			if self.db[unit].IconCrop then
 				local n = 5
 				-- zoom class icon
@@ -74,6 +73,7 @@ function GladiusEx:NewUnitBarModule(name, defaults_arena, defaults_party)
 			end
 
 			self.frame[unit].icon:SetTexCoord(left, right, top, bottom)
+
 		end
 	end
 
@@ -325,7 +325,7 @@ function GladiusEx:NewUnitBarModule(name, defaults_arena, defaults_party)
 								name = L["Texture"],
 								desc = L["Texture of the health bar"],
 								dialogControl = "LSM30_Statusbar",
-								values = AceGUIWidgetLSMlists.statusbar,
+								values = LSM.MediaTable.statusbar,
 								disabled = function() return self.db[unit].GlobalTexture or not self:IsUnitEnabled(unit) end,
 								order = 25,
 							},

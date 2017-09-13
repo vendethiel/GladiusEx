@@ -23,6 +23,7 @@ local defaults = {
 	drTrackerCooldownReverse = false,
 	drFontSize = 18,
 	drCategories = {},
+	drIcons = {},
 }
 
 local DRTracker = GladiusEx:NewGladiusExModule("DRTracker",
@@ -169,7 +170,12 @@ function DRTracker:DRFaded(unit, spellID)
 	local text, r, g, b = unpack(drTexts[tracked.diminished])
 	tracked.text:SetText(text)
 	tracked.text:SetTextColor(r,g,b)
-	tracked.texture:SetTexture(GetSpellTexture(spellID))
+
+	local texture = GetSpellTexture(spellID)
+	if self.db[unit].drIcons[drCat] then
+		texture = GetSpellTexture(self.db[unit].drIcons[drCat])
+	end
+	tracked.texture:SetTexture(texture)
 
 	if self.db[unit].drTrackerCooldown then
 		CooldownFrame_Set(tracked.cooldown, GetTime(), time_left, 1)
@@ -568,6 +574,13 @@ function DRTracker:GetOptions(unit)
 		},
 	}
 
+	options.icon_for_category = {
+		type = "group",
+		name = "Icon for category",
+		order = 3,
+		args = {}
+	}
+
 	local index = 1
 	for key, name in pairs(DRData:GetCategories()) do
 		options.categories.args.categories.args[key] = {
@@ -586,6 +599,52 @@ function DRTracker:GetOptions(unit)
 			disabled = function() return not self:IsUnitEnabled(unit) end,
 			order = index * 5,
 		}
+
+		local values = {"Default"}
+		local seen_icons = {}
+		local idx = 1
+		local spellid_by_idx = {}
+		for spellid, _ in DRData:IterateProviders(key) do
+			local spellname, _, spellicon = GetSpellInfo(spellid)
+			if not seen_icons[spellicon] then
+				spellid_by_idx[idx] = spellid
+				seen_icons[spellicon] = true
+				table.insert(
+					values,
+					string.format(" |T%s:20|t %s", spellicon, spellname)
+				)
+				idx = idx + 1
+			end
+		end
+
+		options.icon_for_category.args[key] = {
+			type = "select",
+			name = name,
+			values = values,
+			order = index * 5,
+			style = "radio",
+			get = function(info)
+				if not self.db[unit].drIcons[key] then
+					return 1
+				end
+				for idx, spellid in pairs(spellid_by_idx) do
+					if spellid == self.db[unit].drIcons[key] then
+						-- +1 because 1 is "default"
+						return idx + 1
+					end
+				end
+				return 1
+			end,
+			set = function(info, value)
+				-- 1 = default
+				if value > 1 then
+					self.db[unit].drIcons[key] = spellid_by_idx[value - 1]
+				else
+					self.db[unit].drIcons[key] = nil
+				end
+			end,
+		}
+
 
 		index = index + 1
 	end
