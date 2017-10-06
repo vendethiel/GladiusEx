@@ -240,6 +240,7 @@ function Auras:UpdateUnitAuras(event, unit)
 
 			if not name then break end
 
+			--print("aura is "..name.."="..(dispelType or "nil"))
 			if self:IsAuraFiltered(unit, name, filter_what) and
 				(not aurasBuffsOnlyMine or player_units[caster]) and
 				(not aurasBuffsOnlyDispellable or LD:CanDispel(unit, buffs, dispelType, spellID)) then

@@ -480,6 +480,9 @@ function GladiusEx:UpdatePartyFrames()
 			self:HideUnit(unit)
 		end
 	end
+	if self.db.base.hideSelf then
+		self:HideUnit("player")
+	end
 
 	self:UpdateBackground("party")
 end
@@ -937,7 +940,6 @@ end
 function GladiusEx:CreateUnit(unit)
 	local button = CreateFrame("Frame", "GladiusExButtonFrame" .. unit, self:IsArenaUnit(unit) and self.arena_parent or self.party_parent)
 	self.buttons[unit] = button
-
 	button.elapsed = 0
 	button.unit = unit
 

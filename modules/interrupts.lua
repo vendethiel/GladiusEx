@@ -60,18 +60,18 @@ function Interrupt:OnDisable()
 end
 
 function Interrupt:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
-	local sub_event = select(2, ...)
+	local subEvent = select(2, ...)
 	local destGUID = select(8, ...)
 	local spellID = select(12, ...)
 
 	local unit = GladiusEx:GetUnitIdByGUID(destGUID)
 	if not unit then return end
 
-	if sub_event ~= "SPELL_CAST_SUCCESS" and sub_event ~= "SPELL_INTERRUPT" then
+	if subEvent ~= "SPELL_CAST_SUCCESS" and subEvent ~= "SPELL_INTERRUPT" then
 		return
 	end
 	-- it is necessary to check ~= false, as if the unit isn't casting a channeled spell, it will be nil
-	if sub_event == "SPELL_CAST_SUCCESS" and select(8,UnitChannelInfo(unit)) ~= false then
+	if subEvent == "SPELL_CAST_SUCCESS" and select(8, UnitChannelInfo(unit)) ~= false then
 		-- not interruptible
 		return
 	end
@@ -84,10 +84,9 @@ function Interrupt:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
    		duration = duration * INTERRUPT_SPEC_MODIFIER[button.specID]
    	end
    	-- V: can they stack? if not, add some kind of "break"
-   	for i = 1, #INTERRUPT_BUFF_MODIFIER do
-   		local mod = INTERRUPT_BUFF_MODIFIER[i]
-   		if UnitBuff(unit, mod) then
-   			duration = duration * mod
+   	for buff, mult in pairs(INTERRUPT_BUFF_MODIFIER) do
+   		if UnitBuff(unit, buff) then
+   			duration = duration * mult
    		end
    	end
    	self:UpdateInterrupt(unit, spellID, duration)
@@ -115,7 +114,7 @@ function Interrupt:GetInterruptFor(unit)
 end
 
 function Interrupt:GetOptions(unit)
-	-- TODO: enable/disable INTERRUPT_SPEC_MODIFIER, since they are talents
+	-- TODO: enable/disable INTERRUPT_SPEC_MODIFIER, since they are talents, we're just guessing
 	return {
 		general = {
 			type = "group",

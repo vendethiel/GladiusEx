@@ -617,3 +617,5 @@ L["Y offset of the cast text"] = true
 L["Y offset of the cast time text"] = true
 L["Y offset of the frame"] = true
 L["Y offset"] = true
+L["Hide self frame"] = true
+L["Hide the player's frame"] = true

@@ -35,6 +35,7 @@ local function GetDefaultSpells()
 			[196555] = true, -- Demon Hunter/Netherwalk
 			[196718] = true, -- Demon Hunter/Darkness
 			[198589] = true, -- Demon Hunter/Blur
+			[183752] = true, -- Demon Hunter/Consume Magic
 
 			[22812] = true, -- Druid/Barkskin
 			[33786] = true, -- Druid/Cyclone (feral)
@@ -50,6 +51,7 @@ local function GetDefaultSpells()
 			[78675] = true, -- Druid/Solar Beam
 			[132469] = true, -- Druid/Typhoon
 			[102793] = true, -- Druid/Ursol's Vortex
+			[106839] = true, -- Druid/Skull Bash
 
 			[19574] = true, -- Hunter/Bestial Wrath
 			[19263] = true, -- Hunter/Deterrence
@@ -142,8 +144,10 @@ local function GetDefaultSpells()
 			[23920] = true, -- Warrior/Spell Reflection
 		},
 		{ -- group 2
-			[195710] = true, -- honorable medallion
-			[208683] = true, -- gladiator's medallion
+			[195710] = true, -- Honorable Medallion
+			[208683] = true, -- Gladiator's Medallion
+			[214027] = true, -- Adaptation
+			[196029] = true, -- Relentless
 		}
 	}
 end
