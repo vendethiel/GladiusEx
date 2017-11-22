@@ -40,6 +40,7 @@ local Alerts = GladiusEx:NewGladiusExModule("Alerts", {
 		healthColor = { r = 1, g = 0, b = 0, a = 1 },
 
 		casts = true,
+		hideSelfAlert = true,
 		castsSpells = GetDefaultCastsSpells(),
 
 		auras = true,
@@ -259,7 +260,6 @@ function Alerts:UNIT_AURA(event, unit)
 
 	for name, aura in pairs(self.db[unit].aurasSpells) do
 		if UnitBuff(unit, name) or UnitDebuff(unit, name) then
-			print("alert aura.."..unit)
 			self:SetAlert(unit, "aura_" .. name, aura.priority, aura.color)
 		else
 			self:ClearAlert(unit, "aura_" .. name)
@@ -275,7 +275,6 @@ function Alerts:UNIT_HEALTH(event, unit)
 	local healthMax = UnitHealthMax(unit)
 
 	if not UnitIsDeadOrGhost(unit) and (health / healthMax) <= self.db[unit].healthThreshold then
-		print("alert health.."..unit)
 		self:SetAlert(unit, "health", self.db[unit].healthPriority, self.db[unit].healthColor)
 	else
 		self:ClearAlert(unit, "health")
@@ -285,10 +284,10 @@ end
 function Alerts:UNIT_SPELLCAST_START(event, unit, spell, _, lineID)
 	if not self.frame[unit] then return end
 	if not self.db[unit].casts then return end
+	if unit == "player" and self.db[unit].hideSelfAlert then return end
 
 	local cast = self.db[unit].castsSpells[spell]
 	if cast then
-		print("alert cast.."..unit.."="..spell)
 		line_ids[unit] = lineID
 		self:SetAlert(unit, "cast_" .. spell, cast.priority, cast.color)
 	end
@@ -300,8 +299,10 @@ function Alerts:UNIT_SPELLCAST_SUCCEEDED(event, unit, spell)
 
 	line_ids[unit] = nil
 	local cast = self.db[unit].castsSpells[spell]
-	if cast and not self:IsAlertActive(unit, "cast_" .. spell) then
-		self:SetAlert(unit, "cast_" .. spell, cast.priority, cast.color)
+	if unit ~= "player" or self.db[unit].hideSelfAlert then
+		if cast and not self:IsAlertActive(unit, "cast_" .. spell) then
+			self:SetAlert(unit, "cast_" .. spell, cast.priority, cast.color)
+		end
 	end
 	self:ClearAlert(unit, "cast_" .. spell)
 end
@@ -469,12 +470,20 @@ function Alerts:GetOptions(unit)
 					disabled = function() return not self:IsUnitEnabled(unit) end,
 					order = 1,
 				},
+				hideSelfAlert = {
+					type = "toggle",
+					name = L["Hide cast alerts on self"],
+					desc = L["Hide cast alerts on your own frame when you are casting alert-worthy spells"],
+					disabled = function() return not self:IsUnitEnabled(unit) end,
+					hidden = function() return GladiusEx:IsArenaUnit(unit) end,
+					order = 2,
+				},
 				newCast = {
 					type = "group",
 					name = L["New cast"],
 					desc = L["New cast"],
 					inline = true,
-					order = 1,
+					order = 3,
 					args = {
 						name = {
 							type = "input",
