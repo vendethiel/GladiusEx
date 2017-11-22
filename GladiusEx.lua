@@ -1566,3 +1566,10 @@ function GladiusEx:SafeGetSpellName(spellid)
 	end
 	return name
 end
+
+-- Returns whether a castGUID is "empty" (nil, zero, full of zero, etc.)
+-- BLIZZBUG: The castGUID here is 0 when you phase in while an unit is already casting.
+-- (from Resike/Z-Perl2)
+function GladiusEx:IsValidCastGUID(guid)
+	return guid ~= nil and guid ~= 0 and guid ~= "0" and guid ~= "0-0-0-0-0-0000000000"
+end

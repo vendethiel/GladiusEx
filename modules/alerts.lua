@@ -12,19 +12,11 @@ local function GetDefaultCastsSpells()
 	local h = { priority = 10, color = { r = 0, g = 1, b = 0, a = 1 } }
 	local cc = { priority = 20, color = { r = 1, g = 0, b = 0, a = 1 } }
 	return {
-		[GladiusEx:SafeGetSpellName(2060)]    = h,     -- Greater Heal
-		[GladiusEx:SafeGetSpellName(82326)]   = h,     -- Divine Light
-		[GladiusEx:SafeGetSpellName(8936)]    = h,     -- Regrowth
-		[GladiusEx:SafeGetSpellName(77472)]   = h,     -- Greater Healing Wave
-		[GladiusEx:SafeGetSpellName(115175)]  = h,     -- Soothing Mist
-
 		[GladiusEx:SafeGetSpellName(118)]      = cc,    -- Polymorph
 		[GladiusEx:SafeGetSpellName(5782)]     = cc,    -- Fear
 		[GladiusEx:SafeGetSpellName(51514)]    = cc,    -- Hex
-		[GladiusEx:SafeGetSpellName(105421)]   = cc,    -- Blinding Light
 		[GladiusEx:SafeGetSpellName(20066)]    = cc,    -- Repentance
 		[GladiusEx:SafeGetSpellName(33786)]    = cc,    -- Cyclone
-		[GladiusEx:SafeGetSpellName(339)]      = cc,    -- Entangling Roots
 	}
 end
 
@@ -86,7 +78,7 @@ function Alerts:CreateFrame(unit)
 	-- create frame
 	self.frame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. unit, button)
 	self.frame[unit].texture = self.frame[unit]:CreateTexture("GladiusEx" .. self:GetName() .. "Texture" .. unit, "OVERLAY")
-	self.frame[unit].texture:SetAllPoints()
+	self.frame[unit].texture:SetAllPoints()--self.frame[unit])
 	self.frame[unit].ag = self.frame[unit]:CreateAnimationGroup()
 	self.frame[unit].ag.aa = self.frame[unit].ag:CreateAnimation("Alpha")
 	return true
@@ -110,17 +102,14 @@ function Alerts:Update(unit)
 	self.frame[unit]:SetFrameLevel(100)
 
 	-- texture
-	self.frame[unit].texture:SetTexture(1, 1, 1)
+	self.frame[unit].texture:SetColorTexture(1, 1, 1, 1)
 	self.frame[unit].texture:SetBlendMode(self.db[unit].blendMode)
 
 	-- animation group
 	self.frame[unit]:SetAlpha(self.db[unit].maxAlpha)
 	self.frame[unit].ag:SetLooping("BOUNCE")
-	if self.frame[unit].ag.aa and self.frame[unit].ag.aa.SetChange then
-		-- V: this is not the correct fix! It just disables opacity tuning.
-		-- but I don't know why SetChange is nil in some cases
-		self.frame[unit].ag.aa:SetChange(-(self.db[unit].maxAlpha - self.db[unit].minAlpha))
-	end
+	self.frame[unit].ag.aa:SetFromAlpha(self.db[unit].minAlpha)
+	self.frame[unit].ag.aa:SetToAlpha(self.db[unit].maxAlpha)
 	self.frame[unit].ag.aa:SetDuration(self.db[unit].duration)
 	self.frame[unit].ag.aa:SetSmoothing(self.db[unit].ease)
 	self.frame[unit].ag:Stop()
@@ -140,7 +129,7 @@ end
 
 function Alerts:Test(unit)
 	self:ClearAllAlerts(unit)
-	self:SetAlert(unit, "test", 1, { r = 1, g = 0, b = 0, a = 1 })
+	self:SetAlert(unit, "test", 1, { r = 1, g = 0.2, b = 0.2, a = 0.5 })
 end
 
 function Alerts:Refresh(unit)
@@ -153,8 +142,7 @@ end
 function Alerts:StartFlash(unit, color)
 	local f = self.frame[unit]
 	f.texture:SetVertexColor(color.r, color.g, color.b, color.a)
-
-	f:SetAlpha(self.db[unit].maxAlpha)
+	
 	f:Show()
 	f.ag:Play()
 end
@@ -196,6 +184,7 @@ end
 
 local alerts = {}
 local alerts_color = {}
+local line_ids = {}
 function Alerts:SetAlert(unit, alert, priority, color)
 	assert(type(unit) == "string")
 	assert(type(alert) == "string")
@@ -261,6 +250,7 @@ end
 
 function Alerts:ClearAllAlerts(unit)
 	alerts[unit] = nil
+	line_ids[unit] = nil
 end
 
 function Alerts:UNIT_AURA(event, unit)
@@ -269,6 +259,7 @@ function Alerts:UNIT_AURA(event, unit)
 
 	for name, aura in pairs(self.db[unit].aurasSpells) do
 		if UnitBuff(unit, name) or UnitDebuff(unit, name) then
+			print("alert aura.."..unit)
 			self:SetAlert(unit, "aura_" .. name, aura.priority, aura.color)
 		else
 			self:ClearAlert(unit, "aura_" .. name)
@@ -284,18 +275,21 @@ function Alerts:UNIT_HEALTH(event, unit)
 	local healthMax = UnitHealthMax(unit)
 
 	if not UnitIsDeadOrGhost(unit) and (health / healthMax) <= self.db[unit].healthThreshold then
+		print("alert health.."..unit)
 		self:SetAlert(unit, "health", self.db[unit].healthPriority, self.db[unit].healthColor)
 	else
 		self:ClearAlert(unit, "health")
 	end
 end
 
-function Alerts:UNIT_SPELLCAST_START(event, unit, spell)
+function Alerts:UNIT_SPELLCAST_START(event, unit, spell, _, lineID)
 	if not self.frame[unit] then return end
 	if not self.db[unit].casts then return end
 
 	local cast = self.db[unit].castsSpells[spell]
 	if cast then
+		print("alert cast.."..unit.."="..spell)
+		line_ids[unit] = lineID
 		self:SetAlert(unit, "cast_" .. spell, cast.priority, cast.color)
 	end
 end
@@ -304,17 +298,20 @@ function Alerts:UNIT_SPELLCAST_SUCCEEDED(event, unit, spell)
 	if not self.frame[unit] then return end
 	if not self.db[unit].casts then return end
 
+	line_ids[unit] = nil
 	local cast = self.db[unit].castsSpells[spell]
 	if cast and not self:IsAlertActive(unit, "cast_" .. spell) then
 		self:SetAlert(unit, "cast_" .. spell, cast.priority, cast.color)
-		self:ClearAlert(unit, "cast_" .. spell, 1)
 	end
+	self:ClearAlert(unit, "cast_" .. spell)
 end
 
-function Alerts:UNIT_SPELLCAST_STOP(event, unit, spell)
+function Alerts:UNIT_SPELLCAST_STOP(event, unit, spell, _, lineID)
 	if not self.frame[unit] then return end
 	if not self.db[unit].casts then return end
+	if line_ids[unit] ~= lineID then return end
 
+	line_ids[unit] = nil
 	self:ClearAlert(unit, "cast_" .. spell)
 end
 

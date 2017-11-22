@@ -84,11 +84,11 @@ function CastBar:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_DELAYED")
 	self:RegisterEvent("UNIT_SPELLCAST_FAILED", "UNIT_SPELLCAST_STOP")
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED", "UNIT_SPELLCAST_STOP")
-	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
-	self:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE", "UNIT_SPELLCAST_DELAYED")
-	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP", "UNIT_SPELLCAST_STOP")
+	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
+	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
+	self:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
 
 	if not self.frame then
 		self.frame = {}
@@ -153,11 +153,24 @@ function CastBar:UNIT_SPELLCAST_NOT_INTERRUPTIBLE(event, unit)
 	self:SetInterruptible(unit, false)
 end
 
-function CastBar:UNIT_SPELLCAST_STOP(event, unit, spell)
+function CastBar:UNIT_SPELLCAST_CHANNEL_STOP(event, unit, spell)
 	if not self.frame[unit] then return end
-
+	-- channels don't have a castID, do it the "old" way.
 	if self.frame[unit].spellName ~= spell or (event == "UNIT_SPELLCAST_FAILED" and self.frame[unit].isChanneling) then return end
 
+	self.frame[unit].castID = nil
+	self:CastEnd(self.frame[unit])
+end
+
+function CastBar:UNIT_SPELLCAST_STOP(event, unit, spell, _, castID)
+	if not self.frame[unit] then return end
+
+	if GladiusEx:IsValidCastGUID(castID) then
+		if self.frame[unit].castID ~= castID then return end
+	else
+		if self.frame[unit].spellName ~= spell then return end
+	end
+	self.frame[unit].castID = nil
 	self:CastEnd(self.frame[unit])
 end
 
@@ -228,7 +241,8 @@ function CastBar:CastStart(unit, channel)
 
 	local spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible
 	if channel then
-		spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitChannelInfo(unit)
+		-- a channel doesn't have a castID
+		spell, rank, displayName, icon, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo(unit)
 	else
 		spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unit)
 	end
@@ -241,6 +255,7 @@ function CastBar:CastStart(unit, channel)
 		f.endTime = endTime / 1000
 		f.maxValue = f.endTime - f.startTime
 		f.delay = 0
+		f.castID = castID
 
 		f.icon:SetTexture(icon)
 
