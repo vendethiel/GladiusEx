@@ -27,6 +27,15 @@ local FILTER_WHAT_BUFFS = 2
 local FILTER_WHAT_DEBUFFS = 4
 local FILTER_WHAT_BOTH = 6
 
+local function GetDefaultAuras()
+	return {
+		[GladiusEx:SafeGetSpellName(227723)] = true, -- Mana divining stone
+		[GladiusEx:SafeGetSpellName(197912)] = true, -- Principles of War
+		[GladiusEx:SafeGetSpellName(32727)] = true,  -- Arena Preparation #1
+		[GladiusEx:SafeGetSpellName(32728)] = true,  -- Arena Preparation #2
+	}
+end
+
 local defaults = {
 	aurasBuffs = true,
 	aurasBuffsOnlyDispellable = false,
@@ -56,9 +65,9 @@ local defaults = {
 	aurasDebuffsOffsetY = 0,
 	aurasDebuffsTooltips = true,
 
-	aurasFilterType = FILTER_TYPE_DISABLED,
+	aurasFilterType = FILTER_TYPE_BLACKLIST,
 	aurasFilterWhat = FILTER_WHAT_BOTH,
-	aurasFilterAuras = {},
+	aurasFilterAuras = GetDefaultAuras(),
 }
 
 local Auras = GladiusEx:NewGladiusExModule("Auras",
@@ -240,10 +249,10 @@ function Auras:UpdateUnitAuras(event, unit)
 
 			if not name then break end
 
-			--print("aura is "..name.."="..(dispelType or "nil"))
 			if self:IsAuraFiltered(unit, name, filter_what) and
 				(not aurasBuffsOnlyMine or player_units[caster]) and
 				(not aurasBuffsOnlyDispellable or LD:CanDispel(unit, buffs, dispelType, spellID)) then
+
 				if aurasBuffsEnlargeMine and ((testing and i <= 2) or (not testing and player_units[caster])) then
 					tinsert(enlarged, i)
 				else
@@ -432,7 +441,7 @@ function Auras:UpdateUnitAuras(event, unit)
 		aurasBuffsEnlargeMine = self.db[unit].aurasDebuffsEnlargeMine
 		aurasBuffsEnlargeScale = self.db[unit].aurasDebuffsEnlargeScale
 		aurasBuffsOnlyMine = GladiusEx:IsArenaUnit(unit) and self.db[unit].aurasDebuffsOnlyMine
-		aurasBuffsOnlyDispellable = GladiusEx:IsPartyUnit() and self.db[unit].aurasDebuffsOnlyDispellable
+		aurasBuffsOnlyDispellable = GladiusEx:IsPartyUnit(unit) and self.db[unit].aurasDebuffsOnlyDispellable
 
 		scan(false)
 		hide_unused()

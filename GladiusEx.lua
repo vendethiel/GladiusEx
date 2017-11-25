@@ -1418,6 +1418,10 @@ function GladiusEx:UpdateAnchor(anchor_type)
 	end
 end
 
+function GladiusEx:GetOppositeUnit(unit)
+	return unit == "player" and "arena1" or "player"
+end
+
 function GladiusEx:UpdateBackground(anchor_type)
 	local anchor, background = self:GetAnchorFrames(anchor_type)
 

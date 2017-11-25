@@ -1190,6 +1190,14 @@ end
 
 local FormatSpellDescription
 
+function Cooldowns:GetGroupName(unit, group)
+	local groupName = self:GetGroupDB(unit, group).name
+	if not groupName or groupName == "" then
+		return L["Group"] .. " " .. group
+	end
+	return groupName
+end
+
 function Cooldowns:MakeGroupOptions(unit, group)
 	local function getOption(info)
 		return (info.arg and self:GetGroupDB(unit, group)[info.arg] or self:GetGroupDB(unit, group)[info[#info]])
@@ -1201,9 +1209,11 @@ function Cooldowns:MakeGroupOptions(unit, group)
 		GladiusEx:UpdateFrames()
 	end
 
-	local group_options = {
+	-- pre-declare so that the name can be updated
+	local group_options
+	group_options = {
 		type = "group",
-		name = L["Group"] .. " " .. group,
+		name = self:GetGroupName(unit, group),
 		childGroups = "tab",
 		order = 10 + group,
 		hidden = function() return self:GetNumGroups(unit) < group end,
@@ -1231,6 +1241,24 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self:GetGroupDB(unit, group), info, r, g, b, a) end,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
 								order = 1,
+							},
+							name = {
+								type = "input",
+								name = L["Group name"],
+								disabled = function() return not self:IsUnitEnabled(unit) end,
+								set = function (info, value)
+									for groupIdx = 1, self:GetNumGroups(unit) do
+										local name = self:GetGroupName(unit, groupIdx)
+										if group ~= groupIdx and value == name then
+											GladiusEx:Print("Duplicated group name!")
+											return
+										end
+									end
+
+									setOption(info, value)
+									group_options.name = self:GetGroupName(unit, group)
+								end,
+								order = 2,
 							},
 							sep = {
 								type = "description",
@@ -1636,6 +1664,28 @@ function Cooldowns:MakeGroupOptions(unit, group)
 						disabled = function() return not self:IsUnitEnabled(unit) end,
 						order = 0.5,
 					},
+					copyfromother = {
+						type = "execute",
+						name = GladiusEx:IsArenaUnit(unit) and L["Copy from party"] or L["Copy from arena"],
+						desc = L["Copy cooldown spells from the " .. (GladiusEx:IsArenaUnit(unit) and "party" or "arena") .. " with the same cooldown group name"],
+						func = function ()
+							local name = self:GetGroupName(unit, group)
+							local opp = GladiusEx:GetOppositeUnit(unit)
+							-- find the samely-named group in the "other side"
+							for oppGroup = 1, self:GetNumGroups(opp) do
+								local oppName = self:GetGroupName(opp, oppGroup)
+								if oppName == name then
+									local oppDb = self:GetGroupDB(opp, oppGroup)
+									self:GetGroupDB(unit, group).cooldownsSpells = oppDb.cooldownsSpells
+									GladiusEx:UpdateFrames()
+									return
+								end
+							end
+							GladiusEx:Print(L["No matching group"])
+						end,
+						disabled = function() return not self:IsUnitEnabled(unit) end,
+						order = 0.7,
+					},
 					preracesep = {
 						type = "group",
 						name = "",
@@ -1946,6 +1996,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 				end
 				args.items.args["spell" .. spellid] = spellconfig
 			elseif spelldata.pvp_trinket then
+				-- pvp trinket
 				if not args.pvp_trinket then
 					args.pvp_trinket = {
 						type = "group",
