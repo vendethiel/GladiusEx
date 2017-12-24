@@ -572,8 +572,10 @@ function GladiusEx:ShowFrames()
 		end
 	end
 
-	show_anchor("arena")
-	self.arena_parent:Show()
+	if self.db.base.showArena then
+		show_anchor("arena")
+		self.arena_parent:Show()
+	end
 
 	if self.db.base.showParty then
 		show_anchor("party")

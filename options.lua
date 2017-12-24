@@ -13,6 +13,7 @@ GladiusEx.defaults = {
 		globalFontShadowColor = { r = 0, g = 0, b = 0, a = 0 },
 		globalBarTexture = GladiusEx.default_bar_texture,
 		showParty = true,
+		showArena = true,
 		hideSelf = false,
 		superFS = true,
 		testUnits = {
@@ -440,7 +441,7 @@ function GladiusEx:SetupOptions()
 
 	local function refreshFrames()
 		-- todo: this shouldn't be so.. awkward
-		if GladiusEx:IsArenaShown() then
+		if GladiusEx:IsPartyShown() or GladiusEx:IsArenaShown() then
 			GladiusEx:HideFrames()
 			GladiusEx:ShowFrames()
 		end
@@ -481,6 +482,16 @@ function GladiusEx:SetupOptions()
 								end,
 								order = 11,
 							},
+							showArena = {
+								type = "toggle",
+								name = L["Show arena frames"],
+								desc = L["Toggle to show your arena frames"],
+								set = function(info, value)
+									setOption(info, value)
+									refreshFrames()
+								end,
+								order = 12,
+							},
 							hideSelf = {
 								type = "toggle",
 								name = L["Hide self frame"],
@@ -489,7 +500,7 @@ function GladiusEx:SetupOptions()
 									setOption(info, value)
 									refreshFrames()
 								end,
-								order = 12,
+								order = 13,
 							},
 							advancedOptions = {
 								type = "toggle",
