@@ -259,10 +259,12 @@ function Alerts:UNIT_AURA(event, unit)
 	if not self.db[unit].auras then return end
 
 	for name, aura in pairs(self.db[unit].aurasSpells) do
-		if UnitBuff(unit, name) or UnitDebuff(unit, name) then
-			self:SetAlert(unit, "aura_" .. name, aura.priority, aura.color)
-		else
-			self:ClearAlert(unit, "aura_" .. name)
+		if aura then
+			if UnitBuff(unit, name) or UnitDebuff(unit, name) then
+				self:SetAlert(unit, "aura_" .. name, aura.priority, aura.color)
+			else
+				self:ClearAlert(unit, "aura_" .. name)
+			end
 		end
 	end
 end
@@ -611,13 +613,17 @@ function Alerts:GetOptions(unit)
 	self.newAuraColor = { r = 1, g = 0, b = 0, a = 1 }
 
 	-- setup casts
-	for cast in pairs(self.db[unit].castsSpells) do
-		options.casts.args[cast] = self:SetupCastOptions(options, unit, cast)
+	for cast, v in pairs(self.db[unit].castsSpells) do
+		if v then
+			options.casts.args[cast] = self:SetupCastOptions(options, unit, cast)
+		end
 	end
 
 	-- setup auras
-	for aura in pairs(self.db[unit].aurasSpells) do
-		options.auras.args[aura] = self:SetupAuraOptions(options, unit, aura)
+	for aura, v in pairs(self.db[unit].aurasSpells) do
+		if v then
+			options.auras.args[aura] = self:SetupAuraOptions(options, unit, aura)
+		end
 	end
 
 	return options
@@ -642,7 +648,7 @@ function Alerts:SetupCastOptions(options, unit, cast)
 					self.db[unit].castsSpells[value] = self.db[unit].castsSpells[old_name]
 					options.casts.args[value] = self:SetupCastOptions(options, unit, value)
 					-- delete old cast
-					self.db[unit].castsSpells[old_name] = nil
+					self.db[unit].castsSpells[old_name] = false
 					options.casts.args[old_name] = nil
 					GladiusEx:UpdateFrames()
 				end,
@@ -676,7 +682,7 @@ function Alerts:SetupCastOptions(options, unit, cast)
 				name = L["Delete"],
 				func = function(info)
 					local name = info[#(info) - 1]
-					self.db[unit].castsSpells[name] = nil
+					self.db[unit].castsSpells[name] = false
 					options.casts.args[name] = nil
 					GladiusEx:UpdateFrames()
 				end,
@@ -706,7 +712,7 @@ function Alerts:SetupAuraOptions(options, unit, aura)
 					self.db[unit].aurasSpells[value] = self.db[unit].aurasSpells[old_name]
 					options.auras.args[value] = self:SetupAuraOptions(options, unit, value)
 					-- delete old aura
-					self.db[unit].aurasSpells[old_name] = nil
+					self.db[unit].aurasSpells[old_name] = false
 					options.auras.args[old_name] = nil
 					GladiusEx:UpdateFrames()
 				end,
@@ -740,7 +746,7 @@ function Alerts:SetupAuraOptions(options, unit, aura)
 				name = L["Delete"],
 				func = function(info)
 					local name = info[#(info) - 1]
-					self.db[unit].aurasSpells[name] = nil
+					self.db[unit].aurasSpells[name] = false
 					options.auras.args[name] = nil
 					GladiusEx:UpdateFrames()
 				end,

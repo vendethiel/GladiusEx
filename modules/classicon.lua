@@ -12,7 +12,6 @@ local UnitIsVisible, UnitIsConnected, GetSpecializationInfoByID, GetTexCoordsFor
 
 -- NOTE: this list can be modified from the ClassIcon module options, no need to edit it here
 -- Nonetheless, if you think that we missed an important aura, please post it on the addon site at curse or wowace
--- V: list imported from Gladius 5.1.6
 local function GetDefaultImportantAuras()
 	return {
 		-- Higher Number is More Priority
@@ -350,11 +349,6 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(88611)]      = 1,    -- Smoke Bomb
 		[GladiusEx:SafeGetSpellName(57934)]      = 1,    -- Tricks
 		[GladiusEx:SafeGetSpellName(197690)]     = 1,    -- def stance
-		--[GladiusEx:SafeGetSpellName(783)]        = 1.1,  -- travel
-		--[GladiusEx:SafeGetSpellName(5487)]       = 1.1,  -- bear
-		--[GladiusEx:SafeGetSpellName(768)]        = 1.1,  -- cat
-		--[GladiusEx:SafeGetSpellName(197625)]     = 1.1,  -- moonkin1
-		--[GladiusEx:SafeGetSpellName(24858)]      = 1.1,  -- moonkin2
 		[GladiusEx:SafeGetSpellName(199890)]     = 1,    -- Curse of Tongues
 		[GladiusEx:SafeGetSpellName(199892)]     = 1,    -- Curse of Weakness
 		[GladiusEx:SafeGetSpellName(199954)]     = 1,    -- Curse of Fragility
@@ -898,7 +892,10 @@ function ClassIcon:GetOptions(unit)
 
 	-- setup auras
 	for aura, priority in pairs(self.db[unit].classIconAuras) do
-		options.auraList.args[tostring(aura)] = self:SetupAuraOptions(options, unit, aura)
+		-- priority is false for deleted values
+		if priority then
+			options.auraList.args[tostring(aura)] = self:SetupAuraOptions(options, unit, aura)
+		end
 	end
 
 	return options
@@ -917,7 +914,7 @@ function ClassIcon:SetupAuraOptions(options, unit, aura)
 			options.auraList.args[new_name] = self:SetupAuraOptions(options, unit, new_name)
 
 			-- delete old aura
-			self.db[unit].classIconAuras[aura] = nil
+			self.db[unit].classIconAuras[aura] = false
 			options.auraList.args[aura] = nil
 		else
 			self.db[unit].classIconAuras[info[#(info) - 1]] = value
@@ -967,7 +964,9 @@ function ClassIcon:SetupAuraOptions(options, unit, aura)
 				name = L["Delete"],
 				func = function(info)
 					local aura = info[#(info) - 1]
-					self.db[unit].classIconAuras[aura] = nil
+					-- very important: set to false so that they're not removed
+					-- see https://github.com/slaren/GladiusEx/issues/10
+					self.db[unit].classIconAuras[aura] = false
 					options.auraList.args[aura] = nil
 					GladiusEx:UpdateFrames()
 				end,

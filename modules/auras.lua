@@ -1177,8 +1177,11 @@ function Auras:GetOptions(unit)
 	}
 
 	-- setup auras
-	for aura in pairs(self.db[unit].aurasFilterAuras) do
-		options.filters.args[aura] = self:SetupAuraOptions(options, unit, aura)
+	for aura, v in pairs(self.db[unit].aurasFilterAuras) do
+		-- v is false for deleted values
+		if v then
+			options.filters.args[tostring(aura)] = self:SetupAuraOptions(options, unit, aura)
+		end
 	end
 
 	return options
@@ -1194,7 +1197,7 @@ function Auras:SetupAuraOptions(options, unit, aura)
 			options.filters.args[value] = self:SetupAuraOptions(options, unit, value)
 
 			-- delete old aura
-			self.db[unit].aurasFilterAuras[old_name] = nil
+			self.db[unit].aurasFilterAuras[old_name] = false
 			options.filters.args[old_name] = nil
 		else
 			self.db[unit].aurasFilterAuras[info[#(info) - 1]] = value
@@ -1232,7 +1235,9 @@ function Auras:SetupAuraOptions(options, unit, aura)
 				name = L["Delete"],
 				func = function(info)
 					local aura = info[#(info) - 1]
-					self.db[unit].aurasFilterAuras[aura] = nil
+					-- very important: set to false so that they're not removed
+					-- see https://github.com/slaren/GladiusEx/issues/10
+					self.db[unit].aurasFilterAuras[aura] = false
 					options.filters.args[aura] = nil
 
 					GladiusEx:UpdateFrames()
