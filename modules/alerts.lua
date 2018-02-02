@@ -286,27 +286,31 @@ end
 function Alerts:UNIT_SPELLCAST_START(event, unit, spell, _, lineID)
 	if not self.frame[unit] then return end
 	if not self.db[unit].casts then return end
+	-- we check self.db[unit] and not self.db.base because the option appears only in party mode
 	if unit == "player" and self.db[unit].hideSelfAlert then return end
 
 	local cast = self.db[unit].castsSpells[spell]
 	if cast then
 		line_ids[unit] = lineID
-		self:SetAlert(unit, "cast_" .. spell, cast.priority, cast.color)
+		self:SetAlert(unit, "cast", cast.priority, cast.color)
 	end
 end
 
-function Alerts:UNIT_SPELLCAST_SUCCEEDED(event, unit, spell)
+function Alerts:UNIT_SPELLCAST_SUCCEEDED(evenet, unit, spell)
 	if not self.frame[unit] then return end
 	if not self.db[unit].casts then return end
 
+	-- in case of a _SUCCEEDED event, we do not check the line ID / spell name.
+	-- this is because there are several blizzard bugs where we never receive a cast end event.
+	-- (the castbar modules keeps track of cast end times, but it's too much logic for this module)
+	-- see https://github.com/slaren/GladiusEx/issues/5
 	line_ids[unit] = nil
 	local cast = self.db[unit].castsSpells[spell]
-	if unit ~= "player" or self.db[unit].hideSelfAlert then
-		if cast and not self:IsAlertActive(unit, "cast_" .. spell) then
-			self:SetAlert(unit, "cast_" .. spell, cast.priority, cast.color)
-		end
+	-- flash the screen for an instant
+	if cast and (unit ~= "player" or self.db[unit].hideSelfAlert) then
+		self:SetAlert(unit, "cast", cast.priority, cast.color)
 	end
-	self:ClearAlert(unit, "cast_" .. spell)
+	self:ClearAlert(unit, "cast")
 end
 
 function Alerts:UNIT_SPELLCAST_STOP(event, unit, spell, _, lineID)
@@ -315,7 +319,7 @@ function Alerts:UNIT_SPELLCAST_STOP(event, unit, spell, _, lineID)
 	if line_ids[unit] ~= lineID then return end
 
 	line_ids[unit] = nil
-	self:ClearAlert(unit, "cast_" .. spell)
+	self:ClearAlert(unit, "cast")
 end
 
 local function HasAuraEditBox()

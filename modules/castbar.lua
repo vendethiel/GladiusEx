@@ -216,20 +216,27 @@ end
 local delay_format = " +%.01f"
 local function CastUpdate(self)
 	if self.isCasting or self.isChanneling then
-		local currentTime = min(self.endTime, GetTime())
-		local value = self.endTime - currentTime
+		-- V: Sometimes, we don't receive a cast end event.
+		-- that happens with some vehicles/npcs, as well as phased-out casts.
+		-- Instead, we manually check if we should already have ended the cast. (delay is accounted for already)
+		if GetTime() > self.endTime then
+			CastBar:CastEnd(CastBar.frame[self.unit])
+		else
+			local currentTime = GetTime()
+			local value = self.endTime - currentTime
 
-		if (self.isChanneling and CastBar.db[self.unit].castBarInverse) or (self.isCasting and not CastBar.db[self.unit].castBarInverse) then
-			value = self.endTime - self.startTime - value
+			if (self.isChanneling and CastBar.db[self.unit].castBarInverse) or (self.isCasting and not CastBar.db[self.unit].castBarInverse) then
+				value = self.endTime - self.startTime - value
+			end
+
+			self.bar:SetValue(value)
+
+			local width = self.bar:GetWidth()
+			local sparkPosition = value / self.maxValue * width
+			self.spark:SetPoint("CENTER", self.bar, "LEFT", sparkPosition, 0)
+
+			self.timeText:SetFormattedText(self.time_text_format, value, self.maxValue - value, self.maxValue, self.delay == 0 and "" or strformat(delay_format, self.delay))
 		end
-
-		self.bar:SetValue(value)
-
-		local width = self.bar:GetWidth()
-		local sparkPosition = value / self.maxValue * width
-		self.spark:SetPoint("CENTER", self.bar, "LEFT", sparkPosition, 0)
-
-		self.timeText:SetFormattedText(self.time_text_format, value, self.maxValue - value, self.maxValue, self.delay == 0 and "" or strformat(delay_format, self.delay))
 	else
 		self:SetScript("OnUpdate", nil)
 	end

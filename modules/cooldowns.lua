@@ -467,7 +467,7 @@ local function CooldownFrame_OnUpdate(frame)
 	end
 
 	-- not on cooldown or being used
-	if frame.tracked and frame.tracked.charges_detected and frame.tracked.charges < frame.tracked.max_charges then
+	if frame.tracked and frame.tracked.charges_detected and frame.tracked.charges and frame.tracked.max_charges and frame.tracked.charges < frame.tracked.max_charges then
 		-- show the charge cooldown
 		frame.cooldown:SetReverse(false)
 		CooldownFrame_Set(frame.cooldown, tracked.cooldown_start, tracked.cooldown_end - tracked.cooldown_start, 1, frame.tracked.charges, frame.tracked.max_charges)
@@ -591,7 +591,7 @@ local function GetCooldownList(unit, group)
 			local detected = tracked and tracked.detected
 			-- check if the spell has a cooldown valid for an arena, and check if it is a talent that has not yet been detected
 			if (not spelldata.cooldown or spelldata.cooldown < 600) and
-			   (not (spelldata.glyph or spelldata.talent or spelldata.pet) or detected or not db.cooldownsHideTalentsUntilDetected) then
+			   (not (spelldata.talent or spelldata.pet) or detected or not db.cooldownsHideTalentsUntilDetected) then
 				-- check if the spell requires an aura
 				if not spelldata.requires_aura or UnitBuff(unit, spelldata.requires_aura_name) then
 					if spelldata.replaces then
