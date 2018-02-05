@@ -165,7 +165,6 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(209426)]    = 7.1,  -- Darkness
 		[GladiusEx:SafeGetSpellName(1022)]      = 7.4,  -- Hand of Protection
 		[GladiusEx:SafeGetSpellName(18499)]     = 7.3,  -- Berserker Rage
-		[GladiusEx:SafeGetSpellName(196364)]    = 7,    -- Unstable Affliction
 		[GladiusEx:SafeGetSpellName(1330)]      = 7,    -- Garrote (Silence)
 		[GladiusEx:SafeGetSpellName(15487)]     = 7,    -- Silence
 		[GladiusEx:SafeGetSpellName(236077)]     = 7,    -- Disarm
