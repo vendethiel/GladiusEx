@@ -1,5 +1,5 @@
-# gladiusex-legion
-A GladiusEX update for Legion
+# GladiusEX
+An arena unit frames addon for Legion
 
 # Author
 Original author: slaren
