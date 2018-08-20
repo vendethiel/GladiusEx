@@ -30,7 +30,7 @@ local FILTER_WHAT_BOTH = 6
 local function GetDefaultAuras()
 	return {
 		[GladiusEx:SafeGetSpellName(227723)] = true, -- Mana divining stone
-		[GladiusEx:SafeGetSpellName(197912)] = true, -- Principles of War
+		--[GladiusEx:SafeGetSpellName(197912)] = true, -- V: removed in Bfa. Principles of War
 		[GladiusEx:SafeGetSpellName(32727)] = true,  -- Arena Preparation #1
 		[GladiusEx:SafeGetSpellName(32728)] = true,  -- Arena Preparation #2
 	}
@@ -161,10 +161,10 @@ local player_units = {
 
 local function GetTestAura(index, buff)
 	local spellID = buff and 21562 or 589
-	local name, rank, icon = GetSpellInfo(spellID)
+	local name, _, icon = GetSpellInfo(spellID)
 	local count, dispelType, duration, caster, isStealable, shouldConsolidate = 1, "Magic", 3600 * index, "player", false, false
 	local expires = GetTime() + duration
-	return name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
+	return name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
 end
 
 function Auras:UpdateUnitAuras(event, unit)
@@ -189,13 +189,13 @@ function Auras:UpdateUnitAuras(event, unit)
 
 	local function set_aura(index, buff)
 		local aura_frame = auraFrame[icon_index]
-		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
+		local name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
 		if testing then
-			name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = GetTestAura(index, buff)
+			name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = GetTestAura(index, buff)
 		elseif buff then
-			name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitBuff(unit, index)
+			name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitBuff(unit, index)
 		else
-			name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitDebuff(unit, index)
+			name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitDebuff(unit, index)
 		end
 
 		aura_frame.unit = unit
@@ -240,11 +240,11 @@ function Auras:UpdateUnitAuras(event, unit)
 		local normal = {}
 
 		for i = 1, 40 do
-			local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
+			local name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
 			if testing then
-				name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = GetTestAura(i, buffs)
+				name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = GetTestAura(i, buffs)
 			else
-				name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitAura(unit, i, filter)
+				name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitAura(unit, i, filter)
 			end
 
 			if not name then break end

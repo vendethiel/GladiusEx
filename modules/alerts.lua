@@ -283,7 +283,7 @@ function Alerts:UNIT_HEALTH(event, unit)
 	end
 end
 
-function Alerts:UNIT_SPELLCAST_START(event, unit, spell, _, lineID)
+function Alerts:UNIT_SPELLCAST_START(event, unit, lineID, spell)
 	if not self.frame[unit] then return end
 	if not self.db[unit].casts then return end
 	-- we check self.db[unit] and not self.db.base because the option appears only in party mode
@@ -296,7 +296,7 @@ function Alerts:UNIT_SPELLCAST_START(event, unit, spell, _, lineID)
 	end
 end
 
-function Alerts:UNIT_SPELLCAST_SUCCEEDED(evenet, unit, spell)
+function Alerts:UNIT_SPELLCAST_SUCCEEDED(event, unit, spell)
 	if not self.frame[unit] then return end
 	if not self.db[unit].casts then return end
 

@@ -38,9 +38,7 @@ INTERRUPT_SPEC_MODIFIER = {
 }
 
 INTERRUPT_BUFF_MODIFIER = {
-	["Burning Determination"] = 0.3,
-	["Calming Waters"] = 0.3,
-	["Casting Circle"] = 0.3,
+	-- ["name"] = 0.7,
 }
 
 function Interrupt:OnEnable()
@@ -59,7 +57,11 @@ function Interrupt:OnDisable()
 	end
 end
 
-function Interrupt:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
+function Interrupt:COMBAT_LOG_EVENT_UNFILTERED(event)
+	Interrupt:CombatLogEvent(event, CombatLogGetCurrentEventInfo())
+end
+
+function Interrupt:CombatLogEvent(_, ...)
 	local subEvent = select(2, ...)
 	local destGUID = select(8, ...)
 	local spellID = select(12, ...)
@@ -85,7 +87,7 @@ function Interrupt:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
    	end
    	-- V: can they stack? if not, add some kind of "break"
    	for buff, mult in pairs(INTERRUPT_BUFF_MODIFIER) do
-   		if UnitBuff(unit, buff) then
+   		if AuraUtil.FindAuraByName(buff, unit, "HELPFUL") then
    			duration = duration * mult
    		end
    	end

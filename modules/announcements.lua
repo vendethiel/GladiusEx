@@ -75,32 +75,33 @@ function Announcements:UNIT_HEALTH(event, unit)
 	end
 end
 
-local DRINK_SPELL = GetSpellInfo(57073)
+local DRINK_SPELL = 57073
 function Announcements:UNIT_AURA(event, unit)
 	if not self:IsHandledUnit(unit) or not self.db[unit].drinks then return end
 
-	if UnitAura(unit, DRINK_SPELL) then
+	if Unit(unit, DRINK_SPELL) then
 		self:Send(string.format(L["DRINKING: %s (%s)"], UnitName(unit), UnitClass(unit)), 2, unit)
 	end
 end
 
 local RES_SPELLS = {
-	[GladiusEx:SafeGetSpellName(2008)] = true,   -- Ancestral Spirit (shaman)
-	[GladiusEx:SafeGetSpellName(8342)] = true,   -- Defibrillate (item: Goblin Jumper Cables)
-	[GladiusEx:SafeGetSpellName(22999)] = true,  -- Defibrillate (item: Goblin Jumper Cables XL)
-	[GladiusEx:SafeGetSpellName(54732)] = true,  -- Defibrillate (item: Gnomish Army Knife)
-	[GladiusEx:SafeGetSpellName(126393)] = true, -- Eternal Guardian (hunter pet: quilien)
-	[GladiusEx:SafeGetSpellName(61999)] = true,  -- Raise Ally (death knight)
-	[GladiusEx:SafeGetSpellName(20484)] = true,  -- Rebirth (druid)
-	[GladiusEx:SafeGetSpellName(7328)] = true,   -- Redemption (paladin)
-	[GladiusEx:SafeGetSpellName(2006)] = true,   -- Resurrection (priest)
-	[GladiusEx:SafeGetSpellName(115178)] = true, -- Resuscitate (monk)
-	[GladiusEx:SafeGetSpellName(50769)] = true,  -- Revive (druid)
-	[GladiusEx:SafeGetSpellName(982)] = true,    -- Revive Pet (hunter)
-	[GladiusEx:SafeGetSpellName(20707)] = true,  -- Soulstone (warlock)
+	-- V: removed SafeGetSpellName() for BfA, need to make sure it's ok
+	[2008] = true,   -- Ancestral Spirit (shaman)
+	[8342] = true,   -- Defibrillate (item: Goblin Jumper Cables)
+	[22999] = true,  -- Defibrillate (item: Goblin Jumper Cables XL)
+	[54732] = true,  -- Defibrillate (item: Gnomish Army Knife)
+	--[126393] = true, -- V: removed in Bfa. Eternal Guardian (hunter pet: quilien)
+	[61999] = true,  -- Raise Ally (death knight)
+	[20484] = true,  -- Rebirth (druid)
+	[7328] = true,   -- Redemption (paladin)
+	[2006] = true,   -- Resurrection (priest)
+	[115178] = true, -- Resuscitate (monk)
+	[50769] = true,  -- Revive (druid)
+	[982] = true,    -- Revive Pet (hunter)
+	[20707] = true,  -- Soulstone (warlock)
 }
 
-function Announcements:UNIT_SPELLCAST_START(event, unit, spell, rank)
+function Announcements:UNIT_SPELLCAST_START(event, unit, lineID, spell)
 	if not self:IsHandledUnit(unit) or not self.db[unit].resurrect then return end
 
 	if RES_SPELLS[spell] then

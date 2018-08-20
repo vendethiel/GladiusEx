@@ -148,7 +148,7 @@ function SkillHistory:Refresh(unit)
 end
 
 local prev_lineid = {}
-function SkillHistory:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, rank, lineID, spellId)
+function SkillHistory:UNIT_SPELLCAST_SUCCEEDED(event, unit, lineID, spellId)
 	if self.frame[unit] then
 		--print("unit:"..unit.." just casted "..spellName.."="..spellId)
 		-- casts with lineID = 0 seem to be secondary effects not directly casted by the unit

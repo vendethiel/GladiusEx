@@ -593,7 +593,8 @@ local function GetCooldownList(unit, group)
 			if (not spelldata.cooldown or spelldata.cooldown < 600) and
 			   (not (spelldata.talent or spelldata.pet) or detected or not db.cooldownsHideTalentsUntilDetected) then
 				-- check if the spell requires an aura
-				if not spelldata.requires_aura or UnitBuff(unit, spelldata.requires_aura_name) then
+				-- V: switched this to use FindAuraByName. It's unchecked but no spell uses it anyway
+				if not spelldata.requires_aura or AuraUtil.FindAuraByName(spelldata.requires_aura_name, unit, "HELPFUL") then
 					if spelldata.replaces then
 						-- remove replaced spell if detected
 						spell_list[spelldata.replaces] = false

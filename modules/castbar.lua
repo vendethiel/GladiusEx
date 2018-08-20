@@ -129,12 +129,8 @@ function CastBar:GetModuleAttachFrame(unit, point)
 	return self.frame[unit]
 end
 
-local function UpdateCastText(f, spell, rank)
-	if rank ~= "" then
-		f.castText:SetFormattedText("%s (%s)", spell, rank)
-	else
-		f.castText:SetText(spell)
-	end
+local function UpdateCastText(f, spell)
+	f.castText:SetText(spell)
 end
 
 function CastBar:UNIT_SPELLCAST_START(event, unit)
@@ -155,22 +151,22 @@ end
 
 function CastBar:UNIT_SPELLCAST_CHANNEL_STOP(event, unit, spell)
 	if not self.frame[unit] then return end
-	-- channels don't have a castID, do it the "old" way.
+	-- channels don't have a lineID, do it the "old" way.
 	if self.frame[unit].spellName ~= spell or (event == "UNIT_SPELLCAST_FAILED" and self.frame[unit].isChanneling) then return end
 
-	self.frame[unit].castID = nil
+	self.frame[unit].lineID = nil
 	self:CastEnd(self.frame[unit])
 end
 
-function CastBar:UNIT_SPELLCAST_STOP(event, unit, spell, _, castID)
+function CastBar:UNIT_SPELLCAST_STOP(event, unit, lineID, spell)
 	if not self.frame[unit] then return end
 
-	if GladiusEx:IsValidCastGUID(castID) then
-		if self.frame[unit].castID ~= castID then return end
+	if GladiusEx:IsValidCastGUID(lineID) then
+		if self.frame[unit].lineID ~= lineID then return end
 	else
 		if self.frame[unit].spellName ~= spell then return end
 	end
-	self.frame[unit].castID = nil
+	self.frame[unit].lineID = nil
 	self:CastEnd(self.frame[unit])
 end
 
@@ -178,11 +174,11 @@ function CastBar:UNIT_SPELLCAST_DELAYED(event, unit)
 	if not self.frame[unit] then return end
 	if not self.frame[unit].isCasting or self.frame[unit].isChanneling then return end
 
-	local spell, rank, displayName, icon, startTime, endTime, isTradeSkill
+	local spell, displayName, icon, startTime, endTime, isTradeSkill
 	if event == "UNIT_SPELLCAST_DELAYED" then
-		spell, rank, displayName, icon, startTime, endTime, isTradeSkill = UnitCastingInfo(unit)
+		spell, displayName, icon, startTime, endTime, isTradeSkill = UnitCastingInfo(unit)
 	else
-		spell, rank, displayName, icon, startTime, endTime, isTradeSkill = UnitChannelInfo(unit)
+		spell, displayName, icon, startTime, endTime, isTradeSkill = UnitChannelInfo(unit)
 	end
 
 	if not startTime or not endTime then return end
@@ -246,12 +242,12 @@ function CastBar:CastStart(unit, channel)
 	local f = self.frame[unit]
 	if not f then return end
 
-	local spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible
+	local spell, displayName, icon, startTime, endTime, isTradeSkill, lineID, notInterruptible
 	if channel then
-		-- a channel doesn't have a castID
-		spell, rank, displayName, icon, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo(unit)
+		-- a channel doesn't have a lineID
+		spell, displayName, icon, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo(unit)
 	else
-		spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unit)
+		spell, displayName, icon, startTime, endTime, isTradeSkill, lineID, notInterruptible = UnitCastingInfo(unit)
 	end
 
 	if spell then
@@ -262,7 +258,7 @@ function CastBar:CastStart(unit, channel)
 		f.endTime = endTime / 1000
 		f.maxValue = f.endTime - f.startTime
 		f.delay = 0
-		f.castID = castID
+		f.lineID = lineID
 
 		f.icon:SetTexture(icon)
 
@@ -273,7 +269,7 @@ function CastBar:CastStart(unit, channel)
 		if self.db[unit].castSpark then f.spark:Show() end
 		f:SetScript("OnUpdate", CastUpdate)
 		CastUpdate(f)
-		UpdateCastText(f, spell, rank)
+		UpdateCastText(f, spell)
 	end
 end
 
@@ -500,7 +496,7 @@ function CastBar:Test(unit)
 	local f = self.frame[unit]
 
 	if GladiusEx.testing[unit].powerType == 0 then
-		local spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible = L["Example Spell Name"], "", "", GetSpellTexture(1),
+		local spell, displayName, icon, startTime, endTime, isTradeSkill, lineID, notInterruptible = L["Example Spell Name"], "", GetSpellTexture(1),
 			GetTime() * 1000 - 1000, GetTime() * 1000 + 1500, false, 0, false
 
 		f.spellName = spell
@@ -517,7 +513,7 @@ function CastBar:Test(unit)
 
 		if self.db[unit].castSpark then f.spark:Show() end
 		CastUpdate(f)
-		UpdateCastText(f, spell, rank)
+		UpdateCastText(f, spell)
 	end
 end
 

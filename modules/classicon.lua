@@ -253,7 +253,7 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(61336)]      = 5,    -- Survival Instincts
 
 
-		[GladiusEx:SafeGetSpellName(31842)]      = 4,    -- Divine Favor
+		--[GladiusEx:SafeGetSpellName(31842)]      = 4,    -- V: removed in Bfa. Divine Favor
 		[GladiusEx:SafeGetSpellName(196773)]     = 4,    -- inner focus
 		[GladiusEx:SafeGetSpellName(206803)]     = 4.1,  -- Rain from Above
 		[GladiusEx:SafeGetSpellName(206804)]     = 4,    -- Rain from Above
@@ -271,7 +271,7 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(12042)]      = 3,    -- Arcane Power
 		[GladiusEx:SafeGetSpellName(114050)]     = 3,    -- Ascendance
 		[GladiusEx:SafeGetSpellName(208997)]     = 3.1,  -- Counterstrike Totem
-		[GladiusEx:SafeGetSpellName(203727)]     = 3.1,  -- Thorns
+		--[GladiusEx:SafeGetSpellName(203727)]     = 3.1,  -- V: removed in Bfa. Thorns
 		[GladiusEx:SafeGetSpellName(236696)]     = 3.1,  -- Thorns
 		[GladiusEx:SafeGetSpellName(114051)]     = 3,    -- Ascendance
 		[GladiusEx:SafeGetSpellName(114052)]     = 3,    -- Ascendance
@@ -306,7 +306,7 @@ local function GetDefaultImportantAuras()
 
 		[GladiusEx:SafeGetSpellName(121471)]     = 2.2,  -- Shadow Blades
 		[GladiusEx:SafeGetSpellName(79140)]      = 2.3,  -- Vendetta
-		[GladiusEx:SafeGetSpellName(211048)]     = 2.3,  -- Chaos Blades
+		--[GladiusEx:SafeGetSpellName(211048)]     = 2.3,  -- V: removed in Bfa. Chaos Blades
 		[GladiusEx:SafeGetSpellName(51271)]      = 2.1,  -- Pillar of Frost
 		[GladiusEx:SafeGetSpellName(207127)]     = 2,    -- Hungering Rune Weapon
 		[GladiusEx:SafeGetSpellName(204945)]     = 2,    -- Doom Winds
@@ -316,7 +316,7 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(202665)]     = 2,    -- Curse of the Dreadblades
 		[GladiusEx:SafeGetSpellName(201318)]     = 2.1,  -- Fortifying Elixir
 		[GladiusEx:SafeGetSpellName(97463)]      = 2.2,  -- Rallying Cry
-		[GladiusEx:SafeGetSpellName(31842)]      = 2.1,  -- Avenging Wrath
+		--[GladiusEx:SafeGetSpellName(31842)]      = 2.1,  --  V: removed in Bfa.Avenging Wrath
 		[GladiusEx:SafeGetSpellName(31884)]      = 2.1,  -- Avenging Wrath
 		[GladiusEx:SafeGetSpellName(216331)]     = 2.1,  -- Avenging Crusader
 		[GladiusEx:SafeGetSpellName(184662)]     = 2.2,  -- Shield of Vengeance
@@ -465,14 +465,14 @@ function ClassIcon:ScanAuras(unit)
 
 	-- debuffs
 	for index = 1, 40 do
-		local name, _, icon, _, _, duration, expires, _, _, _, spellid = UnitDebuff(unit, index)
+		local name, icon, _, _, duration, expires, _, _, _, spellid = UnitDebuff(unit, index)
 		if not name then break end
 		handle_aura(name, spellid, icon, duration, expires)
 	end
 
 	-- buffs
 	for index = 1, 40 do
-		local name, _, icon, _, _, duration, expires, _, _, _, spellid = UnitBuff(unit, index)
+		local name, icon, _, _, duration, expires, _, _, _, spellid = UnitBuff(unit, index)
 		if not name then break end
 		handle_aura(name, spellid, icon, duration, expires)
 	end

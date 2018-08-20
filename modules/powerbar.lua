@@ -24,13 +24,8 @@ local PowerBar = GladiusEx:NewGladiusExModule("PowerBar", {
 })
 
 function PowerBar:OnEnable()
-	self:RegisterEvent("UNIT_POWER", "UpdatePowerEvent")
-	self:RegisterEvent("UNIT_POWER_FREQUENT", "UpdatePowerEvent")
-	self:RegisterEvent("UNIT_MAXPOWER", "UpdatePowerEvent")
-	self:RegisterEvent("UNIT_CONNECTION", "UpdatePowerEvent")
-	self:RegisterEvent("UNIT_POWER_BAR_SHOW", "UpdatePowerEvent")
-	self:RegisterEvent("UNIT_POWER_BAR_HIDE","UpdatePowerEvent")
-	self:RegisterEvent("UNIT_CLASSIFICATION_CHANGED","UpdateColorEvent")
+	self:RegisterEvent("UNIT_POWER_UPDATE", "UpdatePowerEvent")
+	self:RegisterEvent("UNIT_MANA", "UpdatePowerEvent")
 	self:RegisterEvent("UNIT_DISPLAYPOWER", "UpdateColorEvent")
 	self:RegisterMessage("GLADIUS_SPEC_UPDATE", "UpdateColorEvent")
 
