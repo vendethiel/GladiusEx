@@ -156,7 +156,7 @@ function PowerBar:Update(unit)
 	-- update background
 	self.frame[unit].background:SetTexture(bar_texture)
 	self.frame[unit].background:SetVertexColor(self.db[unit].powerBarBackgroundColor.r, self.db[unit].powerBarBackgroundColor.g,
-		self.db[unit].powerBarBackgroundColor.b, self.db[unit].powerBarBackgroundColor.a)
+	self.db[unit].powerBarBackgroundColor.b, self.db[unit].powerBarBackgroundColor.a)
 	self.frame[unit].background:SetHorizTile(false)
 	self.frame[unit].background:SetVertTile(false)
 
