@@ -1853,6 +1853,8 @@ function Cooldowns:MakeGroupOptions(unit, group)
 			if spelldata.knockback then tinsert(cats, L["cat:knockback"]) end
 			if spelldata.stun then tinsert(cats, L["cat:stun"]) end
 			if spelldata.immune then tinsert(cats, L["cat:immune"]) end
+			-- specID takes category precedence over talent, so specify it to make it clear
+			if spelldata.specID and spelldata.talent then tinsert(cats, L["cat:talent"]) end
 			local catstr
 			if #cats > 0 then
 				catstr = "|cff7f7f7f(" .. strjoin(", ", unpack(cats)) .. ")|r"

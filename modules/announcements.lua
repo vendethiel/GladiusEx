@@ -79,8 +79,13 @@ local DRINK_SPELL = 57073
 function Announcements:UNIT_AURA(event, unit)
 	if not self:IsHandledUnit(unit) or not self.db[unit].drinks then return end
 
-	if Unit(unit, DRINK_SPELL) then
-		self:Send(string.format(L["DRINKING: %s (%s)"], UnitName(unit), UnitClass(unit)), 2, unit)
+	-- TODO we can probably return early
+	for i = 1, 40 do
+		local _, _, _, _, _, _, _, _, _, spellID = UnitBuff(unit, i, "HELPFUL")
+		if spellID == DRINK_SPELL then
+			self:Send(string.format(L["DRINKING: %s (%s)"], UnitName(unit), UnitClass(unit)), 2, unit)
+			break
+		end
 	end
 end
 
@@ -90,7 +95,6 @@ local RES_SPELLS = {
 	[8342] = true,   -- Defibrillate (item: Goblin Jumper Cables)
 	[22999] = true,  -- Defibrillate (item: Goblin Jumper Cables XL)
 	[54732] = true,  -- Defibrillate (item: Gnomish Army Knife)
-	--[126393] = true, -- V: removed in Bfa. Eternal Guardian (hunter pet: quilien)
 	[61999] = true,  -- Raise Ally (death knight)
 	[20484] = true,  -- Rebirth (druid)
 	[7328] = true,   -- Redemption (paladin)

@@ -13,6 +13,7 @@ L["cat:heal"] = "Heal"
 L["cat:knockback"] = "Knockback"
 L["cat:stun"] = "Stun"
 L["cat:immune"] = "Immune"
+L["cat:talent"] = "Talent"
 L["cat:uncat"] = "Uncategorized"
 
 -- Tags module
