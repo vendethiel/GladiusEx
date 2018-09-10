@@ -137,6 +137,10 @@ function GladiusEx:NewUnitBarModule(name, defaults_arena, defaults_party)
 	end
 
 	function UnitBar:Refresh(unit)
+		-- create bar
+		if not self.frame[unit] then
+			self:CreateBar(unit)
+		end
 		local tunit = self.frame[unit].statusbar.unit
 		if UnitExists(tunit) then
 			self:SetClassIcon(unit)
@@ -160,6 +164,8 @@ function GladiusEx:NewUnitBarModule(name, defaults_arena, defaults_party)
 	function UnitBar:CreateBar(unit)
 		local button = GladiusEx.buttons[unit]
 		if not button then return end
+
+		if self.frame[unit] then return end
 
 		local tunit, poll = self:GetFrameUnit(unit)
 
