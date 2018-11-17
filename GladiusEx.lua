@@ -650,8 +650,10 @@ function GladiusEx:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
 
 		if specID and specID > 0 then
 			self:ShowUnit(unitid)
-			self:UpdateUnitSpecialization(unitid, specID)
 			self:UpdateUnit(unitid)
+
+			-- update spec after UpdateUnit so that it can (maybe) create button
+			self:UpdateUnitSpecialization(unitid, specID)
 			self:UpdateUnitState(unitid, true)
 			self:RefreshUnit(unitid)
 		end
@@ -1388,7 +1390,7 @@ function GladiusEx:UpdateAnchor(anchor_type)
 	anchor:SetFrameLevel(200)
 	anchor:SetFrameStrata("MEDIUM")
 
-	anchor:SetClampedToScreen(true)
+	--anchor:SetClampedToScreen(true) -- https://github.com/slaren/GladiusEx/issues/19
 	anchor:EnableMouse(true)
 	anchor:SetMovable(true)
 	anchor:RegisterForDrag("LeftButton")
