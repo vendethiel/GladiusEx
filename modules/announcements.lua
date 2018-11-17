@@ -79,9 +79,9 @@ local DRINK_SPELL = 57073
 function Announcements:UNIT_AURA(event, unit)
 	if not self:IsHandledUnit(unit) or not self.db[unit].drinks then return end
 
-	-- TODO we can probably return early
 	for i = 1, 40 do
-		local _, _, _, _, _, _, _, _, _, spellID = UnitBuff(unit, i, "HELPFUL")
+		local name, _, _, _, _, _, _, _, _, spellID = UnitBuff(unit, i, "HELPFUL")
+		if not name then break end
 		if spellID == DRINK_SPELL then
 			self:Send(string.format(L["DRINKING: %s (%s)"], UnitName(unit), UnitClass(unit)), 2, unit)
 			break
