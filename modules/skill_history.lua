@@ -186,6 +186,11 @@ function SkillHistory:QueueSpell(unit, spellid, time)
 	-- 	icon_horde = [[Interface\Icons\INV_Jewelry_TrinketPVP_02]]
 	-- end
 
+	-- hide uninteresting spells
+	if spellid == 178293 then -- Arena Inbounds Marker
+		return
+	end
+
 	local entry = {
 		["spellid"] = spellid,
 		["time"] = time
