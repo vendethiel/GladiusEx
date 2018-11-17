@@ -651,6 +651,7 @@ function ClassIcon:CreateFrame(unit)
 	self.frame[unit].texture = _G[self.frame[unit]:GetName().."Icon"]
 	self.frame[unit].normalTexture = _G[self.frame[unit]:GetName().."NormalTexture"]
 	self.frame[unit].cooldown = _G[self.frame[unit]:GetName().."Cooldown"]
+	self.frame[unit].cooldown:SetSwipeColor(0, 0, 0, 1)
 	self.frame[unit].texture_border = self.frame[unit]:CreateTexture(nil, "BACKGROUND", nil, -1)
 	self.frame[unit].texture_border:SetTexture([[Interface\AddOns\GladiusEx\media\icon_border]])
 	self.frame[unit].texture_border:SetAllPoints()

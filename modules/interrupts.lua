@@ -92,6 +92,7 @@ function Interrupt:CombatLogEvent(_, ...)
    		end
    	end
    	self:UpdateInterrupt(unit, spellID, duration)
+   	self:SendMessage("GLADIUS_INTERRUPT", unit)
 end
 
 function Interrupt:UpdateInterrupt(unit, spellid, duration)
