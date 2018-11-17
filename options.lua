@@ -682,7 +682,7 @@ function GladiusEx:SetupOptions()
 					values = function()
 						local t = {}
 						for classID = 1, MAX_CLASSES do
-							local classDisplayName, classTag = GetClassInfoByID(classID)
+							local classDisplayName, classTag = GetClassInfo(classID)
 							local color = RAID_CLASS_COLORS[classTag]
 							local colorfmt = string.format("|cff%02x%02x%02x", color.r * 255, color.g * 255, color.b * 255)
 							for specNum = 1, GetNumSpecializationsForClassID(classID) do
