@@ -24,6 +24,7 @@ local defaults = {
 		castBarColor = { r = 1, g = 1, b = 0, a = 1 },
 		castBarNotIntColor = { r = 1, g = 0, b = 0, a = 1 },
 		castBarBackgroundColor = { r = 0.5, g = 0.5, b = 0.5, a = 0.3 },
+		castBarBackgroundHideWhenNotCasting = true,
 		castBarGlobalTexture = true,
 		castBarTexture = GladiusEx.default_bar_texture,
 		castIcon = true,
@@ -216,7 +217,7 @@ local function CastUpdate(self)
 		-- that happens with some vehicles/npcs, as well as phased-out casts.
 		-- Instead, we manually check if we should already have ended the cast. (delay is accounted for already)
 		if GetTime() > self.endTime then
-			CastBar:CastEnd(CastBar.frame[self.unit])
+			CastBar:CastEnd(CastBar.frame[self.unit], CastBar.db[self.unit])
 		else
 			local currentTime = GetTime()
 			local value = self.endTime - currentTime
@@ -261,6 +262,10 @@ function CastBar:CastStart(unit, channel)
 		f.lineID = lineID
 
 		f.icon:SetTexture(icon)
+		if self.db[unit].castBarBackgroundHideWhenNotCasting then
+			f.icon.bg:Show()
+			f.background:Show()
+		end
 
 		self:SetInterruptible(unit, not notInterruptible)
 
@@ -273,12 +278,16 @@ function CastBar:CastStart(unit, channel)
 	end
 end
 
-function CastBar:CastEnd(frame)
+function CastBar:CastEnd(frame, db)
 	frame.isCasting = false
 	frame.isChanneling = false
 	frame.timeText:SetText("")
 	frame.castText:SetText("")
 	frame.icon:SetTexture("")
+	if db.castBarBackgroundHideWhenNotCasting then
+		frame.icon.bg:Hide()
+		frame.background:Hide()
+	end
 	frame.bar:SetValue(0)
 	frame.spark:Hide()
 	self:SetInterruptible(frame.unit, true)
@@ -341,7 +350,6 @@ function CastBar:Update(unit)
 	self.frame[unit].icon.bg:SetPoint(self.db[unit].castIconPosition, self.frame[unit], self.db[unit].castIconPosition, 0, 0)
 	self.frame[unit].icon.bg:SetSize(height, height)
 	self.frame[unit].icon.bg:SetTexture(bar_texture)
-	-- self.frame[unit].icon.bg:SetTexture(1, 1, 1, 1)
 	self.frame[unit].icon.bg:SetVertexColor(self.db[unit].castBarBackgroundColor.r, self.db[unit].castBarBackgroundColor.g,
 		self.db[unit].castBarBackgroundColor.b, self.db[unit].castBarBackgroundColor.a)
 
@@ -352,13 +360,13 @@ function CastBar:Update(unit)
 	self.frame[unit].icon:SetTexCoord(n / 64, 1 - n / 64, n / 64, 1 - n / 64)
 
 	if self.db[unit].castIcon then
-		self.frame[unit].icon:Show()
 		self.frame[unit].icon.bg:Show()
 	else
 		self.frame[unit].icon:Hide()
 		self.frame[unit].icon.bg:Hide()
 	end
 	self.frame[unit].icon:SetTexture(nil)
+	self.frame[unit].icon.bg:Hide()
 
 	-- update not interruptible shield
 	self.frame[unit].icon.shield_frame:SetFrameLevel(70)
@@ -476,6 +484,14 @@ function CastBar:Update(unit)
 
 	-- hide
 	self.frame[unit]:Hide()
+
+	if self.db[unit].castBarBackgroundHideWhenNotCasting then
+		self.frame[unit].icon.bg:Hide()
+		self.frame[unit].background:Hide()
+	else
+		self.frame[unit].icon.bg:Show()
+		self.frame[unit].background:Show()
+	end
 end
 
 function CastBar:Show(unit)
@@ -486,7 +502,7 @@ end
 function CastBar:Reset(unit)
 	if not self.frame[unit] then return end
 
-	self:CastEnd(self.frame[unit])
+	self:CastEnd(self.frame[unit], self.db[unit])
 
 	-- hide
 	self.frame[unit]:Hide()
@@ -566,6 +582,14 @@ function CastBar:GetOptions(unit)
 							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 10,
+						},
+						castBarBackgroundHideWhenNotCasting = {
+							type = "toggle",
+							name = L["Hide background out of cast"],
+							desc = L["Hides the background when the unit is not casting. If in \"Inside Frame\" mode, will still show the frame's background."],
+
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 11,
 						},
 						sep2 = {
 							type = "description",
