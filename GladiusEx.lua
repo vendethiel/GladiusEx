@@ -990,8 +990,9 @@ function GladiusEx:CreateUnit(unit)
 	button.secure:SetAllPoints()
 	button.secure:SetAttribute("unit", unit)
 	button.secure:RegisterForClicks("AnyDown")
-	button.secure:SetAttribute("*type1", "target")
-	button.secure:SetAttribute("*type2", "focus")
+	--this should be managed via the Clicks module
+	--button.secure:SetAttribute("*type1", "target")
+	--button.secure:SetAttribute("*type2", "focus")
 
 	-- clique support
 	ClickCastFrames = ClickCastFrames or {}
