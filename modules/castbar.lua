@@ -90,6 +90,8 @@ function CastBar:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
 	self:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
+	self:RegisterMessage("GLADIUS_INTERRUPT")
+
 
 	if not self.frame then
 		self.frame = {}
@@ -150,13 +152,15 @@ function CastBar:UNIT_SPELLCAST_NOT_INTERRUPTIBLE(event, unit)
 	self:SetInterruptible(unit, false)
 end
 
-function CastBar:UNIT_SPELLCAST_CHANNEL_STOP(event, unit, spell)
+function CastBar:UNIT_SPELLCAST_CHANNEL_STOP(event, unit, spell, id)
 	if not self.frame[unit] then return end
+	-- BfA note: if spell is nil then... idk, we need to use "id" in the future, for now always CastEnd()
+	if spell and self.frame[unit].spellName ~= spell then return end
 	-- channels don't have a lineID, do it the "old" way.
-	if self.frame[unit].spellName ~= spell or (event == "UNIT_SPELLCAST_FAILED" and self.frame[unit].isChanneling) then return end
+	if spell and event == "UNIT_SPELLCAST_FAILED" and self.frame[unit].isChanneling then return end
 
 	self.frame[unit].lineID = nil
-	self:CastEnd(self.frame[unit])
+	self:CastEnd(self.frame[unit], self.db[unit])
 end
 
 function CastBar:UNIT_SPELLCAST_STOP(event, unit, lineID, spell)
@@ -168,7 +172,11 @@ function CastBar:UNIT_SPELLCAST_STOP(event, unit, lineID, spell)
 		if self.frame[unit].spellName ~= spell then return end
 	end
 	self.frame[unit].lineID = nil
-	self:CastEnd(self.frame[unit])
+	self:CastEnd(self.frame[unit], self.db[unit])
+end
+
+function CastBar:GLADIUS_INTERRUPT(event, unit)
+	-- TODO
 end
 
 function CastBar:UNIT_SPELLCAST_DELAYED(event, unit)
