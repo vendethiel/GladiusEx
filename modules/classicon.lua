@@ -383,6 +383,7 @@ function ClassIcon:OnEnable()
 	self:RegisterEvent("UNIT_PORTRAIT_UPDATE", "UNIT_AURA")
 	self:RegisterEvent("UNIT_MODEL_CHANGED")
 	self:RegisterMessage("GLADIUS_SPEC_UPDATE", "UNIT_AURA")
+	self:RegisterMessage("GLADIUSEX_INTERRUPT", "UNIT_AURA")
 
 	if not self.frame then
 		self.frame = {}
@@ -447,8 +448,15 @@ function ClassIcon:ScanAuras(unit)
 	local best_name, best_icon, best_duration, best_expires
 
 	local interrupt = {Interrupt:GetInterruptFor(unit)}
-	if interrupt[1] then
-		return unpack(interrupt) 
+	if interrupt then
+		local name, icon, duration, endsAt, prio = unpack(interrupt)
+		if prio and prio > best_priority or (prio == best_priority and best_expires and expires < best_expires) then
+			best_name = name
+			best_icon = icon
+			best_duration = duration
+			best_expires = endsAt
+			best_priority = prio
+		end
 	end
 
 	local function handle_aura(name, spellid, icon, duration, expires)

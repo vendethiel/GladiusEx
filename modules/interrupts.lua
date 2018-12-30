@@ -7,38 +7,30 @@ Interrupt = GladiusEx:NewGladiusExModule("Interrupts", {}, {})
 -- V: heavily inspired by Jaxington's Gladius-With-Interrupts
 
 INTERRUPTS = {
-	[6552] = 4,   -- [Warrior] Pummel
-	[96231] = 4,  -- [Paladin] Rebuke
-	[231665] = 3, -- [Paladin] Avengers Shield
-	[147362] = 3, -- [Hunter] Countershot
-	[187707] = 3, -- [Hunter] Muzzle
-	[1766] = 5,   -- [Rogue] Kick
-	[183752] = 3, -- [DH] Consume Magic
-	[47528] = 3,  -- [DK] Mind Freeze
-	[91802] = 2,  -- [DK] Shambling Rush
-	[57994] = 3,  -- [Shaman] Wind Shear
-	[115781] = 6, -- [Warlock] Optical Blast
-	[19647] = 6,  -- [Warlock] Spell Lock
-	[212619] = 6, -- [Warlock] Call Felhunter
-	[132409] = 6, -- [Warlock] Spell Lock
-	[171138] = 6, -- [Warlock] Shadow Lock
-	[2139] = 6,   -- [Mage] Counterspell
-	[116705] = 4, -- [Monk] Spear Hand Strike
-	[106839] = 4, -- [Feral] Skull Bash
-	[93985] = 4,  -- [Feral] Skull Bash
-	[97547] = 5,  -- [Moonkin] Solar Beam
+	[6552] = {duration=4, prio=3},   -- [Warrior] Pummel
+	[96231] = {duration=4, prio=3},   --[Paladin] Rebuke
+	[231665] = {duration=3, prio=3},   -- [Paladin] Avengers Shield
+	[147362] = {duration=3, prio=3},   -- [Hunter] Countershot
+	[187707] = {duration=3, prio=3},   -- [Hunter] Muzzle
+	[1766] = {duration=5, prio=3},   -- [Rogue] Kick
+	[183752] = {duration=3, prio=3},   -- [DH] Consume Magic
+	[47528] = {duration=3, prio=3},   --[DK] Mind Freeze
+	[91802] = {duration=2, prio=3},   --[DK] Shambling Rush
+	[57994] = {duration=3, prio=3},   --[Shaman] Wind Shear
+	[115781] = {duration=6, prio=3},   -- [Warlock] Optical Blast
+	[19647] = {duration=6, prio=3},   --[Warlock] Spell Lock
+	[212619] = {duration=6, prio=3},   -- [Warlock] Call Felhunter
+	[132409] = {duration=6, prio=3},   -- [Warlock] Spell Lock
+	[171138] = {duration=6, prio=3},   -- [Warlock] Shadow Lock
+	[2139] = {duration=6, prio=3},   -- [Mage] Counterspell
+	[116705] = {duration=4, prio=3},   -- [Monk] Spear Hand Strike
+	[106839] = {duration=4, prio=3},   -- [Feral] Skull Bash
+	[93985] = {duration=4, prio=3},   --[Feral] Skull Bash
+	[97547] = {duration=5, prio=3},   --[Moonkin] Solar Beam
 }
 
-INTERRUPT_SPEC_MODIFIER = {
-	[264] = 0.7, -- Shaman, Restoration
-	[258] = 0.7, -- Priest, Shadow
-	[265] = 0.7, -- Warlock, Affliction
-	[266] = 0.7, -- Warlock, Demonology
-	[267] = 0.7, -- Warlock, Destruction
-}
-
-INTERRUPT_BUFF_MODIFIER = {
-	-- ["name"] = 0.7,
+CLASS_INTERRUPT_MODIFIERS = {
+	["Calming Waters"] = 0.5,
 }
 
 function Interrupt:OnEnable()
@@ -78,41 +70,47 @@ function Interrupt:CombatLogEvent(_, ...)
 		return
 	end
 
-   	local duration = INTERRUPTS[spellID]
+   	local duration = INTERRUPTS[spellID].duration
    	if not duration then return end
+	local prio = INTERRUPTS[spellID].prio
+   	if not prio then return end
    	local button = GladiusEx.buttons[unit]
    	if not button then return end
    	if button.specID and INTERRUPT_SPEC_MODIFIER[button.specID] then
    		duration = duration * INTERRUPT_SPEC_MODIFIER[button.specID]
    	end
    	-- V: can they stack? if not, add some kind of "break"
-   	for buff, mult in pairs(INTERRUPT_BUFF_MODIFIER) do
-   		if AuraUtil.FindAuraByName(buff, unit, "HELPFUL") then
-   			duration = duration * mult
-   		end
-   	end
-   	self:UpdateInterrupt(unit, spellID, duration)
-   	self:SendMessage("GLADIUS_INTERRUPT", unit)
+	-- K: Calming Waters does, but it doesnt increase the stack count. In order to track it we would need to register UNIT_AURA and look for applications/reapplications & store no. stacks for each unit
+	local _, _, class = UnitClass(unit)
+	if class == 7 then -- Shaman
+		for buff, mult in ipairs(CLASS_INTERRUPT_MODIFIERS) do
+			if AuraUtil.FindAuraByName(buff, unit, "HELPFUL") then
+				duration = duration * mult
+			end
+		end
+	end
+   	self:UpdateInterrupt(unit, spellID, duration, prio)
+   	
 end
 
-function Interrupt:UpdateInterrupt(unit, spellid, duration)
-	self.interrupts[unit] = { spellid, GetTime(), duration }
+function Interrupt:UpdateInterrupt(unit, spellid, duration, prio)
+	self.interrupts[unit] = { spellid, GetTime(), duration, prio }
 	-- force update now, rather than at next tick
-	if not ClassIcon then return end
-	ClassIcon:UpdateAura(unit)
+	-- K: sending message is more modular than calling the function directly
+	self:SendMessage("GLADIUSEX_INTERRUPT", unit)
 end
 
 function Interrupt:GetInterruptFor(unit)
 	local int = self.interrupts[unit]
 	if not int then return end
 
-	local spellid, startedAt, duration = unpack(int)
+	local spellid, startedAt, duration, prio = unpack(int)
 	local endsAt = startedAt + duration
 	if GetTime() > endsAt then
 		self.interrupts[unit] = nil
 	else
 		local name, _, icon = GetSpellInfo(spellid)
-		return name, icon, duration, endsAt
+		return name, icon, duration, endsAt, prio
 	end
 end
 
