@@ -1,6 +1,7 @@
 local GladiusEx = _G.GladiusEx
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local fn = LibStub("LibFunctional-1.0")
+local timer
 
 Interrupt = GladiusEx:NewGladiusExModule("Interrupts", {}, {})
 
@@ -76,9 +77,7 @@ function Interrupt:CombatLogEvent(_, ...)
    	if not prio then return end
    	local button = GladiusEx.buttons[unit]
    	if not button then return end
-   	if button.specID and INTERRUPT_SPEC_MODIFIER[button.specID] then
-   		duration = duration * INTERRUPT_SPEC_MODIFIER[button.specID]
-   	end
+
    	-- V: can they stack? if not, add some kind of "break"
 	-- K: Calming Waters does, but it doesnt increase the stack count. In order to track it we would need to register UNIT_AURA and look for applications/reapplications & store no. stacks for each unit
 	local _, _, class = UnitClass(unit)
@@ -94,10 +93,20 @@ function Interrupt:CombatLogEvent(_, ...)
 end
 
 function Interrupt:UpdateInterrupt(unit, spellid, duration, prio)
-	self.interrupts[unit] = { spellid, GetTime(), duration, prio }
+	if spellid then
+		self.interrupts[unit] = { spellid, GetTime(), duration, prio }
+	else
+		self.interrupts[unit] = nil
+	end
+	
 	-- force update now, rather than at next tick
 	-- K: sending message is more modular than calling the function directly
 	self:SendMessage("GLADIUSEX_INTERRUPT", unit)
+	
+	-- K: Clears the interrupt after end of duration (in case no new UNIT_AURA ticks)
+	if self.interrupts[unit] then
+		GladiusEx:ScheduleTimer(self.UpdateInterrupt, duration+0.1, self, unit)
+	end
 end
 
 function Interrupt:GetInterruptFor(unit)
