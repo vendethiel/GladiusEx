@@ -447,19 +447,13 @@ function ClassIcon:ScanAuras(unit)
 	local best_priority = 0
 	local best_name, best_icon, best_duration, best_expires
 
-	
-
 	-- debuffs
 	for index = 1, 40 do
 		local name, icon, _, _, duration, expires, _, _, _, spellid = UnitDebuff(unit, index)
 		if not name then break end
 		local prio = self:GetImportantAura(unit, name) or self:GetImportantAura(unit, spellid)
 		if prio and prio > best_priority or (prio == best_priority and best_expires and expires < best_expires) then
-			best_name = name
-			best_icon = icon
-			best_duration = duration
-			best_expires = expires
-			best_priority = prio
+			best_name, best_icon, best_duration, best_expires, best_priority = name, icon, duration, expires, prio
 		end
 	end
 
@@ -470,11 +464,7 @@ function ClassIcon:ScanAuras(unit)
 		local prio = self:GetImportantAura(unit, name) or self:GetImportantAura(unit, spellid)
 		-- V: make sure we have a best_expires before comparing it
 		if prio and prio > best_priority or (prio == best_priority and best_expires and expires < best_expires) then
-			best_name = name
-			best_icon = icon
-			best_duration = duration
-			best_expires = expires
-			best_priority = prio
+			best_name, best_icon, best_duration, best_expires, best_priority = name, icon, duration, expires, prio
 		end
 	end
 	
