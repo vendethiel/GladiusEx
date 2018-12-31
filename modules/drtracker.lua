@@ -626,7 +626,7 @@ function DRTracker:GetOptions(unit)
 			name = name,
 			values = values,
 			order = index * 5,
-			style = "radio",
+			style = "dropdown",
 			get = function(info)
 				if not self.db[unit].drIcons[key] then
 					return 1
