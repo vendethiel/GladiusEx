@@ -3,31 +3,38 @@ local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local fn = LibStub("LibFunctional-1.0")
 local timer
 
-Interrupt = GladiusEx:NewGladiusExModule("Interrupts", {}, {})
+
 
 -- V: heavily inspired by Jaxington's Gladius-With-Interrupts
+-- K: Improved
 
+local defaults = {
+	interruptPrio = 3.0,
+}
+
+local Interrupt = GladiusEx:NewGladiusExModule("Interrupts", defaults, defaults)
+	
 INTERRUPTS = {
-	[6552] = {duration=4, prio=3},   -- [Warrior] Pummel
-	[96231] = {duration=4, prio=3},   --[Paladin] Rebuke
-	[231665] = {duration=3, prio=3},   -- [Paladin] Avengers Shield
-	[147362] = {duration=3, prio=3},   -- [Hunter] Countershot
-	[187707] = {duration=3, prio=3},   -- [Hunter] Muzzle
-	[1766] = {duration=5, prio=3},   -- [Rogue] Kick
-	[183752] = {duration=3, prio=3},   -- [DH] Consume Magic
-	[47528] = {duration=3, prio=3},   --[DK] Mind Freeze
-	[91802] = {duration=2, prio=3},   --[DK] Shambling Rush
-	[57994] = {duration=3, prio=3},   --[Shaman] Wind Shear
-	[115781] = {duration=6, prio=3},   -- [Warlock] Optical Blast
-	[19647] = {duration=6, prio=3},   --[Warlock] Spell Lock
-	[212619] = {duration=6, prio=3},   -- [Warlock] Call Felhunter
-	[132409] = {duration=6, prio=3},   -- [Warlock] Spell Lock
-	[171138] = {duration=6, prio=3},   -- [Warlock] Shadow Lock
-	[2139] = {duration=6, prio=3},   -- [Mage] Counterspell
-	[116705] = {duration=4, prio=3},   -- [Monk] Spear Hand Strike
-	[106839] = {duration=4, prio=3},   -- [Feral] Skull Bash
-	[93985] = {duration=4, prio=3},   --[Feral] Skull Bash
-	[97547] = {duration=5, prio=3},   --[Moonkin] Solar Beam
+	[6552] = {duration=4},    -- [Warrior] Pummel
+	[96231] = {duration=4},   -- [Paladin] Rebuke
+	[231665] = {duration=3},  -- [Paladin] Avengers Shield
+	[147362] = {duration=3},  -- [Hunter] Countershot
+	[187707] = {duration=3},  -- [Hunter] Muzzle
+	[1766] = {duration=5},    -- [Rogue] Kick
+	[183752] = {duration=3},  -- [DH] Consume Magic
+	[47528] = {duration=3},   -- [DK] Mind Freeze
+	[91802] = {duration=2},   -- [DK] Shambling Rush
+	[57994] = {duration=3},   -- [Shaman] Wind Shear
+	[115781] = {duration=6},  -- [Warlock] Optical Blast
+	[19647] = {duration=6},   -- [Warlock] Spell Lock
+	[212619] = {duration=6},  -- [Warlock] Call Felhunter
+	[132409] = {duration=6},  -- [Warlock] Spell Lock
+	[171138] = {duration=6},  -- [Warlock] Shadow Lock
+	[2139] = {duration=6},    -- [Mage] Counterspell
+	[116705] = {duration=4},  -- [Monk] Spear Hand Strike
+	[106839] = {duration=4},  -- [Feral] Skull Bash
+	[93985] = {duration=4},   -- [Feral] Skull Bash
+	[97547] = {duration=5},   -- [Moonkin] Solar Beam
 }
 
 CLASS_INTERRUPT_MODIFIERS = {
@@ -70,11 +77,9 @@ function Interrupt:CombatLogEvent(_, ...)
 		-- not interruptible
 		return
 	end
-
+	if INTERRUPTS[spellID] == nil then return end
    	local duration = INTERRUPTS[spellID].duration
    	if not duration then return end
-	local prio = INTERRUPTS[spellID].prio
-   	if not prio then return end
    	local button = GladiusEx.buttons[unit]
    	if not button then return end
 
@@ -88,13 +93,13 @@ function Interrupt:CombatLogEvent(_, ...)
 			end
 		end
 	end
-   	self:UpdateInterrupt(unit, spellID, duration, prio)
+   	self:UpdateInterrupt(unit, spellID, duration)
    	
 end
 
-function Interrupt:UpdateInterrupt(unit, spellid, duration, prio)
+function Interrupt:UpdateInterrupt(unit, spellid, duration)
 	if spellid then
-		self.interrupts[unit] = { spellid, GetTime(), duration, prio }
+		self.interrupts[unit] = { spellid, GetTime(), duration}
 	else
 		self.interrupts[unit] = nil
 	end
@@ -113,13 +118,13 @@ function Interrupt:GetInterruptFor(unit)
 	local int = self.interrupts[unit]
 	if not int then return end
 
-	local spellid, startedAt, duration, prio = unpack(int)
+	local spellid, startedAt, duration = unpack(int)
 	local endsAt = startedAt + duration
 	if GetTime() > endsAt then
 		self.interrupts[unit] = nil
 	else
 		local name, _, icon = GetSpellInfo(spellid)
-		return name, icon, duration, endsAt, prio
+		return name, icon, duration, endsAt, self.db[unit].interruptPrio
 	end
 end
 
@@ -136,7 +141,16 @@ function Interrupt:GetOptions(unit)
                     name = "This module shows interrupt durations over the Arena Enemy Class Icons when they are interrupted.",
                     width = "full",
                     order = 17,
-                }},
+                },
+				interruptPrio = {
+					type = "range",
+					name = "InterruptPrio",
+					desc = "Sets the priority of interrupts (as compared to regular Class Icon auras)",
+					disabled = function() return not self:IsUnitEnabled(unit) end,
+					softMin = 0.0, softMax = 10, step = 0.1,
+					order = 19,
+				},
+			},
         },
     }
 end

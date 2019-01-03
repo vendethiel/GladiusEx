@@ -469,8 +469,9 @@ function ClassIcon:ScanAuras(unit)
 	end
 	
 	-- interrupts
-	local interrupt = {Interrupt:GetInterruptFor(unit)}
+	local interrupt = GladiusEx:GetModule("Interrupts", true)
 	if interrupt then
+		interrupt = {interrupt:GetInterruptFor(unit)}
 		local name, icon, duration, expires, prio = unpack(interrupt)
 		if prio and prio > best_priority or (prio == best_priority and best_expires and expires < best_expires) then
 			best_name, best_icon, best_duration, best_expires, best_priority = name, icon, duration, expires, prio
