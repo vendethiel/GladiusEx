@@ -260,7 +260,7 @@ function Alerts:UNIT_AURA(event, unit)
 
 	for name, aura in pairs(self.db[unit].aurasSpells) do
 		if aura then
-			if UnitBuff(unit, name) or UnitDebuff(unit, name) then
+			if AuraUtil.FindAuraByName(name, unit, "HELPFUL|HARMFUL") then
 				self:SetAlert(unit, "aura_" .. name, aura.priority, aura.color)
 			else
 				self:ClearAlert(unit, "aura_" .. name)
@@ -289,7 +289,7 @@ function Alerts:UNIT_SPELLCAST_START(event, unit, lineID, spell)
 	-- we check self.db[unit] and not self.db.base because the option appears only in party mode
 	if unit == "player" and self.db[unit].hideSelfAlert then return end
 
-	local cast = self.db[unit].castsSpells[spell]
+	local cast = self.db[unit].castsSpells[GladiusEx:SafeGetSpellName(spell)]
 	if cast then
 		line_ids[unit] = lineID
 		self:SetAlert(unit, "cast", cast.priority, cast.color)
