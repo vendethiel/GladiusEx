@@ -24,7 +24,7 @@ local defaults = {
 		castBarColor = { r = 1, g = 1, b = 0, a = 1 },
 		castBarNotIntColor = { r = 1, g = 0, b = 0, a = 1 },
 		castBarBackgroundColor = { r = 0.5, g = 0.5, b = 0.5, a = 0.3 },
-		castBarBackgroundHideWhenNotCasting = true,
+		castBarBackgroundHideWhenNotCasting = false,
 		castBarGlobalTexture = true,
 		castBarTexture = GladiusEx.default_bar_texture,
 		castIcon = true,

@@ -383,6 +383,7 @@ function ClassIcon:OnEnable()
 	self:RegisterEvent("UNIT_PORTRAIT_UPDATE", "UNIT_AURA")
 	self:RegisterEvent("UNIT_MODEL_CHANGED")
 	self:RegisterMessage("GLADIUS_SPEC_UPDATE", "UNIT_AURA")
+	self:RegisterMessage("GLADIUSEX_INTERRUPT", "UNIT_AURA")
 
 	if not self.frame then
 		self.frame = {}
@@ -446,37 +447,37 @@ function ClassIcon:ScanAuras(unit)
 	local best_priority = 0
 	local best_name, best_icon, best_duration, best_expires
 
-	local interrupt = {Interrupt:GetInterruptFor(unit)}
-	if interrupt[1] then
-		return unpack(interrupt) 
-	end
-
-	local function handle_aura(name, spellid, icon, duration, expires)
-		local prio = self:GetImportantAura(unit, name) or self:GetImportantAura(unit, spellid)
-		-- V: make sure we have a best_expires before comparing it
-		if prio and prio > best_priority or (prio == best_priority and best_expires and expires < best_expires) then
-			best_name = name
-			best_icon = icon
-			best_duration = duration
-			best_expires = expires
-			best_priority = prio
-		end
-	end
-
 	-- debuffs
 	for index = 1, 40 do
 		local name, icon, _, _, duration, expires, _, _, _, spellid = UnitDebuff(unit, index)
 		if not name then break end
-		handle_aura(name, spellid, icon, duration, expires)
+		local prio = self:GetImportantAura(unit, name) or self:GetImportantAura(unit, spellid)
+		if prio and prio > best_priority or (prio == best_priority and best_expires and expires < best_expires) then
+			best_name, best_icon, best_duration, best_expires, best_priority = name, icon, duration, expires, prio
+		end
 	end
 
 	-- buffs
 	for index = 1, 40 do
 		local name, icon, _, _, duration, expires, _, _, _, spellid = UnitBuff(unit, index)
 		if not name then break end
-		handle_aura(name, spellid, icon, duration, expires)
+		local prio = self:GetImportantAura(unit, name) or self:GetImportantAura(unit, spellid)
+		-- V: make sure we have a best_expires before comparing it
+		if prio and prio > best_priority or (prio == best_priority and best_expires and expires < best_expires) then
+			best_name, best_icon, best_duration, best_expires, best_priority = name, icon, duration, expires, prio
+		end
 	end
-
+	
+	-- interrupts
+	local interrupt = GladiusEx:GetModule("Interrupts", true)
+	if interrupt then
+		interrupt = {interrupt:GetInterruptFor(unit)}
+		local name, icon, duration, expires, prio = unpack(interrupt)
+		if prio and prio > best_priority or (prio == best_priority and best_expires and expires < best_expires) then
+			best_name, best_icon, best_duration, best_expires, best_priority = name, icon, duration, expires, prio
+		end
+	end
+	
 	return best_name, best_icon, best_duration, best_expires
 end
 
@@ -866,7 +867,7 @@ function ClassIcon:GetOptions(unit)
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							min = 0,
 							max = 10,
-							step = 1,
+							step = 0.1,
 							order = 2,
 						},
 						add = {
@@ -956,7 +957,7 @@ function ClassIcon:SetupAuraOptions(options, unit, aura)
 				type= "range",
 				name = L["Priority"],
 				desc = L["Select what priority the aura should have - higher equals more priority"],
-				min = 0, softMax = 10, step = 1,
+				min = 0, softMax = 10, step = 0.1,
 				order = 2,
 			},
 			delete = {
