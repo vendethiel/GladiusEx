@@ -15,6 +15,7 @@ L["cat:stun"] = "Stun"
 L["cat:immune"] = "Immune"
 L["cat:talent"] = "Talent"
 L["cat:uncat"] = "Uncategorized"
+L["cat:azerite"] = "Azerite"
 
 -- Tags module
 L["WARRIOR:short"] = "Warr"
@@ -636,3 +637,10 @@ L["Y offset of the frame"] = true
 L["Y offset"] = true
 L["Hide self frame"] = true
 L["Hide the player's frame"] = true
+L["Azerite"] = true
+L["How long should the scale duration animation last"] = true
+L["The size the the icon should scale up to when the cooldown goes off CD"] = true
+L["Off-cooldown scale duration"] = true
+L["Off-cooldown scale"] = true
+L["Animation settings on event"] = true
+L["Animation"] = true
