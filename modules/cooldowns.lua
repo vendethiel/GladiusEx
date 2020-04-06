@@ -196,6 +196,8 @@ local function MakeGroupDb(settings)
 			["uncat"] =       { r = 1, g = 1, b = 1 },
 		},
 		cooldownsHideTalentsUntilDetected = true,
+		cooldownsOffCdScale = 1.5,
+		cooldownsOffCdDuration = 0.3,
 	}
 	return fn.merge(defaults, settings or {})
 end
@@ -418,6 +420,7 @@ end
 local function CooldownFrame_OnUpdate(frame)
 	local tracked = frame.tracked
 	local now = GetTime()
+	local db = Cooldowns:GetGroupDB(frame.unit, frame.group)
 
 	if tracked and (not tracked.charges_detected or not tracked.charges or tracked.charges <= 0) then
 		if tracked.used_start and ((not tracked.used_end and not tracked.cooldown_start) or (tracked.used_end and tracked.used_end > now)) then
@@ -430,8 +433,8 @@ local function CooldownFrame_OnUpdate(frame)
 				else
 					frame.cooldown:Hide()
 				end
-				local a = Cooldowns:GetGroupDB(frame.unit, frame.group).cooldownsIconUsingAlpha
-				local ab = Cooldowns:GetGroupDB(frame.unit, frame.group).cooldownsBorderUsingAlpha
+				local a = db.cooldownsIconUsingAlpha
+				local ab = db.cooldownsBorderUsingAlpha
 				frame:SetBackdropBorderColor(frame.color.r, frame.color.g, frame.color.b, ab)
 				frame.icon_frame:SetAlpha(a)
 				frame.state = 1
@@ -439,10 +442,10 @@ local function CooldownFrame_OnUpdate(frame)
 			return
 		end
 		if tracked.used_start and not tracked.cooldown_start and frame.spelldata.active_until_cooldown_start then
-			-- waiting to be used (inner focus)
+			-- waiting to be used (cold blood)
 			if frame.state ~= 2 then
-				local a = Cooldowns:GetGroupDB(frame.unit, frame.group).cooldownsIconUsingAlpha
-				local ab = Cooldowns:GetGroupDB(frame.unit, frame.group).cooldownsBorderUsingAlpha
+				local a = db.cooldownsIconUsingAlpha
+				local ab = db.cooldownsBorderUsingAlpha
 				frame:SetBackdropBorderColor(frame.color.r, frame.color.g, frame.color.b, ab)
 				frame.icon_frame:SetAlpha(a)
 				frame.cooldown:Hide()
@@ -455,14 +458,25 @@ local function CooldownFrame_OnUpdate(frame)
 			if frame.state ~= 3 then
 				frame.cooldown:SetReverse(false)
 				CooldownFrame_Set(frame.cooldown, tracked.cooldown_start, tracked.cooldown_end - tracked.cooldown_start, 1)
-				local a = Cooldowns:GetGroupDB(frame.unit, frame.group).cooldownsIconCooldownAlpha
-				local ab = Cooldowns:GetGroupDB(frame.unit, frame.group).cooldownsBorderCooldownAlpha
+				local a = db.cooldownsIconCooldownAlpha
+				local ab = db.cooldownsBorderCooldownAlpha
 				frame:SetBackdropBorderColor(frame.color.r, frame.color.g, frame.color.b, ab)
 				frame.icon_frame:SetAlpha(a)
 				frame.cooldown:Show()
 				frame.state = 3
 			end
 			return
+		end
+
+		if frame.state == 3 and db.cooldownsOffCdScale ~= 1 then -- was on CD
+			-- Just got off CD:
+			-- pulse to show CD is over
+			local ag = frame.icon_frame:CreateAnimationGroup()
+			local offCdAnim = ag:CreateAnimation("Scale")
+			offCdAnim:SetScale(db.cooldownsOffCdScale, db.cooldownsOffCdScale)
+			offCdAnim:SetDuration(db.cooldownsOffCdDuration)
+			offCdAnim:SetSmoothing("IN")
+			ag:Play()
 		end
 	end
 
@@ -591,7 +605,7 @@ local function GetCooldownList(unit, group)
 			local detected = tracked and tracked.detected
 			-- check if the spell has a cooldown valid for an arena, and check if it is a talent that has not yet been detected
 			if (not spelldata.cooldown or spelldata.cooldown < 600) and
-			   (not (spelldata.talent or spelldata.pet) or detected or not db.cooldownsHideTalentsUntilDetected) then
+				(not (spelldata.talent or spelldata.pet or spelldata.azerite) or detected or not db.cooldownsHideTalentsUntilDetected) then
 				-- check if the spell requires an aura
 				-- V: switched this to use FindAuraByName. It's unchecked but no spell uses it anyway
 				if not spelldata.requires_aura or AuraUtil.FindAuraByName(spelldata.requires_aura_name, unit, "HELPFUL") then
@@ -1401,6 +1415,37 @@ function Cooldowns:MakeGroupOptions(unit, group)
 							},
 						},
 					},
+					animation = {
+						type = "group",
+						name = L["Animation"],
+						desc = L["Animation settings on event"],
+						inline = true,
+						order = 1.5,
+						args = {
+							cooldownsOffCdScale = {
+								type = "range",
+								name = L["Off-cooldown scale"],
+								desc = L["The size the the icon should scale up to when the cooldown goes off CD"],
+								min = 1, max = 5, step = 0.5,
+								disabled = function() return not self:IsUnitEnabled(unit) end,
+								order = 1,
+							},
+							cooldownsOffCdDuration = {
+								type = "range",
+								name = L["Off-cooldown scale duration"],
+								desc = L["How long should the scale duration animation last"],
+								min = 0, max = 3, step = 0.1,
+								disabled = function() return not self:IsUnitEnabled(unit) end,
+								order = 1,
+							},
+							sep = {
+								type = "description",
+								name = "",
+								width = "full",
+								order = 4,
+							},
+						},
+					},
 					size = {
 						type = "group",
 						name = L["Size"],
@@ -1853,6 +1898,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 			if spelldata.knockback then tinsert(cats, L["cat:knockback"]) end
 			if spelldata.stun then tinsert(cats, L["cat:stun"]) end
 			if spelldata.immune then tinsert(cats, L["cat:immune"]) end
+			if spelldata.azerite then tinsert(cats, L["cat:azerite"]) end
 			-- specID takes category precedence over talent, so specify it to make it clear
 			if spelldata.specID and spelldata.talent then tinsert(cats, L["cat:talent"]) end
 			local catstr
@@ -1998,6 +2044,18 @@ function Cooldowns:MakeGroupOptions(unit, group)
 					}
 				end
 				args.items.args["spell" .. spellid] = spellconfig
+			elseif spelldata.azerite then
+				-- azerite
+				if not args.azerite then
+					args.azerite = {
+						type = "group",
+						name = L["Azerite"],
+						disabled = function() return not self:IsUnitEnabled(unit) end,
+						order = 14,
+						args = {}
+					}
+				end
+				args.azerite.args["spell" .. spellid] = spellconfig
 			elseif spelldata.pvp_trinket then
 				-- pvp trinket
 				if not args.pvp_trinket then
@@ -2190,7 +2248,7 @@ local function parse_desc(desc)
 
 	read_tag = function()
 		local op = read()
-		assert(op, "op is a faggot")
+		assert(op, "op could not be read")
 
 		local fn = op_table[op]
 		assert(fn, "no fn for " .. tostring(op))
