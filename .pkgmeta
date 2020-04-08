@@ -28,7 +28,7 @@ externals:
 	libs/LibDualSpec-1.0:
 		url: git://git.wowace.com/wow/libdualspec-1-0/mainline.git
 	libs/LibFunctional-1.0:
-		url: git://git.wowace.com/wow/libfunctional-1-0/mainline.git
+		url: git://github.com/slaren/LibFunctional-1.0.git
 	libs/LibGroupInSpecT-1.1:
 		url: git://github.com/vendethiel/LibGroupInSpecT.git
 	libs/LibRangeCheck-2.0:
@@ -36,6 +36,6 @@ externals:
 	libs/LibSharedMedia-3.0:
 		url: svn://svn.wowace.com/wow/libsharedmedia-3-0/mainline/trunk
 	libs/LibCooldownTracker-1.0:
-		url: https://github.com/slaren/LibCooldownTracker-10.git
+		url: https://github.com/vendethiel/LibCooldownTracker-10.git
 	libs/DRData-1.0:
 		url: git://github.com/vendethiel/DRData-1.0.git
