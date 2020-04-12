@@ -468,7 +468,7 @@ local function CooldownFrame_OnUpdate(frame)
 			return
 		end
 
-		if frame.state == 3 and db.cooldownsOffCdScale ~= 1 then -- was on CD
+		if frame.state == 3 and db.cooldownsOffCdScale and db.cooldownsOffCdScale ~= 1 then -- was on CD
 			-- Just got off CD:
 			-- pulse to show CD is over
 			local ag = frame.icon_frame:CreateAnimationGroup()
@@ -476,7 +476,37 @@ local function CooldownFrame_OnUpdate(frame)
 			offCdAnim:SetScale(db.cooldownsOffCdScale, db.cooldownsOffCdScale)
 			offCdAnim:SetDuration(db.cooldownsOffCdDuration)
 			offCdAnim:SetSmoothing("IN")
+
+			local texture = frame.icon_frame:CreateTexture()
+			texture:SetTexture([[Interface/Cooldown/star4]])
+			texture:SetAlpha(0)
+			texture:SetAllPoints()
+			texture:SetBlendMode("ADD")
+			local sfAg = texture:CreateAnimationGroup()
+
+			local alpha1 = sfAg:CreateAnimation("Alpha")
+			alpha1:SetFromAlpha(0)
+			alpha1:SetToAlpha(1)
+			alpha1:SetDuration(0)
+			alpha1:SetOrder(1)
+
+			local scale1 = sfAg:CreateAnimation("Scale")
+			scale1:SetScale(1.5, 1.5)
+			scale1:SetDuration(0)
+			scale1:SetOrder(1)
+
+			local scale2 = sfAg:CreateAnimation("Scale")
+			scale2:SetScale(0, 0)
+			scale2:SetDuration(db.cooldownsOffCdDuration)
+			scale2:SetOrder(2)
+
+			local rotation2 = sfAg:CreateAnimation("Rotation")
+			rotation2:SetDegrees(90)
+			rotation2:SetDuration(db.cooldownsOffCdDuration)
+			rotation2:SetOrder(2)
+
 			ag:Play()
+			sfAg:Play()
 		end
 	end
 
