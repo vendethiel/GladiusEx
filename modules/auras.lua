@@ -14,7 +14,7 @@ end
 -- global functions
 local strfind = string.find
 local pairs, select = pairs, select
-local tinsert, tsort = table.insert, table.sort
+local tinsert, tsort, tremove = table.insert, table.sort, table.remove
 local UnitAura, UnitBuff, UnitDebuff, GetSpellInfo = UnitAura, UnitBuff, UnitDebuff, GetSpellInfo
 local band = bit.band
 local ceil, floor, max, min = math.ceil, math.floor, math.max, math.min
@@ -30,7 +30,6 @@ local FILTER_WHAT_BOTH = 6
 local function GetDefaultAuras()
 	return {
 		[GladiusEx:SafeGetSpellName(227723)] = true, -- Mana divining stone
-		--[GladiusEx:SafeGetSpellName(197912)] = true, -- V: removed in Bfa. Principles of War
 		[GladiusEx:SafeGetSpellName(32727)] = true,  -- Arena Preparation #1
 		[GladiusEx:SafeGetSpellName(32728)] = true,  -- Arena Preparation #2
 	}
@@ -50,6 +49,9 @@ local defaults = {
 	aurasBuffsOffsetX = 0,
 	aurasBuffsOffsetY = 0,
 	aurasBuffsTooltips = true,
+	aurasBuffsShowSwipe = true,
+	aurasBuffsSwipeReversed = false,
+	aurasBuffsSwipeColor = { r = 0, g = 0, b = 0, a = 1 },
 
 	aurasDebuffs = true,
 	aurasDebuffsOnlyDispellable = false,
@@ -64,10 +66,16 @@ local defaults = {
 	aurasDebuffsOffsetX = 0,
 	aurasDebuffsOffsetY = 0,
 	aurasDebuffsTooltips = true,
+	aurasDebuffsShowSwipe = true,
+	aurasDebuffsSwipeReversed = false,
+	aurasDebuffsSwipeColor = { r = 0, g = 0, b = 0, a = 1 },
 
 	aurasFilterType = FILTER_TYPE_BLACKLIST,
 	aurasFilterWhat = FILTER_WHAT_BOTH,
 	aurasFilterAuras = GetDefaultAuras(),
+
+	aurasPrioFirst = true,
+	aurasPrioList = {},
 }
 
 local Auras = GladiusEx:NewGladiusExModule("Auras",
@@ -186,6 +194,9 @@ function Auras:UpdateUnitAuras(event, unit)
 	local aurasBuffsSpacingY
 	local aurasBuffsEnlargeMine
 	local aurasBuffsEnlargeScale
+	local showSwipe
+	local swipeReversed
+	local swipeColor
 
 	local function set_aura(index, buff)
 		local aura_frame = auraFrame[icon_index]
@@ -213,6 +224,12 @@ function Auras:UpdateUnitAuras(event, unit)
 			CooldownFrame_Set(aura_frame.cooldown, 0, 0, 0)
 			aura_frame.cooldown:Hide()
 		end
+
+		-- cooldown swipe
+		aura_frame.cooldown:SetSwipeTexture("")
+		aura_frame.cooldown:SetDrawSwipe(showSwipe)
+		aura_frame.cooldown:SetReverse(swipeReversed)
+		aura_frame.cooldown:SetSwipeColor(swipeColor.r, swipeColor.g, swipeColor.b, swipeColor.a)
 
 		-- stacks
 		aura_frame.count:SetText(count > 1 and count or nil)
@@ -261,11 +278,32 @@ function Auras:UpdateUnitAuras(event, unit)
 			end
 		end
 
-		-- sort auras by duration
+		-- sort auras
 		if not testing then
+			local prioFirst = self.db[unit].aurasPrioFirst
+			local ordering = {}
+			for i, aura in pairs(self.db[unit].aurasPrioList) do
+				ordering[aura] = i
+			end
 			local function aura_compare(a, b)
-				local dura = select(6, UnitAura(unit, a, filter))
-				local durb = select(6, UnitAura(unit, b, filter))
+				local namea, _, _, _, _, dura = UnitAura(unit, a, filter)
+				local nameb, _, _, _, _, durb = UnitAura(unit, b, filter)
+				local ordera = ordering[namea]
+				local orderb = ordering[nameb]
+				if ordera and not orderb then
+					return not prioFirst
+				end
+				if orderb and not ordera then
+					return prioFirst
+				end
+				if ordera and orderb then
+					if prioFirst then
+						return ordera > orderb
+					else
+						return ordera < orderb
+					end
+				end
+
 				if dura == 0 then return false end
 				if durb == 0 then return true end
 				return dura < durb
@@ -422,6 +460,9 @@ function Auras:UpdateUnitAuras(event, unit)
 		aurasBuffsEnlargeScale = self.db[unit].aurasBuffsEnlargeScale
 		aurasBuffsOnlyMine = GladiusEx:IsPartyUnit(unit) and self.db[unit].aurasBuffsOnlyMine
 		aurasBuffsOnlyDispellable = GladiusEx:IsArenaUnit(unit) and self.db[unit].aurasBuffsOnlyDispellable
+		showSwipe = self.db[unit].aurasBuffsShowSwipe
+		swipeReversed = self.db[unit].aurasBuffsSwipeReversed
+		swipeColor = self.db[unit].aurasBuffsSwipeColor
 
 		scan(true)
 		hide_unused()
@@ -442,6 +483,9 @@ function Auras:UpdateUnitAuras(event, unit)
 		aurasBuffsEnlargeScale = self.db[unit].aurasDebuffsEnlargeScale
 		aurasBuffsOnlyMine = GladiusEx:IsArenaUnit(unit) and self.db[unit].aurasDebuffsOnlyMine
 		aurasBuffsOnlyDispellable = GladiusEx:IsPartyUnit(unit) and self.db[unit].aurasDebuffsOnlyDispellable
+		showSwipe = self.db[unit].aurasDebuffsShowSwipe
+		swipeReversed = self.db[unit].aurasDebuffsSwipeReversed
+		swipeColor = self.db[unit].aurasDebuffsSwipeColor
 
 		scan(false)
 		hide_unused()
@@ -780,6 +824,38 @@ function Auras:GetOptions(unit)
 						},
 					},
 				},
+				appearence = {
+					type = "group",
+					name = L["Appearance"],
+					desc = L["Appearance settings"],
+					inline = true,
+					order = 25,
+					args = {
+						aurasBuffsShowSwipe = {
+							type = "toggle",
+							name = L["Show swipe"],
+							desc = L["Show cooldown swipe on buffs"],
+							disabled = function() return not self.db[unit].aurasBuffs or not self:IsUnitEnabled(unit) end,
+							order = 1,
+						},
+						aurasBuffsSwipeReversed = {
+							type = "toggle",
+							name = L["Reverse swipe"],
+							desc = L["Reverse swipe animation"],
+							disabled = function() return not self.db[unit].aurasBuffs or not self:IsUnitEnabled(unit) or not self.db[unit].aurasBuffsShowSwipe end,
+							order = 2,
+						},
+						aurasBuffsSwipeColor = {
+							type = "color",
+							name = L["Swipe color"],
+							desc = L["Cooldown swipe color on buffs"],
+							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
+							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
+							disabled = function() return not self.db[unit].aurasBuffs or not self:IsUnitEnabled(unit) or not self.db[unit].aurasBuffsShowSwipe end,
+							order = 3,
+						},
+					}
+				},
 				position = {
 					type = "group",
 					name = L["Position"],
@@ -999,6 +1075,38 @@ function Auras:GetOptions(unit)
 						},
 					},
 				},
+				appareance = {
+					type = "group",
+					name = L["Appearance"],
+					desc = L["Appearance settings"],
+					inline = true,
+					order = 25,
+					args = {
+						aurasDebuffsShowSwipe = {
+							type = "toggle",
+							name = L["Show swipe"],
+							desc = L["Show cooldown swipe on debuffs"],
+							disabled = function() return not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) end,
+							order = 1,
+						},
+						aurasDebuffsSwipeReversed = {
+							type = "toggle",
+							name = L["Reverse swipe"],
+							desc = L["Reverse swipe animation"],
+							disabled = function() return not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) or not self.db[unit].aurasDebuffsShowSwipe end,
+							order = 2,
+						},
+						aurasDebuffsSwipeColor = {
+							type = "color",
+							name = L["Swipe color"],
+							desc = L["Cooldown swipe color on debuffs"],
+							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
+							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
+							disabled = function() return not self.db[unit].aurasDebuffs or not self:IsUnitEnabled(unit) or not self.db[unit].aurasDebuffsShowSwipe end,
+							order = 3,
+						},
+					}
+				},
 				position = {
 					type = "group",
 					name = L["Position"],
@@ -1174,6 +1282,56 @@ function Auras:GetOptions(unit)
 				},
 			},
 		},
+		order = {
+			type = "group",
+			name = L["Ordering"],
+			childGroups = "tree",
+			order = 4,
+			args = {
+				aurasPrioFirst = {
+					type = "toggle",
+					name = L["Higher prio first"],
+					desc = L["Show buffs with a higher priority level at the beginning"],
+					disabled = function() return not self:IsUnitEnabled(unit) end,
+					order = 0,
+				},
+				newAuraOrder = {
+					type = "group",
+					name = L["Add new aura order"],
+					desc = L["Add new aura order"],
+					inline = true,
+					order = 3,
+					args = {
+						name = {
+							type = "input",
+							dialogControl = HasAuraEditBox() and "Aura_EditBox" or nil,
+							name = L["Name"],
+							desc = L["Name of the aura"],
+							get = function() return self.newAuraOrderName or "" end,
+							set = function(info, value) self.newAuraOrderName = GetSpellInfo(value) or value end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 1,
+						},
+						add = {
+							type = "execute",
+							name = L["Add new aura filter"],
+							func = function(info)
+								local name = self.newAuraOrderName
+								if fn.contains(self.db[unit].aurasPrioList, name) then
+									return -- already there
+								end
+								tinsert(self.db[unit].aurasPrioList, name)
+								options.order.args[name] = self:SetupAuraOrderOptions(options, unit, name)
+								self.newAuraOrderName = nil
+								GladiusEx:UpdateFrames()
+							end,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 3,
+						},
+					},
+				}
+			},
+		},
 	}
 
 	-- setup auras
@@ -1184,7 +1342,77 @@ function Auras:GetOptions(unit)
 		end
 	end
 
+  -- setup aura ordering
+  local ordered
+  for i, aura in pairs(self.db[unit].aurasPrioList) do
+    options.order.args[tostring(aura)] = self:SetupAuraOrderOptions(options, unit, aura)
+  end
+
 	return options
+end
+
+function Auras:SetupAuraOrderOptions(options, unit, aura)
+
+	local function GetIdx(override_aura)
+		return select(2, fn.find_first_of(self.db[unit].aurasPrioList, override_aura or aura))
+	end
+
+	local function IsEdge()
+		local idx = GetIdx()
+		return idx == 1 or idx == #self.db[unit].aurasPrioList
+	end
+
+	return {
+		type = "group",
+		name = aura,
+		desc = aura,
+		order = function ()
+			return 100 + GetIdx()
+		end,
+		disabled = function() return not self:IsUnitEnabled(unit) end,
+		args = {
+			up = {
+				type = "execute",
+				name = L["Up"],
+				func = function(info)
+					local idx = GetIdx()
+					local newIdx = idx - 1
+					self.db[unit].aurasPrioList[idx] = self.db[unit].aurasPrioList[newIdx]
+					self.db[unit].aurasPrioList[newIdx] = aura
+
+					GladiusEx:UpdateFrames()
+				end,
+				order = 1,
+				disabled = function() return GetIdx() == 1 end,
+			},
+			down = {
+				type = "execute",
+				name = L["Down"],
+				func = function(info)
+					local idx = GetIdx()
+					local newIdx = idx + 1
+					self.db[unit].aurasPrioList[idx] = self.db[unit].aurasPrioList[newIdx]
+					self.db[unit].aurasPrioList[newIdx] = aura
+
+					GladiusEx:UpdateFrames()
+				end,
+				order = 2,
+				disabled = function() return GetIdx() == #self.db[unit].aurasPrioList end,
+			},
+			delete = {
+				type = "execute",
+				name = L["Delete"],
+				func = function(info)
+					tremove(self.db[unit].aurasPrioList, GetIdx())
+					options.order.args[aura] = nil
+
+					GladiusEx:UpdateFrames()
+				end,
+				order = 3,
+				disabled = function() return not self:IsUnitEnabled(unit) end,
+			},
+		}
+  }
 end
 
 function Auras:SetupAuraOptions(options, unit, aura)
