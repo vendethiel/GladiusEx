@@ -136,7 +136,7 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(16979)]     = 8,    -- Wild Charge
 		[GladiusEx:SafeGetSpellName(87204)]     = 8,    -- Sin and Punishment
 		[GladiusEx:SafeGetSpellName(117526)]    = 8,    -- Binding Shot
-		[GladiusEx:SafeGetSpellName(163505)]    = 8,    -- Rake
+		[163505]    = 8,    -- Rake
 		[GladiusEx:SafeGetSpellName(232055)]    = 8.3,  -- Fists of Fury
 		[GladiusEx:SafeGetSpellName(48792)]     = 8,    -- Icebound Fortitude
 		[GladiusEx:SafeGetSpellName(115078)]    = 8.1,  -- Paralysis
@@ -165,10 +165,11 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(209426)]    = 7.1,  -- Darkness
 		[GladiusEx:SafeGetSpellName(1022)]      = 7.4,  -- Hand of Protection
 		[GladiusEx:SafeGetSpellName(18499)]     = 7.3,  -- Berserker Rage
-		[GladiusEx:SafeGetSpellName(1330)]      = 7,    -- Garrote (Silence)
+    [196364]                                = 7,    -- UA silence
+		[1330]                                  = 7,    -- Garrote (Silence)
 		[GladiusEx:SafeGetSpellName(15487)]     = 7,    -- Silence
-		[GladiusEx:SafeGetSpellName(236077)]     = 7,    -- Disarm
-		[GladiusEx:SafeGetSpellName(209749)]     = 7,    -- Faerie Swarm
+		[GladiusEx:SafeGetSpellName(236077)]    = 7,    -- Disarm
+		[GladiusEx:SafeGetSpellName(209749)]    = 7,    -- Faerie Swarm
 		[GladiusEx:SafeGetSpellName(199683)]    = 7,    -- Last Word
 		[GladiusEx:SafeGetSpellName(202933)]    = 7,    -- Spider Sting
 		[GladiusEx:SafeGetSpellName(47476)]     = 7.5,  -- Strangulate

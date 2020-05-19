@@ -198,6 +198,8 @@ local function MakeGroupDb(settings)
 		cooldownsHideTalentsUntilDetected = true,
 		cooldownsOffCdScale = 1.5,
 		cooldownsOffCdDuration = 0.3,
+		cooldownsOnUseScale = 1.5,
+		cooldownsOnUseDuration = 0.3,
 	}
 	return fn.merge(defaults, settings or {})
 end
@@ -417,6 +419,55 @@ function Cooldowns:LCT_CooldownDetected(event, unit, spellid)
 	self:UpdateIcons(unit)
 end
 
+local function CooldownFrame_Pulse(frame, duration, scale)
+  -- TODO better code than this
+  if frame.inPulse then return end
+  frame.inPulse = true
+
+  local ag = frame.icon_frame:CreateAnimationGroup()
+  -- TODO better code than this
+  ag:SetScript("OnFinished", function ()
+    frame.inPulse = false
+  end)
+
+  local cdAnim = ag:CreateAnimation("Scale")
+  cdAnim:SetScale(scale, scale)
+  cdAnim:SetDuration(duration)
+  cdAnim:SetSmoothing("IN")
+
+  local texture = frame.icon_frame:CreateTexture()
+  texture:SetTexture([[Interface/Cooldown/star4]])
+  texture:SetAlpha(0)
+  texture:SetAllPoints()
+  texture:SetBlendMode("ADD")
+
+  local sfAg = texture:CreateAnimationGroup() 
+
+  local alpha1 = sfAg:CreateAnimation("Alpha")
+  alpha1:SetFromAlpha(0)
+  alpha1:SetToAlpha(1)
+  alpha1:SetDuration(0)
+  alpha1:SetOrder(1)
+
+  local scale1 = sfAg:CreateAnimation("Scale")
+  scale1:SetScale(1.5, 1.5)
+  scale1:SetDuration(0)
+  scale1:SetOrder(1)
+
+  local scale2 = sfAg:CreateAnimation("Scale")
+  scale2:SetScale(0, 0)
+  scale2:SetDuration(duration)
+  scale2:SetOrder(2)
+
+  local rotation2 = sfAg:CreateAnimation("Rotation")
+  rotation2:SetDegrees(90)
+  rotation2:SetDuration(duration)
+  rotation2:SetOrder(2)
+
+  ag:Play()
+  sfAg:Play()
+end
+
 local function CooldownFrame_OnUpdate(frame)
 	local tracked = frame.tracked
 	local now = GetTime()
@@ -438,9 +489,13 @@ local function CooldownFrame_OnUpdate(frame)
 				frame:SetBackdropBorderColor(frame.color.r, frame.color.g, frame.color.b, ab)
 				frame.icon_frame:SetAlpha(a)
 				frame.state = 1
+
+        -- Just got used CD: pulse to show usage
+        CooldownFrame_Pulse(frame, db.cooldownsOffCdDuration, db.cooldownsOffCdScale)
 			end
 			return
 		end
+
 		if tracked.used_start and not tracked.cooldown_start and frame.spelldata.active_until_cooldown_start then
 			-- waiting to be used (cold blood)
 			if frame.state ~= 2 then
@@ -453,6 +508,7 @@ local function CooldownFrame_OnUpdate(frame)
 			end
 			return
 		end
+
 		if tracked.cooldown_end and tracked.cooldown_end > now then
 			-- in cooldown
 			if frame.state ~= 3 then
@@ -469,44 +525,8 @@ local function CooldownFrame_OnUpdate(frame)
 		end
 
 		if frame.state == 3 and db.cooldownsOffCdScale and db.cooldownsOffCdScale ~= 1 then -- was on CD
-			-- Just got off CD:
-			-- pulse to show CD is over
-			local ag = frame.icon_frame:CreateAnimationGroup()
-			local offCdAnim = ag:CreateAnimation("Scale")
-			offCdAnim:SetScale(db.cooldownsOffCdScale, db.cooldownsOffCdScale)
-			offCdAnim:SetDuration(db.cooldownsOffCdDuration)
-			offCdAnim:SetSmoothing("IN")
-
-			local texture = frame.icon_frame:CreateTexture()
-			texture:SetTexture([[Interface/Cooldown/star4]])
-			texture:SetAlpha(0)
-			texture:SetAllPoints()
-			texture:SetBlendMode("ADD")
-			local sfAg = texture:CreateAnimationGroup()
-
-			local alpha1 = sfAg:CreateAnimation("Alpha")
-			alpha1:SetFromAlpha(0)
-			alpha1:SetToAlpha(1)
-			alpha1:SetDuration(0)
-			alpha1:SetOrder(1)
-
-			local scale1 = sfAg:CreateAnimation("Scale")
-			scale1:SetScale(1.5, 1.5)
-			scale1:SetDuration(0)
-			scale1:SetOrder(1)
-
-			local scale2 = sfAg:CreateAnimation("Scale")
-			scale2:SetScale(0, 0)
-			scale2:SetDuration(db.cooldownsOffCdDuration)
-			scale2:SetOrder(2)
-
-			local rotation2 = sfAg:CreateAnimation("Rotation")
-			rotation2:SetDegrees(90)
-			rotation2:SetDuration(db.cooldownsOffCdDuration)
-			rotation2:SetOrder(2)
-
-			ag:Play()
-			sfAg:Play()
+			-- Just got off CD: pulse to show CD is over
+      CooldownFrame_Pulse(frame, db.cooldownsOffCdDuration, db.cooldownsOffCdScale)
 		end
 	end
 
@@ -1452,6 +1472,22 @@ function Cooldowns:MakeGroupOptions(unit, group)
 						inline = true,
 						order = 1.5,
 						args = {
+							cooldownsOnUseScale = {
+								type = "range",
+								name = L["On-use scale"],
+								desc = L["The size the the icon should scale up to when the cooldown gets used"],
+								min = 1, max = 5, step = 0.5,
+								disabled = function() return not self:IsUnitEnabled(unit) end,
+								order = 1,
+							},
+							cooldownsOnUseDuration = {
+								type = "range",
+								name = L["On-use scale duration"],
+								desc = L["How long should the scale animation last"],
+								min = 0, max = 3, step = 0.1,
+								disabled = function() return not self:IsUnitEnabled(unit) end,
+								order = 1,
+							},
 							cooldownsOffCdScale = {
 								type = "range",
 								name = L["Off-cooldown scale"],
@@ -1463,7 +1499,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 							cooldownsOffCdDuration = {
 								type = "range",
 								name = L["Off-cooldown scale duration"],
-								desc = L["How long should the scale duration animation last"],
+								desc = L["How long should the scale animation last"],
 								min = 0, max = 3, step = 0.1,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
 								order = 1,
