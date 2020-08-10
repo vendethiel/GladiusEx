@@ -626,7 +626,7 @@ function ClassIcon:SetClassIcon(unit)
 		left, right, top, bottom = 0, 1, 0, 1
 		needs_crop = true
 	elseif self.db[unit].classIconMode == "ROLE" and specID then
-		local _, _, _, _, _, role = GetSpecializationInfoByID(specID)
+		local _, _, _, _, role = GetSpecializationInfoByID(specID)
 		texture = [[Interface\LFGFrame\UI-LFG-ICON-ROLES]]
 		left, right, top, bottom = GetTexCoordsForRole(role)
 		needs_crop = false

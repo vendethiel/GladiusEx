@@ -51,7 +51,7 @@ local defaults = {
 	aurasBuffsTooltips = true,
 	aurasBuffsShowSwipe = true,
 	aurasBuffsSwipeReversed = false,
-	aurasBuffsSwipeColor = { r = 0, g = 0, b = 0, a = 1 },
+	aurasBuffsSwipeColor = { r = 0, g = 0, b = 0, a = 0.8 },
 
 	aurasDebuffs = true,
 	aurasDebuffsOnlyDispellable = false,
@@ -68,7 +68,7 @@ local defaults = {
 	aurasDebuffsTooltips = true,
 	aurasDebuffsShowSwipe = true,
 	aurasDebuffsSwipeReversed = false,
-	aurasDebuffsSwipeColor = { r = 0, g = 0, b = 0, a = 1 },
+	aurasDebuffsSwipeColor = { r = 0, g = 0, b = 0, a = 0.8 },
 
 	aurasFilterType = FILTER_TYPE_BLACKLIST,
 	aurasFilterWhat = FILTER_WHAT_BOTH,
@@ -215,6 +215,13 @@ function Auras:UpdateUnitAuras(event, unit)
 
 		-- icon
 		aura_frame.icon:SetTexture(icon)
+
+    -- stealable
+    if isStealable then
+      aura_frame.stealable:Show()
+    else
+      aura_frame.stealable:Hide()
+    end
 
 		-- cooldown
 		if duration > 0 then
@@ -498,11 +505,12 @@ function Auras:UpdateUnitAuras(event, unit)
 end
 
 local function CreateAuraFrame(name, parent)
-	local frame = CreateFrame("Button", name, parent, "ActionButtonTemplate")
+	local frame = CreateFrame("Button", name, parent, "GladiusExAuraFrame")
 	frame.icon = _G[name .. "Icon"]
 	frame.border = _G[name .. "Border"]
 	frame.cooldown = _G[name .. "Cooldown"]
 	frame.count = _G[name .. "Count"]
+  frame.stealable = _G[name .. "Stealable"]
 	frame.ButtonData = {
 		Highlight = false
 	}
@@ -847,6 +855,7 @@ function Auras:GetOptions(unit)
 						},
 						aurasBuffsSwipeColor = {
 							type = "color",
+              hasAlpha = true,
 							name = L["Swipe color"],
 							desc = L["Cooldown swipe color on buffs"],
 							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
@@ -1098,6 +1107,7 @@ function Auras:GetOptions(unit)
 						},
 						aurasDebuffsSwipeColor = {
 							type = "color",
+              hasAlpha = true,
 							name = L["Swipe color"],
 							desc = L["Cooldown swipe color on debuffs"],
 							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,

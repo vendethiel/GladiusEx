@@ -5,6 +5,7 @@
 ## OptionalDeps: LibStub, LibFunctional-1.0, Ace3, DRData-1.0, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, AceGUI-3.0-Spell-EditBox, LibGroupInSpecT-1.1, LibCooldownTracker-1.0, LibDualSpec-1.0, LibRangeCheck-2.0, LibDispellable-1.0, Clique, Masque
 
 embeds.xml
+templates.xml
 localization\enUS.lua
 localization\locales.lua
 GladiusEx.lua
