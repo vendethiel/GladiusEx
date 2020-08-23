@@ -30,7 +30,7 @@ externals:
 	libs/LibFunctional-1.0:
 		url: git://github.com/slaren/LibFunctional-1.0.git
 	libs/LibGroupInSpecT-1.1:
-		url: git://github.com/vendethiel/LibGroupInSpecT.git
+		url: svn://svn.wowace.com/wow/libgroupinspect/mainline/trunk
 	libs/LibRangeCheck-2.0:
 		url: svn://svn.wowace.com/wow/librangecheck-2-0/mainline/trunk
 	libs/LibSharedMedia-3.0:
