@@ -135,7 +135,7 @@ function Highlight:CreateFrame(unit)
 	if not button then return end
 
 	-- create frame
-	self.frame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. "Border" .. unit, button)
+	self.frame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. "Border" .. unit, button, "BackdropTemplate")
 	self.frame[unit].highlight = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. unit, button)
 	self.frame[unit].highlight:SetAllPoints()
 	self.frame[unit].highlight:SetFrameStrata("HIGH")

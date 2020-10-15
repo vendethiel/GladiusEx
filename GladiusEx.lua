@@ -941,7 +941,7 @@ function GladiusEx:HideUnit(unit)
 end
 
 function GladiusEx:CreateUnit(unit)
-	local button = CreateFrame("Frame", "GladiusExButtonFrame" .. unit, self:IsArenaUnit(unit) and self.arena_parent or self.party_parent)
+	local button = CreateFrame("Frame", "GladiusExButtonFrame" .. unit, self:IsArenaUnit(unit) and self.arena_parent or self.party_parent, "BackdropTemplate")
 	self.buttons[unit] = button
 	button.elapsed = 0
 	button.unit = unit
@@ -1013,12 +1013,12 @@ end
 
 function GladiusEx:CreateAnchor(anchor_type)
 	-- background
-	local background = CreateFrame("Frame", "GladiusExButtonBackground" .. anchor_type, anchor_type == "party" and self.party_parent or self.arena_parent)
+	local background = CreateFrame("Frame", "GladiusExButtonBackground" .. anchor_type, anchor_type == "party" and self.party_parent or self.arena_parent, "BackdropTemplate")
 	background:SetBackdrop({ bgFile = [[Interface\Buttons\WHITE8X8]], tile = true, tileSize = 8 })
 	background:SetFrameStrata("BACKGROUND")
 
 	-- anchor
-	local anchor = CreateFrame("Frame", "GladiusExButtonAnchor" .. anchor_type, anchor_type == "party" and self.party_parent or self.arena_parent)
+	local anchor = CreateFrame("Frame", "GladiusExButtonAnchor" .. anchor_type, anchor_type == "party" and self.party_parent or self.arena_parent, "BackdropTemplate")
 	anchor:SetScript("OnMouseDown", function(f, button)
 		if button == "LeftButton" then
 			if IsShiftKeyDown() then

@@ -488,7 +488,7 @@ function CastBar:Update(unit)
 		fmt = (fmt or "") .. "%4$s"
 	end
 
-	self.frame[unit].time_text_format = fmt;
+	self.frame[unit].time_text_format = fmt
 
 	-- hide
 	self.frame[unit]:Hide()

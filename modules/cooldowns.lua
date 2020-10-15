@@ -810,7 +810,7 @@ function Cooldowns:UpdateGroupIcons(unit, group)
 end
 
 local function CreateCooldownFrame(name, parent)
-	local frame = CreateFrame("Frame", name, parent)
+	local frame = CreateFrame("Frame", name, parent, "BackdropTemplate")
 
 	frame.icon_frame = CreateFrame("Frame", nil, frame)
 	frame.icon_frame:SetAllPoints()
@@ -846,7 +846,7 @@ function Cooldowns:CreateGroupFrame(unit, group)
 
 	-- create cooldown frame
 	if not gs.frame then
-		gs.frame = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. "frame" .. unit, button)
+		gs.frame = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. "frame" .. unit, button, "BackdropTemplate")
 		gs.frame:EnableMouse(false)
 
 		for i = 1, MAX_ICONS do

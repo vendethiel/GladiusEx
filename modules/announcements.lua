@@ -22,7 +22,6 @@ local Announcements = GladiusEx:NewGladiusExModule("Announcements", {
 function Announcements:OnEnable()
 	-- register events
 	self:RegisterEvent("UNIT_HEALTH")
-	self:RegisterEvent("UNIT_HEALTH_FREQUENT", "UNIT_HEALTH")
 	self:RegisterEvent("UNIT_AURA")
 	self:RegisterEvent("UNIT_SPELLCAST_START")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")

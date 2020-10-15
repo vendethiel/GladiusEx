@@ -48,7 +48,6 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(2094)]      = 9,    -- Blind
 		[GladiusEx:SafeGetSpellName(203126)]    = 9,    -- Maim (Disorient)
 		[GladiusEx:SafeGetSpellName(207167)]    = 9,    -- Blinding Sleet
-		[GladiusEx:SafeGetSpellName(209753)]    = 9.1,  -- Cyclone (boomy)
 		[GladiusEx:SafeGetSpellName(33786)]     = 9.1,  -- Cyclone (rdruid)
 		[GladiusEx:SafeGetSpellName(221527)]    = 9.1,  -- Imprison
 		[GladiusEx:SafeGetSpellName(605)]       = 9,    -- Mind Control
@@ -102,7 +101,6 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(91797)]     = 8,    -- Monstrous Blow (Dark Transformation Ghoul)
 		[GladiusEx:SafeGetSpellName(89766)]     = 8,    -- Axe Toss (Felguard)
 		[GladiusEx:SafeGetSpellName(24394)]     = 8,    -- Intimidation
-		[GladiusEx:SafeGetSpellName(7922)]      = 8,    -- Charge Stun
 		[GladiusEx:SafeGetSpellName(1833)]      = 8,    -- Cheap Shot
 		[GladiusEx:SafeGetSpellName(199804)]    = 8,    -- Between the Eyes
 		[GladiusEx:SafeGetSpellName(226943)]    = 8,    -- Mind Bomb
@@ -177,7 +175,6 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(116844)]    = 7,    -- Ring of Peace
 		[GladiusEx:SafeGetSpellName(207319)]    = 7,    -- Corpse Shield
 		[GladiusEx:SafeGetSpellName(81261)]     = 7,    -- Solar Beam
-		[GladiusEx:SafeGetSpellName(201325)]    = 7,    -- Zen Meditation
 		[GladiusEx:SafeGetSpellName(28730)]     = 7,    -- Arcane Torrent (Mana version)
 		[GladiusEx:SafeGetSpellName(80483)]     = 7,    -- Arcane Torrent (Focus version)
 		[GladiusEx:SafeGetSpellName(25046)]     = 7,    -- Arcane Torrent (Energy version)
@@ -249,7 +246,6 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(236273)]     = 5,    -- Duel
 		[GladiusEx:SafeGetSpellName(207756)]     = 5,    -- Shadowy Duel
 		[GladiusEx:SafeGetSpellName(198111)]     = 5,    -- Temporal Shield
-		[GladiusEx:SafeGetSpellName(216890)]     = 5.1,  -- Spell Reflection
 		[GladiusEx:SafeGetSpellName(248519)]     = 5.1,  -- Interlope (bm pet redirect)
 		[GladiusEx:SafeGetSpellName(61336)]      = 5,    -- Survival Instincts
 
@@ -293,8 +289,6 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(102558)]     = 3,    -- Incarnation: Son of Ursoc
 		[GladiusEx:SafeGetSpellName(19574)]      = 3,    -- Bestial Wrath
 		[GladiusEx:SafeGetSpellName(190319)]     = 3,    -- Combustion
-		[GladiusEx:SafeGetSpellName(193526)]     = 3,    -- Trueshot
-		[GladiusEx:SafeGetSpellName(216113)]     = 3,    -- Way of the Crane
 		[GladiusEx:SafeGetSpellName(1719)]       = 3,    -- Recklessness
 		[GladiusEx:SafeGetSpellName(186289)]     = 2.9,  -- Aspect of the Eagle
 		[GladiusEx:SafeGetSpellName(193530)]     = 2.9,  -- Aspect of the Wild
@@ -324,7 +318,6 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(116014)]     = 2,    -- Rune of Power
 		[GladiusEx:SafeGetSpellName(221404)]     = 2.1,  -- Burning Determination
 		[GladiusEx:SafeGetSpellName(1966)]       = 2.1,  -- Feint
-		[GladiusEx:SafeGetSpellName(201325)]     = 2.1,  -- Zen Moment
 		[GladiusEx:SafeGetSpellName(122278)]     = 2.2,  -- Dampen
 		[GladiusEx:SafeGetSpellName(207498)]     = 2.1,  -- Ancestral Protection
 		[GladiusEx:SafeGetSpellName(206649)]     = 2,    -- Eye of Leotheras

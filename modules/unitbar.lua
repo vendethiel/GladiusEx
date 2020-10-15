@@ -17,7 +17,6 @@ function GladiusEx:NewUnitBarModule(name, defaults_arena, defaults_party)
 
 	function UnitBar:OnEnable()
 		self:RegisterEvent("UNIT_HEALTH")
-		self:RegisterEvent("UNIT_HEALTH_FREQUENT", "UNIT_HEALTH")
 		self:RegisterEvent("UNIT_MAXHEALTH", "UNIT_HEALTH")
 		self:RegisterCustomEvents()
 	end

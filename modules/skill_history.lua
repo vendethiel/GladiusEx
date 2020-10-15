@@ -67,7 +67,7 @@ function SkillHistory:CreateFrame(unit)
 	if not button then return end
 
 	-- create frame
-	self.frame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. unit, button)
+	self.frame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. unit, button, "BackdropTemplate")
 end
 
 function SkillHistory:Update(unit)
