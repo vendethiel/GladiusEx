@@ -144,10 +144,9 @@ local function GetDefaultSpells()
 			[23920] = true, -- Warrior/Spell Reflection
 		},
 		{ -- group 2
-			[195710] = true, -- Honorable Medallion
-			[208683] = true, -- Gladiator's Medallion
-			[214027] = true, -- Adaptation
-			[196029] = true, -- Relentless
+			[336126] = true, -- Gladiator's Medallion
+			[336135] = true, -- Adaptation
+			[336128] = true, -- Relentless
 		}
 	}
 end
