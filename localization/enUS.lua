@@ -658,3 +658,4 @@ L["Reverse swipe animation"] = true
 L["Swipe color"] = true
 L["Cooldown swipe color on buffs"] = true
 L["Cooldown swipe color on debuffs"] = true
+
