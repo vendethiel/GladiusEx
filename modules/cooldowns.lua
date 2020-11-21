@@ -151,6 +151,7 @@ local function GetDefaultSpells()
 	}
 end
 
+
 local function MakeGroupDb(settings)
 	local defaults = {
 		cooldownsAttachTo = "Frame",
