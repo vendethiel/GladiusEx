@@ -569,6 +569,9 @@ local function GetSpellSortScore(unit, group, spellid)
 	end
 
 	local spelldata = CT:GetCooldownData(spellid)
+  if not spelldata then
+    return 0
+  end
 
 	if spelldata.replaces then
 		spellid = spelldata.replaces
