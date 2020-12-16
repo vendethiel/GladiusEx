@@ -240,7 +240,9 @@ local function CastUpdate(self)
 			local sparkPosition = value / self.maxValue * width
 			self.spark:SetPoint("CENTER", self.bar, "LEFT", sparkPosition, 0)
 
-			self.timeText:SetFormattedText(self.time_text_format, value, self.maxValue - value, self.maxValue, self.delay == 0 and "" or strformat(delay_format, self.delay))
+			if CastBar.db[self.unit].castTimeText then
+				self.timeText:SetFormattedText(self.time_text_format, value, self.maxValue - value, self.maxValue, self.delay == 0 and "" or strformat(delay_format, self.delay))
+			end
 		end
 	else
 		self:SetScript("OnUpdate", nil)

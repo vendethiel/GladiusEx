@@ -420,6 +420,12 @@ function Cooldowns:LCT_CooldownDetected(event, unit, spellid)
 end
 
 local function CooldownFrame_Pulse(frame, duration, scale)
+	if OmniCC then
+		OmniCC.FX:Run(frame, "pulse")
+		return
+	end
+
+
   -- TODO better code than this
   if frame.inPulse then return end
   frame.inPulse = true
@@ -569,13 +575,16 @@ local function GetSpellSortScore(unit, group, spellid)
 	end
 
 	local spelldata = CT:GetCooldownData(spellid)
-  if not spelldata then
-    return 0
-  end
+	if not spelldata then
+		return 0
+	end
 
 	if spelldata.replaces then
 		spellid = spelldata.replaces
 		spelldata = CT:GetCooldownData(spelldata.replaces)
+	end
+	if not spelldata then
+		return 0
 	end
 
 	if sortscore[spellid] then
