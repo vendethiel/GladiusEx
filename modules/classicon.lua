@@ -81,6 +81,7 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(105421)]    = 9,    -- Blinding Light
 		[GladiusEx:SafeGetSpellName(213691)]    = 9,    -- Scatter Shot
 		[GladiusEx:SafeGetSpellName(8122)]      = 9,    -- Psychic Scream
+		[GladiusEx:SafeGetSpellName(331866)]    = 9,    -- Door of Shadows's Agent of Chaos
 		[GladiusEx:SafeGetSpellName(20066)]     = 9,    -- Repentance
 		[GladiusEx:SafeGetSpellName(82691)]     = 9,    -- Ring of Frost
 		[GladiusEx:SafeGetSpellName(6770)]      = 9.1,  -- Sap
