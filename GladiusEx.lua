@@ -1581,3 +1581,4 @@ end
 function GladiusEx:IsValidCastGUID(guid)
 	return guid ~= nil and guid ~= 0 and guid ~= "0" and guid ~= "0-0-0-0-0-0000000000"
 end
+
