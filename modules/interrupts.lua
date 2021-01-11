@@ -115,7 +115,7 @@ function Interrupt:UpdateInterrupt(unit, spellid, duration)
 end
 
 function Interrupt:GetInterruptFor(unit)
-	local int = self.interrupts[unit]
+	local int = self.interrupts and self.interrupts[unit]
 	if not int then return end
 
 	local spellid, startedAt, duration = unpack(int)
