@@ -2,6 +2,7 @@ local GladiusEx = _G.GladiusEx
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local LSM = LibStub("LibSharedMedia-3.0")
 local CT = LibStub("LibCooldownTracker-1.0")
+local LCG = LibStub("LibCustomGlow-1.0")
 local fn = LibStub("LibFunctional-1.0")
 
 -- global functions
@@ -425,16 +426,7 @@ local function CooldownFrame_Pulse(frame, duration, scale)
 		return
 	end
 
-
-  -- TODO better code than this
-  if frame.inPulse then return end
-  frame.inPulse = true
-
   local ag = frame.icon_frame:CreateAnimationGroup()
-  -- TODO better code than this
-  ag:SetScript("OnFinished", function ()
-    frame.inPulse = false
-  end)
 
   local cdAnim = ag:CreateAnimation("Scale")
   cdAnim:SetScale(scale, scale)
@@ -484,9 +476,18 @@ local function CooldownFrame_OnUpdate(frame)
 			-- using
 			if frame.state == 0 then
 				if tracked.used_end then
+          LCG.ButtonGlow_Start(frame)
 					frame.cooldown:SetReverse(true)
-					CooldownFrame_Set(frame.cooldown, tracked.used_start, tracked.used_end - tracked.used_start, 1)
 					frame.cooldown:Show()
+					CooldownFrame_Set(frame.cooldown, tracked.used_start, tracked.used_end - tracked.used_start, 1)
+
+          -- Just got used CD: pulse to show usage
+          -- We somehow end up in that piece of code often, so for the whole duration of the effect,
+          --  tag a boolean.
+          if not frame.pulsing then
+            frame.pulsing = true
+            CooldownFrame_Pulse(frame, db.cooldownsOnUseDuration, db.cooldownsOnUseScale)
+          end
 				else
 					frame.cooldown:Hide()
 				end
@@ -495,10 +496,7 @@ local function CooldownFrame_OnUpdate(frame)
 				frame:SetBackdropBorderColor(frame.color.r, frame.color.g, frame.color.b, ab)
 				frame.icon_frame:SetAlpha(a)
 				frame.state = 1
-
-        -- Just got used CD: pulse to show usage
-        CooldownFrame_Pulse(frame, db.cooldownsOffCdDuration, db.cooldownsOffCdScale)
-			end
+      end
 			return
 		end
 
@@ -526,11 +524,14 @@ local function CooldownFrame_OnUpdate(frame)
 				frame.icon_frame:SetAlpha(a)
 				frame.cooldown:Show()
 				frame.state = 3
+        frame.pulsing = false
+        LCG.ButtonGlow_Stop(frame)
 			end
 			return
 		end
 
 		if frame.state == 3 and db.cooldownsOffCdScale and db.cooldownsOffCdScale ~= 1 then -- was on CD
+      LCG.ButtonGlow_Stop(frame)
 			-- Just got off CD: pulse to show CD is over
       CooldownFrame_Pulse(frame, db.cooldownsOffCdDuration, db.cooldownsOffCdScale)
 		end
