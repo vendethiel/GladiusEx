@@ -538,6 +538,7 @@ local function CooldownFrame_OnUpdate(frame)
 	end
 
 	-- not on cooldown or being used
+  LCG.ButtonGlow_Stop(frame)
 	if frame.tracked and frame.tracked.charges_detected and frame.tracked.charges and frame.tracked.max_charges and frame.tracked.charges < frame.tracked.max_charges then
 		-- show the charge cooldown
 		frame.cooldown:SetReverse(false)
