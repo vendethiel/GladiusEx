@@ -2,9 +2,12 @@
 ## Title: GladiusEx
 ## Notes: Arena unit frames and more
 ## SavedVariables: GladiusExDB
-## OptionalDeps: LibStub, LibFunctional-1.0, Ace3, DRData-1.0, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, AceGUI-3.0-Spell-EditBox, LibGroupInSpecT-1.1, LibCooldownTracker-1.0, LibDualSpec-1.0, LibRangeCheck-2.0, LibDispellable-1.0, Clique, Masque
+## Deps: Ace3, DRData-1.0, LibSharedMedia-3.0, LibGroupInSpecT-1.1, LibCooldownTracker-1.0, LibFunctional-1.0, LibCustomGlow-1.0
+## OptionalDeps: AceGUI-3.0-Spell-EditBox, Clique, Masque, LibDualSpec-1.0, LibRangeCheck-2.0, LibDispellable-1.0, AceGUI-3.0-SharedMediaWidgets
 
-embeds.xml
+#@no-lib-strip@
+#embeds.xml
+#@end-no-lib-strip@
 templates.xml
 localization\enUS.lua
 localization\locales.lua
