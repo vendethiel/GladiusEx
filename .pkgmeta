@@ -39,7 +39,7 @@ externals:
 		url: https://github.com/vendethiel/LibCooldownTracker-10.git
 	libs/DRData-1.0:
 		url: git://github.com/vendethiel/DRData-1.0.git
-  libs/LibCustomGlow-1.0:
-    url: https://github.com/Stanzilla/LibCustomGlow
+	libs/LibCustomGlow-1.0:
+		url: https://github.com/Stanzilla/LibCustomGlow
 
 enable-nolib-creation: no
