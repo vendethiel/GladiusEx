@@ -457,7 +457,6 @@ function ClassIcon:ScanAuras(unit)
 		local name, icon, _, _, duration, expires, _, _, _, spellid = UnitBuff(unit, index)
 		if not name then break end
 		local prio = self:GetImportantAura(unit, name) or self:GetImportantAura(unit, spellid)
-		-- V: make sure we have a best_expires before comparing it
 		if prio and prio > best_priority or (prio == best_priority and best_expires and expires < best_expires) then
 			best_name, best_icon, best_duration, best_expires, best_priority = name, icon, duration, expires, prio
 		end
@@ -705,7 +704,10 @@ function ClassIcon:Test(unit)
 end
 
 function ClassIcon:GetImportantAura(unit, name)
-	return self.db[unit].classIconAuras[name]
+	local priority = self.db[unit].classIconAuras[name]
+  if type(priority) ~= "boolean" then
+    return priority
+  end
 end
 
 local function HasAuraEditBox()
@@ -888,8 +890,8 @@ function ClassIcon:GetOptions(unit)
 
 	-- setup auras
 	for aura, priority in pairs(self.db[unit].classIconAuras) do
-		-- priority is false for deleted values
-		if priority then
+		-- priority is true for deleted values
+		if type(priority) ~= "boolean" then
 			options.auraList.args[tostring(aura)] = self:SetupAuraOptions(options, unit, aura)
 		end
 	end
@@ -898,6 +900,20 @@ function ClassIcon:GetOptions(unit)
 end
 
 function ClassIcon:SetupAuraOptions(options, unit, aura)
+  local function removeAura(aura)
+    local importantAuras = GetDefaultImportantAuras()
+    local aura_name = GladiusEx:SafeGetSpellName(aura) or aura
+    if importantAuras[aura_name] and self.db[unit].classIconAuras[aura_name] then
+      self.db[unit].classIconAuras[aura_name] = true
+    elseif importantAuras[aura] and self.db[unit].classIconAuras[aura] then
+      self.db[unit].classIconAuras[aura] = true
+    elseif importantAuras[tonumber(aura)] and self.db[unit].classIconAuras[tonumber(aura)] then
+      self.db[unit].classIconAuras[tonumber(aura)] = true
+    else
+      self.db[unit].classIconAuras[aura] = nil
+    end
+  end
+
 	local function setAura(info, value)
 		if (info[#(info)] == "name") then
 			local new_name = value
@@ -910,7 +926,7 @@ function ClassIcon:SetupAuraOptions(options, unit, aura)
 			options.auraList.args[new_name] = self:SetupAuraOptions(options, unit, new_name)
 
 			-- delete old aura
-			self.db[unit].classIconAuras[aura] = false
+      removeAura(aura)
 			options.auraList.args[aura] = nil
 		else
 			self.db[unit].classIconAuras[info[#(info) - 1]] = value
@@ -960,10 +976,8 @@ function ClassIcon:SetupAuraOptions(options, unit, aura)
 				name = L["Delete"],
 				func = function(info)
 					local aura = info[#(info) - 1]
-					-- very important: set to false so that they're not removed
-					-- see https://github.com/slaren/GladiusEx/issues/10
-					self.db[unit].classIconAuras[aura] = false
 					options.auraList.args[aura] = nil
+          removeAura(aura)
 					GladiusEx:UpdateFrames()
 				end,
 				disabled = function() return not self:IsUnitEnabled(unit) end,

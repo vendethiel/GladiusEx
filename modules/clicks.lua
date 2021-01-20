@@ -48,12 +48,14 @@ end
 function Clicks:ApplyAttributes(unit, frame)
 	-- todo: remove previous attributes ..
 	for _, attr in pairs(self.db[unit].clickAttributes) do
-		frame:SetAttribute(attr.modifier .. "type" .. attr.button, attr.action)
-		if attr.action == "macro" and attr.macro ~= "" then
-			frame:SetAttribute(attr.modifier .. "macrotext" .. attr.button, string.gsub(attr.macro, "*unit", unit))
-		elseif attr.action == "spell" and attr.macro ~= "" then
-			frame:SetAttribute(attr.modifier .. "spell" .. attr.button, attr.macro)
-		end
+    if attr ~= true then -- might be true if deleted
+      frame:SetAttribute(attr.modifier .. "type" .. attr.button, attr.action)
+      if attr.action == "macro" and attr.macro ~= "" then
+        frame:SetAttribute(attr.modifier .. "macrotext" .. attr.button, string.gsub(attr.macro, "*unit", unit))
+      elseif attr.action == "spell" and attr.macro ~= "" then
+        frame:SetAttribute(attr.modifier .. "spell" .. attr.button, attr.macro)
+      end
+    end
 	end
 end
 
@@ -130,9 +132,11 @@ function Clicks:GetOptions(unit)
 
 	-- attributes
 	local order = 1
-	for attr, _ in pairs(self.db[unit].clickAttributes) do
-		options.attributeList.args[attr] = self:GetAttributeOptionTable(options, unit, attr, order)
-		order = order + 1
+	for attr, value in pairs(self.db[unit].clickAttributes) do
+    if type(value) == "table" then
+      options.attributeList.args[attr] = self:GetAttributeOptionTable(options, unit, attr, order)
+      order = order + 1
+    end
 	end
 
 	return options
@@ -161,7 +165,12 @@ function Clicks:GetAttributeOptionTable(options, unit, attribute, order)
 				name = L["Delete click action"],
 				func = function()
 					-- remove from db
-					self.db[unit].clickAttributes[attribute] = nil
+          if defaultClickAttributes[attribute] then
+            -- do not set to `nil`, AceDB would merge with default and just re-add it later
+            self.db[unit].clickAttributes[attribute] = true
+          else
+            self.db[unit].clickAttributes[attribute] = nil
+          end
 
 					-- remove from options
 					options.attributeList.args[attribute] = nil

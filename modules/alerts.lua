@@ -327,7 +327,7 @@ local function HasAuraEditBox()
 end
 
 local function HasSpellEditBox()
-	return not not LibStub("AceGUI-3.0").WidgetVersions["Spell_EditBox"]
+	return false -- not not LibStub("AceGUI-3.0").WidgetVersions["Spell_EditBox"]
 end
 
 function Alerts:GetOptions(unit)
