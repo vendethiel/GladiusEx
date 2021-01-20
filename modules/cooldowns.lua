@@ -669,9 +669,8 @@ local function GetCooldownList(unit, group)
 			local detected = tracked and tracked.detected
 			-- check if the spell has a cooldown valid for an arena, and check if it is a talent that has not yet been detected
 			if (not spelldata.cooldown or spelldata.cooldown < 600) and
-				(not (spelldata.talent or spelldata.pet or spelldata.azerite) or detected or not db.cooldownsHideTalentsUntilDetected) then
-				-- check if the spell requires an aura
-				-- V: switched this to use FindAuraByName. It's unchecked but no spell uses it anyway
+				(not (spelldata.talent or spelldata.item or spelldata.pet or spelldata.covenant) or detected or not db.cooldownsHideTalentsUntilDetected) then
+				-- check if the spell requires an aura (XXX unused atm?)
 				if not spelldata.requires_aura or AuraUtil.FindAuraByName(spelldata.requires_aura_name, unit, "HELPFUL") then
 					if spelldata.replaces then
 						-- remove replaced spell if detected
@@ -1978,7 +1977,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 			if spelldata.knockback then tinsert(cats, L["cat:knockback"]) end
 			if spelldata.stun then tinsert(cats, L["cat:stun"]) end
 			if spelldata.immune then tinsert(cats, L["cat:immune"]) end
-			if spelldata.azerite then tinsert(cats, L["cat:azerite"]) end
+			if spelldata.covenant then tinsert(cats, L["cat:covenant"]) end
 			-- specID takes category precedence over talent, so specify it to make it clear
 			if spelldata.specID and spelldata.talent then tinsert(cats, L["cat:talent"]) end
 			local catstr
@@ -2016,6 +2015,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 				if spelldata.cooldown_starts_on_dispel then table.insert(extradesc, L["Cooldown starts on dispel"]) end
 				if spelldata.resets then table.insert(extradesc, string.format(L["Resets: %s"], table.concat(fn.sort(fn.map(spelldata.resets, GetSpellInfo)), ", "))) end
 				if spelldata.charges then table.insert(extradesc, string.format(L["Charges: %i"], spelldata.charges)) end
+				if spelldata.covenant then table.insert(extradesc, string.format(L["Covenant: %s"], spelldata.covenant)) end
 				if #extradesc > 0 then
 					spelldesc = spelldesc .. "\n|cff9f9f9f" .. table.concat(fn.sort(extradesc), "\n|cff9f9f9f")
 				end
@@ -2061,6 +2061,18 @@ function Cooldowns:MakeGroupOptions(unit, group)
 						end
 						args[spelldata.class].args["spec" .. specID].args["spell" .. spellid] = spellconfig
 					end
+				elseif spelldata.covenant then
+					-- covenant
+					if not args[spelldata.class].args.covenant then
+						args[spelldata.class].args.covenant = {
+							type = "group",
+							name = L["Covenant"],
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 1000,
+							args = {}
+						}
+					end
+					args[spelldata.class].args.covenant.args["spell" .. spellid] = spellconfig
 				elseif spelldata.talent then
 					-- talent
 					if not args[spelldata.class].args.talents then
@@ -2124,18 +2136,18 @@ function Cooldowns:MakeGroupOptions(unit, group)
 					}
 				end
 				args.items.args["spell" .. spellid] = spellconfig
-			elseif spelldata.azerite then
-				-- azerite
-				if not args.azerite then
-					args.azerite = {
+			elseif spelldata.covenant then
+				-- covenant
+				if not args.covenant then
+					args.covenant = {
 						type = "group",
-						name = L["Azerite"],
+						name = L["Covenant"],
 						disabled = function() return not self:IsUnitEnabled(unit) end,
 						order = 14,
 						args = {}
 					}
 				end
-				args.azerite.args["spell" .. spellid] = spellconfig
+				args.covenant.args["spell" .. spellid] = spellconfig
 			elseif spelldata.pvp_trinket then
 				-- pvp trinket
 				if not args.pvp_trinket then

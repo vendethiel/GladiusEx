@@ -15,7 +15,7 @@ L["cat:stun"] = "Stun"
 L["cat:immune"] = "Immune"
 L["cat:talent"] = "Talent"
 L["cat:uncat"] = "Uncategorized"
-L["cat:azerite"] = "Azerite"
+L["cat:covenant"] = "Covenant"
 
 -- Tags module
 L["WARRIOR:short"] = "Warr"
@@ -201,6 +201,7 @@ L["Center left"] = true
 L["Center right"] = true
 L["Center"] = true
 L["Charges: %i"] = true
+L["Covenant: %s"] = true
 L["Choose how low an enemy must be before low health is announced"] = true
 L["Choose how your announcements are displayed"] = true
 L["Class color"] = true
@@ -637,7 +638,7 @@ L["Y offset of the frame"] = true
 L["Y offset"] = true
 L["Hide self frame"] = true
 L["Hide the player's frame"] = true
-L["Azerite"] = true
+L["Covenant"] = true
 L["How long should the scale animation last"] = true
 L["The size the the icon should scale up to when the cooldown goes off CD"] = true
 L["The size the the icon should scale up to when the cooldown gets used"] = true
