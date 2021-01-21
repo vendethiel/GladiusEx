@@ -902,7 +902,7 @@ function Cooldowns:CreateGroupAnchor(unit, group)
 	local gs = self:GetGroupState(unit, group)
 
 	-- anchor
-	local anchor = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. unit .. "Group" .. group .. "Anchor", UIParent)
+	local anchor = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. unit .. "Group" .. group .. "Anchor", UIParent, "BackdropTemplate")
 	anchor:SetScript("OnMouseDown", function(f, button)
 		if button == "LeftButton" then
 			if IsShiftKeyDown() then
