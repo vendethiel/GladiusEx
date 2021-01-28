@@ -2,7 +2,10 @@
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local LSM = LibStub("LibSharedMedia-3.0")
 
-GladiusEx.default_bar_texture = "Wglass (GladiusEx)"
+GladiusEx.default_bar_texture = "Blizzard Raid Bar"
+if not LSM:IsValid("statusbar", GladiusEx.default_bar_texture) then
+  GladiusEx.default_bar_texture = "Wglass (GladiusEx)"
+end
 GladiusEx.defaults = {
 	profile = {
 		locked = false,
@@ -46,7 +49,7 @@ local group_defaults = {
 	backgroundColor = { r = 0, g = 0, b = 0, a = 0 },
 	backgroundPadding = 5,
 	margin = 2,
-	barWidth = 174,
+	barWidth = 130,
 	barsHeight = 40,
 	frameScale = 1,
 	borderSize = 2,
