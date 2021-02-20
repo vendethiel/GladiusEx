@@ -781,7 +781,7 @@ function Cooldowns:UpdateGroupIcons(unit, group)
 	local gs = self:GetGroupState(unit, group)
 	local db = Cooldowns:GetGroupDB(unit, group)
 
-	if not gs.frame then return end
+	if not gs.frame and not db.cooldownsDetached then return end
 
 	-- get spells lists
 	local sorted_spells = GetCooldownList(unit, group)
