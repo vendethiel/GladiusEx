@@ -439,7 +439,7 @@ local function CooldownFrame_Pulse(frame, duration, scale)
   texture:SetAllPoints()
   texture:SetBlendMode("ADD")
 
-  local sfAg = texture:CreateAnimationGroup() 
+  local sfAg = texture:CreateAnimationGroup()
 
   local alpha1 = sfAg:CreateAnimation("Alpha")
   alpha1:SetFromAlpha(0)
@@ -778,13 +778,18 @@ local function UpdateGroupIconFrames(unit, group, sorted_spells)
 end
 
 function Cooldowns:UpdateGroupIcons(unit, group)
-	local gs = self:GetGroupState(unit, group)
 	local db = Cooldowns:GetGroupDB(unit, group)
 
-	if not gs.frame then return end
+	if db.cooldownsDetached then
+		-- When an update event happens for a non-HeaderUnit, we update the icons for the HeaderUnit,
+		-- since that unit contains the icons for all units
+		unit = GetHeaderUnit(unit)
+		db = Cooldowns:GetGroupDB(unit, group)
+	end
 
-	-- get spells lists
-	local sorted_spells = GetCooldownList(unit, group)
+	local gs = self:GetGroupState(unit, group)
+
+	if not gs.frame then return end
 
 	-- update icon frames
 	if db.cooldownsDetached then
@@ -794,16 +799,15 @@ function Cooldowns:UpdateGroupIcons(unit, group)
 		-- save detached group spells
 		local index = GladiusEx:GetUnitIndex(unit)
 		header_gs.unit_spells = header_gs.unit_spells or { ["unit"] = unit }
-		header_gs.unit_spells[index] = sorted_spells
 
 		-- make list of the spells of all the units
 		local detached_spells = {}
-		for i = 1, 5 do
-			local us = header_gs.unit_spells[i]
-			if us then
-				local dunit = us.unit
-				for j = 1, #us do
-					tinsert(detached_spells, { dunit, us[j] })
+		local units = GladiusEx:IsArenaUnit(unit) and GladiusEx.arena_units or GladiusEx.party_units
+		for dunit, _ in pairs(units) do
+			if GladiusEx:GetUnitIndex(dunit) <= GladiusEx:GetArenaSize() then
+				local unitCooldowns =  GetCooldownList(dunit, group)
+				for j = 1, #unitCooldowns do
+					tinsert(detached_spells, {dunit, unitCooldowns[j]})
 				end
 			end
 		end
@@ -818,6 +822,7 @@ function Cooldowns:UpdateGroupIcons(unit, group)
 
 		UpdateGroupIconFrames(header_unit, group, detached_spells)
 	else
+		local sorted_spells = GetCooldownList(unit, group)
 		UpdateGroupIconFrames(unit, group, sorted_spells)
 	end
 end
