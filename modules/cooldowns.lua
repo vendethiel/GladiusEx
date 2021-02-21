@@ -13,6 +13,11 @@ local bor, lshift = bit.bor, bit.lshift
 local GetTime, UnitExists, UnitFactionGroup, UnitClass, UnitRace = GetTime, UnitExists, UnitFactionGroup, UnitClass, UnitRace
 local UnitBuff = UnitBuff
 
+-- Spells to add to units in test mode
+local TESTING_EXTRA_SPELLS = {
+	336126
+}
+
 local function GetDefaultSpells()
 	return {
 		{ -- group 1
@@ -241,38 +246,38 @@ local g2_defaults = MakeGroupDb {
 }
 
 local Cooldowns = GladiusEx:NewGladiusExModule("Cooldowns",
-	fn.merge(defaults, {
-		groups = {
-			["group_1"] = fn.merge(g1_defaults, {
-				cooldownsAttachTo = "Frame",
-				cooldownsAnchor = "TOPLEFT",
-				cooldownsRelativePoint = "BOTTOMLEFT",
-				cooldownsGrow = "DOWNRIGHT",
-			}),
-			["group_2"] = fn.merge(g2_defaults, {
-				cooldownsAttachTo = "Frame",
-				cooldownsAnchor = "TOPLEFT",
-				cooldownsRelativePoint = "TOPRIGHT",
-				cooldownsGrow = "DOWNRIGHT",
-			})
-		},
-	}),
-	fn.merge(defaults, {
-		groups = {
-			["group_1"] = fn.merge(g1_defaults, {
-				cooldownsAttachTo = "Frame",
-				cooldownsAnchor = "TOPRIGHT",
-				cooldownsRelativePoint = "BOTTOMRIGHT",
-				cooldownsGrow = "DOWNLEFT",
-			}),
-			["group_2"] = fn.merge(g2_defaults, {
-				cooldownsAttachTo = "Frame",
-				cooldownsAnchor = "TOPRIGHT",
-				cooldownsRelativePoint = "TOPLEFT",
-				cooldownsGrow = "DOWNLEFT",
-			})
-		}
-	}))
+fn.merge(defaults, {
+	groups = {
+		["group_1"] = fn.merge(g1_defaults, {
+			cooldownsAttachTo = "Frame",
+			cooldownsAnchor = "TOPLEFT",
+			cooldownsRelativePoint = "BOTTOMLEFT",
+			cooldownsGrow = "DOWNRIGHT",
+		}),
+		["group_2"] = fn.merge(g2_defaults, {
+			cooldownsAttachTo = "Frame",
+			cooldownsAnchor = "TOPLEFT",
+			cooldownsRelativePoint = "TOPRIGHT",
+			cooldownsGrow = "DOWNRIGHT",
+		})
+	},
+}),
+fn.merge(defaults, {
+	groups = {
+		["group_1"] = fn.merge(g1_defaults, {
+			cooldownsAttachTo = "Frame",
+			cooldownsAnchor = "TOPRIGHT",
+			cooldownsRelativePoint = "BOTTOMRIGHT",
+			cooldownsGrow = "DOWNLEFT",
+		}),
+		["group_2"] = fn.merge(g2_defaults, {
+			cooldownsAttachTo = "Frame",
+			cooldownsAnchor = "TOPRIGHT",
+			cooldownsRelativePoint = "TOPLEFT",
+			cooldownsGrow = "DOWNLEFT",
+		})
+	}
+}))
 
 local MAX_ICONS = 40
 
@@ -343,6 +348,7 @@ function Cooldowns:OnEnable()
 	CT.RegisterCallback(self, "LCT_CooldownUsed")
 	CT.RegisterCallback(self, "LCT_CooldownsReset")
 	CT.RegisterCallback(self, "LCT_CooldownDetected")
+	CT.RegisterCallback(self, "LCT_CovenantDetected")
 	self:RegisterEvent("UNIT_NAME_UPDATE")
 	self:RegisterMessage("GLADIUS_SPEC_UPDATE")
 end
@@ -420,50 +426,57 @@ function Cooldowns:LCT_CooldownDetected(event, unit, spellid)
 	self:UpdateIcons(unit)
 end
 
+function Cooldowns:LCT_CovenantDetected(event, unit, covenant)
+	if GladiusEx:IsHandledUnit(unit) then
+		GladiusEx.buttons[unit].covenant = covenant
+		self:UpdateIcons(unit)
+	end
+end
+
 local function CooldownFrame_Pulse(frame, duration, scale)
 	if OmniCC then
 		OmniCC.FX:Run(frame, "pulse")
 		return
 	end
 
-  local ag = frame.icon_frame:CreateAnimationGroup()
+	local ag = frame.icon_frame:CreateAnimationGroup()
 
-  local cdAnim = ag:CreateAnimation("Scale")
-  cdAnim:SetScale(scale, scale)
-  cdAnim:SetDuration(duration)
-  cdAnim:SetSmoothing("IN")
+	local cdAnim = ag:CreateAnimation("Scale")
+	cdAnim:SetScale(scale, scale)
+	cdAnim:SetDuration(duration)
+	cdAnim:SetSmoothing("IN")
 
-  local texture = frame.icon_frame:CreateTexture()
-  texture:SetTexture([[Interface/Cooldown/star4]])
-  texture:SetAlpha(0)
-  texture:SetAllPoints()
-  texture:SetBlendMode("ADD")
+	local texture = frame.icon_frame:CreateTexture()
+	texture:SetTexture([[Interface/Cooldown/star4]])
+	texture:SetAlpha(0)
+	texture:SetAllPoints()
+	texture:SetBlendMode("ADD")
 
-  local sfAg = texture:CreateAnimationGroup() 
+	local sfAg = texture:CreateAnimationGroup() 
 
-  local alpha1 = sfAg:CreateAnimation("Alpha")
-  alpha1:SetFromAlpha(0)
-  alpha1:SetToAlpha(1)
-  alpha1:SetDuration(0)
-  alpha1:SetOrder(1)
+	local alpha1 = sfAg:CreateAnimation("Alpha")
+	alpha1:SetFromAlpha(0)
+	alpha1:SetToAlpha(1)
+	alpha1:SetDuration(0)
+	alpha1:SetOrder(1)
 
-  local scale1 = sfAg:CreateAnimation("Scale")
-  scale1:SetScale(1.5, 1.5)
-  scale1:SetDuration(0)
-  scale1:SetOrder(1)
+	local scale1 = sfAg:CreateAnimation("Scale")
+	scale1:SetScale(1.5, 1.5)
+	scale1:SetDuration(0)
+	scale1:SetOrder(1)
 
-  local scale2 = sfAg:CreateAnimation("Scale")
-  scale2:SetScale(0, 0)
-  scale2:SetDuration(duration)
-  scale2:SetOrder(2)
+	local scale2 = sfAg:CreateAnimation("Scale")
+	scale2:SetScale(0, 0)
+	scale2:SetDuration(duration)
+	scale2:SetOrder(2)
 
-  local rotation2 = sfAg:CreateAnimation("Rotation")
-  rotation2:SetDegrees(90)
-  rotation2:SetDuration(duration)
-  rotation2:SetOrder(2)
+	local rotation2 = sfAg:CreateAnimation("Rotation")
+	rotation2:SetDegrees(90)
+	rotation2:SetDuration(duration)
+	rotation2:SetOrder(2)
 
-  ag:Play()
-  sfAg:Play()
+	ag:Play()
+	sfAg:Play()
 end
 
 local function CooldownFrame_OnUpdate(frame)
@@ -473,9 +486,9 @@ local function CooldownFrame_OnUpdate(frame)
 
 	if tracked and (not tracked.charges_detected or not tracked.charges or tracked.charges <= 0) then
 		if tracked.used_start and ((not tracked.used_end and not tracked.cooldown_start) or (tracked.used_end and tracked.used_end > now)) then
-			-- using
-			if frame.state == 0 then
-				if tracked.used_end then
+        -- using
+        if frame.state == 0 then
+          if tracked.used_end then
           LCG.ButtonGlow_Start(frame)
 					frame.cooldown:SetReverse(true)
 					frame.cooldown:Show()
@@ -632,17 +645,19 @@ function Cooldowns:UpdateIcons(unit)
 end
 
 local function GetUnitInfo(unit)
-	local specID, class, race
+	local specID, class, race, covenant
 	if GladiusEx:IsTesting(unit) then
 		specID = GladiusEx.testing[unit].specID
 		class = GladiusEx.testing[unit].unitClass
 		race = GladiusEx.testing[unit].unitRace
+    covenant = GladiusEx.testing[unit].covenant
 	elseif GladiusEx.buttons[unit] then
 		specID = GladiusEx.buttons[unit].specID
 		class = GladiusEx.buttons[unit].class or select(2, UnitClass(unit))
 		race = select(2, UnitRace(unit))
+		covenant = GladiusEx.buttons[unit].covenant
 	end
-	return specID, class, race
+	return specID, class, race, covenant
 end
 
 local function GetUnitFaction(unit)
@@ -658,18 +673,19 @@ local unit_sorted_spells = {}
 local function GetCooldownList(unit, group)
 	local db = Cooldowns:GetGroupDB(unit, group)
 
-	local specID, class, race = GetUnitInfo(unit)
+	local specID, class, race, covenant = GetUnitInfo(unit)
 
 	-- generate list of valid cooldowns for this unit
 	wipe(spell_list)
-	for spellid, spelldata in CT:IterateCooldowns(class, specID, race) do
+	for spellid, spelldata in CT:IterateCooldowns(class, specID, race, covenant) do
 		-- check if the spell is enabled by the user
 		if db.cooldownsSpells[spellid] or (spelldata.replaces and db.cooldownsSpells[spelldata.replaces]) then
 			local tracked = CT:GetUnitCooldownInfo(unit, spellid)
 			local detected = tracked and tracked.detected
 			-- check if the spell has a cooldown valid for an arena, and check if it is a talent that has not yet been detected
-			if (not spelldata.cooldown or spelldata.cooldown < 600) and
-				(not (spelldata.talent or spelldata.item or spelldata.pet or spelldata.covenant) or detected or not db.cooldownsHideTalentsUntilDetected) then
+			if spelldata.cooldown and spelldata.cooldown < 600 and
+        -- Do NOT show all covenant spells if HideTalentsUntilDetected is false
+				(not (spelldata.talent or spelldata.item or spelldata.pet) or detected or not db.cooldownsHideTalentsUntilDetected) then
 				-- check if the spell requires an aura (XXX unused atm?)
 				if not spelldata.requires_aura or AuraUtil.FindAuraByName(spelldata.requires_aura_name, unit, "HELPFUL") then
 					if spelldata.replaces then
@@ -682,6 +698,15 @@ local function GetCooldownList(unit, group)
 					end
 				end
 			end
+		end
+	end
+
+	-- add a trinket if we're in testing mode
+	if GladiusEx:IsTesting(unit) then
+		for i = 1, #TESTING_EXTRA_SPELLS do
+      if db.cooldownsSpells[TESTING_EXTRA_SPELLS[i]] then
+        spell_list[TESTING_EXTRA_SPELLS[i]] = true
+      end
 		end
 	end
 
@@ -781,20 +806,19 @@ function Cooldowns:UpdateGroupIcons(unit, group)
 	local gs = self:GetGroupState(unit, group)
 	local db = Cooldowns:GetGroupDB(unit, group)
 
-	if not gs.frame then return end
-
 	-- get spells lists
 	local sorted_spells = GetCooldownList(unit, group)
 
 	-- update icon frames
 	if db.cooldownsDetached then
-		local header_unit = GetHeaderUnit(unit)
+    local header_unit = GetHeaderUnit(unit)
 		local header_gs = self:GetGroupState(header_unit, group)
 
 		-- save detached group spells
 		local index = GladiusEx:GetUnitIndex(unit)
-		header_gs.unit_spells = header_gs.unit_spells or { ["unit"] = unit }
+		header_gs.unit_spells = header_gs.unit_spells or {  }
 		header_gs.unit_spells[index] = sorted_spells
+		header_gs.unit_spells[index].unit = unit
 
 		-- make list of the spells of all the units
 		local detached_spells = {}
@@ -816,8 +840,10 @@ function Cooldowns:UpdateGroupIcons(unit, group)
 				end)
 		end
 
+    if not header_gs.frame then return end
 		UpdateGroupIconFrames(header_unit, group, detached_spells)
 	else
+    if not gs.frame then return end
 		UpdateGroupIconFrames(unit, group, sorted_spells)
 	end
 end
@@ -1963,7 +1989,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 
 	local args = group_options.args.cooldowns.args
 	for spellid, spelldata in pairs(CT:GetCooldownsData()) do
-		if type(spelldata) == "table" and (not spelldata.cooldown or spelldata.cooldown < 600) then
+		if type(spelldata) == "table" and spelldata.cooldown and spelldata.cooldown < 600 then
 			local cats = {}
 			if spelldata.pvp_trinket then tinsert(cats, L["cat:pvp_trinket"]) end
 			if spelldata.cc then tinsert(cats, L["cat:cc"]) end

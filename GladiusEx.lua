@@ -602,6 +602,7 @@ function GladiusEx:HideFrames()
 		button.class = nil
 		button.specID = nil
 		button.unit_state = nil
+		button.covenant = nil
 
 		-- hide frame
 		self:HideUnit(unit)
@@ -839,6 +840,7 @@ function GladiusEx:UpdateUnitSpecialization(unit, specID)
 	if self.buttons[unit] and self.buttons[unit].specID ~= specID then
 		self.buttons[unit].class = class
 		self.buttons[unit].specID = specID
+    -- TODO safer to reset covenant?
 
 		self:SendMessage("GLADIUS_SPEC_UPDATE", unit)
 	end
