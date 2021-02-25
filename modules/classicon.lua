@@ -53,35 +53,35 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(274914)]	= 10,	-- Drink2
 
 
-		-- Breakable CC (9)
+  -- Breakable CC (9)
 
-		[217832]				= 9,	-- Imprison
-		[GladiusEx:SafeGetSpellName(99)]  	= 9,	-- Incapacitating Roar
-		[GladiusEx:SafeGetSpellName(2637)]  	= 9,	-- Hibernate 
-		[GladiusEx:SafeGetSpellName(3355)]  	= 9,	-- Freezing Trap 
-		[GladiusEx:SafeGetSpellName(203337)]  	= 9,	-- Freezing Trap (S honor talent)
-		[GladiusEx:SafeGetSpellName(213691)]  	= 9,	-- Scatter Shot
-		[GladiusEx:SafeGetSpellName(118)]  	= 9.1,	-- Polymorph
-		[GladiusEx:SafeGetSpellName(28272)]  	= 9.1,	-- Polymorph (pig)
-		[GladiusEx:SafeGetSpellName(28271)]  	= 9.1,	-- Polymorph (turtle)
-		[GladiusEx:SafeGetSpellName(61025)]  	= 9.1,	-- Polymorph (snake)
-		[GladiusEx:SafeGetSpellName(61305)]  	= 9.1,	-- Polymorph (black cat)
-		[GladiusEx:SafeGetSpellName(61721)]  	= 9.1,	-- Polymorph (rabbit)
-		[GladiusEx:SafeGetSpellName(61780)]  	= 9.1,	-- Polymorph (turkey)
-		[GladiusEx:SafeGetSpellName(126819)]  	= 9.1,	-- Polymorph (procupine)
-		[GladiusEx:SafeGetSpellName(161353)]  	= 9.1,	-- Polymorph (bear cub)
-		[GladiusEx:SafeGetSpellName(161354)]  	= 9.1,	-- Polymorph (monkey)
-		[GladiusEx:SafeGetSpellName(161355)]  	= 9.1,	-- Polymorph (penguin)
-		[GladiusEx:SafeGetSpellName(161372)]  	= 9.1,	-- Polymorph (peacock)
-		[GladiusEx:SafeGetSpellName(277787)]  	= 9.1,	-- Polymorph (direhorn)
-		[GladiusEx:SafeGetSpellName(277792)]  	= 9.1,	-- Polymorph (bumblebee)
-		[82691]				  	= 9.1,	-- Ring of Frost
-		[GladiusEx:SafeGetSpellName(115078)]  	= 9,	-- Paralysis
-		[GladiusEx:SafeGetSpellName(20066)]  	= 9,	-- Repentance
-		[200196]			  	= 9,	-- Holy Word: Chastise incap 
-		[GladiusEx:SafeGetSpellName(1776)]  	= 9,	-- Gouge
-		[GladiusEx:SafeGetSpellName(6770)]  	= 9.1,	-- Sap
-		[GladiusEx:SafeGetSpellName(51514)]  	= 9,	-- Hex
+  [217832]				= 9,	-- Imprison
+  [GladiusEx:SafeGetSpellName(99)]  	= 9,	-- Incapacitating Roar
+  [GladiusEx:SafeGetSpellName(2637)]  	= 9,	-- Hibernate 
+  [GladiusEx:SafeGetSpellName(3355)]  	= 9,	-- Freezing Trap 
+  [GladiusEx:SafeGetSpellName(203337)]  	= 9,	-- Freezing Trap (S honor talent)
+  [GladiusEx:SafeGetSpellName(213691)]  	= 9,	-- Scatter Shot
+  [GladiusEx:SafeGetSpellName(118)]  	= 9.1,	-- Polymorph
+  [GladiusEx:SafeGetSpellName(28272)]  	= 9.1,	-- Polymorph (pig)
+  [GladiusEx:SafeGetSpellName(28271)]  	= 9.1,	-- Polymorph (turtle)
+  [GladiusEx:SafeGetSpellName(61025)]  	= 9.1,	-- Polymorph (snake)
+  [GladiusEx:SafeGetSpellName(61305)]  	= 9.1,	-- Polymorph (black cat)
+  [GladiusEx:SafeGetSpellName(61721)]  	= 9.1,	-- Polymorph (rabbit)
+  [GladiusEx:SafeGetSpellName(61780)]  	= 9.1,	-- Polymorph (turkey)
+  [GladiusEx:SafeGetSpellName(126819)]  	= 9.1,	-- Polymorph (procupine)
+  [GladiusEx:SafeGetSpellName(161353)]  	= 9.1,	-- Polymorph (bear cub)
+  [GladiusEx:SafeGetSpellName(161354)]  	= 9.1,	-- Polymorph (monkey)
+  [GladiusEx:SafeGetSpellName(161355)]  	= 9.1,	-- Polymorph (penguin)
+  [GladiusEx:SafeGetSpellName(161372)]  	= 9.1,	-- Polymorph (peacock)
+  [GladiusEx:SafeGetSpellName(277787)]  	= 9.1,	-- Polymorph (direhorn)
+  [GladiusEx:SafeGetSpellName(277792)]  	= 9.1,	-- Polymorph (bumblebee)
+  [82691]				  	= 9.1,	-- Ring of Frost
+  [GladiusEx:SafeGetSpellName(115078)]  	= 9,	-- Paralysis
+  [GladiusEx:SafeGetSpellName(20066)]  	= 9,	-- Repentance
+  [200196]			  	= 9,	-- Holy Word: Chastise incap 
+  [GladiusEx:SafeGetSpellName(1776)]  	= 9,	-- Gouge
+  [GladiusEx:SafeGetSpellName(6770)]  	= 9.1,	-- Sap
+  [GladiusEx:SafeGetSpellName(51514)]  	= 9,	-- Hex
 		[GladiusEx:SafeGetSpellName(211004)]  	= 9,	-- Hex (spider)
 		[GladiusEx:SafeGetSpellName(210873)]  	= 9,	-- Hex (raptor)
 		[GladiusEx:SafeGetSpellName(211015)]  	= 9,	-- Hex (cockroach)
@@ -181,7 +181,7 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(210918)]  	= 7,	-- Ethereal Form
 		[GladiusEx:SafeGetSpellName(118038)]  	= 7,	-- Die by the Sword
 		[GladiusEx:SafeGetSpellName(236321)]  	= 7,	-- War Banner 
-		[323524]			  	= 7.1,	-- Fleshcraft (cc immune) 1 & 2
+		[323524]			  	= 7.1,	-- Ultimate Form (Fleshcraft cc immune)
 
 
 		-- Defensives I (6.5)
@@ -201,19 +201,25 @@ local function GetDefaultImportantAuras()
 
 
 		-- Immunes III (6)
+		[GladiusEx:SafeGetSpellName(8178)]  	= 6.4,	-- Grounding Totem Effect
 
+
+
+		[330279]			  	= 6.1,	-- Intervene Spell Reflect (a/f honor talent)
+		[335255]			  	= 6.1,	-- Spell Reflection (legy)(party reflect)
+
+
+
+		[GladiusEx:SafeGetSpellName(23920)]  	= 6,	-- Spell Reflection
 		[GladiusEx:SafeGetSpellName(49039)]  	= 6,	-- Lichborne
 		[GladiusEx:SafeGetSpellName(212704)]  	= 6,	-- The Beast Within
 		[GladiusEx:SafeGetSpellName(248519)]  	= 6,	-- Interlope1 (bm pet redirect)
 		[202248]			  	= 6,	-- Zen Meditation (spells redirected to monk)
 		[GladiusEx:SafeGetSpellName(204018)]  	= 6,	-- Blessing of Spellwarding
 		[GladiusEx:SafeGetSpellName(31224)]  	= 6,	-- Cloak of Shadows
-		[GladiusEx:SafeGetSpellName(8178)]  	= 6.4,	-- Grounding Totem Effect
 		[GladiusEx:SafeGetSpellName(212295)]  	= 6,	-- Nether Ward
 		[GladiusEx:SafeGetSpellName(18499)]  	= 6,	-- Berserker Rage
-		[GladiusEx:SafeGetSpellName(23920)]  	= 6.1,	-- Spell Reflection
-		[330279]			  	= 6.1,	-- Intervene Spell Reflect (a/f honor talent)
-		[335255]			  	= 6.1,	-- Spell Reflection (legy)(party reflect)
+		[GladiusEx:SafeGetSpellName(317929)]  	= 6,	-- Concentration Aura (enhanced via Aura Mastery)
 
 
 		-- Important I (5.5)
@@ -439,7 +445,6 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(12975)]  	= 2.5,	-- Last Stand
 		[GladiusEx:SafeGetSpellName(132404)]  	= 2.5,	-- Shield Block
 		[66]				  	= 2.5,	-- Invisibility (initial)
-		[GladiusEx:SafeGetSpellName(317929)]  	= 2.5,	-- Concentration Aura (enhanced via Aura Mastery)
 		[GladiusEx:SafeGetSpellName(291944)]  	= 2.5,	-- Regeneratin'
 		[GladiusEx:SafeGetSpellName(20578)]  	= 2.5,	-- Cannibalize
 		[GladiusEx:SafeGetSpellName(48743)]  	= 2.5,	-- Death Pact (big absorb+healing reduced)

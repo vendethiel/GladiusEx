@@ -3,8 +3,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local fn = LibStub("LibFunctional-1.0")
 local timer
 
-
-
 -- V: heavily inspired by Jaxington's Gladius-With-Interrupts
 -- K: Improved
 
@@ -38,7 +36,7 @@ INTERRUPTS = {
 }
 
 CLASS_INTERRUPT_MODIFIERS = {
-	["Calming Waters"] = 0.5,
+  [GladiusEx:SafeGetSpellName(317920)] = 0.7, -- Concentration Aura
 }
 
 function Interrupt:OnEnable()
@@ -83,8 +81,6 @@ function Interrupt:CombatLogEvent(_, ...)
    	local button = GladiusEx.buttons[unit]
    	if not button then return end
 
-   	-- V: can they stack? if not, add some kind of "break"
-	-- K: Calming Waters does, but it doesnt increase the stack count. In order to track it we would need to register UNIT_AURA and look for applications/reapplications & store no. stacks for each unit
 	local _, _, class = UnitClass(unit)
 	if class == 7 then -- Shaman
 		for buff, mult in ipairs(CLASS_INTERRUPT_MODIFIERS) do
@@ -104,8 +100,6 @@ function Interrupt:UpdateInterrupt(unit, spellid, duration)
 		self.interrupts[unit] = nil
 	end
 	
-	-- force update now, rather than at next tick
-	-- K: sending message is more modular than calling the function directly
 	self:SendMessage("GLADIUSEX_INTERRUPT", unit)
 	
 	-- K: Clears the interrupt after end of duration (in case no new UNIT_AURA ticks)
