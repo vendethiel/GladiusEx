@@ -18,6 +18,7 @@ local function GetDefaultImportantAuras()
 		-- Priority List by Bibimapi
 -- Immunes I and Stealth (10)
 
+    [211317]        = 10, -- Archbishop Benedictus' Restitution
 		[221527]				= 10,	-- Imprison (pvp tal)
 		[GladiusEx:SafeGetSpellName(33786)]	= 10,	-- Cyclone
 		[GladiusEx:SafeGetSpellName(605)]	= 10,	-- Mind Control
@@ -463,7 +464,6 @@ local function GetDefaultImportantAuras()
 		[339516]			  	= 2.5,	-- Glimmerdust's Grand Design (big absorb)
 		[334555]			  	= 2.5,	-- Vampiric Blood (legy)
  
-
 		-- Offensives II (2)
 
 		[GladiusEx:SafeGetSpellName(207289)]  	= 2,	-- Unholy Assault
@@ -536,11 +536,6 @@ local function GetDefaultImportantAuras()
 		[GladiusEx:SafeGetSpellName(276111)]  	= 1,	-- Divine Steed
 		[GladiusEx:SafeGetSpellName(36554)]  	= 1,	-- Shadowstep
 		[GladiusEx:SafeGetSpellName(2983)]  	= 1,	-- Sprint
-		[GladiusEx:SafeGetSpellName(783)]  	= 1,	-- Travel Form
-		[GladiusEx:SafeGetSpellName(5487)]  	= 1,	-- Bear Form
-		[GladiusEx:SafeGetSpellName(768)]  	= 1,	-- Cat Form
-		[GladiusEx:SafeGetSpellName(24858)]  	= 1,	-- Moonkin Form
-		[GladiusEx:SafeGetSpellName(197625)]  	= 1,	-- Moonkin Form (balance affinity)
 		[GladiusEx:SafeGetSpellName(206940)]  	= 1,	-- Mark of Blood
 		[51399]				  	= 1,	-- Death Grip (on target debuff)
 		[GladiusEx:SafeGetSpellName(206649)]  	= 1,	-- Eye of Leotheras

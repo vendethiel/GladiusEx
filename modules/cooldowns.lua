@@ -206,6 +206,8 @@ local function MakeGroupDb(settings)
 		cooldownsOffCdDuration = 0.3,
 		cooldownsOnUseScale = 1.5,
 		cooldownsOnUseDuration = 0.3,
+    cooldownsEnableGlow = true,
+		cooldownsShowDuration = true,
 	}
 	return fn.merge(defaults, settings or {})
 end
@@ -489,10 +491,16 @@ local function CooldownFrame_OnUpdate(frame)
         -- using
         if frame.state == 0 then
           if tracked.used_end then
-          LCG.ButtonGlow_Start(frame)
+					if db.cooldownsEnableGlow then
+						LCG.ButtonGlow_Start(frame)
+					end
 					frame.cooldown:SetReverse(true)
 					frame.cooldown:Show()
-					CooldownFrame_Set(frame.cooldown, tracked.used_start, tracked.used_end - tracked.used_start, 1)
+					if db.cooldownsShowDuration then
+						CooldownFrame_Set(frame.cooldown, tracked.used_start, tracked.used_end - tracked.used_start, 1)
+					else
+						CooldownFrame_Set(frame.cooldown, tracked.cooldown_start, tracked.cooldown_end - tracked.cooldown_start, 1)
+					end
 
           -- Just got used CD: pulse to show usage
           -- We somehow end up in that piece of code often, so for the whole duration of the effect,
@@ -683,9 +691,9 @@ local function GetCooldownList(unit, group)
 			local tracked = CT:GetUnitCooldownInfo(unit, spellid)
 			local detected = tracked and tracked.detected
 			-- check if the spell has a cooldown valid for an arena, and check if it is a talent that has not yet been detected
-			if spelldata.cooldown and spelldata.cooldown < 600 and
+			if (not spelldata.cooldown or spelldata.cooldown < 600) and
         -- Do NOT show all covenant spells if HideTalentsUntilDetected is false
-				(not (spelldata.talent or spelldata.item or spelldata.pet) or detected or not db.cooldownsHideTalentsUntilDetected) then
+				(not (spelldata.talent or spelldata.item or spelldata.pvp_trinket or spelldata.pet) or detected or not db.cooldownsHideTalentsUntilDetected) then
 				-- check if the spell requires an aura (XXX unused atm?)
 				if not spelldata.requires_aura or AuraUtil.FindAuraByName(spelldata.requires_aura_name, unit, "HELPFUL") then
 					if spelldata.replaces then
@@ -1517,7 +1525,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								desc = L["The size the the icon should scale up to when the cooldown gets used"],
 								min = 1, max = 5, step = 0.5,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
-								order = 1,
+								order = 10,
 							},
 							cooldownsOnUseDuration = {
 								type = "range",
@@ -1525,7 +1533,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								desc = L["How long should the scale animation last"],
 								min = 0, max = 3, step = 0.1,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
-								order = 1,
+								order = 11,
 							},
 							cooldownsOffCdScale = {
 								type = "range",
@@ -1533,7 +1541,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								desc = L["The size the the icon should scale up to when the cooldown goes off CD"],
 								min = 1, max = 5, step = 0.5,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
-								order = 1,
+								order = 20,
 							},
 							cooldownsOffCdDuration = {
 								type = "range",
@@ -1541,9 +1549,22 @@ function Cooldowns:MakeGroupOptions(unit, group)
 								desc = L["How long should the scale animation last"],
 								min = 0, max = 3, step = 0.1,
 								disabled = function() return not self:IsUnitEnabled(unit) end,
-								order = 1,
+								order = 21,
 							},
 							sep = {
+								type = "description",
+								name = "",
+								width = "full",
+								order = 4,
+							},
+							cooldownsEnableGlow = {
+								type = "toggle",
+								name = L["Glow cooldowns that are in active use"],
+								desc = L["Show a glow around the cooldown icon during the cooldown duration"],
+								disabled = function() return not self:IsUnitEnabled(unit) end,
+								order = 30,
+							},
+							sep2 = {
 								type = "description",
 								name = "",
 								width = "full",
@@ -1823,11 +1844,12 @@ function Cooldowns:MakeGroupOptions(unit, group)
 							local name = self:GetGroupName(unit, group)
 							local opp = GladiusEx:GetOppositeUnit(unit)
 							-- find the samely-named group in the "other side"
-							for oppGroup = 1, self:GetNumGroups(opp) do
-								local oppName = self:GetGroupName(opp, oppGroup)
-								if oppName == name then
-									local oppDb = self:GetGroupDB(opp, oppGroup)
-									self:GetGroupDB(unit, group).cooldownsSpells = oppDb.cooldownsSpells
+							for opp_group = 1, self:GetNumGroups(opp) do
+								local opp_name = self:GetGroupName(opp, opp_group)
+								if opp_name == name then
+									-- TODO copy, rather than this aliasing
+									local opp_db = self:GetGroupDB(opp, opp_group)
+									self:GetGroupDB(unit, group).cooldownsSpells = opp_db.cooldownsSpells
 									GladiusEx:UpdateFrames()
 									return
 								end
@@ -1989,7 +2011,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 
 	local args = group_options.args.cooldowns.args
 	for spellid, spelldata in pairs(CT:GetCooldownsData()) do
-		if type(spelldata) == "table" and spelldata.cooldown and spelldata.cooldown < 600 then
+		if type(spelldata) == "table" and (not spelldata.cooldown or spelldata.cooldown < 600) then
 			local cats = {}
 			if spelldata.pvp_trinket then tinsert(cats, L["cat:pvp_trinket"]) end
 			if spelldata.cc then tinsert(cats, L["cat:cc"]) end

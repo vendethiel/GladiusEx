@@ -1019,6 +1019,30 @@ function Tags:GetBuiltinTags()
 		["name"] = function(unit)
 			return UnitName(unit) or unit
 		end,
+    ["unit"] = function(unit)
+      return unit
+    end,
+    ["index0"] = function(unit)
+      if unit == "player" then
+        return 0
+      else
+        local idx = string.match(unit, "(%d+)")
+        return idx or "?"
+      end
+      return unit
+    end,
+    ["index1"] = function(unit)
+      if unit == "player" then
+        return 1
+      else
+        local party = string.match(unit, "party(%d+)")
+        if party then
+          return party + 1
+        else
+          return string.match(unit, "party(%d+)") or "?"
+        end
+      end
+    end,
 		["name:status"] = function(unit)
 			if not UnitExists(unit) then
 				return unit

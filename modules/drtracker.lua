@@ -2,7 +2,7 @@
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local fn = LibStub("LibFunctional-1.0")
 local LSM = LibStub("LibSharedMedia-3.0")
-local DRData = LibStub("DRData-1.0")
+local DRData = LibStub("DRList-1.0")
 
 -- global functions
 local strfind = string.find
@@ -608,7 +608,7 @@ function DRTracker:GetOptions(unit)
 		local seen_icons = {}
 		local idx = 1
 		local spellid_by_idx = {}
-		for spellid, _ in DRData:IterateProviders(key) do
+		for spellid, _ in DRData:IterateSpellsByCategory(key) do
 			local spellname, _, spellicon = GetSpellInfo(spellid)
 			if not seen_icons[spellicon] then
 				spellid_by_idx[idx] = spellid

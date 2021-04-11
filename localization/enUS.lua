@@ -659,4 +659,5 @@ L["Reverse swipe animation"] = true
 L["Swipe color"] = true
 L["Cooldown swipe color on buffs"] = true
 L["Cooldown swipe color on debuffs"] = true
-
+L["Glow cooldowns that are in active use"] = true
+L["Show a glow around the cooldown icon during the cooldown duration"] = true
