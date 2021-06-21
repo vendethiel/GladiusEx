@@ -1010,8 +1010,26 @@ function Tags:GetBuiltinTags()
 			if not amount or not maxamount or maxamount == 0 then
 				return ""
 			else
-				return strformat("%.1f%%", (amount / maxamount * 100))
+        local value = amount / maxamount * 100
+        -- avoid printing "XYZ.0%", print "50%"
+        if value == math.floor(value) then
+          return value .. "%"
+        else
+          return strformat("%.1f%%", value)
+        end
 			end
+		end
+	end
+	local function percentage_rounded(fn, fnmax)
+		return function(unit)
+			local amount = fn(unit)
+			local maxamount = fnmax(unit)
+
+			if not amount or not maxamount or maxamount == 0 then
+				return ""
+			else
+        return math.floor((amount / maxamount * 100) + 0.5) .. "%"
+      end
 		end
 	end
 
@@ -1026,10 +1044,8 @@ function Tags:GetBuiltinTags()
       if unit == "player" then
         return 0
       else
-        local idx = string.match(unit, "(%d+)")
-        return idx or "?"
+        return string.match(unit, "party(%d+)") or string.match(unit, "arena(%d+)") or "?"
       end
-      return unit
     end,
     ["index1"] = function(unit)
       if unit == "player" then
@@ -1039,7 +1055,7 @@ function Tags:GetBuiltinTags()
         if party then
           return party + 1
         else
-          return string.match(unit, "party(%d+)") or "?"
+          return string.match(unit, "arena(%d+)") or "?"
         end
       end
     end,
@@ -1106,6 +1122,7 @@ function Tags:GetBuiltinTags()
 		["health:short"] = short(health),
 		["maxhealth:short"] = short(maxhealth),
 		["health:percentage"] = percentage(health, maxhealth),
+		["health:rounded"] = percentage_rounded(health, maxhealth),
 		["absorbs"] = absorbs,
 		["absorbs:short"] = short(absorbs),
 		["healthabsorbs"] = healthabsorbs,
@@ -1115,6 +1132,7 @@ function Tags:GetBuiltinTags()
 		["power:short"] = short(power),
 		["maxpower:short"] = short(maxpower),
 		["power:percentage"] = percentage(power, maxpower),
+		["power:rounded"] = percentage_rounded(power, maxpower),
 	}
 end
 
@@ -1140,6 +1158,7 @@ function Tags:GetBuiltinTagsEvents()
 		["health:short"] = "UNIT_HEALTH UNIT_MAXHEALTH",
 		["maxhealth:short"] = "UNIT_HEALTH UNIT_MAXHEALTH",
 		["health:percentage"] = "UNIT_HEALTH UNIT_MAXHEALTH",
+		["health:rounded"] = "UNIT_HEALTH UNIT_MAXHEALTH",
 
 		["absorbs"] = "UNIT_ABSORB_AMOUNT_CHANGED",
 		["absorbs:short"] = "UNIT_ABSORB_AMOUNT_CHANGED",
@@ -1152,5 +1171,6 @@ function Tags:GetBuiltinTagsEvents()
 		["power:short"] = "UNIT_POWER_UPDATE UNIT_POWER_FREQUENT UNIT_DISPLAYPOWER",
 		["maxpower:short"] = "UNIT_MAXPOWER UNIT_POWER_FREQUENT UNIT_DISPLAYPOWER",
 		["power:percentage"] = "UNIT_POWER_UPDATE UNIT_POWER_FREQUENT UNIT_MAXPOWER UNIT_DISPLAYPOWER",
+		["power:rounded"] = "UNIT_POWER_UPDATE UNIT_POWER_FREQUENT UNIT_MAXPOWER UNIT_DISPLAYPOWER",
 	}
 end

@@ -169,6 +169,20 @@ local function GetTestAura(index, buff)
 	return name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
 end
 
+-- V: Temporary hack.
+--    LibDispellable-1.0 relies on IsSpellKnown() to detect dispels,
+--    but because of a Blizzard API bug, IsSpellKnown(115450) returns false on MW monks.
+--    Instead, use IsPlayerSpell (could also use IsSpellKnownOrOverridesKnown).
+local function CanDispel(unit, buffs, dispelType, spellID)
+	if (isBuff and not UnitCanAttack("player", unit)) or (not isBuff and not UnitCanAssist("player", unit))then
+		return false
+	end
+  if isBuff and IsPlayerSpell(115450) and dispelType == "MAGIC" then
+    return true
+  end
+  return CanDispel(unit, buffs, dispelType, spellID)
+end
+
 function Auras:UpdateUnitAuras(event, unit)
 	if not self.buffFrame[unit] and not self.debuffFrame[unit] then return end
 
@@ -269,7 +283,7 @@ function Auras:UpdateUnitAuras(event, unit)
 
 			if self:IsAuraFiltered(unit, name, filter_what) and
 				(not aurasBuffsOnlyMine or player_units[caster]) and
-				(not aurasBuffsOnlyDispellable or LD:CanDispel(unit, buffs, dispelType, spellID)) then
+				(not aurasBuffsOnlyDispellable or CanDispel(unit, buffs, dispelType, spellID)) then
 
 				if aurasBuffsEnlargeMine and ((testing and i <= 2) or (not testing and player_units[caster])) then
 					tinsert(enlarged, i)
