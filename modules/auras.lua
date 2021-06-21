@@ -27,13 +27,7 @@ local FILTER_WHAT_BUFFS = 2
 local FILTER_WHAT_DEBUFFS = 4
 local FILTER_WHAT_BOTH = 6
 
-local function GetDefaultAuras()
-	return {
-		[GladiusEx:SafeGetSpellName(227723)] = true, -- Mana divining stone
-		[GladiusEx:SafeGetSpellName(32727)] = true,  -- Arena Preparation #1
-		[GladiusEx:SafeGetSpellName(32728)] = true,  -- Arena Preparation #2
-	}
-end
+local GetDefaultAuras = GladiusEx.Data.DefaultAuras
 
 local defaults = {
 	aurasBuffs = true,

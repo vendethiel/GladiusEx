@@ -1,5 +1,8 @@
 ﻿GladiusEx = LibStub("AceAddon-3.0"):NewAddon("GladiusEx", "AceEvent-3.0")
 
+GladiusEx.IS_RETAIL = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+GladiusEx.IS_TBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+
 local LGIST = LibStub:GetLibrary("LibGroupInSpecT-1.1")
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local RC = LibStub("LibRangeCheck-2.0")
@@ -32,6 +35,27 @@ local party_units = {
 
 GladiusEx.party_units = party_units
 GladiusEx.arena_units = arena_units
+
+if GladiusEx.IS_RETAIL then
+  function CountArenaOpponents()
+    return GetNumArenaOpponentSpecs()
+  end
+
+  function IsValidSpecId(specID)
+    return specID and specID > 0
+  end
+else
+  function CountArenaOpponents()
+    return 3 -- ???? TBC
+  end
+
+  function IsValidSpecId(specID)
+    return true
+  end
+
+  -- TODO TBC spec detection
+end
+
 
 local anchor_width = 260
 local anchor_height = 40
@@ -350,7 +374,9 @@ function GladiusEx:OnEnable()
 	-- register the appropriate events
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("ARENA_OPPONENT_UPDATE")
-	self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
+  if GladiusEx.IS_RETAIL then
+    self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
+  end
 	self:RegisterEvent("UNIT_NAME_UPDATE")
 	self:RegisterEvent("UNIT_HEALTH")
 	self:RegisterEvent("UNIT_MAXHEALTH", "UNIT_HEALTH")
@@ -358,6 +384,9 @@ function GladiusEx:OnEnable()
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("UNIT_PET", "UpdateUnitGUID")
 	self:RegisterEvent("UNIT_PORTRAIT_UPDATE", "UpdateUnitGUID")
+  if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+    self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
+  end
 	LGIST.RegisterCallback(self, "GroupInSpecT_Update")
 	RC.RegisterCallback(self, RC.CHECKERS_CHANGED, "UpdateRangeCheckers")
 	self.dbi.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
@@ -437,9 +466,9 @@ function GladiusEx:GetArenaSize(min)
 	end
 
 	-- try to guess the current arena size
-	local guess = max(min or 0, 2, GetNumArenaOpponents(), GetNumArenaOpponentSpecs(), GetNumGroupMembers(LE_PARTY_CATEGORY_HOME), GetNumGroupMembers(LE_PARTY_CATEGORY_INSTANCE))
+	local guess = max(min or 0, 2, GetNumArenaOpponents(), GetNumArenaOpponentSpecs and GetNumArenaOpponentSpecs() or 0, GetNumGroupMembers(LE_PARTY_CATEGORY_HOME), GetNumGroupMembers(LE_PARTY_CATEGORY_INSTANCE))
 
-	log("GetArenaSize", min, GetNumArenaOpponents(), GetNumArenaOpponentSpecs(), GetNumGroupMembers(LE_PARTY_CATEGORY_HOME), GetNumGroupMembers(LE_PARTY_CATEGORY_INSTANCE),
+	log("GetArenaSize", min, GetNumArenaOpponents(), GetNumArenaOpponentSpecs and GetNumArenaOpponentSpecs() or 0, GetNumGroupMembers(LE_PARTY_CATEGORY_HOME), GetNumGroupMembers(LE_PARTY_CATEGORY_INSTANCE),
 		" => ", guess)
 
 	if guess >= 4 then
@@ -495,7 +524,7 @@ function GladiusEx:UpdateArenaFrames()
 
 	local numOpps = self.arena_size
 
-	log("UpdateArenaFrames:", numOpps, GetNumArenaOpponents(), GetNumArenaOpponentSpecs())
+	log("UpdateArenaFrames:", numOpps, GetNumArenaOpponents(), GetNumArenaOpponentSpecs and GetNumArenaOpponentSpecs() or 0)
 
 	self:UpdateAnchor("arena")
 
@@ -644,12 +673,12 @@ function GladiusEx:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
 	self:CheckArenaSize()
 	self:ShowFrames()
 
-	local numOpps = GetNumArenaOpponentSpecs()
+	local numOpps = CountArenaOpponents()
 	for i = 1, numOpps do
 		local specID = GetArenaOpponentSpec(i)
 		local unitid = "arena" .. i
 
-		if specID and specID > 0 then
+		if IsValidSpecId(specID) then
 			self:ShowUnit(unitid)
 			self:UpdateUnit(unitid)
 
@@ -820,6 +849,7 @@ function GladiusEx:GroupInSpecT_Update(event, guid, unit, info)
 end
 
 function GladiusEx:CheckUnitSpecialization(unit)
+  if not LGIST.GetCachedInfo then return end
 	local info = LGIST:GetCachedInfo(UnitGUID(unit))
 
 	if info then

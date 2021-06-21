@@ -1086,7 +1086,7 @@ function Tags:GetBuiltinTags()
 			if not specID or specID == 0 then
 				return ""
 			end
-			return select(2, GetSpecializationInfoByID(specID))
+			return select(2, GetSpecializationInfoByID and GetSpecializationInfoByID(specID))
 		end,
 		["spec:short"] = function(unit)
 			local specID

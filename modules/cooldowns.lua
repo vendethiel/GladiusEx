@@ -18,145 +18,7 @@ local TESTING_EXTRA_SPELLS = {
 	336126
 }
 
-local function GetDefaultSpells()
-	return {
-		{ -- group 1
-			--[28730] = true, -- BloodElf/Arcane Torrent
-			--[107079] = true, -- Pandaren/Quaking Palm
-			--[69070] = true, -- Goblin/Rocket Jump
-			--[7744] = true, -- Scourge/Will of the Forsaken
-
-			[48707] = true, -- Death Knight/Anti-Magic Shell
-			[108194] = true, -- Death Knight/Asphyxiate
-			[49576] = true, -- Death Knight/Death Grip
-			[48792] = true, -- Death Knight/Icebound Fortitude
-			[49039] = true, -- Death Knight/Lichborne
-			[47528] = true, -- Death Knight/Mind Freeze
-			[51271] = true, -- Death Knight/Pillar of Frost
-			[47476] = true, -- Death Knight/Strangulate
-			[49206] = true, -- Death Knight/Summon Gargoyle
-
-			[191427] = true, -- Demon Hunter/Metamorphosis (Havoc)
-			[187827] = true, -- Demon Hunter/Metamorphosis (Vengeance)
-			[196555] = true, -- Demon Hunter/Netherwalk
-			[196718] = true, -- Demon Hunter/Darkness
-			[198589] = true, -- Demon Hunter/Blur
-			[183752] = true, -- Demon Hunter/Consume Magic
-
-			[22812] = true, -- Druid/Barkskin
-			[33786] = true, -- Druid/Cyclone (feral)
-			[99] = true, -- Druid/Disorienting Roar
-			[102280] = true, -- Druid/Displacer Beast
-			[108288] = true, -- Druid/Heart of the Wild
-			[102342] = true, -- Druid/Ironbark
-			[102359] = true, -- Druid/Mass Entanglement
-			[5211] = true, -- Druid/Mighty Bash
-			[88423] = true, -- Druid/Nature's Cure
-			[132158] = true, -- Druid/Nature's Swiftness
-			[2782] = true, -- Druid/Remove Corruption
-			[78675] = true, -- Druid/Solar Beam
-			[132469] = true, -- Druid/Typhoon
-			[102793] = true, -- Druid/Ursol's Vortex
-			[106839] = true, -- Druid/Skull Bash
-
-			[19574] = true, -- Hunter/Bestial Wrath
-			[19263] = true, -- Hunter/Deterrence
-			[781] = true, -- Hunter/Disengage
-			[1499] = true, -- Hunter/Freezing Trap
-			[19577] = true, -- Hunter/Intimidation
-			[23989] = true, -- Hunter/Readiness
-			[50519] = true, -- Hunter/Sonic Blast
-			[121818] = true, -- Hunter/Stampede
-			[19386] = true, -- Hunter/Wyvern Sting
-
-			[108843] = true, -- Mage/Blazing Speed
-			[1953] = true, -- Mage/Blink
-			[235219] = true, -- Mage/Cold Snap. V: changed ID in legion
-			[2139] = true, -- Mage/Counterspell
-			[122] = true, -- Mage/Frost Nova
-			[45438] = true, -- Mage/Ice Block
-
-			[115450] = true, -- Monk/Detox
-			[122783] = true, -- Monk/Diffuse Magic
-			[113656] = true, -- Monk/Fists of Fury
-			[115203] = true, -- Monk/Fortifying Brew
-			[119381] = true, -- Monk/Leg Sweep
-			[116849] = true, -- Monk/Life Cocoon
-			[115078] = true, -- Monk/Paralysis
-			[115310] = true, -- Monk/Revival
-			[116844] = true, -- Monk/Ring of Peace
-			[116705] = true, -- Monk/Spear Hand Strike
-			[116680] = true, -- Monk/Thunder Focus Tea
-			[116841] = true, -- Monk/Tiger's Lust
-			[122470] = true, -- Monk/Touch of Karma
---
-			[115750] = true, -- Paladin/Blinding Light
-			[4987] = true, -- Paladin/Cleanse
-			[31821] = true, -- Paladin/Devotion Aura
-			[642] = true, -- Paladin/Divine Shield
-			[853] = true, -- Paladin/Hammer of Justice
-			[96231] = true, -- Paladin/Rebuke
-			[20066] = true, -- Paladin/Repentance
---
-			[19236] = true, -- Priest/Desperate Prayer
-			[47585] = true, -- Priest/Dispersion
-			[47788] = true, -- Priest/Guardian Spirit
-			[73325] = true, -- Priest/Leap of Faith
-			[33206] = true, -- Priest/Pain Suppression
-			[8122] = true, -- Priest/Psychic Scream
-			[527] = true, -- Priest/Purify
-			[15487] = true, -- Priest/Silence
-			[10060] = true, -- V: Priest/Power Infusion
---
-			[13750] = true, -- Rogue/Adrenaline Rush
-			[2094] = true, -- Rogue/Blind
-			[31224] = true, -- Rogue/Cloak of Shadows
-			[1766] = true, -- Rogue/Kick
-			[137619] = true, -- Rogue/Marked for Death
-			[121471] = true, -- Rogue/Shadow Blades
-			[185313] = true, -- Rogue/Shadow Dance. V: changed ID in legion
-			[76577] = true, -- Rogue/Smoke Bomb
-			[1856] = true, -- Rogue/Vanish
-			[79140] = true, -- Rogue/Vendetta
---
-			[114049] = true, -- Shaman/Ascendance
-			[51886] = true, -- Shaman/Cleanse Spirit
-			[108280] = true, -- Shaman/Healing Tide Totem
-			[51514] = true, -- Shaman/Hex
-			[77130] = true, -- Shaman/Purify Spirit
-			[113286] = true, -- Shaman/Solar Beam
-			[98008] = true, -- Shaman/Spirit Link Totem
-			[79206] = true, -- Shaman/Spiritwalker's Grace
-			[51490] = true, -- Shaman/Thunderstorm
-			[57994] = true, -- Shaman/Wind Shear
---
-			[89766] = true, -- Warlock/Axe Toss
-			[48020] = true, -- Warlock/Demonic Circle: Teleport
-			[5484] = true, -- Warlock/Howl of Terror
-			[6789] = true, -- Warlock/Mortal Coil
-			[115781] = true, -- Warlock/Optical Blast
-			[30283] = true, -- Warlock/Shadowfury
-			[89808] = true, -- Warlock/Singe Magic
-			[19647] = true, -- Warlock/Spell Lock
-			[104773] = true, -- Warlock/Unending Resolve
---
-			[107574] = true, -- Warrior/Avatar
-			[118038] = true, -- Warrior/Die by the Sword
-			[5246] = true, -- Warrior/Intimidating Shout
-			[6552] = true, -- Warrior/Pummel
-			[1719] = true, -- Warrior/Recklessness
-			[871] = true, -- Warrior/Shield Wall
-			[46968] = true, -- Warrior/Shockwave
-			[23920] = true, -- Warrior/Spell Reflection
-		},
-		{ -- group 2
-			[336126] = true, -- Gladiator's Medallion
-			[336135] = true, -- Adaptation
-			[336128] = true, -- Relentless
-		}
-	}
-end
-
+local GetDefaultSpells = GladiusEx.Data.DefaultCooldowns
 
 local function MakeGroupDb(settings)
 	local defaults = {
@@ -2097,11 +1959,11 @@ function Cooldowns:MakeGroupOptions(unit, group)
 					-- spec
 					for _, specID in ipairs(spelldata.specID) do
 						if not args[spelldata.class].args["spec" .. specID] then
-							local _, name, description, icon, role, class = GetSpecializationInfoByID(specID)
+							local _, name, description, icon, role, class = GetSpecializationInfoByID and GetSpecializationInfoByID(specID)
 							args[spelldata.class].args["spec" .. specID] = {
 								type = "group",
-								name = name,
-								icon = icon,
+								name = name or "",
+								icon = icon or "",
 								disabled = function() return not self:IsUnitEnabled(unit) end,
 								order = 3 + specID,
 								args = {}

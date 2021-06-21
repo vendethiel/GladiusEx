@@ -27,7 +27,7 @@ GladiusEx.defaults = {
 			["arena5"] = { health = 100000, maxHealth = 370000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Gnome", specID = 71, covenant = "VENTHYR" },
 
 			["player"] = { health = 250000, maxHealth = 350000, power = 18000, maxPower = 300000, powerType = 0, unitClass = "PRIEST", unitRace = "Draenei", specID = 256 },
-			["party1"] = { health = 300000, maxHealth = 320000, power = 10000, maxPower = 12000, powerType = 3, unitClass = "MONK", unitRace = "Pandaren", specID = 269, covenant = "NIGHTFAE" },
+			["party1"] = { health = 300000, maxHealth = 320000, power = 10000, maxPower = 12000, powerType = 3, unitClass = "SHAMAN", unitRace = "Pandaren", specID = 269, covenant = "NIGHTFAE" },
 			["party2"] = { health = 220000, maxHealth = 350000, power = 280000, maxPower = 300000, powerType = 0, unitClass = "WARLOCK", unitRace = "Orc", specID = 267, covenant = "NECROLORD" },
 			["party3"] = { health = 100000, maxHealth = 300000, power = 10, maxPower = 100, powerType = 1, unitClass = "WARRIOR", unitRace = "Troll", specID = 71, covenant = "KYRIAN" },
 			["party4"] = { health = 200000, maxHealth = 400000, power = 80, maxPower = 130, powerType = 6, unitClass = "DEATHKNIGHT", unitRace = "Dwarf", specID = 252, covenant = "VENTHYR" },
@@ -795,9 +795,11 @@ function GladiusEx:SetupOptions()
 	options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.dbi)
 
 	-- add dual-spec support
-	local LibDualSpec = LibStub("LibDualSpec-1.0")
-	LibDualSpec:EnhanceDatabase(self.dbi, "GladiusEx")
-	LibDualSpec:EnhanceOptions(options.args.profiles, self.dbi)
+  if GladiusEx.IS_RETAIL then
+    local LibDualSpec = LibStub("LibDualSpec-1.0")
+    LibDualSpec:EnhanceDatabase(self.dbi, "GladiusEx")
+    LibDualSpec:EnhanceOptions(options.args.profiles, self.dbi)
+  end
 
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("GladiusEx", options)
 

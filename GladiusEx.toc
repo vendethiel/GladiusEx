@@ -9,6 +9,7 @@ templates.xml
 localization\enUS.lua
 localization\locales.lua
 GladiusEx.lua
+Data-Mainline.lua
 options.lua
 modules\alerts.lua
 modules\announcements.lua

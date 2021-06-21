@@ -12,32 +12,9 @@ local defaults = {
 
 local Interrupt = GladiusEx:NewGladiusExModule("Interrupts", defaults, defaults)
 	
-INTERRUPTS = {
-	[6552] = {duration=4},    -- [Warrior] Pummel
-	[96231] = {duration=4},   -- [Paladin] Rebuke
-	[231665] = {duration=3},  -- [Paladin] Avengers Shield
-	[147362] = {duration=3},  -- [Hunter] Countershot
-	[187707] = {duration=3},  -- [Hunter] Muzzle
-	[1766] = {duration=5},    -- [Rogue] Kick
-	[183752] = {duration=3},  -- [DH] Consume Magic
-	[47528] = {duration=3},   -- [DK] Mind Freeze
-	[91802] = {duration=2},   -- [DK] Shambling Rush
-	[57994] = {duration=3},   -- [Shaman] Wind Shear
-	[115781] = {duration=6},  -- [Warlock] Optical Blast
-	[19647] = {duration=6},   -- [Warlock] Spell Lock
-	[212619] = {duration=6},  -- [Warlock] Call Felhunter
-	[132409] = {duration=6},  -- [Warlock] Spell Lock
-	[171138] = {duration=6},  -- [Warlock] Shadow Lock
-	[2139] = {duration=6},    -- [Mage] Counterspell
-	[116705] = {duration=4},  -- [Monk] Spear Hand Strike
-	[106839] = {duration=4},  -- [Feral] Skull Bash
-	[93985] = {duration=4},   -- [Feral] Skull Bash
-	[97547] = {duration=5},   -- [Moonkin] Solar Beam
-}
+INTERRUPTS = GladiusEx.Data.Interrupts()
 
-CLASS_INTERRUPT_MODIFIERS = {
-  [GladiusEx:SafeGetSpellName(317920)] = 0.7, -- Concentration Aura
-}
+CLASS_INTERRUPT_MODIFIERS = GladiusEx.Data.InterruptModifiers()
 
 function Interrupt:OnEnable()
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")

@@ -34,8 +34,10 @@ local HealthBar = GladiusEx:NewGladiusExModule("HealthBar", {
 function HealthBar:OnEnable()
 	self:RegisterEvent("UNIT_HEALTH", "UpdateHealthEvent")
 	self:RegisterEvent("UNIT_MAXHEALTH", "UpdateHealthEvent")
-	self:RegisterEvent("UNIT_HEAL_PREDICTION", "UpdateIncomingHealsEvent")
-	self:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED", "UpdateIncomingAbsorbsEvent")
+  if GladiusEx.IS_RETAIL then
+    self:RegisterEvent("UNIT_HEAL_PREDICTION", "UpdateIncomingHealsEvent")
+    self:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED", "UpdateIncomingAbsorbsEvent")
+  end
 	self:RegisterMessage("GLADIUS_SPEC_UPDATE", "UpdateColorEvent")
 
 	if not self.frame then
@@ -182,7 +184,8 @@ function HealthBar:UpdateIncomingHeals(unit)
 	if not self.frame[unit] then return end
 	if not self.db[unit].healthBarIncomingHeals then return end
 
-	local incamount = UnitGetIncomingHeals(unit) or 0
+  -- TODO integrate with HealComm if present
+	local incamount = UnitGetIncomingHeals and UnitGetIncomingHeals(unit) or 0
 	self:SetIncomingBarAmount(unit, self.frame[unit].incheals, incamount, self.db[unit].healthBarIncomingHealsCap)
 end
 
@@ -190,7 +193,7 @@ function HealthBar:UpdateIncomingAbsorbs(unit)
 	if not self.frame[unit] then return end
 	if not self.db[unit].healthBarIncomingAbsorbs then return end
 
-	local incamount = UnitGetTotalAbsorbs(unit) or 0
+	local incamount = UnitGetTotalAbsorbs and UnitGetTotalAbsorbs(unit) or 0
 	self:SetIncomingBarAmount(unit, self.frame[unit].incabsorbs, incamount, self.db[unit].healthBarIncomingAbsorbsCap)
 end
 

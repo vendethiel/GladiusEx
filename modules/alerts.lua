@@ -11,20 +11,13 @@ local GetTime = GetTime
 local function GetDefaultCastsSpells()
 	local h = { priority = 10, color = { r = 0, g = 1, b = 0, a = 1 } }
 	local cc = { priority = 20, color = { r = 1, g = 0, b = 0, a = 1 } }
-	return {
-		[GladiusEx:SafeGetSpellName(118)]      = cc,    -- Polymorph
-		[GladiusEx:SafeGetSpellName(5782)]     = cc,    -- Fear
-		[GladiusEx:SafeGetSpellName(51514)]    = cc,    -- Hex
-		[GladiusEx:SafeGetSpellName(20066)]    = cc,    -- Repentance
-		[GladiusEx:SafeGetSpellName(33786)]    = cc,    -- Cyclone
-	}
+  return GladiusEx.Data.DefaultAlertSpells()
 end
 
 local function GetDefaultAuraSpells()
 	local cc = { priority = 15, color = { r = 1, g = 1, b = 1, a = 1 } }
 	local im = { priority = 15, color = { r = 1, g = 1, b = 0, a = 1 } }
-	return {
-	}
+	return GladiusEx.Data.DefaultAlertSpells()
 end
 
 local Alerts = GladiusEx:NewGladiusExModule("Alerts", {
