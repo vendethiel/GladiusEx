@@ -23,3 +23,7 @@ end
 function GladiusEx.Data.Interrupts()
   return {}
 end
+
+function GladiusEx.Data.GetSpecializationInfoByID(id)
+end
+

@@ -277,12 +277,12 @@ function ClassIcon:SetClassIcon(unit)
 		left, right, top, bottom = 0, 1, 0, 1
 		needs_crop = true
 	elseif self.db[unit].classIconMode == "ROLE" and specID then
-		local _, _, _, _, role = GetSpecializationInfoByID(specID)
+		local _, _, _, _, role = GladiusEx.Data.GetSpecializationInfoByID(specID)
 		texture = [[Interface\LFGFrame\UI-LFG-ICON-ROLES]]
 		left, right, top, bottom = GetTexCoordsForRole(role)
 		needs_crop = false
 	elseif self.db[unit].classIconMode == "SPEC" and specID then
-		texture = select(4, GetSpecializationInfoByID and GetSpecializationInfoByID(specID))
+		texture = select(4, GladiusEx.Data.GetSpecializationInfoByID(specID))
 		left, right, top, bottom = 0, 1, 0, 1
 		needs_crop = true
 	else

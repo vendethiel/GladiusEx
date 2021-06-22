@@ -750,3 +750,7 @@ return {
     [GladiusEx:SafeGetSpellName(317920)] = 0.7, -- Concentration Aura
   }
 end
+
+function GladiusEx.Data.GetSpecializationInfoByID(id)
+  return GetSpecializationInfoByID(id)
+end
