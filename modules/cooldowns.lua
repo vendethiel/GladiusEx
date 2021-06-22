@@ -117,12 +117,14 @@ fn.merge(defaults, {
 			cooldownsAnchor = "TOPLEFT",
 			cooldownsRelativePoint = "BOTTOMLEFT",
 			cooldownsGrow = "DOWNRIGHT",
+      cooldownsOffsetY = -25,
 		}),
 		["group_2"] = fn.merge(g2_defaults, {
 			cooldownsAttachTo = "Frame",
 			cooldownsAnchor = "TOPLEFT",
 			cooldownsRelativePoint = "TOPRIGHT",
 			cooldownsGrow = "DOWNRIGHT",
+      cooldownsOffsetX = 5,
 		})
 	},
 }),

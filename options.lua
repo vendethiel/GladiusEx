@@ -48,12 +48,12 @@ local group_defaults = {
 	deadAlpha = 0.2,
 	backgroundColor = { r = 0, g = 0, b = 0, a = 0 },
 	backgroundPadding = 5,
-	margin = 2,
-	barWidth = 130,
+	margin = 5,
+	barWidth = 100,
 	barsHeight = 40,
 	frameScale = 1,
-	borderSize = 2,
-	modMargin = 1,
+	borderSize = 0,
+	modMargin = 0,
 	backdropColor = { r = 0, g = 0, b = 0, a = 0.8 },
 }
 

@@ -10,9 +10,9 @@ local pairs, unpack = pairs, unpack
 local GetTime, GetSpellTexture, UnitGUID = GetTime, GetSpellTexture, UnitGUID
 
 local defaults = {
-	drTrackerAdjustSize = true,
+	drTrackerAdjustSize = false,
 	drTrackerMargin = 1,
-	drTrackerSize = 40,
+	drTrackerSize = 25,
 	drTrackerCrop = true,
 	drTrackerOffsetX = 0,
 	drTrackerOffsetY = 0,

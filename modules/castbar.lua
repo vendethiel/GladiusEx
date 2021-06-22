@@ -14,11 +14,9 @@ local time_text_format_normal = "%.01f "
 local time_text_format_delay = "+%.01f %.01f "
 
 local defaults = {
-		castBarAttachMode = "InFrame",
-		castBarOffsetX = 0,
-		castBarOffsetY = 0,
+		castBarOffsetX = -20,
+		castBarOffsetY = -5,
 		castBarWidth = 175,
-		castBarPosition = "BOTTOM",
 		castBarHeight = 20,
 		castBarInverse = false,
 		castBarColor = { r = 1, g = 1, b = 0, a = 1 },
@@ -53,9 +51,11 @@ local defaults = {
 
 local CastBar = GladiusEx:NewGladiusExModule("CastBar",
 	fn.merge(defaults, {
+    castBarAttachMode = "Widget",
 		castBarAttachTo = "Frame",
-		castBarRelativePoint = "TOPLEFT",
-		castBarAnchor = "TOPRIGHT",
+		castBarRelativePoint = "BOTTOMLEFT",
+		castBarAnchor = "TOPLEFT",
+		castBarPosition = "BOTTOMLEFT",
 
 		castIconPosition = "LEFT",
 		castTextAlign = "LEFT",
@@ -66,9 +66,11 @@ local CastBar = GladiusEx:NewGladiusExModule("CastBar",
 		castTimeTextOffsetY = 0,
 	}),
 	fn.merge(defaults, {
+		castBarAttachMode = "InFrame",
 		castBarAttachTo = "Frame",
-		castBarRelativePoint = "TOPRIGHT",
-		castBarAnchor = "TOPLEFT",
+		castBarRelativePoint = "BOTTOMLEFT",
+		castBarAnchor = "TOPRIGHT",
+		castBarPosition = "BOTTOM",
 
 		castIconPosition = "RIGHT",
 		castTextAlign = "RIGHT",
