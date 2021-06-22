@@ -20,6 +20,13 @@ local TESTING_EXTRA_SPELLS = {
 
 local GetDefaultSpells = GladiusEx.Data.DefaultCooldowns
 
+local GetSpecData
+if GladiusEx.IS_RETAIL then
+  GetSpecData = GetSpecializationInfoByID
+else
+  GetSpecData = function (id) end
+end
+
 local function MakeGroupDb(settings)
 	local defaults = {
 		cooldownsAttachTo = "Frame",
@@ -1959,7 +1966,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 					-- spec
 					for _, specID in ipairs(spelldata.specID) do
 						if not args[spelldata.class].args["spec" .. specID] then
-							local _, name, description, icon, role, class = GetSpecializationInfoByID and GetSpecializationInfoByID(specID)
+							local _, name, description, icon, role, class = GetSpecData(specID)
 							args[spelldata.class].args["spec" .. specID] = {
 								type = "group",
 								name = name or "",
