@@ -527,7 +527,6 @@ function GladiusEx.Data.DefaultClassicon()
 		[GladiusEx:SafeGetSpellName(19236)]  	= 1,	-- Desperate Prayer
 		[GladiusEx:SafeGetSpellName(185311)]  	= 1,	-- Crimson Vial
 		[GladiusEx:SafeGetSpellName(212198)]  	= 1,	-- Create: Crimson Vial (pvp talent)
-		[204293]			  	= 1,	-- Spirit Link (pvp tal)
 		[2645]				  	= 1,	-- Ghost Wolf
 		[GladiusEx:SafeGetSpellName(213871)]  	= 1,	-- Bodyguard
 		[GladiusEx:SafeGetSpellName(197690)]  	= 1,	-- Defensive Stance
