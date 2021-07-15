@@ -474,7 +474,7 @@ function GladiusEx.Data.DefaultClassicon()
  
 		-- Offensives II (2)
 
-		[GladiusEx:SafeGetSpellName(207289)]  	= 2,	-- Unholy Assault
+		[GladiusEx:SafeGetSpellName(207289)]  	= 2,	-- Unholy Assault (old Frenzy)
 		[GladiusEx:SafeGetSpellName(47568)]  	= 2,	-- Empower Rune Weapon
 		[GladiusEx:SafeGetSpellName(202425)]  	= 2,	-- Warrior of Elune (3 instant Starfires)
 		[GladiusEx:SafeGetSpellName(5217)]  	= 2,	-- Tiger's Fury
@@ -589,22 +589,48 @@ function GladiusEx.Data.DefaultCooldowns()
 			--[69070] = true, -- Goblin/Rocket Jump
 			--[7744] = true, -- Scourge/Will of the Forsaken
 
-			[48707] = true, -- Death Knight/Anti-Magic Shell
-			[108194] = true, -- Death Knight/Asphyxiate
+			[108194] = true, -- Death Knight/Asphyxiate (Frost & Unholy)
+			[221562] = true, -- Death Knight/Asphyxiate (Blood)
 			[49576] = true, -- Death Knight/Death Grip
 			[48792] = true, -- Death Knight/Icebound Fortitude
 			[49039] = true, -- Death Knight/Lichborne
 			[47528] = true, -- Death Knight/Mind Freeze
 			[51271] = true, -- Death Knight/Pillar of Frost
+			[152279] = true, -- Death Knight/Breath of Sindragosa
+			[279302] = true, -- Death Knight/Frostwyrm's Fury
+			[305392] = true, -- Death Knight/Chill Streak
 			[47476] = true, -- Death Knight/Strangulate
 			[49206] = true, -- Death Knight/Summon Gargoyle
+			[275699] = true, -- Death Knight/Apocalypse
+			[48707] = true, -- Death Knight/Anti-Magic Shell
+			[51052] = true, -- Death Knight/Anti-Magic Zone
+			[48265] = true, -- Death Knight/Death's Advance
+			[212552] = true, -- Death Knight/Wraith Walk
+			[77606] = true, -- Death Knight/Dark Simulacrum
+			[48743] = true, -- Death Knight/Death Pact
+			[55233] = true, -- Death Knight/Vampiric Blood
+			[47476] = true, -- Death Knight/Strangulate
+			[42650] = true, -- Death Knight/Army of the Dead
+			[63560] = true, -- Death Knight/Dark Transformation
+			[207289] = true, -- Death Knight/Unholy Assault (old Frenzy)
+			[47481] = true, -- Death Knight/Gnaw
+			[315443] = true, -- Death Knight/Abomination Limb
 
 			[191427] = true, -- Demon Hunter/Metamorphosis (Havoc)
 			[187827] = true, -- Demon Hunter/Metamorphosis (Vengeance)
 			[196555] = true, -- Demon Hunter/Netherwalk
 			[196718] = true, -- Demon Hunter/Darkness
 			[198589] = true, -- Demon Hunter/Blur
-			[183752] = true, -- Demon Hunter/Consume Magic
+			[183752] = true, -- Demon Hunter/Disrupt
+			[278326] = true, -- Demon Hunter/Consume Magic
+			[217832] = true, -- Demon Hunter/Imprison
+			[221527] = true, -- Demon Hunter/Imprison (Detainment)
+			[179057] = true, -- Demon Hunter/Chaos Nova
+			[205604] = true, -- Demon Hunter/Reverse Magic
+			[203704] = true, -- Demon Hunter/Mana Break
+			[202137] = true, -- Demon Hunter/Sigil of Silence
+			[204021] = true, -- Demon Hunter/Fiery Brand
+			[323639] = true, -- Demon Hunter/The Hunt
 
 			[22812] = true, -- Druid/Barkskin
 			[33786] = true, -- Druid/Cyclone (feral)
@@ -652,7 +678,7 @@ function GladiusEx.Data.DefaultCooldowns()
 			[116680] = true, -- Monk/Thunder Focus Tea
 			[116841] = true, -- Monk/Tiger's Lust
 			[122470] = true, -- Monk/Touch of Karma
---
+
 			[115750] = true, -- Paladin/Blinding Light
 			[4987] = true, -- Paladin/Cleanse
 			[31821] = true, -- Paladin/Devotion Aura
@@ -660,7 +686,7 @@ function GladiusEx.Data.DefaultCooldowns()
 			[853] = true, -- Paladin/Hammer of Justice
 			[96231] = true, -- Paladin/Rebuke
 			[20066] = true, -- Paladin/Repentance
---
+
 			[19236] = true, -- Priest/Desperate Prayer
 			[47585] = true, -- Priest/Dispersion
 			[47788] = true, -- Priest/Guardian Spirit
@@ -669,8 +695,8 @@ function GladiusEx.Data.DefaultCooldowns()
 			[8122] = true, -- Priest/Psychic Scream
 			[527] = true, -- Priest/Purify
 			[15487] = true, -- Priest/Silence
-			[10060] = true, -- V: Priest/Power Infusion
---
+			[10060] = true, -- Priest/Power Infusion
+
 			[13750] = true, -- Rogue/Adrenaline Rush
 			[2094] = true, -- Rogue/Blind
 			[31224] = true, -- Rogue/Cloak of Shadows
@@ -681,7 +707,7 @@ function GladiusEx.Data.DefaultCooldowns()
 			[76577] = true, -- Rogue/Smoke Bomb
 			[1856] = true, -- Rogue/Vanish
 			[79140] = true, -- Rogue/Vendetta
---
+
 			[114049] = true, -- Shaman/Ascendance
 			[51886] = true, -- Shaman/Cleanse Spirit
 			[108280] = true, -- Shaman/Healing Tide Totem
@@ -692,7 +718,7 @@ function GladiusEx.Data.DefaultCooldowns()
 			[79206] = true, -- Shaman/Spiritwalker's Grace
 			[51490] = true, -- Shaman/Thunderstorm
 			[57994] = true, -- Shaman/Wind Shear
---
+
 			[89766] = true, -- Warlock/Axe Toss
 			[48020] = true, -- Warlock/Demonic Circle: Teleport
 			[5484] = true, -- Warlock/Howl of Terror
@@ -702,7 +728,7 @@ function GladiusEx.Data.DefaultCooldowns()
 			[89808] = true, -- Warlock/Singe Magic
 			[19647] = true, -- Warlock/Spell Lock
 			[104773] = true, -- Warlock/Unending Resolve
---
+
 			[107574] = true, -- Warrior/Avatar
 			[118038] = true, -- Warrior/Die by the Sword
 			[5246] = true, -- Warrior/Intimidating Shout
@@ -711,6 +737,10 @@ function GladiusEx.Data.DefaultCooldowns()
 			[871] = true, -- Warrior/Shield Wall
 			[46968] = true, -- Warrior/Shockwave
 			[23920] = true, -- Warrior/Spell Reflection
+
+      [300728] = true, -- Covenant/Door of Shadows
+      [324631] = true, -- Covenant/Fleshcraft
+      [310143] = true, -- Covenant/Soulshape
 		},
 		{ -- group 2
 			[336126] = true, -- Gladiator's Medallion
