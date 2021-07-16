@@ -4,6 +4,8 @@
 ## SavedVariables: GladiusExDB
 ## OptionalDeps: Ace3, DRList-1.0, LibSharedMedia-3.0, LibGroupInSpecT-1.1, LibCooldownTracker-1.0, LibFunctional-1.0, LibCustomGlow-1.0, Clique, Masque, LibDualSpec-1.0, LibRangeCheck-2.0, LibDispellable-1.0, AceGUI-3.0-SharedMediaWidgets
 
+
+
 embeds-bcc.xml
 templates.xml
 localization\enUS.lua
