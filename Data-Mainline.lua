@@ -214,7 +214,6 @@ function GladiusEx.Data.DefaultClassicon()
 
 
 
-		[330279]			  	= 6.1,	-- Intervene Spell Reflect (a/f honor talent)
 		[335255]			  	= 6.1,	-- Spell Reflection (legy)(party reflect)
 
 
