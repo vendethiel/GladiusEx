@@ -180,7 +180,7 @@ local function CanDispel(unit, buffs, dispelType, spellID)
   if isBuff and IsPlayerSpell(115450) and dispelType == "MAGIC" then
     return true
   end
-  return CanDispel(unit, buffs, dispelType, spellID)
+  return LD:CanDispel(unit, buffs, dispelType, spellID)
 end
 
 function Auras:UpdateUnitAuras(event, unit)
