@@ -853,7 +853,7 @@ function GladiusEx:GroupInSpecT_Update(event, guid, unit, info)
 end
 
 function GladiusEx:CheckUnitSpecialization(unit)
-  if not LGIST.GetCachedInfo then return end
+	if not LGIST or not LGIST.GetCachedInfo then return end
 	local info = LGIST:GetCachedInfo(UnitGUID(unit))
 
 	if info then
