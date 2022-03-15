@@ -1,9 +1,11 @@
-﻿GladiusEx = LibStub("AceAddon-3.0"):NewAddon("GladiusEx", "AceEvent-3.0")
+GladiusEx = LibStub("AceAddon-3.0"):NewAddon("GladiusEx", "AceEvent-3.0")
 
 GladiusEx.IS_RETAIL = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 GladiusEx.IS_TBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+GladiusEx.IS_WOTLKC = WOW_PROJECT_ID == 123123123
+GladiusEx.IS_CLASSIC = GladiusEx.IS_TBCC or GladiusEx.IS_WOTLKC
 
-local LGIST = LibStub:GetLibrary("LibGroupInSpecT-1.1")
+local LGIST = GladiusEx.IS_RETAIL and LibStub:GetLibrary("LibGroupInSpecT-1.1")
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local RC = LibStub("LibRangeCheck-2.0")
 local LSM = LibStub("LibSharedMedia-3.0")
@@ -384,10 +386,12 @@ function GladiusEx:OnEnable()
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("UNIT_PET", "UpdateUnitGUID")
 	self:RegisterEvent("UNIT_PORTRAIT_UPDATE", "UpdateUnitGUID")
-  if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-    self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
-  end
-	LGIST.RegisterCallback(self, "GroupInSpecT_Update")
+	if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+		self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
+	end
+	if LGIST then
+		LGIST.RegisterCallback(self, "GroupInSpecT_Update")
+	end
 	RC.RegisterCallback(self, RC.CHECKERS_CHANGED, "UpdateRangeCheckers")
 	self.dbi.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
 	self.dbi.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
