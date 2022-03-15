@@ -277,9 +277,9 @@ function GladiusEx.Data.DefaultCooldowns()
       [16188] = true, -- Shaman/Nature's Swiftness
       [8177] = true, -- Shaman/Grounding Totem
       [30823] = true, -- Shaman/Shamanistic Rage
-      [5730] = true, -- Shaman/Stoneclaw
 		},
 		{ -- group 2
+		[42292] = true, -- Trinket
 		}
 	}
 end

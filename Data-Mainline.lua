@@ -744,6 +744,8 @@ function GladiusEx.Data.DefaultCooldowns()
 			[336126] = true, -- Gladiator's Medallion
 			[336135] = true, -- Adaptation
 			[336128] = true, -- Relentless
+			[363117] = true, -- Fastidious Resolve
+			[363121] = true, -- Echoing Resolve
 		}
 	}
 end
