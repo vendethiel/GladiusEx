@@ -1909,7 +1909,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
 			end
 
 			local cdstr = spelldata.cooldown and "[" .. spelldata.cooldown .. "s]" or ""
-			local namestr = string.format(L[" |T%s:20|t %s [%ss] %s"], spelldata.icon, spelldata.name, cdstr, catstr or "")
+			local namestr = string.format(L[" |T%s:20|t %s %s %s"], spelldata.icon, spelldata.name, cdstr, catstr or "")
 
 			local function MakeSpellDesc()
 				local spelldesc = FormatSpellDescription(spellid)

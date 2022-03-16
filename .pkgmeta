@@ -24,11 +24,11 @@ externals:
   libs/CallbackHandler-1.0:
     url: svn://svn.wowace.com/wow/callbackhandler/mainline/trunk/CallbackHandler-1.0
   libs/LibDispellable-1.0:
-    url: git://github.com/AdiAddons/LibDispellable-1.0.git
+    url: git@github.com:AdiAddons/LibDispellable-1.0.git
   libs/LibDualSpec-1.0:
-    url: git://git.wowace.com/wow/libdualspec-1-0/mainline.git
+    url: ssh://git.wowace.com/wow/libdualspec-1-0/mainline.git
   libs/LibFunctional-1.0:
-    url: git://github.com/slaren/LibFunctional-1.0.git
+    url: git@github.com:slaren/LibFunctional-1.0.git
   libs/LibGroupInSpecT-1.1:
     url: svn://svn.wowace.com/wow/libgroupinspect/mainline/trunk
   libs/LibRangeCheck-2.0:
@@ -36,9 +36,9 @@ externals:
   libs/LibSharedMedia-3.0:
     url: svn://svn.wowace.com/wow/libsharedmedia-3-0/mainline/trunk
   libs/LibCooldownTracker-1.0:
-    url: https://github.com/vendethiel/LibCooldownTracker-10.git
+    url: git@github.com:vendethiel/LibCooldownTracker-10.git
   libs/DRList-1.0:
-    url: git://github.com/wardz/DRList-1.0.git
+    url: git@github.com:wardz/DRList-1.0.git
   libs/LibCustomGlow-1.0:
     url: https://github.com/Stanzilla/LibCustomGlow
 
