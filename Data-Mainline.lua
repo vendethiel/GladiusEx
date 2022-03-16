@@ -595,23 +595,15 @@ function GladiusEx.Data.DefaultCooldowns()
 			[47528] = true, -- Death Knight/Mind Freeze
 			[51271] = true, -- Death Knight/Pillar of Frost
 			[152279] = true, -- Death Knight/Breath of Sindragosa
-			[279302] = true, -- Death Knight/Frostwyrm's Fury
 			[305392] = true, -- Death Knight/Chill Streak
 			[47476] = true, -- Death Knight/Strangulate
-			[49206] = true, -- Death Knight/Summon Gargoyle
-			[275699] = true, -- Death Knight/Apocalypse
 			[48707] = true, -- Death Knight/Anti-Magic Shell
 			[51052] = true, -- Death Knight/Anti-Magic Zone
-			[48265] = true, -- Death Knight/Death's Advance
-			[212552] = true, -- Death Knight/Wraith Walk
 			[77606] = true, -- Death Knight/Dark Simulacrum
 			[48743] = true, -- Death Knight/Death Pact
 			[55233] = true, -- Death Knight/Vampiric Blood
 			[47476] = true, -- Death Knight/Strangulate
-			[42650] = true, -- Death Knight/Army of the Dead
 			[63560] = true, -- Death Knight/Dark Transformation
-			[207289] = true, -- Death Knight/Unholy Assault (old Frenzy)
-			[47481] = true, -- Death Knight/Gnaw
 			[315443] = true, -- Death Knight/Abomination Limb
 
 			[191427] = true, -- Demon Hunter/Metamorphosis (Havoc)

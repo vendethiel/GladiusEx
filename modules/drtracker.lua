@@ -14,6 +14,7 @@ local defaults = {
 	drTrackerMargin = 1,
 	drTrackerSize = 25,
 	drTrackerCrop = true,
+	drTrackerCooldownSwipeColor = { r = 0, g = 0, b = 0, a = 0.6 },
 	drTrackerOffsetX = 0,
 	drTrackerOffsetY = 0,
 	drTrackerFrameLevel = 8,
@@ -21,6 +22,7 @@ local defaults = {
 	drTrackerGlossColor = { r = 1, g = 1, b = 1, a = 0.4 },
 	drTrackerCooldown = true,
 	drTrackerCooldownReverse = false,
+	drTrackerBorder = true,
 	drFontSize = 18,
 	drCategories = {},
 	drIcons = {},
@@ -97,6 +99,9 @@ function DRTracker:CreateIcon(unit, drCat)
 
 	f.text = f:CreateFontString(nil, "OVERLAY")
 
+	f.border = f:CreateTexture(nil, "OVERLAY")
+	f.border:SetAllPoints()
+
 	self.frame[unit].tracker[drCat] = f
 end
 
@@ -113,6 +118,8 @@ function DRTracker:UpdateIcon(unit, drCat)
 	tracked.normalTexture:SetVertexColor(self.db[unit].drTrackerGlossColor.r, self.db[unit].drTrackerGlossColor.g,
 		self.db[unit].drTrackerGlossColor.b, self.db[unit].drTrackerGloss and self.db[unit].drTrackerGlossColor.a or 0)
 
+	tracked.border:SetTexture([[Interface\Buttons\UI-Quickslot-Depress]])
+
 	-- cooldown
 	tracked.cooldown:SetReverse(self.db[unit].drTrackerCooldownReverse)
 	if self.db[unit].drTrackerCooldown then
@@ -120,6 +127,9 @@ function DRTracker:UpdateIcon(unit, drCat)
 	else
 		tracked.cooldown:Hide()
 	end
+
+	local swipeColor = self.db[unit].drTrackerCooldownSwipeColor
+	tracked.cooldown:SetSwipeColor(swipeColor.r, swipeColor.g, swipeColor.b, swipeColor.a)
 
 	-- text
 	tracked.text:SetFont(LSM:Fetch(LSM.MediaType.FONT, "2002"), self.db[unit].drFontSize, "OUTLINE")
@@ -176,6 +186,13 @@ function DRTracker:DRFaded(unit, spellID)
 		texture = GetSpellTexture(self.db[unit].drIcons[drCat])
 	end
 	tracked.texture:SetTexture(texture)
+
+	if self.db[unit].drTrackerBorder then
+		tracked.border:SetVertexColor(r, g, b, 1)
+		tracked.border:Show()
+	else
+		tracked.border:Hide()
+	end
 
 	if self.db[unit].drTrackerCooldown then
 		CooldownFrame_Set(tracked.cooldown, GetTime(), time_left, 1)
@@ -346,6 +363,22 @@ function DRTracker:GetOptions(unit)
 							name = L["Cooldown reverse"],
 							desc = L["Invert the dark/bright part of the cooldown spiral"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 13,
+						},
+						drTrackerCooldownSwipeColor = {
+							type = "color",
+              hasAlpha = true,
+							name = L["Swipe color"],
+							desc = L["Cooldown swipe color on buffs"],
+							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
+							set = function(info, r, g, b, a) return GladiusEx:SetColorOption(self.db[unit], info, r, g, b, a) end,
+							disabled = function() return not self:IsUnitEnabled(unit) or not self.db[unit].drTrackerCooldown end,
+							order = 14,
+						},
+						sep3 = {
+							type = "description",
+							name = "",
+							width = "full",
 							order = 15,
 						},
 						drTrackerCrop = {
@@ -354,12 +387,6 @@ function DRTracker:GetOptions(unit)
 							desc = L["Toggle if the icon borders should be cropped or not"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 16,
-						},
-						sep3 = {
-							type = "description",
-							name = "",
-							width = "full",
-							order = 17,
 						},
 						drTrackerGloss = {
 							type = "toggle",
@@ -383,6 +410,13 @@ function DRTracker:GetOptions(unit)
 							name = "",
 							width = "full",
 							order = 33,
+						},
+						drTrackerBorder = {
+							type = "toggle",
+							name = L["DR-Colored Border"],
+							desc = L["Adds a border to the icon the color of which will be the DR color"],
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 34,
 						},
 						drTrackerFrameLevel = {
 							type = "range",

@@ -285,7 +285,10 @@ function ClassIcon:SetClassIcon(unit)
 		texture = select(4, GladiusEx.Data.GetSpecializationInfoByID(specID))
 		left, right, top, bottom = 0, 1, 0, 1
 		needs_crop = true
-	else
+	end
+
+	-- If we don't have a texture, either because we didn't enter an `if` or we had no texture for what we asked for, default to class.
+	if not texture then
 		texture = [[Interface\Glues\CharacterCreate\UI-CharacterCreate-Classes]]
 		left, right, top, bottom = unpack(CLASS_ICON_TCOORDS[class])
 		needs_crop = true
@@ -296,7 +299,7 @@ end
 
 function ClassIcon:CreateFrame(unit)
 	local button = GladiusEx.buttons[unit]
-	if (not button) then return end
+	if not button then return end
 
 	-- create frame
 	self.frame[unit] = CreateFrame("CheckButton", "GladiusEx" .. self:GetName() .. "Frame" .. unit, button, "ActionButtonTemplate")
@@ -363,9 +366,9 @@ end
 
 function ClassIcon:GetImportantAura(unit, name)
 	local priority = self.db[unit].classIconAuras[name]
-  if type(priority) ~= "boolean" then
-    return priority
-  end
+	if type(priority) ~= "boolean" then
+		return priority
+	end
 end
 
 local function HasAuraEditBox()

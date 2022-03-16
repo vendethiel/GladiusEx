@@ -29,6 +29,8 @@ local defaults = {
 		castSpark = true,
 		castShieldIcon = true,
 		castIconPosition = "LEFT",
+		castIconOffsetX = -10,
+		castIconOffsetY = 0,
 		castText = true,
 		castTextGlobalFontSize = true,
 		castTextSize = 11,
@@ -90,10 +92,10 @@ function CastBar:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE", "UNIT_SPELLCAST_DELAYED")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
-  if GladiusEx.IS_RETAIL then
-    self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
-    self:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
-  end
+	if GladiusEx.IS_RETAIL then
+		self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
+		self:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
+	end
 	self:RegisterMessage("GLADIUS_INTERRUPT")
 
 
@@ -361,7 +363,7 @@ function CastBar:Update(unit)
 
 	-- update icon
 	self.frame[unit].icon.bg:ClearAllPoints()
-	self.frame[unit].icon.bg:SetPoint(self.db[unit].castIconPosition, self.frame[unit], self.db[unit].castIconPosition, 0, 0)
+	self.frame[unit].icon.bg:SetPoint(self.db[unit].castIconPosition, self.frame[unit], self.db[unit].castIconPosition, self.db[unit].castIconOffsetX, self.db[unit].castIconOffsetY)
 	self.frame[unit].icon.bg:SetSize(height, height)
 	self.frame[unit].icon.bg:SetTexture(bar_texture)
 	self.frame[unit].icon.bg:SetVertexColor(self.db[unit].castBarBackgroundColor.r, self.db[unit].castBarBackgroundColor.g,
@@ -659,9 +661,31 @@ function CastBar:GetOptions(unit)
 							desc = L["Position of the cast bar icon"],
 							values = { ["LEFT"] = L["Left"], ["RIGHT"] = L["Right"] },
 							disabled = function() return not self.db[unit].castIcon or not self:IsUnitEnabled(unit) end,
-							order = 30,
+							order = 26,
 						},
 						sep5 = {
+							type = "description",
+							name = "",
+							width = "full",
+							order = 27,
+						},
+						castIconOffsetX = {
+							type = "range",
+							name = L["Icon Offset X"],
+							desc = L["X offset of the icon"],
+							softMin = -100, softMax = 100, bigStep = 1,
+							disabled = function() return not self.db[unit].castIcon or not self:IsUnitEnabled(unit) end,
+							order = 28,
+						},
+						castIconOffsetY = {
+							type = "range",
+							name = L["Icon Offset Y"],
+							desc = L["Y offset of the icon"],
+							softMin = -100, softMax = 100, bigStep = 1,
+							disabled = function() return not self.db[unit].castIcon or not self:IsUnitEnabled(unit) end,
+							order = 29,
+						},
+						sep6 = {
 							type = "description",
 							name = "",
 							width = "full",
