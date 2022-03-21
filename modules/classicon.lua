@@ -13,22 +13,30 @@ local UnitIsVisible, UnitIsConnected, GetSpecializationInfoByID, GetTexCoordsFor
 local GetDefaultImportantAuras = GladiusEx.Data.DefaultClassicon
 
 local defaults = {
-	classIconMode = "SPEC",
+	classIconMode = "CLASS",
 	classIconGloss = false,
 	classIconGlossColor = { r = 1, g = 1, b = 1, a = 0.4 },
 	classIconImportantAuras = true,
 	classIconCrop = true,
 	classIconCooldown = true,
 	classIconCooldownReverse = true,
-	classIconAuras = GetDefaultImportantAuras()
+	classIconAuras = GetDefaultImportantAuras(),
+  classIconSideView = true,
+  classIconSideViewMode = "SPEC",
+  classIconSideViewAttachTo = "Frame",
+  classIconSideViewSize = 20,
 }
 
 local ClassIcon = GladiusEx:NewGladiusExModule("ClassIcon",
 	fn.merge(defaults, {
 		classIconPosition = "LEFT",
+    classIconSideViewOffsetX = 80,
+    classIconSideViewOffsetY = -20,
 	}),
 	fn.merge(defaults, {
 		classIconPosition = "RIGHT",
+    classIconSideViewOffsetX = 20,
+    classIconSideViewOffsetY = -20,
 	}))
 
 function ClassIcon:OnEnable()
@@ -49,6 +57,7 @@ function ClassIcon:OnDisable()
 
 	for unit in pairs(self.frame) do
 		self.frame[unit]:Hide()
+		self.frame[unit].sideicon:Hide()
 	end
 end
 
@@ -155,26 +164,25 @@ function ClassIcon:SetAura(unit, name, icon, duration, expires)
 	end
 end
 
-function ClassIcon:SetTexture(unit, texture, needs_crop, left, right, top, bottom)
+local function SetClassIconTexture(self, unit, prop, texture, needs_crop, left, right, top, bottom, size)
 	-- so the user wants a border, but the borders in the blizzard icons are
 	-- messed up in random ways (some are missing the alpha at the corners, some contain
 	-- random blocks of colored pixels there)
 	-- so instead of using the border already present in the icons, we crop them and add
 	-- our own (this would have been a lot easier if wow allowed alpha mask textures)
 	local needs_border = needs_crop and not self.db[unit].classIconCrop
-	local size = self:GetAttachSize(unit)
 	if needs_border then
-		self.frame[unit].texture:ClearAllPoints()
-		self.frame[unit].texture:SetPoint("CENTER")
-		self.frame[unit].texture:SetWidth(size * (1 - 6 / 64))
-		self.frame[unit].texture:SetHeight(size * (1 - 6 / 64))
-		self.frame[unit].texture_border:Show()
+		self.frame[unit][prop]:ClearAllPoints()
+		self.frame[unit][prop]:SetPoint("CENTER")
+		self.frame[unit][prop]:SetWidth(size * (1 - 6 / 64))
+		self.frame[unit][prop]:SetHeight(size * (1 - 6 / 64))
+		self.frame[unit][prop .. '_border']:Show()
 	else
-		self.frame[unit].texture:ClearAllPoints()
-		self.frame[unit].texture:SetPoint("CENTER")
-		self.frame[unit].texture:SetWidth(size)
-		self.frame[unit].texture:SetHeight(size)
-		self.frame[unit].texture_border:Hide()
+		self.frame[unit][prop]:ClearAllPoints()
+		self.frame[unit][prop]:SetPoint("CENTER")
+		self.frame[unit][prop]:SetWidth(size)
+		self.frame[unit][prop]:SetHeight(size)
+		self.frame[unit][prop .. '_border']:Hide()
 	end
 
 	if needs_crop then
@@ -187,8 +195,13 @@ function ClassIcon:SetTexture(unit, texture, needs_crop, left, right, top, botto
 	end
 
 	-- set texture
-	self.frame[unit].texture:SetTexture(texture)
-	self.frame[unit].texture:SetTexCoord(left, right, top, bottom)
+	self.frame[unit][prop]:SetTexture(texture)
+	self.frame[unit][prop]:SetTexCoord(left, right, top, bottom)
+end
+
+function ClassIcon:SetTexture(unit, texture, needs_crop, left, right, top, bottom)
+  local size = self:GetAttachSize(unit)
+  SetClassIconTexture(self, unit, 'texture', texture, needs_crop, left, right, top, bottom, size)
 
 	-- hide portrait
 	if self.frame[unit].portrait3d then
@@ -197,6 +210,62 @@ function ClassIcon:SetTexture(unit, texture, needs_crop, left, right, top, botto
 	if self.frame[unit].portrait2d then
 		self.frame[unit].portrait2d:Hide()
 	end
+end
+
+function ClassIcon:SetSideTexture(unit, texture, _needs_crop, left, right, top, bottom)
+  if self.db[unit].classIconSideView then
+    -- Never crop borders
+    SetClassIconTexture(self, unit, 'sideicon', texture, false, left, right, top, bottom, self.db[unit].classIconSideViewSize)
+    self.frame[unit].sideicon:Show()
+  else
+    self.frame[unit].sideicon:Hide()
+  end
+end
+
+local function GetClassRoleSpecIcon(self, unit, mode)
+	-- get unit class
+	local class, specID
+	if not GladiusEx:IsTesting(unit) then
+		class = select(2, UnitClass(unit))
+		specID = GladiusEx.buttons[unit].specID
+		-- check for arena prep info
+		if not class then
+			if GladiusEx.buttons[unit].class then
+				class = GladiusEx.buttons[unit].class
+			end
+		end
+	else
+		class = GladiusEx.testing[unit].unitClass
+		specID = GladiusEx.testing[unit].specID
+	end
+
+	local texture
+	local left, right, top, bottom
+	local needs_crop
+
+	if not class then
+		texture = [[Interface\Icons\INV_Misc_QuestionMark]]
+		left, right, top, bottom = 0, 1, 0, 1
+		needs_crop = true
+	elseif mode == "ROLE" and specID then
+		local _, _, _, _, role = GladiusEx.Data.GetSpecializationInfoByID(specID)
+		texture = [[Interface\LFGFrame\UI-LFG-ICON-ROLES]]
+		left, right, top, bottom = GetTexCoordsForRole(role)
+		needs_crop = false
+	elseif mode == "SPEC" and specID then
+		texture = select(4, GladiusEx.Data.GetSpecializationInfoByID(specID))
+		left, right, top, bottom = 0, 1, 0, 1
+		needs_crop = true
+	end
+
+	-- If we don't have a texture, either because we didn't enter an `if` or we had no texture for what we asked for, default to class.
+	if not texture then
+		texture = [[Interface\Glues\CharacterCreate\UI-CharacterCreate-Classes]]
+		left, right, top, bottom = unpack(CLASS_ICON_TCOORDS[class])
+		needs_crop = true
+	end
+
+  return texture, left, right, top, bottom, needs_crop
 end
 
 function ClassIcon:SetClassIcon(unit)
@@ -252,49 +321,12 @@ function ClassIcon:SetClassIcon(unit)
 		end
 	end
 
-	-- get unit class
-	local class, specID
-	if not GladiusEx:IsTesting(unit) then
-		class = select(2, UnitClass(unit))
-		specID = GladiusEx.buttons[unit].specID
-		-- check for arena prep info
-		if not class then
-			if GladiusEx.buttons[unit].class then
-				class = GladiusEx.buttons[unit].class
-			end
-		end
-	else
-		class = GladiusEx.testing[unit].unitClass
-		specID = GladiusEx.testing[unit].specID
-	end
 
-	local texture
-	local left, right, top, bottom
-	local needs_crop
-
-	if not class then
-		texture = [[Interface\Icons\INV_Misc_QuestionMark]]
-		left, right, top, bottom = 0, 1, 0, 1
-		needs_crop = true
-	elseif self.db[unit].classIconMode == "ROLE" and specID then
-		local _, _, _, _, role = GladiusEx.Data.GetSpecializationInfoByID(specID)
-		texture = [[Interface\LFGFrame\UI-LFG-ICON-ROLES]]
-		left, right, top, bottom = GetTexCoordsForRole(role)
-		needs_crop = false
-	elseif self.db[unit].classIconMode == "SPEC" and specID then
-		texture = select(4, GladiusEx.Data.GetSpecializationInfoByID(specID))
-		left, right, top, bottom = 0, 1, 0, 1
-		needs_crop = true
-	end
-
-	-- If we don't have a texture, either because we didn't enter an `if` or we had no texture for what we asked for, default to class.
-	if not texture then
-		texture = [[Interface\Glues\CharacterCreate\UI-CharacterCreate-Classes]]
-		left, right, top, bottom = unpack(CLASS_ICON_TCOORDS[class])
-		needs_crop = true
-	end
-
+  local texture, left, right, top, bottom, needs_crop = GetClassRoleSpecIcon(self, unit, self.db[unit].classIconMode)
 	self:SetTexture(unit, texture, needs_crop, left, right, top, bottom)
+
+  texture, left, right, top, bottom, needs_crop = GetClassRoleSpecIcon(self, unit, self.db[unit].classIconSideViewMode)
+  self:SetSideTexture(unit, texture, needs_crop, left, right, top, bottom)
 end
 
 function ClassIcon:CreateFrame(unit)
@@ -311,6 +343,11 @@ function ClassIcon:CreateFrame(unit)
 	self.frame[unit].texture_border = self.frame[unit]:CreateTexture(nil, "BACKGROUND", nil, -1)
 	self.frame[unit].texture_border:SetTexture([[Interface\AddOns\GladiusEx\media\icon_border]])
 	self.frame[unit].texture_border:SetAllPoints()
+
+  self.frame[unit].side = CreateFrame('Frame', nil)
+  self.frame[unit].sideicon = self.frame[unit].side:CreateTexture(nil, "OVERLAY")
+  self.frame[unit].sideicon_border = self.frame[unit].side:CreateTexture(nil, "BACKGROUND", nil, -1)
+  self.frame[unit].sideicon_border:SetTexture([[Interface\AddOns\GladiusEx\media\icon_border]])
 end
 
 function ClassIcon:Update(unit)
@@ -336,8 +373,24 @@ function ClassIcon:Update(unit)
 
 	self.frame[unit].cooldown:SetReverse(self.db[unit].classIconCooldownReverse)
 
+  -- side-view
+  local sidepoint = GladiusEx:GetAttachFrame(unit, self.db[unit].classIconSideViewAttachTo)
+  local x, y = self.db[unit].classIconSideViewOffsetX, self.db[unit].classIconSideViewOffsetY
+  x = GladiusEx:AdjustPositionOffset(sidepoint, x)
+  y = GladiusEx:AdjustPositionOffset(sidepoint, y)
+  self.frame[unit].side:SetPoint('TOPLEFT', sidepoint)
+  self.frame[unit].side:SetPoint('BOTTOMRIGHT', sidepoint, 'TOPLEFT', x, y)
+  self.frame[unit].side:SetFrameLevel(70)
+
+  self.frame[unit].sideicon:ClearAllPoints()
+  self.frame[unit].sideicon:SetAllPoints()
+
+  self.frame[unit].sideicon_border:ClearAllPoints()
+  self.frame[unit].sideicon_border:SetAllPoints()
+
 	-- hide
 	self.frame[unit]:Hide()
+  self.frame[unit].side:Hide()
 end
 
 function ClassIcon:Refresh(unit)
@@ -348,6 +401,7 @@ end
 function ClassIcon:Show(unit)
 	-- show frame
 	self.frame[unit]:Show()
+	self.frame[unit].side:Show()
 
 	-- set class icon
 	self:SetClassIcon(unit)
@@ -359,6 +413,7 @@ function ClassIcon:Reset(unit)
 
 	-- hide
 	self.frame[unit]:Hide()
+	self.frame[unit].side:Hide()
 end
 
 function ClassIcon:Test(unit)
@@ -376,10 +431,21 @@ local function HasAuraEditBox()
 end
 
 function ClassIcon:GetOptions(unit)
+	local function getOption(info)
+		return (info.arg and self.db[unit][info.arg] or self.db[unit][info[#info]])
+	end
+
+	local function setOption(info, value)
+		local key = info[#info]
+		self.db[unit][key] = value
+		GladiusEx:UpdateFrames()
+	end
 	local options
 	options = {
 		general = {
 			type = "group",
+      get = getOption,
+      set = setOption,
 			name = L["General"],
 			order = 1,
 			args = {
@@ -486,6 +552,77 @@ function ClassIcon:GetOptions(unit)
 						},
 					},
 				},
+        sideview = {
+          type = "group",
+          name = L["Side-view icon"],
+          inline = true,
+          order = 4,
+          args = {
+            classIconSideView = {
+              type = "toggle",
+              name = L["Enable"],
+              desc = L["Shows a secondary side-icon so you can keep seeing the class/role/spec while an important aura is active"],
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+              order = 1,
+            },
+						classIconSideViewMode = {
+							type = "select",
+							name = L["Show"],
+							values = {
+								["CLASS"] = L["Class"],
+								["SPEC"] = L["Spec"],
+								["ROLE"] = L["Role"],
+							},
+							desc = L["When available, show specialization instead of class icons"],
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 3,
+						},
+            classIconSideViewSize = {
+              type = "range",
+              name = L["Icon size"],
+              name = L["Side-view icon size"],
+              min = 0, softMin = 0, softMax = 40, step = 1,
+							disabled = function() return not self:IsUnitEnabled(unit) or not self.db[unit].classIconSideView end,
+              order = 5,
+            },
+						sep1 = {
+							type = "description",
+							name = "",
+							width = "full",
+							order = 7,
+						},
+            classIconSideViewAttachTo = {
+              type = "select",
+              name = L["Attach to"],
+              desc = L["Attach to the given frame"],
+              values = function() return self:GetOtherAttachPoints(unit) end,
+							disabled = function() return not self:IsUnitEnabled(unit) or not self.db[unit].classIconSideView end,
+              order = 8,
+            },
+						-- sep2 = {
+						-- 	type = "description",
+						-- 	name = "",
+						-- 	width = "full",
+						-- 	order = 10,
+						-- },
+            classIconSideViewOffsetX = {
+              type = "range",
+              name = L["Icon Offset X"],
+              desc = L["X offset of the icon"],
+              softMin = -100, softMax = 100, step = 1,
+							disabled = function() return not self:IsUnitEnabled(unit) or not self.db[unit].classIconSideView end,
+              order = 12,
+            },
+            classIconSideViewOffsetY = {
+              type = "range",
+              name = L["Icon Offset Y"],
+              desc = L["Y offset of the icon"],
+              softMin = -100, softMax = 100, step = 1,
+							disabled = function() return not self:IsUnitEnabled(unit) or not self.db[unit].classIconSideView end,
+              order = 15,
+            },
+          }
+        }
 			},
 		},
 		auraList = {

@@ -250,7 +250,7 @@ function Cooldowns:GetModuleAttachPoints(unit)
 	for group = 1, self:GetNumGroups(unit) do
 		local db = self:GetGroupDB(unit, group)
 		if not db.cooldownsDetached then
-			t["Cooldowns_" .. db.cooldownsGroupId] = string.format(L["Cooldowns group %i"], group)
+			t["Cooldowns_" .. db.cooldownsGroupId] = string.format(L["Cooldowns group %s"], db.name and '"' .. db.name .. '"' or group)
 		end
 	end
 	return t

@@ -295,3 +295,6 @@ end
 function GladiusEx.Data.GetSpecializationInfoByID(id)
 end
 
+function GladiusEx.Data.GetNumSpecializationsForClassID(classID)
+  return 0
+end

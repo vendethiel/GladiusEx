@@ -688,7 +688,7 @@ function GladiusEx:SetupOptions()
 							local classDisplayName, classTag = GetClassInfo(classID)
 							local color = RAID_CLASS_COLORS[classTag]
 							local colorfmt = string.format("|cff%02x%02x%02x", color.r * 255, color.g * 255, color.b * 255)
-							for specNum = 1, GetNumSpecializationsForClassID(classID) do
+							for specNum = 1, GladiusEx.Data.GetNumSpecializationsForClassID(classID) do
 								local specID, name, description, icon, background, role = GetSpecializationInfoForClassID(classID, specNum)
 								t[specID] = string.format("%s%s/%s", colorfmt, classDisplayName, name)
 							end
