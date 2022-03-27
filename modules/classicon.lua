@@ -21,7 +21,6 @@ local defaults = {
 	classIconCooldown = true,
 	classIconCooldownReverse = true,
 	classIconAuras = GetDefaultImportantAuras(),
-  classIconSideView = true,
   classIconSideViewMode = "SPEC",
   classIconSideViewAttachTo = "Frame",
   classIconSideViewSize = 20,
@@ -29,11 +28,13 @@ local defaults = {
 
 local ClassIcon = GladiusEx:NewGladiusExModule("ClassIcon",
 	fn.merge(defaults, {
+    classIconSideView = true,
 		classIconPosition = "LEFT",
     classIconSideViewOffsetX = 80,
     classIconSideViewOffsetY = -20,
 	}),
 	fn.merge(defaults, {
+    classIconSideView = false,
 		classIconPosition = "RIGHT",
     classIconSideViewOffsetX = 20,
     classIconSideViewOffsetY = -20,
@@ -57,7 +58,7 @@ function ClassIcon:OnDisable()
 
 	for unit in pairs(self.frame) do
 		self.frame[unit]:Hide()
-		self.frame[unit].sideicon:Hide()
+		self.frame[unit].side:Hide()
 	end
 end
 
@@ -216,9 +217,9 @@ function ClassIcon:SetSideTexture(unit, texture, _needs_crop, left, right, top, 
   if self.db[unit].classIconSideView then
     -- Never crop borders
     SetClassIconTexture(self, unit, 'sideicon', texture, false, left, right, top, bottom, self.db[unit].classIconSideViewSize)
-    self.frame[unit].sideicon:Show()
+    self.frame[unit].side:Show()
   else
-    self.frame[unit].sideicon:Hide()
+    self.frame[unit].side:Hide()
   end
 end
 
