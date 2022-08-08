@@ -56,6 +56,7 @@ else
   end
 
   -- TODO TBC spec detection
+  -- TODO move this somewhere else
 end
 
 
