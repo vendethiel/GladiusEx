@@ -1,4 +1,4 @@
-﻿## Interface: 90005
+﻿## Interface: 90207
 ## Title: GladiusEx
 ## Notes: Arena unit frames and more
 ## SavedVariables: GladiusExDB

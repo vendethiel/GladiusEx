@@ -387,9 +387,6 @@ function GladiusEx:OnEnable()
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("UNIT_PET", "UpdateUnitGUID")
 	self:RegisterEvent("UNIT_PORTRAIT_UPDATE", "UpdateUnitGUID")
-	if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-		self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
-	end
 	if LGIST then
 		LGIST.RegisterCallback(self, "GroupInSpecT_Update")
 	end
