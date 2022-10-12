@@ -644,7 +644,7 @@ function DRTracker:GetOptions(unit)
 		local spellid_by_idx = {}
 		for spellid, _ in DRData:IterateSpellsByCategory(key) do
 			local spellname, _, spellicon = GetSpellInfo(spellid)
-			if not seen_icons[spellicon] then
+			if spellicon and not seen_icons[spellicon] then
 				spellid_by_idx[idx] = spellid
 				seen_icons[spellicon] = true
 				table.insert(
