@@ -46,6 +46,10 @@ if GladiusEx.IS_RETAIL then
   function IsValidSpecId(specID)
     return specID and specID > 0
   end
+
+  function GetArenaOpponentSpecInfo(id)
+    return GetArenaOpponentSpec(id)
+  end
 else
   function CountArenaOpponents()
     return 3 -- ???? TBC
@@ -53,6 +57,10 @@ else
 
   function IsValidSpecId(specID)
     return true
+  end
+
+  function GetArenaOpponentSpecInfo(id)
+    return nil
   end
 
   -- TODO TBC spec detection
@@ -677,7 +685,7 @@ function GladiusEx:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
 
 	local numOpps = CountArenaOpponents()
 	for i = 1, numOpps do
-		local specID = GetArenaOpponentSpec(i)
+		local specID = GetArenaOpponentSpecInfo(i)
 		local unitid = "arena" .. i
 
 		if IsValidSpecId(specID) then
@@ -696,7 +704,7 @@ end
 function GladiusEx:CheckOpponentSpecialization(unit)
 	local id = strmatch(unit, "^arena(%d+)$")
 	if id then
-		local specID = GetArenaOpponentSpec(tonumber(id))
+		local specID = GetArenaOpponentSpecInfo(tonumber(id))
 		self:UpdateUnitSpecialization(unit, specID)
 	end
 end
