@@ -217,9 +217,6 @@ function ClassIcon:SetSideTexture(unit, texture, _needs_crop, left, right, top, 
   if self.db[unit].classIconSideView then
     -- Never crop borders
     SetClassIconTexture(self, unit, 'sideicon', texture, false, left, right, top, bottom, self.db[unit].classIconSideViewSize)
-    self.frame[unit].side:Show()
-  else
-    self.frame[unit].side:Hide()
   end
 end
 
@@ -328,6 +325,12 @@ function ClassIcon:SetClassIcon(unit)
 
   texture, left, right, top, bottom, needs_crop = GetClassRoleSpecIcon(self, unit, self.db[unit].classIconSideViewMode)
   self:SetSideTexture(unit, texture, needs_crop, left, right, top, bottom)
+
+  if self.db[unit].classIconSideView then
+    self.frame[unit].side:Show()
+  else
+    self.frame[unit].side:Hide()
+  end
 end
 
 function ClassIcon:CreateFrame(unit)

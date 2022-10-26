@@ -5,7 +5,9 @@ function GladiusEx.Data.DefaultAlertSpells()
 end
 
 function GladiusEx.Data.DefaultAuras()
-	return {}
+	return {
+    [GladiusEx:SafeGetSpellName(57940)] = true, -- Essence of Wintergrasp
+  }
 end
 
 function GladiusEx.Data.DefaultClassicon()

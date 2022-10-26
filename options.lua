@@ -38,6 +38,10 @@ GladiusEx.defaults = {
 	}
 }
 
+-- Blizzard is incompetent, more news at 11
+-- On classic, MAX_CLASSES returns 10, even though druid is 11, and 10 actually doesn't return any info
+local max_classes = GladiusEx.IS_WOTLKC and 11 or MAX_CLASSES
+
 local group_defaults = {
 	x = {},
 	y = {},
@@ -686,12 +690,14 @@ function GladiusEx:SetupOptions()
 						local t = {}
 						for classID = 1, MAX_CLASSES do
 							local classDisplayName, classTag = GetClassInfo(classID)
-							local color = RAID_CLASS_COLORS[classTag]
-							local colorfmt = string.format("|cff%02x%02x%02x", color.r * 255, color.g * 255, color.b * 255)
-							for specNum = 1, GladiusEx.Data.GetNumSpecializationsForClassID(classID) do
-								local specID, name, description, icon, background, role = GetSpecializationInfoForClassID(classID, specNum)
-								t[specID] = string.format("%s%s/%s", colorfmt, classDisplayName, name)
-							end
+              if classDisplayName then
+                local color = RAID_CLASS_COLORS[classTag]
+                local colorfmt = string.format("|cff%02x%02x%02x", color.r * 255, color.g * 255, color.b * 255)
+                for specNum = 1, GladiusEx.Data.GetNumSpecializationsForClassID(classID) do
+                  local specID, name, description, icon, background, role = GetSpecializationInfoForClassID(classID, specNum)
+                  t[specID] = string.format("%s%s/%s", colorfmt, classDisplayName, name)
+                end
+              end
 						end
 						return t
 					end

@@ -37,7 +37,6 @@ function GladiusEx.Data.DefaultClassicon()
 		[GladiusEx:SafeGetSpellName(228050)]	= 10,	-- Guardian of the Forgotten Queen (party bubble)
 		[27827]					= 10,	-- Spirit of Redemption
 		[215769]				= 10,	-- Spirit of Redemption (pvp tal)
-		[GladiusEx:SafeGetSpellName(213602)]	= 10,	-- Greater Fade
 		[GladiusEx:SafeGetSpellName(269513)]	= 10,	-- Death from Above
 		[46924]					= 10,	-- Bladestorm (fury)
 		[227847]				= 10,	-- Bladestorm (arms)
@@ -398,7 +397,6 @@ function GladiusEx.Data.DefaultClassicon()
 		[GladiusEx:SafeGetSpellName(231895)]  	= 3,	-- Crusade
 		[GladiusEx:SafeGetSpellName(31884)]  	= 3,	-- Avenging Wrath
 		[GladiusEx:SafeGetSpellName(216331)]  	= 3,	-- Avenging Crusader
-		[319952]			  	= 3,	-- Surrender to Madness
 		[GladiusEx:SafeGetSpellName(185422)]  	= 3,	-- Shadow Dance
 		[GladiusEx:SafeGetSpellName(13750)]  	= 3,	-- Adrenaline Rush 
 		[GladiusEx:SafeGetSpellName(51690)]  	= 3,	-- Killing Spree
@@ -552,7 +550,6 @@ function GladiusEx.Data.DefaultClassicon()
 		[GladiusEx:SafeGetSpellName(257284)]  	= 1,	-- Hunter's Mark
 		[GladiusEx:SafeGetSpellName(41425)]  	= 1,	-- Hypothermia
 		[GladiusEx:SafeGetSpellName(25771)]  	= 1,	-- Forbearance
-		[319952]			  	= 1,	-- Surrender to Madness (target)
 		[198529]			  	= 1,	-- Plunder Armor (target)
 		[GladiusEx:SafeGetSpellName(198688)]  	= 1,	-- Dagger in the Dark
 		[GladiusEx:SafeGetSpellName(208997)]  	= 1,	-- Counterstrike Totem

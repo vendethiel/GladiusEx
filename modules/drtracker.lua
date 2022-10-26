@@ -262,7 +262,7 @@ function DRTracker:CreateFrame(unit)
 	if not button then return end
 
 	-- create frame
-	self.frame[unit] = CreateFrame("Frame", "GladiusEx" .. self:GetName() .. "Frame" .. unit, button, "ActionButtonTemplate")
+	self.frame[unit] = CreateFrame("CheckButton", "GladiusEx" .. self:GetName() .. "Frame" .. unit, button, "ActionButtonTemplate")
 end
 
 function DRTracker:Update(unit)
