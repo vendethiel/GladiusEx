@@ -262,9 +262,11 @@ function DRTracker:CreateFrame(unit)
 	if not button then return end
 
 	-- create frame
-	-- 10.0 really wants this to be a CheckButton, but on classic this has unfortunate side effect of showing borders etc
-	local template = GladiusEx.IS_RETAIL and "CheckButton" or "Frame"
-	self.frame[unit] = CreateFrame(template, "GladiusEx" .. self:GetName() .. "Frame" .. unit, button, "ActionButtonTemplate")
+	-- TODO make my own CheckButton/ActionButtonTemplate
+	self.frame[unit] = CreateFrame("CheckButton", "GladiusEx" .. self:GetName() .. "Frame" .. unit, button, "ActionButtonTemplate")
+	self.frame[unit].NormalTexture:Hide()
+	self.frame[unit].HighlightTexture:Hide()
+	self.frame[unit].SlotBackground:Hide()
 end
 
 function DRTracker:Update(unit)
