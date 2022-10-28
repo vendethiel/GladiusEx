@@ -265,8 +265,12 @@ function DRTracker:CreateFrame(unit)
 	-- TODO make my own CheckButton/ActionButtonTemplate
 	self.frame[unit] = CreateFrame("CheckButton", "GladiusEx" .. self:GetName() .. "Frame" .. unit, button, "ActionButtonTemplate")
 	self.frame[unit].NormalTexture:Hide()
-	self.frame[unit].HighlightTexture:Hide()
-	self.frame[unit].SlotBackground:Hide()
+	if self.frame[unit].HighlightTexture then
+		self.frame[unit].HighlightTexture:Hide()
+	end
+	if self.frame[unit].SlotBackground then
+		self.frame[unit].SlotBackground:Hide()
+	end
 end
 
 function DRTracker:Update(unit)
