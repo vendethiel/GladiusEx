@@ -1463,7 +1463,7 @@ function Auras:SetupAuraOptions(options, unit, aura)
 	return {
 		type = "group",
 		name = aura,
-		desc = aura,
+		desc = tostring(aura),
 		get = getAura,
 		set = setAura,
 		disabled = function() return not self:IsUnitEnabled(unit) end,
