@@ -108,10 +108,11 @@ function Clicks:GetOptions(unit)
 							name = L["Add"],
 							func = function()
 								local attr = addAttrMod ~= "" and CLICK_MODIFIERS[addAttrMod] .. CLICK_BUTTONS[addAttrButton] or CLICK_BUTTONS[addAttrButton]
-								if not self.db[unit].clickAttributes[attr] then
+								-- Check for table, because if we delete an action it becomes true instead of nil (see Delete Click Action)
+								if type(self.db[unit].clickAttributes[attr]) ~= 'table' then
 									-- add to db
 									self.db[unit].clickAttributes[attr] = {
-									button = addAttrButton,
+										button = addAttrButton,
 										modifier = addAttrMod,
 										action = "target",
 										macro = ""

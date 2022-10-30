@@ -252,7 +252,7 @@ function GladiusEx:NewUnitBarModule(name, defaults_arena, defaults_party)
 		self.frame[unit].secure:SetWidth(width)
 		self.frame[unit].secure:SetHeight(height)
 		self.frame[unit].secure:SetFrameStrata("MEDIUM")
-		self.frame[unit].secure:RegisterForClicks("AnyDown")
+		self.frame[unit].secure:RegisterForClicks("AnyDown", "AnyUp")
 
 		-- hide frame
 		self.frame[unit]:Hide()
