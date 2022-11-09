@@ -76,6 +76,9 @@ local STATE_DEAD = 1
 local STATE_STEALTH = 2
 local RANGE_UPDATE_INTERVAL = 1 / 5
 
+-- used to hide Blizzard's default Arena Frames
+local hiddenArenaFrame
+
 -- debugging output
 local log_frame
 local log_table
@@ -385,6 +388,7 @@ function GladiusEx:OnEnable()
 	-- register the appropriate events
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("ARENA_OPPONENT_UPDATE")
+	self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
   if GladiusEx.IS_RETAIL then
     self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
   end
@@ -652,6 +656,34 @@ function GladiusEx:HideFrames()
 	self.arena_size = 0
 end
 
+function GladiusEx:HideDefaultArenaFrames(instanceType)
+  if not hiddenArenaFrame then
+  	hiddenArenaFrame = CreateFrame("Frame")
+  	hiddenArenaFrame:Hide()
+  end
+
+	local function handleFrame(frame, originalParent)
+    if not frame then return end
+    if not instanceType == "arena" then
+        frame:SetParent(originalParent) -- unhide
+        return
+    end
+    frame:SetParent(hiddenArenaFrame) -- hide
+  end
+
+  for i=1,5 do
+    local prepPlayerFrame = _G["ArenaEnemyPrepFrame"..i]
+    local prepPetFrame = _G["ArenaEnemyPrepFrame"..i.."PetFrame"]
+    local matchPlayerFrame = _G["ArenaEnemyMatchFrame"..i]
+    local matchPetFrame = _G["ArenaEnemyMatchFrame"..i.."PetFrame"]
+    
+    handleFrame(prepPlayerFrame, nil)
+    handleFrame(prepPetFrame, nil)
+    handleFrame(matchPlayerFrame, ArenaEnemyMatchFramesContainer)
+    handleFrame(matchPetFrame, ArenaEnemyMatchFramesContainer)
+	end
+end
+
 function GladiusEx:IsPartyShown()
 	return self.party_parent:IsShown()
 end
@@ -662,6 +694,10 @@ end
 
 function GladiusEx:PLAYER_ENTERING_WORLD()
 	local instanceType = select(2, IsInInstance())
+
+	if GladiusEx.IS_RETAIL then
+		self:HideDefaultArenaFrames(instanceType)
+	end
 
 	-- check if we are entering or leaving an arena
 	if instanceType == "arena" then
@@ -676,6 +712,14 @@ function GladiusEx:PLAYER_ENTERING_WORLD()
 			self:HideFrames()
 		end
 		if logging then log("DISABLE LOGGING") end
+	end
+end
+
+function GladiusEx:ZONE_CHANGED_NEW_AREA()
+	if GladiusEx.IS_RETAIL then
+		local instanceType = select(2, IsInInstance())
+
+		self:HideDefaultArenaFrames(instanceType)
 	end
 end
 
