@@ -38,11 +38,6 @@ local party_units = {
 GladiusEx.party_units = party_units
 GladiusEx.arena_units = arena_units
 
-if GladiusEx.IS_RETAIL then
-    --
-else
-end
-
 local anchor_width = 260
 local anchor_height = 40
 
