@@ -70,20 +70,25 @@ function Interrupt:CombatLogEvent(_, ...)
    	
 end
 
-function Interrupt:UpdateInterrupt(unit, spellid, duration)
-	if spellid then
-		self.interrupts[unit] = { spellid, GetTime(), duration}
-	else
-		self.interrupts[unit] = nil
-	end
-	
-	self:SendMessage("GLADIUSEX_INTERRUPT", unit)
-	
+function Interrupt:UpdateInterrupt(unit, spellid, duration, oldTime)
+    local t = GetTime()
+    if spellid and duration then
+        self.interrupts[unit] = {spellid, t, duration}
+    elseif oldTime then
+        if t == oldTime then -- this ensures we don't overwrite a new interrupt with an old c_timer
+            self.interrupts[unit] = nil
+        end
+    end
+
+    self:SendMessage("GLADIUSEX_INTERRUPT", unit)
+    
+    if oldTime or duration == nil then return end -- avoid triggering the c_timer again
+    
     -- K: Clears the interrupt after end of duration (in case no new UNIT_AURA ticks clears it)
     C_Timer.After(
         duration + 0.1,
         function()
-            GladiusEx:GetModule("Interrupts"):UpdateInterrupt(unit, spellid, nil, t)
+            GladiusEx:GetModule("Interrupts"):UpdateInterrupt(unit, spellid, nil, t+duration+0.1)
         end
     )
 end
