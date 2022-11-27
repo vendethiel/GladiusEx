@@ -79,10 +79,13 @@ function Interrupt:UpdateInterrupt(unit, spellid, duration)
 	
 	self:SendMessage("GLADIUSEX_INTERRUPT", unit)
 	
-	-- K: Clears the interrupt after end of duration (in case no new UNIT_AURA ticks)
-	--if self.interrupts[unit] then
-		--GladiusEx:ScheduleTimer(self.UpdateInterrupt, duration+0.1, self, unit)
-	--end
+    -- K: Clears the interrupt after end of duration (in case no new UNIT_AURA ticks clears it)
+    C_Timer.After(
+        duration + 0.1,
+        function()
+            GladiusEx:GetModule("Interrupts"):UpdateInterrupt(unit, spellid, nil, t)
+        end
+    )
 end
 
 function Interrupt:GetInterruptFor(unit)
