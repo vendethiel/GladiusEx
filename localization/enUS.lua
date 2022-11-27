@@ -106,6 +106,18 @@ L["PetBar"] = "Pet"
 L["SkillHistory"] = "Skill History"
 L["Interrupts"] = true
 
+-- Class names
+L["Death Knight"] = true
+L["Druid"] = true
+L["Hunter"] = true
+L["Mage"] = true
+L["Paladin"] = true
+L["Priest"] = true
+L["Rogue"] = true
+L["Shaman"] = true
+L["Warlock"] = true
+L["Warrior"] = true
+
 -- General
 L["Highlight player target"] = true
 L["Show border around your target"] = true
