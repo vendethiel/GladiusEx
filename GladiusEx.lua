@@ -760,17 +760,7 @@ function GladiusEx:FindSpecByAuras(unit)
 end
 
 function GladiusEx:FindSpecBySpell(unit, spellID, spellName)
-    local specID
-    if spellID then
-        specID = GladiusEx.Data.SpecSpells[spellID]
-    end
-    if specID then
-        return specID
-    end
-    if spellName then
-        specID = GladiusEx.Data.SpecSpells[SpellName]
-    end
-    return specID
+    return GladiusEx.Data.SpecSpells[spellID] or GladiusEx.Data.SpecSpells[spellName]
 end
 
 function GladiusEx:UNIT_AURA(event, unit)

@@ -88,7 +88,7 @@ function Interrupt:UpdateInterrupt(unit, spellid, duration, oldTime)
     C_Timer.After(
         duration + 0.1,
         function()
-            GladiusEx:GetModule("Interrupts"):UpdateInterrupt(unit, spellid, nil, t+duration+0.1)
+            self:UpdateInterrupt(unit, spellid, nil, t+duration+0.1)
         end
     )
 end

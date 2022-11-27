@@ -571,11 +571,7 @@ end
 
 function GladiusEx.Data.GetArenaOpponentSpec(id)
     local unit = "arena" .. id
-
-    if GladiusEx.buttons[unit] and GladiusEx.buttons[unit].specID ~= nil then
-        return GladiusEx.buttons[unit].specID
-    end
-    return nil
+    return GladiusEx.buttons[unit] and GladiusEx.buttons[unit].specID
 end
 
 function GladiusEx.Data.CountArenaOpponents()

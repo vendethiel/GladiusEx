@@ -715,7 +715,6 @@ local function UpdateGroupIconFrames(unit, group, sorted_spells)
             elseif db.trinketIcon == "hordeWotLk" and spelldata.icon_horde_wotlk then
                 icon = spelldata.icon_horde_wotlk
             elseif db.trinketIcon == "factionWotLK" then
-                print(faction)
                 if faction == "Horde" and spelldata.icon_horde_wotlk then
                     icon = spelldata.icon_horde_wotlk
                 elseif faction == "Alliance" and spelldata.icon_alliance_wotlk then
