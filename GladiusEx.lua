@@ -451,7 +451,7 @@ function GladiusEx:GetArenaSize(minVal)
     end
 
     local widget_number = 0
-    if not self:IsTesting() then
+    if not self:IsTesting() and IsActiveBattlefieldArena() then
         for _, widget in pairs(C_UIWidgetManager.GetAllWidgetsBySetID(1)) do
             local text = C_UIWidgetManager.GetIconAndTextWidgetVisualizationInfo(widget.widgetID).text
             local n = tonumber(string.match(text, "%d"))
