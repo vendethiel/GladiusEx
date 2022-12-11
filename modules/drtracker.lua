@@ -271,6 +271,7 @@ function DRTracker:CreateFrame(unit)
 	if self.frame[unit].SlotBackground then
 		self.frame[unit].SlotBackground:Hide()
 	end
+    self.frame[unit]:EnableMouse(false) -- fixes a bug in which, with some settings, the first DR category icon is clickable and clicking it causes a strange border to appear
 end
 
 function DRTracker:Update(unit)

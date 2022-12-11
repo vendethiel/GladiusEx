@@ -8,7 +8,7 @@ local strfind = string.find
 local pairs, select, unpack = pairs, select, unpack
 local GetTime, SetPortraitTexture = GetTime, SetPortraitTexture
 local GetSpellInfo, UnitAura, UnitClass, UnitGUID, UnitBuff, UnitDebuff = GetSpellInfo, UnitAura, UnitClass, UnitGUID, UnitBuff, UnitDebuff
-local UnitIsVisible, UnitIsConnected, GetSpecializationInfoByID, GetTexCoordsForRole = UnitIsVisible, UnitIsConnected, GetSpecializationInfoByID, GetTexCoordsForRole
+local UnitIsVisible, UnitIsConnected, GetTexCoordsForRole = UnitIsVisible, UnitIsConnected, GetTexCoordsForRole
 
 local GetDefaultImportantAuras = GladiusEx.Data.DefaultClassicon
 

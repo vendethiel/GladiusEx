@@ -2,7 +2,7 @@ GladiusEx = LibStub("AceAddon-3.0"):NewAddon("GladiusEx", "AceEvent-3.0")
 
 GladiusEx.IS_RETAIL = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 GladiusEx.IS_TBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
-GladiusEx.IS_WOTLKC = WOW_PROJECT_ID == 123123123
+GladiusEx.IS_WOTLKC = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 GladiusEx.IS_CLASSIC = GladiusEx.IS_TBCC or GladiusEx.IS_WOTLKC
 
 local LGIST = GladiusEx.IS_RETAIL and LibStub:GetLibrary("LibGroupInSpecT-1.1")
@@ -17,56 +17,26 @@ local strfind, strmatch = string.find, string.match
 local max, abs, floor, ceil = math.max, math.abs, math.floor, math.ceil
 local UnitIsDeadOrGhost, UnitGUID, UnitExists = UnitIsDeadOrGhost, UnitGUID, UnitExists
 local InCombatLockdown = InCombatLockdown
-local GetNumArenaOpponents, GetNumArenaOpponentSpecs, GetNumGroupMembers = GetNumArenaOpponents, GetNumArenaOpponentSpecs, GetNumGroupMembers
+local GetNumGroupMembers = GetNumArenaOpponents, GetNumArenaOpponentSpecs, GetNumGroupMembers
 
 local arena_units = {
-	["arena1"] = true,
-	["arena2"] = true,
-	["arena3"] = true,
-	["arena4"] = true,
-	["arena5"] = true,
+    ["arena1"] = true,
+    ["arena2"] = true,
+    ["arena3"] = true,
+    ["arena4"] = true,
+    ["arena5"] = true
 }
 
 local party_units = {
-	["player"] = true,
-	["party1"] = true,
-	["party2"] = true,
-	["party3"] = true,
-	["party4"] = true,
+    ["player"] = true,
+    ["party1"] = true,
+    ["party2"] = true,
+    ["party3"] = true,
+    ["party4"] = true
 }
 
 GladiusEx.party_units = party_units
 GladiusEx.arena_units = arena_units
-
-if GladiusEx.IS_RETAIL then
-  function CountArenaOpponents()
-    return GetNumArenaOpponentSpecs()
-  end
-
-  function IsValidSpecId(specID)
-    return specID and specID > 0
-  end
-
-  function GetArenaOpponentSpecInfo(id)
-    return GetArenaOpponentSpec(id)
-  end
-else
-  function CountArenaOpponents()
-    return 3 -- ???? TBC
-  end
-
-  function IsValidSpecId(specID)
-    return true
-  end
-
-  function GetArenaOpponentSpecInfo(id)
-    return nil
-  end
-
-  -- TODO TBC spec detection
-  -- TODO move this somewhere else
-end
-
 
 local anchor_width = 260
 local anchor_height = 40
@@ -360,48 +330,53 @@ function GladiusEx:EnableModules()
 end
 
 function GladiusEx:OnEnable()
-	-- create frames
-	-- anchor & background
-	self.party_parent = CreateFrame("Frame", "GladiusExPartyFrame", UIParent)
-	self.arena_parent = CreateFrame("Frame", "GladiusExArenaFrame", UIParent)
-	self.party_parent:Hide()
-	self.arena_parent:Hide()
+    -- create frames
+    -- anchor & background
+    self.party_parent = CreateFrame("Frame", "GladiusExPartyFrame", UIParent)
+    self.arena_parent = CreateFrame("Frame", "GladiusExArenaFrame", UIParent)
+    self.party_parent:Hide()
+    self.arena_parent:Hide()
 
-	self.arena_anchor, self.arena_background = self:CreateAnchor("arena")
-	self.party_anchor, self.party_background = self:CreateAnchor("party")
+    self.arena_anchor, self.arena_background = self:CreateAnchor("arena")
+    self.party_anchor, self.party_background = self:CreateAnchor("party")
 
-	-- update roster
-	self:UpdateAllGUIDs()
+    -- update roster
+    self:UpdateAllGUIDs()
 
-	-- update range checkers
-	self:UpdateRangeCheckers()
+    -- update range checkers
+    self:UpdateRangeCheckers()
 
-	-- enable modules
-	self:EnableModules()
+    -- enable modules
+    self:EnableModules()
 
-	-- init options
-	self:SetupOptions()
+    -- init options
+    self:SetupOptions()
 
-	-- register the appropriate events
-	self:RegisterEvent("PLAYER_ENTERING_WORLD")
-	self:RegisterEvent("ARENA_OPPONENT_UPDATE")
-  if GladiusEx.IS_RETAIL then
-    self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
-  end
-	self:RegisterEvent("UNIT_NAME_UPDATE")
-	self:RegisterEvent("UNIT_HEALTH")
-	self:RegisterEvent("UNIT_MAXHEALTH", "UNIT_HEALTH")
-	self:RegisterEvent("GROUP_ROSTER_UPDATE")
-	self:RegisterEvent("PLAYER_REGEN_ENABLED")
-	self:RegisterEvent("UNIT_PET", "UpdateUnitGUID")
-	self:RegisterEvent("UNIT_PORTRAIT_UPDATE", "UpdateUnitGUID")
-	if LGIST then
-		LGIST.RegisterCallback(self, "GroupInSpecT_Update")
-	end
-	RC.RegisterCallback(self, RC.CHECKERS_CHANGED, "UpdateRangeCheckers")
-	self.dbi.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
-	self.dbi.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
-	self.dbi.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")
+    -- register the appropriate events
+    self:RegisterEvent("PLAYER_ENTERING_WORLD")
+    self:RegisterEvent("ARENA_OPPONENT_UPDATE")
+    if GladiusEx.IS_RETAIL then
+        self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
+    else
+        self:RegisterEvent("UNIT_AURA")
+        self:RegisterEvent("UNIT_SPELLCAST_START")
+        self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+        self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+    end
+    self:RegisterEvent("UNIT_NAME_UPDATE")
+    self:RegisterEvent("UNIT_HEALTH")
+    self:RegisterEvent("UNIT_MAXHEALTH", "UNIT_HEALTH")
+    self:RegisterEvent("GROUP_ROSTER_UPDATE")
+    self:RegisterEvent("PLAYER_REGEN_ENABLED")
+    self:RegisterEvent("UNIT_PET", "UpdateUnitGUID")
+    self:RegisterEvent("UNIT_PORTRAIT_UPDATE", "UpdateUnitGUID")
+    if LGIST then
+        LGIST.RegisterCallback(self, "GroupInSpecT_Update")
+    end
+    RC.RegisterCallback(self, RC.CHECKERS_CHANGED, "UpdateRangeCheckers")
+    self.dbi.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
+    self.dbi.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
+    self.dbi.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")
 end
 
 local first_run = false
@@ -460,32 +435,60 @@ function GladiusEx:SetTesting(count)
 end
 
 function GladiusEx:IsTesting(unit)
-	if not self.test then
-		return false
-	elseif unit then
-		return not UnitExists(unit)
-	else
-		return self.test
-	end
+    if not self.test then
+        return false
+    elseif unit then
+        return not UnitExists(unit)
+    else
+        return self.test
+    end
 end
 
-function GladiusEx:GetArenaSize(min)
-	if self:IsTesting() then
-		log("GetArenaSize => testing")
-		return self:IsTesting()
-	end
+function GladiusEx:GetArenaSize(minVal)
+    if self:IsTesting() then
+        log("GetArenaSize => testing")
+        return self:IsTesting()
+    end
 
-	-- try to guess the current arena size
-	local guess = max(min or 0, 2, GetNumArenaOpponents(), GetNumArenaOpponentSpecs and GetNumArenaOpponentSpecs() or 0, GetNumGroupMembers(LE_PARTY_CATEGORY_HOME), GetNumGroupMembers(LE_PARTY_CATEGORY_INSTANCE))
+    local widget_number = 0
+    if not self:IsTesting() and IsActiveBattlefieldArena() then
+        for _, widget in pairs(C_UIWidgetManager.GetAllWidgetsBySetID(1)) do
+            local text = C_UIWidgetManager.GetIconAndTextWidgetVisualizationInfo(widget.widgetID).text
+            local n = tonumber(string.match(text, "%d"))
+            if n > widget_number then
+                widget_number = n
+            end
+        end
+    end
 
-	log("GetArenaSize", min, GetNumArenaOpponents(), GetNumArenaOpponentSpecs and GetNumArenaOpponentSpecs() or 0, GetNumGroupMembers(LE_PARTY_CATEGORY_HOME), GetNumGroupMembers(LE_PARTY_CATEGORY_INSTANCE),
-		" => ", guess)
+    -- try to guess the current arena size
+    local guess =
+        max(
+        minVal or 0,
+        2,
+        widget_number,
+        GetNumArenaOpponents(),
+        GladiusEx.Data.GetNumArenaOpponentSpecs() and GladiusEx.Data.GetNumArenaOpponentSpecs() or 0,
+        GetNumGroupMembers(LE_PARTY_CATEGORY_HOME),
+        GetNumGroupMembers(LE_PARTY_CATEGORY_INSTANCE)
+    )
 
-	if guess >= 4 then
-		guess = 5
-	end
+    log(
+        "GetArenaSize",
+        minVal,
+        GetNumArenaOpponents(),
+        GladiusEx.Data.GetNumArenaOpponentSpecs() and GladiusEx.Data.GetNumArenaOpponentSpecs() or 0,
+        GetNumGroupMembers(LE_PARTY_CATEGORY_HOME),
+        GetNumGroupMembers(LE_PARTY_CATEGORY_INSTANCE),
+        " => ",
+        guess
+    )
 
-	return guess
+    if guess >= 4 then
+        guess = 5
+    end
+
+    return guess
 end
 
 function GladiusEx:UpdatePartyFrames()
@@ -680,33 +683,130 @@ function GladiusEx:PLAYER_ENTERING_WORLD()
 end
 
 function GladiusEx:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
-	self:CheckArenaSize()
-	self:ShowFrames()
+    self:CheckArenaSize()
+    self:ShowFrames()
 
-	local numOpps = CountArenaOpponents()
-	for i = 1, numOpps do
-		local specID = GetArenaOpponentSpecInfo(i)
-		local unitid = "arena" .. i
+    local numOpps = GladiusEx.Data.CountArenaOpponents()
+    for i = 1, numOpps do
+        local specID = GladiusEx.Data.GetArenaOpponentSpec(i)
+        local unitid = "arena" .. i
 
-		if IsValidSpecId(specID) then
-			self:ShowUnit(unitid)
-			self:UpdateUnit(unitid)
+        if (GladiusEx.IS_RETAIL and specID and specID > 0) or GladiusEx.IS_CLASSIC then
+            self:ShowUnit(unitid)
+            self:UpdateUnit(unitid)
 
-			-- update spec after UpdateUnit so that it can (maybe) create button
-			self:UpdateUnitSpecialization(unitid, specID)
-			self:UpdateUnitState(unitid, true)
-			self:RefreshUnit(unitid)
-		end
-	end
-	self:UpdateFrames()
+            -- update spec after UpdateUnit so that it can (maybe) create button
+            self:UpdateUnitSpecialization(unitid, specID)
+            self:UpdateUnitState(unitid, true)
+            self:RefreshUnit(unitid)
+        end
+    end
+    self:UpdateFrames()
+end
+
+function GladiusEx:UpdateUnitSpecialization(unit, specID)
+    if not self.buttons[unit] then
+        return
+    end
+
+    self.buttons[unit].class = class
+
+    if not specID or specID < 1 then
+        return
+    end
+
+    local _, _, _, _, _, class = GladiusEx.Data.GetSpecializationInfoByID(specID)
+
+    specID = (specID and specID > 0) and specID or nil
+
+    if self.buttons[unit].specID ~= specID then
+        self.buttons[unit].specID = specID
+
+        -- TODO safer to reset covenant?
+        self:SendMessage("GLADIUS_SPEC_UPDATE", unit)
+    end
 end
 
 function GladiusEx:CheckOpponentSpecialization(unit)
-	local id = strmatch(unit, "^arena(%d+)$")
-	if id then
-		local specID = GetArenaOpponentSpecInfo(tonumber(id))
-		self:UpdateUnitSpecialization(unit, specID)
-	end
+    local id = strmatch(unit, "^arena(%d+)$")
+    if id then
+        local specID = GladiusEx.Data.GetArenaOpponentSpec(tonumber(id))
+
+        if GladiusEx.IS_CLASSIC and not specID then
+            specID = self:FindSpecByAuras(unit)
+        end
+
+        self:UpdateUnitSpecialization(unit, specID)
+    end
+end
+
+function GladiusEx:FindSpecByAuras(unit)
+    for i = 1, 40 do
+        local n, _, _, _, _, _, unitCaster, _, _, spellID = UnitAura(unit, i, "HELPFUL")
+        if n == nil then
+            break
+        end
+        if unitCaster ~= nil then
+            local unitPet = string.gsub(unit, "pet", "")
+            unitPet = unitPet == "" and "player" or unitPet
+            if UnitIsUnit(unitPet, unitCaster) then
+                local specID = GladiusEx.Data.SpecBuffs[spellID]
+                if specID then
+                    return specID
+                end
+            end
+        end
+    end
+end
+
+function GladiusEx:FindSpecBySpell(unit, spellID, spellName)
+    return GladiusEx.Data.SpecSpells[spellID] or GladiusEx.Data.SpecSpells[spellName]
+end
+
+function GladiusEx:UNIT_AURA(event, unit)
+    if not self.buttons[unit] or self.buttons[unit].specID then
+        return
+    end
+    local specID = self:FindSpecByAuras(unit)
+    if not specID then
+        return
+    end
+    self:UpdateUnitSpecialization(unit, specID)
+end
+
+function GladiusEx:UNIT_SPELLCAST_START(event, unit)
+    if not self.buttons[unit] or self.buttons[unit].specID then
+        return
+    end
+    local spellName, _, _, _, _, _, _, _, spellID = UnitCastingInfo(unit)
+    local specID = self:FindSpecBySpell(unit, spellID, spellName)
+    if not specID then
+        return
+    end
+    self:UpdateUnitSpecialization(unit, specID)
+end
+
+function GladiusEx:UNIT_SPELLCAST_CHANNEL_START(event, unit)
+    if not self.buttons[unit] or self.buttons[unit].specID then
+        return
+    end
+    local spellName, _, _, _, _, _, _, _, spellID = UnitChannelInfo(unit)
+    local specID = self:FindSpecBySpell(unit, spellID, spellName)
+    if not specID then
+        return
+    end
+    self:UpdateUnitSpecialization(unit, specID)
+end
+
+function GladiusEx:UNIT_SPELLCAST_SUCCEEDED(event, unit, castGUID, spellID)
+    if not self.buttons[unit] or self.buttons[unit].specID then
+        return
+    end
+    local specID = self:FindSpecBySpell(unit, spellID)
+    if not specID then
+        return
+    end
+    self:UpdateUnitSpecialization(unit, specID)
 end
 
 function GladiusEx:ARENA_OPPONENT_UPDATE(event, unit, type)
@@ -859,31 +959,16 @@ function GladiusEx:GroupInSpecT_Update(event, guid, unit, info)
 end
 
 function GladiusEx:CheckUnitSpecialization(unit)
-	if not LGIST or not LGIST.GetCachedInfo then return end
-	local info = LGIST:GetCachedInfo(UnitGUID(unit))
+    if not LGIST or not LGIST.GetCachedInfo then
+        return
+    end
+    local info = LGIST:GetCachedInfo(UnitGUID(unit))
 
-	if info then
-		self:UpdateUnitSpecialization(unit, info.global_spec_id)
-	else
-		LGIST:Rescan(UnitGUID(unit))
-	end
-end
-
-function GladiusEx:UpdateUnitSpecialization(unit, specID)
-	if not specID or specID < 1 then
-		return
-	end
-	local _, _, _, _, _, class = GetSpecializationInfoByID(specID)
-
-	specID = (specID and specID > 0) and specID or nil
-
-	if self.buttons[unit] and self.buttons[unit].specID ~= specID then
-		self.buttons[unit].class = class
-		self.buttons[unit].specID = specID
-    -- TODO safer to reset covenant?
-
-		self:SendMessage("GLADIUS_SPEC_UPDATE", unit)
-	end
+    if info then
+        self:UpdateUnitSpecialization(unit, info.global_spec_id)
+    else
+        LGIST:Rescan(UnitGUID(unit))
+    end
 end
 
 function GladiusEx:IsHandledUnit(unit)

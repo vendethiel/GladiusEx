@@ -1,4 +1,4 @@
-﻿## Interface: 100002
+## Interface: 100002
 ## Title: GladiusEx
 ## Notes: Arena unit frames and more
 ## SavedVariables: GladiusExDB

@@ -13,7 +13,7 @@ local UnitClass, UnitRace = UnitClass, UnitRace
 local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
 local UnitPower, UnitPowerMax = UnitPower, UnitPowerMax
 local UnitGetTotalAbsorbs = UnitGetTotalAbsorbs
-local UnitExists, UnitIsConnected, GetSpecializationInfoByID = UnitExists, UnitIsConnected, GetSpecializationInfoByID
+local UnitExists, UnitIsConnected = UnitExists, UnitIsConnected
 
 local Tags = GladiusEx:NewGladiusExModule("Tags", {
 	tags = {},
