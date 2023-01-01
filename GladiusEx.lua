@@ -687,7 +687,7 @@ function GladiusEx:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
     self:CheckArenaSize()
     self:ShowFrames()
 
-    local numOpps = GladiusEx.Data.GetNumArenaOpponentSpecs()
+    local numOpps = GladiusEx.Data.CountArenaOpponents()
     for i = 1, numOpps do
         local specID = GladiusEx.Data.GetArenaOpponentSpec(i)
         local unitid = "arena" .. i
