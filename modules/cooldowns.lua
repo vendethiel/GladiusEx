@@ -701,7 +701,7 @@ local function UpdateGroupIconFrames(unit, group, sorted_spells)
             if db.trinketIcon == nil or db.trinketIcon == "faction" then
                 if spelldata.icon_alliance and faction == "Alliance" then
                     icon = spelldata.icon_alliance
-                elseif db.trinketIcon == nil or db.trinketIcon == "faction" and spelldata.icon_horde and faction == "Horde" then
+                elseif spelldata.icon_horde and faction == "Horde" then
                     icon = spelldata.icon_horde
                 else
                     icon = spelldata.icon
@@ -722,6 +722,8 @@ local function UpdateGroupIconFrames(unit, group, sorted_spells)
                 else
                     icon = spelldata.icon
                 end
+            else
+                icon = spelldata.icon
             end
         else
             icon = spelldata.icon

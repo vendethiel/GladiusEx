@@ -574,10 +574,6 @@ function GladiusEx.Data.GetArenaOpponentSpec(id)
     return GladiusEx.buttons[unit] and GladiusEx.buttons[unit].specID
 end
 
-function GladiusEx.Data.CountArenaOpponents()
-    return GladiusEx:GetArenaSize(2)
-end
-
 function GladiusEx.Data.GetNumArenaOpponentSpecs()
-    return nil
+    return GladiusEx:GetArenaSize(2)
 end

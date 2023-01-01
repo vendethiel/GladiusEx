@@ -451,7 +451,7 @@ function GladiusEx:GetArenaSize(minVal)
     end
 
     local widget_number = 0
-    if not self:IsTesting() and IsActiveBattlefieldArena() then
+    if GladiusEx.IS_CLASSIC and not self:IsTesting() and IsActiveBattlefieldArena() then
         for _, widget in pairs(C_UIWidgetManager.GetAllWidgetsBySetID(1)) do
             local text = C_UIWidgetManager.GetIconAndTextWidgetVisualizationInfo(widget.widgetID).text
             local n = tonumber(string.match(text, "%d"))
@@ -484,8 +484,9 @@ function GladiusEx:GetArenaSize(minVal)
         guess
     )
 
-    if guess >= 4 then
-        guess = 5
+    -- In Retail, Solo Shuffle sometimes returns 4
+    if guess == 4 then
+        guess = 3
     end
 
     return guess
@@ -686,7 +687,7 @@ function GladiusEx:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
     self:CheckArenaSize()
     self:ShowFrames()
 
-    local numOpps = GladiusEx.Data.CountArenaOpponents()
+    local numOpps = GladiusEx.Data.GetNumArenaOpponentSpecs()
     for i = 1, numOpps do
         local specID = GladiusEx.Data.GetArenaOpponentSpec(i)
         local unitid = "arena" .. i
@@ -709,8 +710,6 @@ function GladiusEx:UpdateUnitSpecialization(unit, specID)
         return
     end
 
-    self.buttons[unit].class = class
-
     if not specID or specID < 1 then
         return
     end
@@ -720,6 +719,7 @@ function GladiusEx:UpdateUnitSpecialization(unit, specID)
     specID = (specID and specID > 0) and specID or nil
 
     if self.buttons[unit].specID ~= specID then
+        self.buttons[unit].class = class
         self.buttons[unit].specID = specID
 
         -- TODO safer to reset covenant?

@@ -786,10 +786,6 @@ function GladiusEx.Data.GetArenaOpponentSpec(id)
     return GetArenaOpponentSpec(id)
 end
 
-function GladiusEx.Data.CountArenaOpponents()
-    return GetNumArenaOpponents()
-end
-
 function GladiusEx.Data.GetNumArenaOpponentSpecs()
     return GetNumArenaOpponentSpecs()
 end
