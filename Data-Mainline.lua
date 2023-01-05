@@ -44,6 +44,7 @@ function GladiusEx.Data.DefaultClassicon()
 		[320224]				= 10,	-- Podtender
 		[327140]				= 10,	-- Forgeborne Reveries
 		[199545]				= 10,	-- Steed of Glory (P pvp tal)
+		[378464]				= 10,	-- Nullifying Shroud
 
 		[GladiusEx:SafeGetSpellName(5215)]	= 10,	-- Prowl
 		[199483]				= 10,	-- Camouflage
