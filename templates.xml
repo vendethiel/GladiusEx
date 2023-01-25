@@ -14,11 +14,13 @@
 						<Anchor point="CENTER"/>
 					</Anchors>
 				</Texture>
+        <!--
 				<Texture name="$parentFlyoutBorderShadow" inherits="ActionBarFlyoutButton-IconShadow" parentKey="FlyoutBorderShadow" hidden="true">
 					<Anchors>
 						<Anchor point="CENTER"/>
 					</Anchors>
 				</Texture>
+        -->
 			</Layer>
 			<Layer level="ARTWORK" textureSubLevel="2">
 				<Texture name="$parentFlyoutArrow" inherits="ActionBarFlyoutButton-ArrowUp" parentKey="FlyoutArrow" hidden="true"/>

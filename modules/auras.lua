@@ -177,7 +177,12 @@ local function CanDispel(unit, buffs, dispelType, spellID)
 	if (isBuff and not UnitCanAttack("player", unit)) or (not isBuff and not UnitCanAssist("player", unit))then
 		return false
 	end
-  if isBuff and IsPlayerSpell(115450) and dispelType == "MAGIC" then
+  -- TODO update LibDispellable
+  -- TODO handle the *other* evoker dispels
+  local hasMonkDispel = IsPlayerSpell(115450)
+  local hasEvokerDispel = IsPlayerSpell(360823)
+  local hasDispel = hasMonkDispel or hasEvokerDispel
+  if isBuff and hasDispel and dispelType == "MAGIC" then
     return true
   end
   return LD:CanDispel(unit, buffs, dispelType, spellID)
