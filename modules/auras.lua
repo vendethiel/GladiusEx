@@ -174,18 +174,19 @@ end
 --    but because of a Blizzard API bug, IsSpellKnown(115450) returns false on MW monks.
 --    Instead, use IsPlayerSpell (could also use IsSpellKnownOrOverridesKnown).
 local function CanDispel(unit, buffs, dispelType, spellID)
-	if (isBuff and not UnitCanAttack("player", unit)) or (not isBuff and not UnitCanAssist("player", unit))then
+	if (buffs and not UnitCanAttack("player", unit)) or (not buffs and not UnitCanAssist("player", unit)) then
 		return false
 	end
-  -- TODO update LibDispellable
-  -- TODO handle the *other* evoker dispels
-  local hasMonkDispel = IsPlayerSpell(115450)
-  local hasEvokerDispel = IsPlayerSpell(360823)
-  local hasDispel = hasMonkDispel or hasEvokerDispel
-  if isBuff and hasDispel and dispelType == "MAGIC" then
-    return true
-  end
-  return LD:CanDispel(unit, buffs, dispelType, spellID)
+	-- TODO update LibDispellable
+	-- TODO handle the *other* evoker dispels
+	local hasMonkDispel = IsPlayerSpell(115450)
+	local hasEvokerDispel = IsPlayerSpell(360823)
+	local hasShamanDispel = IsPlayerSpell(378773)
+	local hasDispel = hasMonkDispel or hasEvokerDispel or hasShamanDispel
+	if buffs and hasDispel and dispelType == "Magic" then
+		return true
+	end
+	return LD:CanDispel(unit, buffs, dispelType, spellID)
 end
 
 function Auras:UpdateUnitAuras(event, unit)
