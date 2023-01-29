@@ -762,6 +762,7 @@ function GladiusEx.Data.Interrupts()
     [106839] = {duration=4},  -- [Feral] Skull Bash
     [93985] = {duration=4},   -- [Feral] Skull Bash
     [97547] = {duration=5},   -- [Moonkin] Solar Beam
+    [351338] = {duration=4},  -- [Evoker] Quell
   }
 end
 
