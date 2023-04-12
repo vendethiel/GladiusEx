@@ -216,6 +216,9 @@ SlashCmdList["GLADIUSEX"] = function(msg)
         GladiusEx:SetTesting(test)
     elseif msg == "" or msg == "options" or msg == "config" or msg == "ui" then
         GladiusEx:ShowOptionsDialog()
+    elseif msg == "show" then
+        -- show buttons
+        GladiusEx:ShowFrames()
     elseif msg == "hide" then
         -- hide buttons
         GladiusEx:HideFrames()
