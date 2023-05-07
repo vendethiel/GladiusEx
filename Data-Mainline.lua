@@ -187,7 +187,6 @@ function GladiusEx.Data.DefaultClassicon()
 		[328530]			  	= 7,	-- Divine Ascension Initial
 		[5277]				  	= 7,	-- Evasion
 		[199027]			  	= 7,	-- Evasion2 post stealth
-		[GladiusEx:SafeGetSpellName(210918)]  	= 7,	-- Ethereal Form
 		[GladiusEx:SafeGetSpellName(118038)]  	= 7,	-- Die by the Sword
 		[GladiusEx:SafeGetSpellName(236321)]  	= 7,	-- War Banner 
 		[323524]			  	= 7.1,	-- Ultimate Form (Fleshcraft cc immune)
