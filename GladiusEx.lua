@@ -217,7 +217,7 @@ end
 
 function GladiusEx:OnInitialize()
 	-- init db+
-	self.dbi = LibStub("AceDB-3.0"):New("GladiusExDB", self.defaults)
+	self.dbi = LibStub("AceDB-3.0"):New("GladiusExDB", self.defaults, true)
 	self.dbi_arena = self.dbi:RegisterNamespace("arena", { profile = self.defaults_arena })
 	self.dbi_party = self.dbi:RegisterNamespace("party", { profile = self.defaults_party })
 	self.db = setmetatable({}, {
