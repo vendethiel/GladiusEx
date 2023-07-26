@@ -484,7 +484,6 @@ function GladiusEx.Data.DefaultClassicon()
 		[206432]			  	= 2,	-- Burst of Cold (buffed Cone of Cold)
 		[287504]			  	= 2,	-- Alpha Tiger (Tiger Palm burst window)
 		[GladiusEx:SafeGetSpellName(105809)]  	= 2,	-- Holy Avenger
-		[GladiusEx:SafeGetSpellName(152262)]  	= 2,	-- Seraphim
 		[GladiusEx:SafeGetSpellName(194249)]  	= 2,	-- Void Eruption
 		[GladiusEx:SafeGetSpellName(197871)]  	= 2,	-- Dark Archangel
 		[GladiusEx:SafeGetSpellName(10060)]  	= 2,	-- Power Infusion
