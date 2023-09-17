@@ -743,29 +743,29 @@ function GladiusEx.Data.DefaultCooldowns()
 end
 
 function GladiusEx.Data.Interrupts()
-  return {
-    [6552] = {duration=4},    -- [Warrior] Pummel
-    [96231] = {duration=4},   -- [Paladin] Rebuke
-    [231665] = {duration=3},  -- [Paladin] Avengers Shield
-    [147362] = {duration=3},  -- [Hunter] Countershot
-    [187707] = {duration=3},  -- [Hunter] Muzzle
-    [1766] = {duration=5},    -- [Rogue] Kick
-    [183752] = {duration=3},  -- [DH] Consume Magic
-    [47528] = {duration=3},   -- [DK] Mind Freeze
-    [91802] = {duration=2},   -- [DK] Shambling Rush
-    [57994] = {duration=3},   -- [Shaman] Wind Shear
-    [115781] = {duration=6},  -- [Warlock] Optical Blast
-    [19647] = {duration=6},   -- [Warlock] Spell Lock
-    [212619] = {duration=6},  -- [Warlock] Call Felhunter
-    [132409] = {duration=6},  -- [Warlock] Spell Lock
-    [171138] = {duration=6},  -- [Warlock] Shadow Lock
-    [2139] = {duration=6},    -- [Mage] Counterspell
-    [116705] = {duration=4},  -- [Monk] Spear Hand Strike
-    [106839] = {duration=4},  -- [Feral] Skull Bash
-    [93985] = {duration=4},   -- [Feral] Skull Bash
-    [97547] = {duration=5},   -- [Moonkin] Solar Beam
-    [351338] = {duration=4},  -- [Evoker] Quell
-  }
+	return {
+	  [6552] = {duration=3},    -- [Warrior] Pummel
+	  [96231] = {duration=3},   -- [Paladin] Rebuke
+	  [231665] = {duration=3},  -- [Paladin] Avengers Shield
+	  [147362] = {duration=3},  -- [Hunter] Countershot
+	  [187707] = {duration=3},  -- [Hunter] Muzzle
+	  [1766] = {duration=3},    -- [Rogue] Kick
+	  [183752] = {duration=3},  -- [DH] Consume Magic
+	  [47528] = {duration=3},   -- [DK] Mind Freeze
+	  [91802] = {duration=2},   -- [DK] Shambling Rush
+	  [57994] = {duration=2},   -- [Shaman] Wind Shear
+	  [115781] = {duration=5},  -- [Warlock] Optical Blast
+	  [19647] = {duration=5},   -- [Warlock] Spell Lock
+	  [212619] = {duration=5},  -- [Warlock] Call Felhunter
+	  [132409] = {duration=5},  -- [Warlock] Spell Lock
+	  [171138] = {duration=5},  -- [Warlock] Shadow Lock
+	  [2139] = {duration=5},    -- [Mage] Counterspell
+	  [116705] = {duration=3},  -- [Monk] Spear Hand Strike
+	  [106839] = {duration=3},  -- [Feral] Skull Bash
+	  [93985] = {duration=3},   -- [Feral] Skull Bash
+	  [97547] = {duration=4},   -- [Moonkin] Solar Beam
+	  [351338] = {duration=4},  -- [Evoker] Quell
+	}
 end
 
 function GladiusEx.Data.InterruptModifiers()
