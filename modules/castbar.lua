@@ -85,6 +85,8 @@ local CastBar = GladiusEx:NewGladiusExModule("CastBar",
 
 function CastBar:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_START")
+	self:RegisterEvent("UNIT_SPELLCAST_EMPOWER_START")
+	self:RegisterEvent("UNIT_SPELLCAST_EMPOWER_STOP")
 	self:RegisterEvent("UNIT_SPELLCAST_STOP")
 	self:RegisterEvent("UNIT_SPELLCAST_DELAYED")
 	self:RegisterEvent("UNIT_SPELLCAST_FAILED", "UNIT_SPELLCAST_STOP")
@@ -146,6 +148,10 @@ function CastBar:UNIT_SPELLCAST_START(event, unit)
 	self:CastStart(unit, false)
 end
 
+function CastBar:UNIT_SPELLCAST_EMPOWER_START(event, unit)
+	self:CastStart(unit, true)
+end
+
 function CastBar:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	self:CastStart(unit, true)
 end
@@ -170,6 +176,18 @@ function CastBar:UNIT_SPELLCAST_CHANNEL_STOP(event, unit, spell, id)
 end
 
 function CastBar:UNIT_SPELLCAST_STOP(event, unit, lineID, spell)
+	if not self.frame[unit] then return end
+
+	if GladiusEx:IsValidCastGUID(lineID) then
+		if self.frame[unit].lineID ~= lineID then return end
+	else
+		if self.frame[unit].spellName ~= spell then return end
+	end
+	self.frame[unit].lineID = nil
+	self:CastEnd(self.frame[unit], self.db[unit])
+end
+
+function CastBar:UNIT_SPELLCAST_EMPOWER_STOP(event, unit, lineID, spell)
 	if not self.frame[unit] then return end
 
 	if GladiusEx:IsValidCastGUID(lineID) then
