@@ -85,9 +85,9 @@ local CastBar = GladiusEx:NewGladiusExModule("CastBar",
 
 function CastBar:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_START")
-	self:RegisterEvent("UNIT_SPELLCAST_EMPOWER_START")
-	self:RegisterEvent("UNIT_SPELLCAST_EMPOWER_STOP")
+	self:RegisterEvent("UNIT_SPELLCAST_EMPOWER_START", "UNIT_SPELLCAST_STOP")
 	self:RegisterEvent("UNIT_SPELLCAST_STOP")
+    self:RegisterEvent("UNIT_SPELLCAST_EMPOWER_STOP", "UNIT_SPELLCAST_STOP")
 	self:RegisterEvent("UNIT_SPELLCAST_DELAYED")
 	self:RegisterEvent("UNIT_SPELLCAST_FAILED", "UNIT_SPELLCAST_STOP")
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED", "UNIT_SPELLCAST_STOP")
