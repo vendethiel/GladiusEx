@@ -685,6 +685,9 @@ function GladiusEx:PLAYER_ENTERING_WORLD()
 end
 
 function GladiusEx:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
+    if InCombatLockdown() then
+        return -- Combat doesnt end immediately when solo shuffle round ends so this would trigger a lua error if ran on the first events.
+    end
     self:CheckArenaSize()
     self:ShowFrames()
 

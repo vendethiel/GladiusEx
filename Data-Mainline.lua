@@ -26,7 +26,7 @@ function GladiusEx.Data.DefaultClassicon()
 		-- Priority List by Bibimapi
 -- Immunes I and Stealth (10)
 
-    [211317]        = 10, -- Archbishop Benedictus' Restitution
+    	[211317]        = 10, -- Archbishop Benedictus' Restitution
 		[221527]				= 10,	-- Imprison (pvp tal)
 		[GladiusEx:SafeGetSpellName(33786)]	= 10,	-- Cyclone
 		[GladiusEx:SafeGetSpellName(605)]	= 10,	-- Mind Control
@@ -56,6 +56,7 @@ function GladiusEx.Data.DefaultClassicon()
 		[GladiusEx:SafeGetSpellName(58984)]	= 10,	-- Shadowmeld
 		[GladiusEx:SafeGetSpellName(5384)]	= 10,	-- Feign Death
 		[GladiusEx:SafeGetSpellName(207736)]	= 10,	-- Shadowy Duel
+		[GladiusEx:SafeGetSpellName(377362)]    = 10,   -- Precognition
 
 		[GladiusEx:SafeGetSpellName(167152)]	= 10,	-- Refreshment
 		[GladiusEx:SafeGetSpellName(118358)]	= 10,	-- Drink1
@@ -70,26 +71,26 @@ function GladiusEx.Data.DefaultClassicon()
   [GladiusEx:SafeGetSpellName(3355)]  	= 9,	-- Freezing Trap 
   [GladiusEx:SafeGetSpellName(203337)]  	= 9,	-- Freezing Trap (S honor talent)
   [GladiusEx:SafeGetSpellName(213691)]  	= 9,	-- Scatter Shot
-  [GladiusEx:SafeGetSpellName(118)]  	= 9.1,	-- Polymorph
-  [GladiusEx:SafeGetSpellName(28272)]  	= 9.1,	-- Polymorph (pig)
-  [GladiusEx:SafeGetSpellName(28271)]  	= 9.1,	-- Polymorph (turtle)
-  [GladiusEx:SafeGetSpellName(61025)]  	= 9.1,	-- Polymorph (snake)
-  [GladiusEx:SafeGetSpellName(61305)]  	= 9.1,	-- Polymorph (black cat)
-  [GladiusEx:SafeGetSpellName(61721)]  	= 9.1,	-- Polymorph (rabbit)
-  [GladiusEx:SafeGetSpellName(61780)]  	= 9.1,	-- Polymorph (turkey)
-  [GladiusEx:SafeGetSpellName(126819)]  	= 9.1,	-- Polymorph (procupine)
-  [GladiusEx:SafeGetSpellName(161353)]  	= 9.1,	-- Polymorph (bear cub)
-  [GladiusEx:SafeGetSpellName(161354)]  	= 9.1,	-- Polymorph (monkey)
-  [GladiusEx:SafeGetSpellName(161355)]  	= 9.1,	-- Polymorph (penguin)
-  [GladiusEx:SafeGetSpellName(161372)]  	= 9.1,	-- Polymorph (peacock)
-  [GladiusEx:SafeGetSpellName(277787)]  	= 9.1,	-- Polymorph (direhorn)
-  [GladiusEx:SafeGetSpellName(277792)]  	= 9.1,	-- Polymorph (bumblebee)
+  [GladiusEx:SafeGetSpellName(118)]  	= 9,	-- Polymorph
+  [GladiusEx:SafeGetSpellName(28272)]  	= 9,	-- Polymorph (pig)
+  [GladiusEx:SafeGetSpellName(28271)]  	= 9,	-- Polymorph (turtle)
+  [GladiusEx:SafeGetSpellName(61025)]  	= 9,	-- Polymorph (snake)
+  [GladiusEx:SafeGetSpellName(61305)]  	= 9,	-- Polymorph (black cat)
+  [GladiusEx:SafeGetSpellName(61721)]  	= 9,	-- Polymorph (rabbit)
+  [GladiusEx:SafeGetSpellName(61780)]  	= 9,	-- Polymorph (turkey)
+  [GladiusEx:SafeGetSpellName(126819)]  	= 9,	-- Polymorph (procupine)
+  [GladiusEx:SafeGetSpellName(161353)]  	= 9,	-- Polymorph (bear cub)
+  [GladiusEx:SafeGetSpellName(161354)]  	= 9,	-- Polymorph (monkey)
+  [GladiusEx:SafeGetSpellName(161355)]  	= 9,	-- Polymorph (penguin)
+  [GladiusEx:SafeGetSpellName(161372)]  	= 9,	-- Polymorph (peacock)
+  [GladiusEx:SafeGetSpellName(277787)]  	= 9,	-- Polymorph (direhorn)
+  [GladiusEx:SafeGetSpellName(277792)]  	= 9,	-- Polymorph (bumblebee)
   [82691]				  	= 9.1,	-- Ring of Frost
   [GladiusEx:SafeGetSpellName(115078)]  	= 9,	-- Paralysis
   [GladiusEx:SafeGetSpellName(20066)]  	= 9,	-- Repentance
   [200196]			  	= 9,	-- Holy Word: Chastise incap 
   [GladiusEx:SafeGetSpellName(1776)]  	= 9,	-- Gouge
-  [GladiusEx:SafeGetSpellName(6770)]  	= 9.1,	-- Sap
+  [GladiusEx:SafeGetSpellName(6770)]  	= 9,	-- Sap
   [GladiusEx:SafeGetSpellName(51514)]  	= 9,	-- Hex
 		[GladiusEx:SafeGetSpellName(211004)]  	= 9,	-- Hex (spider)
 		[GladiusEx:SafeGetSpellName(210873)]  	= 9,	-- Hex (raptor)
@@ -112,6 +113,7 @@ function GladiusEx.Data.DefaultClassicon()
 		[331866]			  	= 9,	-- Door of Shadows
 		[GladiusEx:SafeGetSpellName(2094)]  	= 9,	-- Blind 
 		[GladiusEx:SafeGetSpellName(118699)]  	= 9,	-- Fear
+		[GladiusEx:SafeGetSpellName(130616)]  	= 9,	-- Fear (Horrify)
 		[GladiusEx:SafeGetSpellName(5484)]  	= 9,	-- Howl of Terror
 		[GladiusEx:SafeGetSpellName(6358)]  	= 9,	-- Seduction
 		[GladiusEx:SafeGetSpellName(261589)]  	= 9,	-- Seduction (Grimoire talent)
@@ -123,6 +125,7 @@ function GladiusEx.Data.DefaultClassicon()
 		[206961]			  	= 9,	-- Phearomones (legy)
 		[324263]			  	= 9,	-- Sulfuric Emission (disorient)
 		[339738]			  	= 9,	-- Dreamer's Mending
+		[360806]			  	= 9,	-- Sleep Walk
 
 
 		-- Stuns (8)
@@ -239,7 +242,7 @@ function GladiusEx.Data.DefaultClassicon()
 		[GladiusEx:SafeGetSpellName(209584)]  	= 5.5,	-- Zen Focus Tea
 		[GladiusEx:SafeGetSpellName(213664)]  	= 5.5,	-- Nimble Brew 
 		[GladiusEx:SafeGetSpellName(210256)]  	= 5.5,	-- Blessing of Sanctuary
-		[GladiusEx:SafeGetSpellName(210294)]  	= 5.5,	-- Divine Favor
+		[GladiusEx:SafeGetSpellName(210294)]  	= 4,	-- Divine Favor
 		[GladiusEx:SafeGetSpellName(289655)]  	= 5.5,	-- Holy Word: Concentration
 		[GladiusEx:SafeGetSpellName(115192)]  	= 5.5,	-- Subterfuge
 		[GladiusEx:SafeGetSpellName(290641)]  	= 5.5,	-- Ancestral Gift (pvp tal aura mastery)
@@ -740,29 +743,29 @@ function GladiusEx.Data.DefaultCooldowns()
 end
 
 function GladiusEx.Data.Interrupts()
-  return {
-    [6552] = {duration=4},    -- [Warrior] Pummel
-    [96231] = {duration=4},   -- [Paladin] Rebuke
-    [231665] = {duration=3},  -- [Paladin] Avengers Shield
-    [147362] = {duration=3},  -- [Hunter] Countershot
-    [187707] = {duration=3},  -- [Hunter] Muzzle
-    [1766] = {duration=5},    -- [Rogue] Kick
-    [183752] = {duration=3},  -- [DH] Consume Magic
-    [47528] = {duration=3},   -- [DK] Mind Freeze
-    [91802] = {duration=2},   -- [DK] Shambling Rush
-    [57994] = {duration=3},   -- [Shaman] Wind Shear
-    [115781] = {duration=6},  -- [Warlock] Optical Blast
-    [19647] = {duration=6},   -- [Warlock] Spell Lock
-    [212619] = {duration=6},  -- [Warlock] Call Felhunter
-    [132409] = {duration=6},  -- [Warlock] Spell Lock
-    [171138] = {duration=6},  -- [Warlock] Shadow Lock
-    [2139] = {duration=6},    -- [Mage] Counterspell
-    [116705] = {duration=4},  -- [Monk] Spear Hand Strike
-    [106839] = {duration=4},  -- [Feral] Skull Bash
-    [93985] = {duration=4},   -- [Feral] Skull Bash
-    [97547] = {duration=5},   -- [Moonkin] Solar Beam
-    [351338] = {duration=4},  -- [Evoker] Quell
-  }
+	return {
+	  [6552] = {duration=3},    -- [Warrior] Pummel
+	  [96231] = {duration=3},   -- [Paladin] Rebuke
+	  [231665] = {duration=3},  -- [Paladin] Avengers Shield
+	  [147362] = {duration=3},  -- [Hunter] Countershot
+	  [187707] = {duration=3},  -- [Hunter] Muzzle
+	  [1766] = {duration=3},    -- [Rogue] Kick
+	  [183752] = {duration=3},  -- [DH] Consume Magic
+	  [47528] = {duration=3},   -- [DK] Mind Freeze
+	  [91802] = {duration=2},   -- [DK] Shambling Rush
+	  [57994] = {duration=2},   -- [Shaman] Wind Shear
+	  [115781] = {duration=5},  -- [Warlock] Optical Blast
+	  [19647] = {duration=5},   -- [Warlock] Spell Lock
+	  [212619] = {duration=5},  -- [Warlock] Call Felhunter
+	  [132409] = {duration=5},  -- [Warlock] Spell Lock
+	  [171138] = {duration=5},  -- [Warlock] Shadow Lock
+	  [2139] = {duration=5},    -- [Mage] Counterspell
+	  [116705] = {duration=3},  -- [Monk] Spear Hand Strike
+	  [106839] = {duration=3},  -- [Feral] Skull Bash
+	  [93985] = {duration=3},   -- [Feral] Skull Bash
+	  [97547] = {duration=4},   -- [Moonkin] Solar Beam
+	  [351338] = {duration=4},  -- [Evoker] Quell
+	}
 end
 
 function GladiusEx.Data.InterruptModifiers()
