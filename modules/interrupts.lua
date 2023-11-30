@@ -12,9 +12,9 @@ local defaults = {
 
 local Interrupt = GladiusEx:NewGladiusExModule("Interrupts", defaults, defaults)
 	
-INTERRUPTS = GladiusEx.Data.Interrupts()
+local INTERRUPTS = GladiusEx.Data.Interrupts()
 
-CLASS_INTERRUPT_MODIFIERS = GladiusEx.Data.InterruptModifiers()
+local CLASS_INTERRUPT_MODIFIERS = GladiusEx.Data.InterruptModifiers()
 
 function Interrupt:OnEnable()
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")

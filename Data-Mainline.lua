@@ -727,10 +727,6 @@ function GladiusEx.Data.DefaultCooldowns()
 			[871] = true, -- Warrior/Shield Wall
 			[46968] = true, -- Warrior/Shockwave
 			[23920] = true, -- Warrior/Spell Reflection
-
-      [300728] = true, -- Covenant/Door of Shadows
-      [324631] = true, -- Covenant/Fleshcraft
-      [310143] = true, -- Covenant/Soulshape
 		},
 		{ -- group 2
 			[336126] = true, -- Gladiator's Medallion
