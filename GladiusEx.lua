@@ -7,7 +7,7 @@ GladiusEx.IS_CLASSIC = GladiusEx.IS_TBCC or GladiusEx.IS_WOTLKC
 
 local LGIST = GladiusEx.IS_RETAIL and LibStub:GetLibrary("LibGroupInSpecT-1.1")
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
-local RC = LibStub("LibRangeCheck-2.0")
+local RC = LibStub("LibRangeCheck-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local fn = LibStub("LibFunctional-1.0")
 
