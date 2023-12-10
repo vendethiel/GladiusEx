@@ -31,8 +31,8 @@ externals:
     url: https://github.com/slaren/LibFunctional-1.0
   libs/LibGroupInSpecT-1.1:
     url: svn://svn.wowace.com/wow/libgroupinspect/mainline/trunk
-  libs/LibRangeCheck-2.0:
-    url: https://github.com/WeakAuras/LibRangeCheck-2.0
+  libs/LibRangeCheck-3.0:
+    url: https://github.com/WeakAuras/LibRangeCheck-3.0
   libs/LibSharedMedia-3.0:
     url: svn://svn.wowace.com/wow/libsharedmedia-3-0/mainline/trunk
   libs/LibCooldownTracker-1.0:
