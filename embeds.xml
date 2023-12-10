@@ -15,7 +15,7 @@
 	<Include file="libs\AceLocale-3.0\AceLocale-3.0.xml"/>
 	<Include file="libs\AceSerializer-3.0\AceSerializer-3.0.xml"/>
 	<Include file="libs\LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
-	<Include file="libs\LibRangeCheck-2.0\LibRangeCheck-2.0\LibRangeCheck-2.0.lua"/>
+	<Include file="libs\LibRangeCheck-3.0\LibRangeCheck-3.0\LibRangeCheck-3.0.lua"/>
 	<Include file="libs\LibDispellable-1.0\LibDispellable-1.0.lua"/>
 	<Include file="libs\LibGroupInSpecT-1.1\lib.xml"/>
 	<Include file="libs\LibCooldownTracker-1.0\lib.xml"/>
