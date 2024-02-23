@@ -2353,6 +2353,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
                         args = {}
                     }
                 end
+
                 if spelldata.specID then
                     -- spec
                     for _, specID in ipairs(spelldata.specID) do
@@ -2372,20 +2373,6 @@ function Cooldowns:MakeGroupOptions(unit, group)
                         end
                         args[spelldata.class].args["spec" .. specID].args["spell" .. spellid] = spellconfig
                     end
-                elseif spelldata.covenant then
-                    -- covenant
-                    if not args[spelldata.class].args.covenant then
-                        args[spelldata.class].args.covenant = {
-                            type = "group",
-                            name = L["Covenant"],
-                            disabled = function()
-                                return not self:IsUnitEnabled(unit)
-                            end,
-                            order = 1000,
-                            args = {}
-                        }
-                    end
-                    args[spelldata.class].args.covenant.args["spell" .. spellid] = spellconfig
                 elseif spelldata.talent then
                     -- talent
                     if not args[spelldata.class].args.talents then
@@ -2462,20 +2449,6 @@ function Cooldowns:MakeGroupOptions(unit, group)
                     }
                 end
                 args.items.args["spell" .. spellid] = spellconfig
-            elseif spelldata.covenant then
-                -- covenant
-                if not args.covenant then
-                    args.covenant = {
-                        type = "group",
-                        name = L["Covenant"],
-                        disabled = function()
-                            return not self:IsUnitEnabled(unit)
-                        end,
-                        order = 14,
-                        args = {}
-                    }
-                end
-                args.covenant.args["spell" .. spellid] = spellconfig
             elseif spelldata.pvp_trinket then
                 -- pvp trinket
                 if not args.pvp_trinket then
