@@ -26,6 +26,7 @@ local defaults = {
 	drFontSize = 18,
 	drCategories = {},
 	drIcons = {},
+	showOnApply = true,
 }
 
 local DRTracker = GladiusEx:NewGladiusExModule("DRTracker",
@@ -156,7 +157,7 @@ function DRTracker:UpdateIcon(unit, drCat)
 	end
 end
 
-function DRTracker:DRFaded(unit, spellID)
+function DRTracker:DRFaded(unit, spellID, applied)
 	local drCat = DRData:GetSpellCategory(spellID)
 	if self.db[unit].drCategories[drCat] == false then return end
 
@@ -167,11 +168,25 @@ function DRTracker:DRFaded(unit, spellID)
 
 	local tracked = self.frame[unit].tracker[drCat]
 
-	if tracked.active then
-		tracked.diminished = DRData:NextDR(tracked.diminished)
-	else
-		tracked.active = true
-		tracked.diminished = 1
+	local useApplied = self.db[unit].showOnApply
+
+	if (applied and not useApplied) or (not applied and useApplied) then
+		if tracked.active then
+			local oldDiminished = tracked.diminished
+			tracked.diminished = DRData:NextDR(tracked.diminished)
+			
+			-- K: Fallback edge-case early DR reset detection
+			if oldDiminished and oldDiminished == 0.25 and tracked.diminished == 0 then
+				tracked.diminished = 1
+			end
+		elseif not tracked.active then
+			tracked.active = true
+			tracked.diminished = 1
+		end
+	end
+
+	if not tracked.active then
+		return
 	end
 
 	local time_left = DRData:GetResetTime()
@@ -195,17 +210,30 @@ function DRTracker:DRFaded(unit, spellID)
 	end
 
 	if self.db[unit].drTrackerCooldown then
-		CooldownFrame_Set(tracked.cooldown, GetTime(), time_left, 1)
+		if useApplied and applied then
+			CooldownFrame_Set(tracked.cooldown, 0, 0)
+			tracked.cooldown:Hide()
+		else
+			CooldownFrame_Set(tracked.cooldown, GetTime(), time_left, 1)
+			tracked.cooldown:Show()
+		end
 	end
 
-	tracked:SetScript("OnUpdate", function(f, elapsed)
-		-- add extra time to allow the cooldown frame to play the bling animation
-		if GetTime() >= (f.reset_time + 0.5) then
-			tracked.active = false
-			self:SortIcons(unit)
-			f:SetScript("OnUpdate", nil)
-		end
-	end)
+	local time_left = DRData:GetResetTime()
+	tracked.reset_time = time_left + GetTime()
+
+    if not useApplied or not applied then
+        tracked:SetScript("OnUpdate", function(f, elapsed)
+            -- add extra time to allow the cooldown frame to play the bling animation
+            if GetTime() >= (f.reset_time + 0.5) then
+                tracked.active = false
+                self:SortIcons(unit)
+                f:SetScript("OnUpdate", nil)
+            end
+        end)
+    elseif useApplied and applied then
+        tracked:SetScript("OnUpdate", nil)
+    end
 
 	tracked:Show()
 	self:SortIcons(unit)
@@ -247,14 +275,50 @@ end
 function DRTracker:CombatLogEvent(event, timestamp, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, auraType)
 	-- Enemy had a debuff refreshed before it faded
 	-- Buff or debuff faded from an enemy
-	if eventType == "SPELL_AURA_REFRESH" or eventType == "SPELL_AURA_REMOVED" then
-		if auraType == "DEBUFF" and DRData:GetSpellCategory(spellID) then
-			local unit = GladiusEx:GetUnitIdByGUID(destGUID)
-			if unit and self.frame[unit] then
-				self:DRFaded(unit, spellID)
-			end
-		end
-	end
+    if eventType == "SPELL_AURA_APPLIED" or eventType == "SPELL_AURA_REFRESH" or eventType == "SPELL_AURA_REMOVED" then
+        local drCat = DRData:GetSpellCategory(spellID)
+        if drCat and auraType == "DEBUFF" then
+            local unit = GetUnitIdByGUID(destGUID)
+            if unit and self.frame[unit] then
+
+                -- Dynamic DR early reset detection
+                if GladiusEx.IS_CLASSIC then
+					local tracked = (self.frame[unit] and self.frame[unit].tracker) and self.frame[unit].tracker[drCat] or nil
+					if tracked and eventType == "SPELL_AURA_APPLIED" then
+						if self:HasFullDurationAura(unit, sourceGUID, spellID) then
+							tracked.active = false
+						end
+					end
+				end
+
+				local applied = eventType == "SPELL_AURA_APPLIED" or eventType == "SPELL_AURA_REFRESH"
+				self:DRFaded(unit, spellID, applied)
+            end
+        end
+    end
+end
+
+function DRTracker:HasFullDurationAura(unit, sourceGUID, spellID)
+    local fullDuration = GladiusEx.Data.AuraDurations[spellID]
+    
+    if fullDuration then
+        local srcUnit = GetUnitIdByGUID(sourceGUID)
+
+        for i=1, 40 do
+            local name, _, _, _, _, duration, _, unitCaster, _, _, secID, secSourceGUID = UnitAura(unit, i, "HARMFUL")
+            if not name then break end
+            if secID == spellID then
+                if ((not secSourceGUID or secSourceGUID == sourceGUID) or ((not unitCaster and not scrUnit) or (unitCaster and srcUnit and unitCaster == srcUnit))) then
+                    -- K: Some classes/races have CC duration reduction effects, thus we have to check if the aura is at least longer than 50% of fullDuration
+                    -- which would imply it's possibly reduced by effects - but at least not DRd (which would be less than or equal to 50%)
+                    -- Note: No class/race/comp combo has the possibility to reduce a CC by 50% or more
+                    if duration == fullDuration or duration > (fullDuration / 2) then
+                        return true
+                    end
+                end
+            end
+        end
+    end
 end
 
 function DRTracker:CreateFrame(unit)
@@ -337,13 +401,20 @@ function DRTracker:Reset(unit)
 end
 
 function DRTracker:Test(unit)
-	self:DRFaded(unit, 5211)
-	self:DRFaded(unit, 118)
-	self:DRFaded(unit, 118)
+	self:DRFaded(unit, 5211, true)
+	self:DRFaded(unit, 5211, false)
 
-	self:DRFaded(unit, 33786)
-	self:DRFaded(unit, 33786)
-	self:DRFaded(unit, 33786)
+	self:DRFaded(unit, 118, true)
+	self:DRFaded(unit, 118, false)
+	self:DRFaded(unit, 118, true)
+	self:DRFaded(unit, 118, false)
+
+	self:DRFaded(unit, 33786, true)
+	self:DRFaded(unit, 33786, false)
+	self:DRFaded(unit, 33786, true)
+	self:DRFaded(unit, 33786, false)
+	self:DRFaded(unit, 33786, true)
+	self:DRFaded(unit, 33786, false)
 end
 
 function DRTracker:GetOptions(unit)
@@ -427,6 +498,13 @@ function DRTracker:GetOptions(unit)
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 34,
 						},
+						showOnApply = {
+                            type = "toggle",
+                            name = L["Show on Apply"],
+                            desc = L["Show DRs on start instead of on refresh/removal"],
+                            disabled = function() return not self:IsUnitEnabled(unit) end,
+                            order = 35,
+                        },
 						drTrackerFrameLevel = {
 							type = "range",
 							name = L["Frame level"],
@@ -434,7 +512,7 @@ function DRTracker:GetOptions(unit)
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							hidden = function() return not GladiusEx.db.base.advancedOptions end,
 							softMin = 1, softMax = 100, step = 1,
-							order = 35,
+							order = 36,
 						},
 					},
 				},
@@ -453,10 +531,12 @@ function DRTracker:GetOptions(unit)
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 5,
 						},
-						sep = {
-							type = "description",
-							name = "",
-							width = "full",
+						drTrackerSize = {
+							type = "range",
+							name = L["Icon size"],
+							desc = L["Size of the icons"],
+							min = 1, softMin = 10, softMax = 100, bigStep = 1,
+							disabled = function() return self.db[unit].drTrackerAdjustSize or not self:IsUnitEnabled(unit) end,
 							order = 6,
 						},
 						drTrackerAdjustSize = {
@@ -465,14 +545,6 @@ function DRTracker:GetOptions(unit)
 							desc = L["Adjust size to the frame size"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 7,
-						},
-						drTrackerSize = {
-							type = "range",
-							name = L["Icon size"],
-							desc = L["Size of the icons"],
-							min = 1, softMin = 10, softMax = 100, bigStep = 1,
-							disabled = function() return self.db[unit].drTrackerAdjustSize or not self:IsUnitEnabled(unit) end,
-							order = 10,
 						},
 					},
 				},
