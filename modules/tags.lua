@@ -368,7 +368,7 @@ function Tags:Update(unit)
 
 			-- update frame
 			local position = self.db[unit].tagsTexts[text].position
-			local hjustify = (strfind(position, "RIGHT") and "RIGHT") or (strfind(position, "LEFT") and "LEFT") or "MIDDLE"
+			local hjustify = (strfind(position, "RIGHT") and "RIGHT") or (strfind(position, "LEFT") and "LEFT") or "CENTER"
 			local vjustify = (strfind(position, "TOP") and "TOP") or (strfind(position, "BOTTOM") and "BOTTOM") or "MIDDLE"
 			local ox = self.db[unit].tagsTexts[text].offsetX
 			local oy = self.db[unit].tagsTexts[text].offsetY
