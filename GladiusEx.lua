@@ -1,9 +1,11 @@
 GladiusEx = LibStub("AceAddon-3.0"):NewAddon("GladiusEx", "AceEvent-3.0")
 
+
+
 GladiusEx.IS_RETAIL = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 GladiusEx.IS_TBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 GladiusEx.IS_WOTLKC = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
-GladiusEx.IS_CATAC = select(3, GetBuildInfo()) < 50000 and select(3, GetBuildInfo()) > 40000
+GladiusEx.IS_CATAC = WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC
 GladiusEx.IS_CLASSIC = GladiusEx.IS_TBCC or GladiusEx.IS_WOTLKC or GladiusEx.IS_CATAC
 
 local LGIST = GladiusEx.IS_RETAIL and LibStub:GetLibrary("LibGroupInSpecT-1.1")
