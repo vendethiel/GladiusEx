@@ -553,7 +553,7 @@ GladiusEx.Data.SpecSpells = {
     [33891] = 105, -- Tree of Life
     [53251] = 105, -- Wild Growth
 }
-
+-- K: This is used to assess whether a DR has (dynamically) reset early
 GladiusEx.Data.AuraDurations = {
     [64058] = 10,  -- Psychic Horror Disarm Effect
     [51722] = 10,  -- Dismantle
@@ -640,9 +640,9 @@ GladiusEx.Data.AuraDurations = {
     [58861] = 2,   -- Bash (Spirit Wolves)
     [18425] = 1.5, -- Silenced - Improved Kick
     [7922]  = 1.5, -- Charge Stun
-  --[81261] = 0,  -- Solar Beam (static, unusable)
-  --[408] = 6,     -- Kidney Shot (varies, unusable)
-  --[22570] = 5,   -- Maim (varies, unusable)
+    --[81261] = 0, -- Solar Beam (static, unusable)
+    [408]   = 6, -- Kidney Shot (varies)
+    [22570] = 5, -- Maim (varies)
 }
 
 function GladiusEx.Data.GetSpecializationInfoByID(id)

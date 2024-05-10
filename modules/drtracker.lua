@@ -157,6 +157,35 @@ function DRTracker:UpdateIcon(unit, drCat)
 	end
 end
 
+function DRTracker:SortIcons(unit)
+	local lastFrame
+
+	for cat, frame in pairs(self.frame[unit].tracker) do
+		frame:ClearAllPoints()
+
+		if frame.active then
+			if not lastFrame then
+				-- frame:SetPoint(self.db[unit].drTrackerAnchor, self.frame[unit], self.db[unit].drTrackerRelativePoint, self.db[unit].drTrackerOffsetX, self.db[unit].drTrackerOffsetY)
+				frame:SetPoint("TOPLEFT", self.frame[unit])
+			elseif self.db[unit].drTrackerGrowDirection == "RIGHT" then
+				frame:SetPoint("TOPLEFT", lastFrame, "TOPRIGHT", self.db[unit].drTrackerMargin, 0)
+			elseif self.db[unit].drTrackerGrowDirection == "LEFT" then
+				frame:SetPoint("TOPRIGHT", lastFrame, "TOPLEFT", -self.db[unit].drTrackerMargin, 0)
+			elseif self.db[unit].drTrackerGrowDirection == "UP" then
+				frame:SetPoint("BOTTOMLEFT", lastFrame, "TOPLEFT", 0, self.db[unit].drTrackerMargin)
+			elseif self.db[unit].drTrackerGrowDirection == "DOWN" then
+				frame:SetPoint("TOPLEFT", lastFrame, "BOTTOMLEFT", 0, -self.db[unit].drTrackerMargin)
+			end
+
+			lastFrame = frame
+
+			frame:Show()
+		else
+			frame:Hide()
+		end
+	end
+end
+
 function DRTracker:DRFaded(unit, spellID, applied)
 	local drCat = DRData:GetSpellCategory(spellID)
 	if self.db[unit].drCategories[drCat] == false then return end
@@ -209,8 +238,11 @@ function DRTracker:DRFaded(unit, spellID, applied)
 		tracked.border:Hide()
 	end
 
+	local time_left = DRData:GetResetTime()
+	tracked.reset_time = time_left + GetTime()
+
 	if self.db[unit].drTrackerCooldown then
-		if useApplied and applied then
+        if useApplied and applied then
 			CooldownFrame_Set(tracked.cooldown, 0, 0)
 			tracked.cooldown:Hide()
 		else
@@ -219,90 +251,55 @@ function DRTracker:DRFaded(unit, spellID, applied)
 		end
 	end
 
-	local time_left = DRData:GetResetTime()
-	tracked.reset_time = time_left + GetTime()
-
-    if not useApplied or not applied then
-        tracked:SetScript("OnUpdate", function(f, elapsed)
-            -- add extra time to allow the cooldown frame to play the bling animation
-            if GetTime() >= (f.reset_time + 0.5) then
-                tracked.active = false
-                self:SortIcons(unit)
-                f:SetScript("OnUpdate", nil)
-            end
-        end)
-    elseif useApplied and applied then
-        tracked:SetScript("OnUpdate", nil)
-    end
+	if not applied then
+		tracked:SetScript("OnUpdate", function(f, elapsed)
+			-- add extra time to allow the cooldown frame to play the bling animation
+			if GetTime() >= (f.reset_time + 0.5) then
+				tracked.active = false
+				self:SortIcons(unit)
+				f:SetScript("OnUpdate", nil)
+			end
+		end)
+	elseif (applied and useApplied) then
+		tracked:SetScript("OnUpdate", nil)
+	end
 
 	tracked:Show()
 	self:SortIcons(unit)
-end
-
-function DRTracker:SortIcons(unit)
-	local lastFrame
-
-	for cat, frame in pairs(self.frame[unit].tracker) do
-		frame:ClearAllPoints()
-
-		if frame.active then
-			if not lastFrame then
-				-- frame:SetPoint(self.db[unit].drTrackerAnchor, self.frame[unit], self.db[unit].drTrackerRelativePoint, self.db[unit].drTrackerOffsetX, self.db[unit].drTrackerOffsetY)
-				frame:SetPoint("TOPLEFT", self.frame[unit])
-			elseif self.db[unit].drTrackerGrowDirection == "RIGHT" then
-				frame:SetPoint("TOPLEFT", lastFrame, "TOPRIGHT", self.db[unit].drTrackerMargin, 0)
-			elseif self.db[unit].drTrackerGrowDirection == "LEFT" then
-				frame:SetPoint("TOPRIGHT", lastFrame, "TOPLEFT", -self.db[unit].drTrackerMargin, 0)
-			elseif self.db[unit].drTrackerGrowDirection == "UP" then
-				frame:SetPoint("BOTTOMLEFT", lastFrame, "TOPLEFT", 0, self.db[unit].drTrackerMargin)
-			elseif self.db[unit].drTrackerGrowDirection == "DOWN" then
-				frame:SetPoint("TOPLEFT", lastFrame, "BOTTOMLEFT", 0, -self.db[unit].drTrackerMargin)
-			end
-
-			lastFrame = frame
-
-			frame:Show()
-		else
-			frame:Hide()
-		end
-	end
 end
 
 function DRTracker:COMBAT_LOG_EVENT_UNFILTERED(event)
 	self:CombatLogEvent(event, CombatLogGetCurrentEventInfo())
 end
 
-function DRTracker:CombatLogEvent(event, timestamp, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, auraType)
-	-- Enemy had a debuff refreshed before it faded
-	-- Buff or debuff faded from an enemy
+function DRTracker:CombatLogEvent(_, timestamp, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, auraType)
+    -- Enemy had a debuff refreshed before it faded
+    -- Buff or debuff faded from an enemy
     if eventType == "SPELL_AURA_APPLIED" or eventType == "SPELL_AURA_REFRESH" or eventType == "SPELL_AURA_REMOVED" then
         local drCat = DRData:GetSpellCategory(spellID)
         if drCat and auraType == "DEBUFF" then
-            local unit = GetUnitIdByGUID(destGUID)
+            local unit = GladiusEx:GetUnitIdByGUID(destGUID)
             if unit and self.frame[unit] then
-
-                -- Dynamic DR early reset detection
-                if GladiusEx.IS_CLASSIC then
-					local tracked = (self.frame[unit] and self.frame[unit].tracker) and self.frame[unit].tracker[drCat] or nil
-					if tracked and eventType == "SPELL_AURA_APPLIED" then
-						if self:HasFullDurationAura(unit, sourceGUID, spellID) then
-							tracked.active = false
-						end
-					end
-				end
-
-				local applied = eventType == "SPELL_AURA_APPLIED" or eventType == "SPELL_AURA_REFRESH"
-				self:DRFaded(unit, spellID, applied)
+                                
+                -- K: Dynamic DR reset early if we have a full duration aura on _REFRESH / _APPLIED 
+                local tracked = (self.frame[unit] and self.frame[unit].tracker) and self.frame[unit].tracker[drCat] or nil
+                if tracked and (eventType == "SPELL_AURA_REFRESH" or eventType == "SPELL_AURA_APPLIED") then
+                    if self:HasFullDurationAura(unit, sourceGUID, spellID) then
+                        tracked.active = false
+                    end
+                end
+                
+				self:DRFaded(unit, spellID, eventType)
             end
         end
     end
 end
 
 function DRTracker:HasFullDurationAura(unit, sourceGUID, spellID)
-    local fullDuration = GladiusEx.Data.AuraDurations[spellID]
+    local fullDuration = GladiusEx.Data.AuraDurations and GladiusEx.Data.AuraDurations[spellID] or nil
     
     if fullDuration then
-        local srcUnit = GetUnitIdByGUID(sourceGUID)
+        local srcUnit = GladiusEx:GetUnitIdByGUID(sourceGUID)
 
         for i=1, 40 do
             local name, _, _, _, _, duration, _, unitCaster, _, _, secID, secSourceGUID = UnitAura(unit, i, "HARMFUL")
@@ -401,20 +398,20 @@ function DRTracker:Reset(unit)
 end
 
 function DRTracker:Test(unit)
-	self:DRFaded(unit, 5211, true)
-	self:DRFaded(unit, 5211, false)
+    self:DRFaded(unit, 64058, "SPELL_AURA_APPLIED")
+    self:DRFaded(unit, 64058, "SPELL_AURA_REMOVED")
 
-	self:DRFaded(unit, 118, true)
-	self:DRFaded(unit, 118, false)
-	self:DRFaded(unit, 118, true)
-	self:DRFaded(unit, 118, false)
-
-	self:DRFaded(unit, 33786, true)
-	self:DRFaded(unit, 33786, false)
-	self:DRFaded(unit, 33786, true)
-	self:DRFaded(unit, 33786, false)
-	self:DRFaded(unit, 33786, true)
-	self:DRFaded(unit, 33786, false)
+    self:DRFaded(unit, 118, "SPELL_AURA_APPLIED")
+	self:DRFaded(unit, 118, "SPELL_AURA_REMOVED")
+    self:DRFaded(unit, 118, "SPELL_AURA_APPLIED")
+    self:DRFaded(unit, 118, "SPELL_AURA_REMOVED")
+    
+    self:DRFaded(unit, 33786, "SPELL_AURA_APPLIED")
+    self:DRFaded(unit, 33786, "SPELL_AURA_REMOVED")
+    self:DRFaded(unit, 33786, "SPELL_AURA_APPLIED")
+    self:DRFaded(unit, 33786, "SPELL_AURA_REMOVED")
+    self:DRFaded(unit, 33786, "SPELL_AURA_APPLIED")
+    self:DRFaded(unit, 33786, "SPELL_AURA_REMOVED")
 end
 
 function DRTracker:GetOptions(unit)
