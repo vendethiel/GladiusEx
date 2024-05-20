@@ -23,6 +23,7 @@ local defaults = {
 	drTrackerCooldown = true,
 	drTrackerCooldownReverse = false,
 	drTrackerBorder = true,
+	drTrackerText = true,
 	drFontSize = 18,
 	drCategories = {},
 	drIcons = {},
@@ -225,8 +226,14 @@ function DRTracker:DRFaded(unit, drCat, spellID, event)
 	tracked.reset_time = time_left + GetTime()
 
 	local text, r, g, b = unpack(drTexts[tracked.diminished])
-	tracked.text:SetText(text)
-	tracked.text:SetTextColor(r,g,b)
+
+	if self.db[unit].drTrackerText then
+		tracked.text:Show()
+		tracked.text:SetText(text)
+		tracked.text:SetTextColor(r,g,b)
+	else
+		tracked.text:Hide()
+	end
 
 	local texture = GetSpellTexture(spellID)
 	if self.db[unit].drIcons[drCat] then
@@ -563,6 +570,13 @@ function DRTracker:GetOptions(unit)
 							name = L["Text size"],
 							desc = L["Text size of the DR text"],
 							min = 1, max = 20, step = 1,
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 10,
+						},
+						drTrackerText = {
+							type = "toggle",
+							name = L["DR Text"],
+							desc = L["Show the current DR on the icon as text"],
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 15,
 						},
