@@ -27,7 +27,7 @@ local defaults = {
 	drFontSize = 18,
 	drCategories = {},
 	drIcons = {},
-	showOnApply = true,
+	drShowOnApply = true,
 }
 
 local DRTracker = GladiusEx:NewGladiusExModule("DRTracker",
@@ -197,7 +197,7 @@ function DRTracker:DRFaded(unit, drCat, spellID, event)
 
 	local tracked = self.frame[unit].tracker[drCat]
 
-	local useApplied = self.db[unit].showOnApply
+	local useApplied = self.db[unit].drShowOnApply
 
 	local newDR =     event == "SPELL_AURA_APPLIED"
 	local refreshDR = event == "SPELL_AURA_REFRESH"
@@ -508,7 +508,7 @@ function DRTracker:GetOptions(unit)
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 34,
 						},
-						showOnApply = {
+						drShowOnApply = {
 							type = "toggle",
 							name = L["Show on Apply"],
 							desc = L["Show DRs on start instead of on refresh/removal"],
