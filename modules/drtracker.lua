@@ -314,19 +314,21 @@ function DRTracker:HasFullDurationAura(unit, sourceGUID, spellID)
 	if fullDuration then
 		local srcUnit = GladiusEx:GetUnitIdByGUID(sourceGUID)
 
-		for i=1, 40 do
+		local i = 1
+		while true do
 			local name, _, _, _, _, duration, _, unitCaster, _, _, secID, secSourceGUID = UnitAura(unit, i, "HARMFUL")
 			if not name then break end
 			if secID == spellID then
-				if ((not secSourceGUID or secSourceGUID == sourceGUID) or ((not unitCaster and not scrUnit) or (unitCaster and srcUnit and unitCaster == srcUnit))) then
+				if secSourceGUID == sourceGUID or unitCaster == srcUnit then
 					-- K: Some classes/races have CC duration reduction effects, thus we have to check if the aura is at least longer than 50% of fullDuration
 					-- which would imply it's possibly reduced by effects - but at least not DRd (which would be less than or equal to 50%)
 					-- Note: No class/race/comp combo has the possibility to reduce a CC by 50% or more
-					if duration == fullDuration or duration > (fullDuration / 2) then
+					if duration > (fullDuration / 2) then
 						return true
 					end
 				end
 			end
+			i = i + 1
 		end
 	end
 end

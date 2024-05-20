@@ -276,8 +276,8 @@ function Auras:UpdateUnitAuras(event, unit)
 
 		local enlarged = {}
 		local normal = {}
-
-		for i = 1, 40 do
+		local i = 1
+		while true do
 			local name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
 			if testing then
 				name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = GetTestAura(i, buffs)
@@ -297,6 +297,7 @@ function Auras:UpdateUnitAuras(event, unit)
 					tinsert(normal, i)
 				end
 			end
+			i = i + 1
 		end
 
 		-- sort auras

@@ -748,9 +748,10 @@ function GladiusEx:CheckOpponentSpecialization(unit)
 end
 
 function GladiusEx:FindSpecByAuras(unit)
-    for i = 1, 40 do
+    local i = 1
+    while true do
         local n, _, _, _, _, _, unitCaster, _, _, spellID = UnitAura(unit, i, "HELPFUL")
-        if n == nil then
+        if not n then
             break
         end
         if unitCaster ~= nil then
@@ -763,6 +764,7 @@ function GladiusEx:FindSpecByAuras(unit)
                 end
             end
         end
+        i = i + 1
     end
 end
 
