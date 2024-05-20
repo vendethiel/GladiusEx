@@ -186,8 +186,7 @@ function DRTracker:SortIcons(unit)
 	end
 end
 
-function DRTracker:DRFaded(unit, spellID, applied)
-	local drCat = DRData:GetSpellCategory(spellID)
+function DRTracker:DRFaded(unit, drCat, spellID, event)
 	if self.db[unit].drCategories[drCat] == false then return end
 
 	if not self.frame[unit].tracker[drCat] then
@@ -199,7 +198,11 @@ function DRTracker:DRFaded(unit, spellID, applied)
 
 	local useApplied = self.db[unit].showOnApply
 
-	if (applied and not useApplied) or (not applied and useApplied) then
+	local newDR =     event == "SPELL_AURA_APPLIED"
+	local refreshDR = event == "SPELL_AURA_REFRESH"
+	local removedDR = event == "SPELL_AURA_REMOVED"
+
+	if newDR or refreshDR then
 		if tracked.active then
 			local oldDiminished = tracked.diminished
 			tracked.diminished = DRData:NextDR(tracked.diminished)
@@ -214,7 +217,7 @@ function DRTracker:DRFaded(unit, spellID, applied)
 		end
 	end
 
-	if not tracked.active then
+	if not tracked.active or (not useApplied and not (refreshDR or removedDR)) then
 		return
 	end
 
@@ -242,7 +245,7 @@ function DRTracker:DRFaded(unit, spellID, applied)
 	tracked.reset_time = time_left + GetTime()
 
 	if self.db[unit].drTrackerCooldown then
-        if useApplied and applied then
+		if useApplied and (newDR or refreshDR) then
 			CooldownFrame_Set(tracked.cooldown, 0, 0)
 			tracked.cooldown:Hide()
 		else
@@ -251,7 +254,7 @@ function DRTracker:DRFaded(unit, spellID, applied)
 		end
 	end
 
-	if not applied then
+	if removedDR or (not useApplied and refreshDR) then
 		tracked:SetScript("OnUpdate", function(f, elapsed)
 			-- add extra time to allow the cooldown frame to play the bling animation
 			if GetTime() >= (f.reset_time + 0.5) then
@@ -260,7 +263,7 @@ function DRTracker:DRFaded(unit, spellID, applied)
 				f:SetScript("OnUpdate", nil)
 			end
 		end)
-	elseif (applied and useApplied) then
+	else
 		tracked:SetScript("OnUpdate", nil)
 	end
 
@@ -273,49 +276,52 @@ function DRTracker:COMBAT_LOG_EVENT_UNFILTERED(event)
 end
 
 function DRTracker:CombatLogEvent(_, timestamp, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, auraType)
-    -- Enemy had a debuff refreshed before it faded
-    -- Buff or debuff faded from an enemy
-    if eventType == "SPELL_AURA_APPLIED" or eventType == "SPELL_AURA_REFRESH" or eventType == "SPELL_AURA_REMOVED" then
-        local drCat = DRData:GetSpellCategory(spellID)
-        if drCat and auraType == "DEBUFF" then
-            local unit = GladiusEx:GetUnitIdByGUID(destGUID)
-            if unit and self.frame[unit] then
-                                
-                -- K: Dynamic DR reset early if we have a full duration aura on _REFRESH / _APPLIED 
-                local tracked = (self.frame[unit] and self.frame[unit].tracker) and self.frame[unit].tracker[drCat] or nil
-                if tracked and (eventType == "SPELL_AURA_REFRESH" or eventType == "SPELL_AURA_APPLIED") then
-                    if self:HasFullDurationAura(unit, sourceGUID, spellID) then
-                        tracked.active = false
-                    end
-                end
-                
-				self:DRFaded(unit, spellID, eventType)
-            end
-        end
-    end
+	-- Enemy had a debuff refreshed before it faded
+	-- Buff or debuff faded from an enemy
+	if eventType == "SPELL_AURA_APPLIED" or eventType == "SPELL_AURA_REFRESH" or eventType == "SPELL_AURA_REMOVED" then
+		local drCat, catTbl = DRData:GetSpellCategory(spellID)
+		if drCat and auraType == "DEBUFF" then
+			local unit = GladiusEx:GetUnitIdByGUID(destGUID)
+			if unit and self.frame[unit] then
+				local tbl = catTbl and catTbl or { drCat }
+				for _, drCat in pairs(tbl) do -- K: Use a for loop to catch auras that DR with multiple categories (primarily Ring of Frost/Deep Freeze)				
+					
+					-- K: Dynamic DR reset early if we have a full duration aura on _REFRESH / _APPLIED 
+					local tracked = (self.frame[unit] and self.frame[unit].tracker) and self.frame[unit].tracker[drCat] or nil
+					if tracked and (eventType == "SPELL_AURA_REFRESH" or eventType == "SPELL_AURA_APPLIED") then
+						if self:HasFullDurationAura(unit, sourceGUID, spellID) then
+							tracked.active = false
+						end
+					end
+					
+					self:DRFaded(unit, drCat, spellID, eventType)
+				end
+			end
+		end
+	end
 end
 
 function DRTracker:HasFullDurationAura(unit, sourceGUID, spellID)
-    local fullDuration = GladiusEx.Data.AuraDurations and GladiusEx.Data.AuraDurations[spellID] or nil
-    
-    if fullDuration then
-        local srcUnit = GladiusEx:GetUnitIdByGUID(sourceGUID)
+	local fullDuration = GladiusEx.Data.AuraDurations and GladiusEx.Data.AuraDurations[spellID] or nil
+	
+	if fullDuration then
+		local srcUnit = GladiusEx:GetUnitIdByGUID(sourceGUID)
 
-        for i=1, 40 do
-            local name, _, _, _, _, duration, _, unitCaster, _, _, secID, secSourceGUID = UnitAura(unit, i, "HARMFUL")
-            if not name then break end
-            if secID == spellID then
-                if ((not secSourceGUID or secSourceGUID == sourceGUID) or ((not unitCaster and not scrUnit) or (unitCaster and srcUnit and unitCaster == srcUnit))) then
-                    -- K: Some classes/races have CC duration reduction effects, thus we have to check if the aura is at least longer than 50% of fullDuration
-                    -- which would imply it's possibly reduced by effects - but at least not DRd (which would be less than or equal to 50%)
-                    -- Note: No class/race/comp combo has the possibility to reduce a CC by 50% or more
-                    if duration == fullDuration or duration > (fullDuration / 2) then
-                        return true
-                    end
-                end
-            end
-        end
-    end
+		for i=1, 40 do
+			local name, _, _, _, _, duration, _, unitCaster, _, _, secID, secSourceGUID = UnitAura(unit, i, "HARMFUL")
+			if not name then break end
+			if secID == spellID then
+				if ((not secSourceGUID or secSourceGUID == sourceGUID) or ((not unitCaster and not scrUnit) or (unitCaster and srcUnit and unitCaster == srcUnit))) then
+					-- K: Some classes/races have CC duration reduction effects, thus we have to check if the aura is at least longer than 50% of fullDuration
+					-- which would imply it's possibly reduced by effects - but at least not DRd (which would be less than or equal to 50%)
+					-- Note: No class/race/comp combo has the possibility to reduce a CC by 50% or more
+					if duration == fullDuration or duration > (fullDuration / 2) then
+						return true
+					end
+				end
+			end
+		end
+	end
 end
 
 function DRTracker:CreateFrame(unit)
@@ -332,7 +338,7 @@ function DRTracker:CreateFrame(unit)
 	if self.frame[unit].SlotBackground then
 		self.frame[unit].SlotBackground:Hide()
 	end
-    self.frame[unit]:EnableMouse(false) -- fixes a bug in which, with some settings, the first DR category icon is clickable and clicking it causes a strange border to appear
+	self.frame[unit]:EnableMouse(false) -- fixes a bug in which, with some settings, the first DR category icon is clickable and clicking it causes a strange border to appear
 end
 
 function DRTracker:Update(unit)
@@ -398,20 +404,20 @@ function DRTracker:Reset(unit)
 end
 
 function DRTracker:Test(unit)
-    self:DRFaded(unit, 64058, "SPELL_AURA_APPLIED")
-    self:DRFaded(unit, 64058, "SPELL_AURA_REMOVED")
+	self:DRFaded(unit, DRData:GetSpellCategory(64058), 64058, "SPELL_AURA_APPLIED")
+	self:DRFaded(unit, DRData:GetSpellCategory(64058), 64058, "SPELL_AURA_REMOVED")
 
-    self:DRFaded(unit, 118, "SPELL_AURA_APPLIED")
-	self:DRFaded(unit, 118, "SPELL_AURA_REMOVED")
-    self:DRFaded(unit, 118, "SPELL_AURA_APPLIED")
-    self:DRFaded(unit, 118, "SPELL_AURA_REMOVED")
-    
-    self:DRFaded(unit, 33786, "SPELL_AURA_APPLIED")
-    self:DRFaded(unit, 33786, "SPELL_AURA_REMOVED")
-    self:DRFaded(unit, 33786, "SPELL_AURA_APPLIED")
-    self:DRFaded(unit, 33786, "SPELL_AURA_REMOVED")
-    self:DRFaded(unit, 33786, "SPELL_AURA_APPLIED")
-    self:DRFaded(unit, 33786, "SPELL_AURA_REMOVED")
+	self:DRFaded(unit, DRData:GetSpellCategory(118), 118, "SPELL_AURA_APPLIED")
+	self:DRFaded(unit, DRData:GetSpellCategory(118), 118, "SPELL_AURA_REFRESH")
+	self:DRFaded(unit, DRData:GetSpellCategory(118), 118, "SPELL_AURA_REMOVED")
+	self:DRFaded(unit, DRData:GetSpellCategory(118), 118, "SPELL_AURA_REMOVED")
+
+	self:DRFaded(unit, DRData:GetSpellCategory(33786), 33786, "SPELL_AURA_APPLIED")
+	self:DRFaded(unit, DRData:GetSpellCategory(33786), 33786, "SPELL_AURA_APPLIED")
+	self:DRFaded(unit, DRData:GetSpellCategory(33786), 33786, "SPELL_AURA_APPLIED")
+	self:DRFaded(unit, DRData:GetSpellCategory(33786), 33786, "SPELL_AURA_REMOVED")
+	self:DRFaded(unit, DRData:GetSpellCategory(33786), 33786, "SPELL_AURA_REMOVED")
+	self:DRFaded(unit, DRData:GetSpellCategory(33786), 33786, "SPELL_AURA_REMOVED")
 end
 
 function DRTracker:GetOptions(unit)
@@ -444,7 +450,7 @@ function DRTracker:GetOptions(unit)
 						},
 						drTrackerCooldownSwipeColor = {
 							type = "color",
-              hasAlpha = true,
+							hasAlpha = true,
 							name = L["Swipe color"],
 							desc = L["Cooldown swipe color on buffs"],
 							get = function(info) return GladiusEx:GetColorOption(self.db[unit], info) end,
@@ -496,12 +502,12 @@ function DRTracker:GetOptions(unit)
 							order = 34,
 						},
 						showOnApply = {
-                            type = "toggle",
-                            name = L["Show on Apply"],
-                            desc = L["Show DRs on start instead of on refresh/removal"],
-                            disabled = function() return not self:IsUnitEnabled(unit) end,
-                            order = 35,
-                        },
+							type = "toggle",
+							name = L["Show on Apply"],
+							desc = L["Show DRs on start instead of on refresh/removal"],
+							disabled = function() return not self:IsUnitEnabled(unit) end,
+							order = 35,
+						},
 						drTrackerFrameLevel = {
 							type = "range",
 							name = L["Frame level"],
