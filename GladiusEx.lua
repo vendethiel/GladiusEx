@@ -1,9 +1,12 @@
 GladiusEx = LibStub("AceAddon-3.0"):NewAddon("GladiusEx", "AceEvent-3.0")
 
+
+
 GladiusEx.IS_RETAIL = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 GladiusEx.IS_TBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 GladiusEx.IS_WOTLKC = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
-GladiusEx.IS_CLASSIC = GladiusEx.IS_TBCC or GladiusEx.IS_WOTLKC
+GladiusEx.IS_CATAC = WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC
+GladiusEx.IS_CLASSIC = GladiusEx.IS_TBCC or GladiusEx.IS_WOTLKC or GladiusEx.IS_CATAC
 
 local LGIST = GladiusEx.IS_RETAIL and LibStub:GetLibrary("LibGroupInSpecT-1.1")
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
@@ -745,9 +748,10 @@ function GladiusEx:CheckOpponentSpecialization(unit)
 end
 
 function GladiusEx:FindSpecByAuras(unit)
-    for i = 1, 40 do
+    local i = 1
+    while true do
         local n, _, _, _, _, _, unitCaster, _, _, spellID = UnitAura(unit, i, "HELPFUL")
-        if n == nil then
+        if not n then
             break
         end
         if unitCaster ~= nil then
@@ -760,6 +764,7 @@ function GladiusEx:FindSpecByAuras(unit)
                 end
             end
         end
+        i = i + 1
     end
 end
 
