@@ -188,6 +188,7 @@ function DRTracker:SortIcons(unit)
 end
 
 function DRTracker:DRFaded(unit, drCat, spellID, event)
+	if drCat == nil then return end -- Should only happen in testing
 	if self.db[unit].drCategories[drCat] == false then return end
 
 	if not self.frame[unit].tracker[drCat] then
