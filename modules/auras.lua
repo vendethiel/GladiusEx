@@ -277,7 +277,7 @@ function Auras:UpdateUnitAuras(event, unit)
 		local enlarged = {}
 		local normal = {}
 		local i = 1
-		while true do
+		while not testing or i < 40 do
 			local name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
 			if testing then
 				name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = GetTestAura(i, buffs)
