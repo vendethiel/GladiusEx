@@ -379,9 +379,12 @@ function GladiusEx.Data.Interrupts()
         [6552]  = { duration = 4 }, -- Pummel (Warrior)
         [72]    = { duration = 6 }, -- Shield Bash (Warrior)
         [57994] = { duration = 2 }, -- Wind Shear (Shaman)
-        [19244] = { duration = 5 }, -- Spell Lock (Warlock
-        [47528] = { duration = 5 }, -- Mind Freeze (Deathknight)
+        [19244] = { duration = 5 }, -- Spell Lock (Warlock)
+        [47528] = { duration = 5 }, -- Mind Freeze (Death Knight)
         [93985] = { duration = 4 }, -- Skull Bash (Druid)
+        [96231] = { duration = 4 }, -- Rebuke (Druid)
+        [50318] = { duration = 4 }, -- Serenity Dust (Moth - Hunter Pet)
+        [50479] = { duration = 2 }, -- Nether Shock (Nether Ray - Hunter Pet)
     }
 end
 
