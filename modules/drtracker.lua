@@ -196,35 +196,35 @@ function DRTracker:DRFaded(unit, drCat, spellID, event)
 		self:UpdateIcon(unit, drCat)
 	end
 
-	local tracked = self.frame[unit].tracker[drCat]
-
 	local useApplied = self.db[unit].drShowOnApply
 
-	local newDR =     event == "SPELL_AURA_APPLIED"
-	local refreshDR = event == "SPELL_AURA_REFRESH"
-	local removedDR = event == "SPELL_AURA_REMOVED"
+	local applied = useApplied and (event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH") or (event == "SPELL_AURA_APPLIED")
 
-	if newDR or refreshDR then
+	if not useApplied and applied then
+		return -- K: If we're not showing on apply then _APPLIED events are not relevant
+	end
+
+	local tracked = self.frame[unit].tracker[drCat]
+
+	if (not applied and not useApplied) or (applied and useApplied) then
 		if tracked.active then
 			local oldDiminished = tracked.diminished
 			tracked.diminished = DRData:NextDR(tracked.diminished)
-			
 			-- K: Fallback edge-case early DR reset detection
-			if oldDiminished and oldDiminished == 0.25 and tracked.diminished == 0 then
+			if oldDiminished and oldDiminished == 0 and tracked.diminished == 0 then
 				tracked.diminished = 1
 			end
-		elseif not tracked.active then
+		else
 			tracked.active = true
 			tracked.diminished = 1
 		end
 	end
 
-	if not tracked.active or (not useApplied and not (refreshDR or removedDR)) then
-		return
+	-- K: This could happen if a _REMOVED is received before an _APPLIED/_REFRESH
+	-- when using showOnApply, or reversed if not using it (could happen due to late join)
+	if not tracked.active then
+		return 
 	end
-
-	local time_left = DRData:GetResetTime()
-	tracked.reset_time = time_left + GetTime()
 
 	local text, r, g, b = unpack(drTexts[tracked.diminished])
 
@@ -249,20 +249,19 @@ function DRTracker:DRFaded(unit, drCat, spellID, event)
 		tracked.border:Hide()
 	end
 
-	local time_left = DRData:GetResetTime()
-	tracked.reset_time = time_left + GetTime()
-
 	if self.db[unit].drTrackerCooldown then
-		if useApplied and (newDR or refreshDR) then
+		if useApplied and applied then
 			CooldownFrame_Set(tracked.cooldown, 0, 0)
 			tracked.cooldown:Hide()
 		else
+			local time_left = DRData:GetResetTime()
+			tracked.reset_time = time_left + GetTime()
 			CooldownFrame_Set(tracked.cooldown, GetTime(), time_left, 1)
 			tracked.cooldown:Show()
 		end
 	end
 
-	if removedDR or (not useApplied and refreshDR) then
+	if not applied then
 		tracked:SetScript("OnUpdate", function(f, elapsed)
 			-- add extra time to allow the cooldown frame to play the bling animation
 			if GetTime() >= (f.reset_time + 0.5) then
@@ -271,7 +270,7 @@ function DRTracker:DRFaded(unit, drCat, spellID, event)
 				f:SetScript("OnUpdate", nil)
 			end
 		end)
-	else
+	elseif (applied and useApplied) then
 		tracked:SetScript("OnUpdate", nil)
 	end
 

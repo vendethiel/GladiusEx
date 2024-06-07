@@ -390,146 +390,133 @@ end
 
 GladiusEx.Data.SpecBuffs = {
     -- WARRIOR
+    [46924] = 71, -- Bladestorm
     [56638] = 71, -- Taste for Blood
-    [64976] = 71, -- Juggernaut
-    [57522] = 71, -- Enrage
-    [52437] = 71, -- Sudden Death
-    [46857] = 71, -- Trauma
-    [56112] = 72, -- Furious Attacks
+    [65156] = 71, -- Juggernaut
     [29801] = 72, -- Rampage
-    [46916] = 72, -- Slam!
+    [46913] = 72, -- Bloodsurge R1
+    [46914] = 72, -- Bloodsurge R2
+    [46915] = 72, -- Bloodsurge R3
     [50227] = 73, -- Sword and Board
-    [50720] = 73, -- Vigilance
-    [74347] = 73, -- Silenced - Gag Order
     -- PALADIN
-    [20375] = 70, -- Seal of Command
-    [59578] = 70, -- The Art of War
-    [31836] = 65, -- Light's Grace
-    [53563] = 65, -- Beacon of Light
     [54149] = 65, -- Infusion of Light
-    [63529] = 66, -- Silenced - Shield of the Templar
+    
     -- ROGUE
-    [36554] = 261, -- Shadowstep
-    [44373] = 261, -- Shadowstep Speed
-    [36563] = 261, -- Shadowstep DMG
-    [51713] = 261, -- Shadow Dance
-    [31665] = 261, -- Master of Subtlety
-    [14278] = 261, -- Ghostly Strike
     [51690] = 260, -- Killing Spree
     [13877] = 260, -- Blade Flurry
     [13750] = 260, -- Adrenaline Rush
-    [14177] = 259, -- Cold Blood
+    [36554] = 261, -- Shadowstep
+    [31223] = 261, -- Master of Subtlety
+    [51713] = 261, -- Shadow Dance
+    [51698] = 261, -- Honor Among Thieves R1 -- people play with varous
+    [51700] = 261, -- Honor Among Thieves R2 -- number of points in this
+    [51701] = 261, -- Honor Among Thieves R3 -- talent
     -- PRIEST
+    [10060] = 256, -- Power Infusion
+    [33206] = 256, -- Pain Suppression
+    [52795] = 256, -- Borrowed Time
+    [57472] = 256, -- Renewed Hope
+    [47517] = 256, -- Grace
+    [14751] = 257, -- Chakra
     [47788] = 257, -- Guardian Spirit
-    [52800] = 256, -- Borrowed Time
-    [63944] = 256, -- Renewed Hope
     [15473] = 258, -- Shadowform
     [15286] = 258, -- Vampiric Embrace
     -- DEATHKNIGHT
-    [49222] = 252, -- Bone Shield
-    [49016] = 250, -- Hysteria
+    [49222] = 250, -- Bone Shield
     [53138] = 250, -- Abomination's Might
     [55610] = 251, -- Imp. Icy Talons
-    -- MAGE
-    [43039] = 64, -- Ice Barrier
-    [74396] = 64, -- Fingers of Frost
-    [57761] = 64, -- Fireball!
-    [11129] = 63, -- Combustion
-    [64346] = 63, -- Fiery Payback
-    [48108] = 63, -- Hot Streak
-    [54741] = 63, -- Firestarter
-    [55360] = 63, -- Living Bomb
-    [31583] = 62, -- Arcane Empowerment
-    [44413] = 62, -- Incanter's Absorption
-    -- WARLOCK
-    [30302] = 267, -- Nether Protection
-    [63244] = 267, -- Pyroclasm
-    [54277] = 267, -- Backdraft
-    [47283] = 267, -- Empowered Imp
-    [34936] = 267, -- Backlash
-    [47193] = 266, -- Demonic Empowerment
-    [64371] = 265, -- Eradication
+    [51052] = 252, -- Anti-Magic Zone
+    [49016] = 252, -- Unholy Frenzy
+    -- MAGE      
+    [11426] = 64, -- Ice Barrier
+    -- WARLOCK   
+    [59672] = 266, -- Metamorphosis
+    [30299] = 267, -- Nether Protection
     -- SHAMAN
-    [57663] = 262, -- Totem of Wrath
-    [65264] = 262, -- Lava Flows
+    [16166] = 262, -- Elemental Mastery
     [51470] = 262, -- Elemental Oath
-    [52179] = 262, -- Astral Shift
-    [49284] = 264, -- Earth Shield
-    [53390] = 264, -- Tidal Waves
-    [30809] = 263, -- Unleashed Rage
-    [53817] = 263, -- Maelstrom Weapon
-    [63685] = 263, -- Freeze (Frozen Power)
+    [30802] = 263, -- Unleashed Rage
+    [30823] = 263, -- Shamanistic Rage
+    [61295] = 264, -- Riptide
+    [974]   = 264, -- Earth Shield
     -- HUNTER
     [20895] = 253, -- Spirit Bond
-    [34471] = 253, -- The Beast Within
     [75447] = 253, -- Ferocious Inspiration
     [19506] = 254, -- Trueshot Aura
-    [64420] = 255, -- Sniper Training
     -- DRUID
+    [48505] = 102, -- Starfall
+    [50516] = 102, -- Typhoon
+    [24907] = 102, -- Moonkin Form
     [24932] = 103, -- Leader of the Pack
-    [16975] = 103, -- Predatory Strikes
-    [50334] = 103, -- Berserk
-    [24907] = 102, -- Moonkin Aura
-    [24858] = 102, -- Moonkin Form
-    [48504] = 105, -- Living Seed
-    [45283] = 105, -- Natural Perfection
-    [53251] = 105, -- Wild Growth
-    [16188] = 105, -- Nature's Swiftness
-    [33891] = 105 -- Tree of Life
+    [18562] = 105, -- Swiftmend
+    [48438] = 105, -- Wild Growth
+    [33891] = 105, -- Tree of Life
 }
 
 GladiusEx.Data.SpecSpells = {
     -- WARRIOR
-    [47486] = 71, -- Mortal Strike
+    [12294] = 71, -- Mortal Strike
     [46924] = 71, -- Bladestorm
     [23881] = 72, -- Bloodthirst
     [12809] = 73, -- Concussion Blow
-    [47498] = 73, -- Devastate
     [46968] = 73, -- Shockwave
+	[23922] = 66, -- Shield Slam
     [50720] = 73, -- Vigilance
     -- PALADIN
-    [48827] = 66, -- Avenger's Shield
-    [48825] = 65, -- Holy Shock
+    [31935] = 66, -- Avenger's Shield
+    [20473] = 65, -- Holy Shock
     [53563] = 65, -- Beacon of Light
+	[68020] = 70, -- Seal of Command
     [35395] = 70, -- Crusader Strike
-    [66006] = 70, -- Divine Storm
+    [53385] = 70, -- Divine Storm
     [20066] = 70, -- Repentance
     -- ROGUE
-    [48666] = 259, -- Mutilate
+    [1329] = 259, -- Mutilate
     [14177] = 259, -- Cold Blood
     [51690] = 260, -- Killing Spree
     [13877] = 260, -- Blade Flurry
     [13750] = 260, -- Adrenaline Rush
     [36554] = 261, -- Shadowstep
-    [48660] = 261, -- Hemorrhage
-    [51713] = 261, -- Shadow Dance
+    [16511] = 261, -- Hemorrhage
     -- PRIEST
-    [53007] = 256, -- Penance
+    [47540] = 256, -- Penance
     [10060] = 256, -- Power Infusion
     [33206] = 256, -- Pain Suppression
     [34861] = 257, -- Circle of Healing
     [15487] = 258, -- Silence
-    [48160] = 258, -- Vampiric Touch
+    [34914] = 258, -- Vampiric Touch
     -- DEATHKNIGHT
-    [55262] = 250, -- Heart Strike
+    [55050] = 250, -- Heart Strike
+    [49222] = 250, -- Bone Shield
+    [53138] = 250, -- Abomination's Might
     [49203] = 251, -- Hungering Cold
-    [55268] = 251, -- Frost Strike
-    [51411] = 251, -- Howling Blast
-    [55271] = 252, -- Scourge Strike
+    [49143] = 251, -- Frost Strike
+    [49184] = 251, -- Howling Blast
+    [55610] = 251, -- Imp. Icy Talons
+    [55090] = 252, -- Scourge Strike
+    [49206] = 252, -- Summon Gargoyle
+    [51052] = 252, -- Anti-Magic Zone
+    [49194] = 252, -- Unholy Blight
+    [49016] = 252, -- Unholy Frenzy
     -- MAGE
-    [44781] = 62, -- Arcane Barrage
-    [55360] = 63, -- Living Bomb
-    [42950] = 63, -- Dragon's Breath
-    [42945] = 63, -- Blast Wave
+    [44425] = 62, -- Arcane Barrage
+    [31589] = 62, -- Slow
+    [44457] = 63, -- Living Bomb
+    [31661] = 63, -- Dragon's Breath
+    [11366] = 63, -- Pyroblast
+    [11129] = 63, -- Combustion
     [44572] = 64, -- Deep Freeze
+    [31687] = 64, -- Summon Water Elemental
+    [11426] = 64, -- Ice Barrier
     -- WARLOCK
-    [59164] = 265, -- Haunt
-    [47843] = 265, -- Unstable Affliction
+    [48181] = 265, -- Haunt
+    [30108] = 265, -- Unstable Affliction
     [59672] = 266, -- Metamorphosis
     [47193] = 266, -- Demonic Empowerment
     [47996] = 266, -- Intercept Felguard
-    [59172] = 267, -- Chaos Bolt
-    [47847] = 267, -- Shadowfury
+    [17962] = 267, -- Conflagrate
+    [30283] = 267, -- Shadowfury
+    [50769] = 267, -- Chaos Bolt
     -- SHAMAN
     [59159] = 262, -- Thunderstorm
     [16166] = 262, -- Elemental Mastery
@@ -542,19 +529,20 @@ GladiusEx.Data.SpecSpells = {
     [19577] = 253, -- Intimidation
     [34490] = 254, -- Silencing Shot
     [53209] = 254, -- Chimera Shot
-    [60053] = 255, -- Explosive Shot
-    [49012] = 255, -- Wyvern Sting
+    [19434] = 254, -- Aimed Shot
+    [53301] = 255, -- Explosive Shot
+    [19386] = 255, -- Wyvern Sting
     -- DRUID
-    [53201] = 102, -- Starfall
-    [61384] = 102, -- Typhoon
+    [48505] = 102, -- Starfall
+    [50516] = 102, -- Typhoon
     [24858] = 102, -- Moonkin Form
-    [48566] = 103, -- Mangle (Cat)
-    [48564] = 103, -- Mangle (Bear)
+    [33876] = 103, -- Mangle (Cat)
+    [33878] = 103, -- Mangle (Bear)
     [50334] = 103, -- Berserk
     [18562] = 105, -- Swiftmend
     [17116] = 105, -- Nature's Swiftness
     [33891] = 105, -- Tree of Life
-    [53251] = 105, -- Wild Growth
+    [48438] = 105, -- Wild Growth
 }
 -- K: This is used to assess whether a DR has (dynamically) reset early
 GladiusEx.Data.AuraDurations = {
