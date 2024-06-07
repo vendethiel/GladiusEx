@@ -739,12 +739,40 @@ function GladiusEx:CheckOpponentSpecialization(unit)
     if id then
         local specID = GladiusEx.Data.GetArenaOpponentSpec(tonumber(id))
 
-        if GladiusEx.IS_CLASSIC and not specID then
-            specID = self:FindSpecByAuras(unit)
+        if not specID and GladiusEx.IS_CLASSIC then
+			
+			-- K: TBC healer / hybrid mana pools are too similar to use this method
+			if not GladiusEx.IS_TBCC then
+				specID = self:FindSpecByPower(unit)
+			end
+			
+			if not specID then
+				specID = self:FindSpecByAuras(unit)
+			end
         end
 
         self:UpdateUnitSpecialization(unit, specID)
     end
+end
+
+function GladiusEx:FindSpecByPower(unit)
+	local _, class = UnitClass(unit)
+	local specID
+	if class then
+		local p = UnitPowerMax(unit, 0)
+		local limit = GladiusEx.Data.SpecManaLimit
+		if p then
+			if class == "PALADIN" and p > limit then
+				specID = 65 -- Holy
+			elseif class == "DRUID" and p < limit then
+				specID = 103 -- Feral
+			elseif class == "SHAMAN" and p < limit then
+				specID = 263 -- Enhancement
+			end
+		end
+	end
+	
+	return specID
 end
 
 function GladiusEx:FindSpecByAuras(unit)

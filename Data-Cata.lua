@@ -648,6 +648,8 @@ GladiusEx.Data.AuraDurations = {
     [22570] = 5, -- Maim (varies)
 }
 
+GladiusEx.Data.SpecManaLimit = 50000
+
 function GladiusEx.Data.GetSpecializationInfoByID(id)
     if specData[id] == nil then
         return
