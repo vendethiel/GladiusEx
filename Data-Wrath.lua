@@ -552,6 +552,8 @@ GladiusEx.Data.SpecSpells = {
     [53251] = 105, -- Wild Growth
 }
 
+GladiusEx.Data.SpecManaLimit = 11000
+
 function GladiusEx.Data.GetSpecializationInfoByID(id)
     if specData[id] == nil then
         return
