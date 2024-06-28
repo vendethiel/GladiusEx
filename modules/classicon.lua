@@ -21,23 +21,24 @@ local defaults = {
 	classIconCooldown = true,
 	classIconCooldownReverse = true,
 	classIconAuras = GetDefaultImportantAuras(),
-  classIconSideViewMode = "SPEC",
-  classIconSideViewAttachTo = "Frame",
-  classIconSideViewSize = 20,
+	classIconSideViewMode = "SPEC",
+	classIconSideViewAttachTo = "Frame",
+	classIconSideViewSize = 20,
+	classIconShowLowestRemainingAura = true,
 }
 
 local ClassIcon = GladiusEx:NewGladiusExModule("ClassIcon",
 	fn.merge(defaults, {
-    classIconSideView = true,
+	classIconSideView = true,
 		classIconPosition = "LEFT",
-    classIconSideViewOffsetX = 80,
-    classIconSideViewOffsetY = -20,
+	classIconSideViewOffsetX = 80,
+	classIconSideViewOffsetY = -20,
 	}),
 	fn.merge(defaults, {
-    classIconSideView = false,
-		classIconPosition = "RIGHT",
-    classIconSideViewOffsetX = 20,
-    classIconSideViewOffsetY = -20,
+	classIconSideView = false,
+	classIconPosition = "RIGHT",
+	classIconSideViewOffsetX = 20,
+	classIconSideViewOffsetY = -20,
 	}))
 
 function ClassIcon:OnEnable()
@@ -110,13 +111,15 @@ function ClassIcon:ScanAuras(unit)
 	local best_priority = 0
 	local best_name, best_icon, best_duration, best_expires
 
+	local showShortest = self.db[unit].classIconShowLowestRemainingAura
+
 	-- debuffs
 	local index = 1
 	while true do
 		local name, icon, _, _, duration, expires, _, _, _, spellid = UnitDebuff(unit, index)
 		if not name then break end
 		local prio = self:GetImportantAura(unit, name) or self:GetImportantAura(unit, spellid)
-		if prio and prio > best_priority or (prio == best_priority and best_expires and expires < best_expires) then
+		if prio and prio > best_priority or (prio == best_priority and best_expires and ((showShortest and expires and expires <= best_expires) or (not showShortest and (not expires or expires >= best_expires)))) then
 			best_name, best_icon, best_duration, best_expires, best_priority = name, icon, duration, expires, prio
 		end
 		index = index + 1
@@ -128,7 +131,7 @@ function ClassIcon:ScanAuras(unit)
 		local name, icon, _, _, duration, expires, _, _, _, spellid = UnitBuff(unit, index)
 		if not name then break end
 		local prio = self:GetImportantAura(unit, name) or self:GetImportantAura(unit, spellid)
-		if prio and prio > best_priority or (prio == best_priority and best_expires and expires < best_expires) then
+		if prio and prio > best_priority or (prio == best_priority and best_expires and ((showShortest and expires and expires <= best_expires) or (not showShortest and (not expires or expires >= best_expires)))) then
 			best_name, best_icon, best_duration, best_expires, best_priority = name, icon, duration, expires, prio
 		end
 		index = index + 1
@@ -139,7 +142,7 @@ function ClassIcon:ScanAuras(unit)
 	if interrupt then
 		interrupt = {interrupt:GetInterruptFor(unit)}
 		local name, icon, duration, expires, prio = unpack(interrupt)
-		if prio and prio > best_priority or (prio == best_priority and best_expires and expires < best_expires) then
+		if prio and prio > best_priority or (prio == best_priority and best_expires and ((showShortest and expires and expires <= best_expires) or (not showShortest and (not expires or expires >= best_expires)))) then
 			best_name, best_icon, best_duration, best_expires, best_priority = name, icon, duration, expires, prio
 		end
 	end
@@ -540,6 +543,13 @@ function ClassIcon:GetOptions(unit)
 							hasAlpha = true,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 25,
+						},
+						classIconShowLowestRemainingAura = {
+							type = "toggle",
+							name = L["Show important aura with least time left"] ,
+							desc = L["If toggled, the important aura with the lowest remaining duration will be showed if there is a tie in priority"],
+							disabled = function() return not self:IsUnitEnabled(unit) or not self.db[unit].classIconImportantAuras end,
+							order = 30,
 						},
 					},
 				},
