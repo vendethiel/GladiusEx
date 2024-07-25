@@ -109,7 +109,6 @@ function GladiusEx.Data.DefaultClassicon()
 		[GladiusEx:SafeGetSpellName(202274)]  	= 9,	-- Incendiary Brew
 		[GladiusEx:SafeGetSpellName(105421)]  	= 9,	-- Blinding Light
 		[GladiusEx:SafeGetSpellName(8122)]  	= 9,	-- Psychic Scream 
-		[226943]			  	= 9,	-- Mind Bomb
 		[331866]			  	= 9,	-- Door of Shadows
 		[GladiusEx:SafeGetSpellName(2094)]  	= 9,	-- Blind 
 		[GladiusEx:SafeGetSpellName(118699)]  	= 9,	-- Fear
@@ -395,7 +394,6 @@ function GladiusEx.Data.DefaultClassicon()
 		[GladiusEx:SafeGetSpellName(12042)]  	= 3,	-- Arcane Power
 		[GladiusEx:SafeGetSpellName(12472)]  	= 3,	-- Icy Veins 
 		[GladiusEx:SafeGetSpellName(190319)]  	= 3,	-- Combustion
-		[GladiusEx:SafeGetSpellName(152173)]  	= 3,	-- Serenity
 		[GladiusEx:SafeGetSpellName(137639)]  	= 3,	-- SEF
 		[247483]			  	= 3,	-- Tigereye Brew
 		[GladiusEx:SafeGetSpellName(231895)]  	= 3,	-- Crusade
@@ -529,7 +527,7 @@ function GladiusEx.Data.DefaultClassicon()
 		[GladiusEx:SafeGetSpellName(212198)]  	= 1,	-- Create: Crimson Vial (pvp talent)
 		[2645]				  	= 1,	-- Ghost Wolf
 		[GladiusEx:SafeGetSpellName(213871)]  	= 1,	-- Bodyguard
-		[GladiusEx:SafeGetSpellName(197690)]  	= 1,	-- Defensive Stance
+		[GladiusEx:SafeGetSpellName(386208)]  	= 1,	-- Defensive Stance
 		[GladiusEx:SafeGetSpellName(191034)]  	= 1,	-- Starfall (cast while moving tal)
 		[GladiusEx:SafeGetSpellName(31821)]  	= 1,	-- Aura Mastery 
 		[GladiusEx:SafeGetSpellName(79206)]  	= 1,	-- Spiritwalkers Grace
