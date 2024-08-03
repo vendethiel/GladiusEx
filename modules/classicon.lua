@@ -51,6 +51,10 @@ function ClassIcon:OnEnable()
 	if not self.frame then
 		self.frame = {}
 	end
+	
+	self:InsertTestDebuff(8122, 8, "Magic") -- Psychic Scream
+	self:InsertTestDebuff(19503, 4, nil) -- Scatter Shot
+	self:InsertTestDebuff(408, 6, nil) -- Kidney Shot
 end
 
 function ClassIcon:OnDisable()
@@ -107,11 +111,47 @@ function ClassIcon:UNIT_MODEL_CHANGED(event, unit)
 	self:UpdateAura(unit)
 end
 
+local TestDebuffs = {}
+
+function ClassIcon:InsertTestDebuff(spellID, timeLeft, dispelType)
+	local name, _, texture = GetSpellInfo(spellID)
+	table.insert(TestDebuffs, { spellID, texture, timeLeft, dispelType, name })
+end
+
+function ClassIcon.UnitDebuffTest(unit, index)
+	local debuff = TestDebuffs[index]
+	if not debuff then return end
+
+	local self = ClassIcon
+	
+	local frame = self.frame[unit]
+	local timer = frame.testTimer
+	local ClassIcon = ClassIcon -- local reference for the timer function to utilize
+
+	if timer and not timer.expired then
+		return debuff[5], debuff[2], 0, debuff[4], debuff[3], timer.start + debuff[3], nil, nil, nil, debuff[1]
+	elseif not timer then
+		local t = GetTime()
+		timer = C_Timer.NewTimer(debuff[3] + 0.01, function(self) 
+			self.expired = true
+			if GladiusEx:IsTesting(unit) then
+				ClassIcon:UNIT_AURA("UNIT_AURA", unit)
+			end 
+		end)
+		timer.start = t
+		frame.testTimer = timer
+
+		return debuff[5], debuff[2], 0, debuff[4], debuff[3], t + debuff[3], nil, nil, nil, debuff[1]
+	end
+end
+
 function ClassIcon:ScanAuras(unit)
 	local best_priority = 0
 	local best_name, best_icon, best_duration, best_expires
 
 	local showShortest = self.db[unit].classIconShowLowestRemainingAura
+	
+	local UnitDebuff = GladiusEx:IsTesting(unit) and ClassIcon.UnitDebuffTest or UnitDebuff
 
 	-- debuffs
 	local index = 1
@@ -428,6 +468,9 @@ function ClassIcon:Reset(unit)
 end
 
 function ClassIcon:Test(unit)
+	self.frame[unit].testTimer = nil
+	
+	self:UNIT_AURA("UNIT_AURA", unit)
 end
 
 function ClassIcon:GetImportantAura(unit, name)
