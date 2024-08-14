@@ -102,8 +102,8 @@ function Interrupt:GetInterruptFor(unit)
 	if GetTime() > endsAt then
 		self.interrupts[unit] = nil
 	else
-		local name, _, icon = GetSpellInfo(spellid)
-		return name, icon, duration, endsAt, self.db[unit].interruptPrio
+		local spellInfoTable = C_Spell.GetSpellInfo(spellid)
+		return spellInfoTable.name, spellInfoTable.iconID, duration, endsAt, self.db[unit].interruptPrio
 	end
 end
 
