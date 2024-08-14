@@ -2269,12 +2269,12 @@ function Cooldowns:MakeGroupOptions(unit, group)
                     table.insert(extradesc, string.format(L["Duration: %is"], spelldata.duration))
                 end
                 if spelldata.replaces then
-                    table.insert(extradesc, string.format(L["Replaces: %s"], GetSpellInfo(spelldata.replaces)))
+                    table.insert(extradesc, string.format(L["Replaces: %s"], GladiusEx:GetSpellInfoWrapper(spelldata.replaces)))
                 end
                 if spelldata.requires_aura then
                     table.insert(
                         extradesc,
-                        string.format(L["Required aura: %s"], GetSpellInfo(spelldata.requires_aura))
+                        string.format(L["Required aura: %s"], GladiusEx:GetSpellInfoWrapper(spelldata.requires_aura))
                     )
                 end
                 if spelldata.sets_cooldown then
@@ -2282,7 +2282,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
                         extradesc,
                         string.format(
                             L["Shared cooldown: %s (%is)"],
-                            GetSpellInfo(spelldata.sets_cooldown.spellid),
+                            GladiusEx:GetSpellInfoWrapper(spelldata.sets_cooldown.spellid),
                             spelldata.sets_cooldown.cooldown
                         )
                     )
@@ -2292,7 +2292,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
                         local cd = spelldata.sets_cooldowns[i]
                         table.insert(
                             extradesc,
-                            string.format(L["Shared cooldown: %s (%is)"], GetSpellInfo(cd.spellid), cd.cooldown)
+                            string.format(L["Shared cooldown: %s (%is)"], GladiusEx:GetSpellInfoWrapper(cd.spellid), cd.cooldown)
                         )
                     end
                 end
@@ -2596,10 +2596,10 @@ local function parse_desc(desc)
         if op == "spelldesc" then
             return FormatSpellDescription(spellid)
         elseif op == "spellicon" then
-            local _, _, icon = GetSpellInfo(spellid)
+            local _, _, icon = GladiusEx:GetSpellInfoWrapper(spellid)
             return string.format("|T%s:24|t", icon)
         elseif op == "spellname" then
-            local name = GetSpellInfo(spellid)
+            local name = GladiusEx:GetSpellInfoWrapper(spellid)
             return name
         else
             assert(op, "op failed me once again")
