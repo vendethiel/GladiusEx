@@ -546,7 +546,7 @@ function CastBar:Test(unit)
 	local f = self.frame[unit]
 
 	if GladiusEx.testing[unit].powerType == 0 then
-		local spell, displayName, icon, startTime, endTime, isTradeSkill, lineID, notInterruptible = L["Example Spell Name"], "", GetSpellTexture(1),
+		local spell, displayName, icon, startTime, endTime, isTradeSkill, lineID, notInterruptible = L["Example Spell Name"], "", GladiusEx:GetSpellTextureWrapper(1),
 			GetTime() * 1000 - 1000, GetTime() * 1000 + 1500, false, 0, false
 
 		f.spellName = spell
