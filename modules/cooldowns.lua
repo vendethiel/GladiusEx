@@ -2269,20 +2269,20 @@ function Cooldowns:MakeGroupOptions(unit, group)
                     table.insert(extradesc, string.format(L["Duration: %is"], spelldata.duration))
                 end
                 if spelldata.replaces then
-                    table.insert(extradesc, string.format(L["Replaces: %s"], GetSpellInfo(spelldata.replaces)))
+                    local spellInfoTable = C_Spell.GetSpellInfo(spelldata.replaces)
+                    table.insert(extradesc, string.format(L["Replaces: %s"], spellInfoTable.name))
                 end
                 if spelldata.requires_aura then
-                    table.insert(
-                        extradesc,
-                        string.format(L["Required aura: %s"], GetSpellInfo(spelldata.requires_aura))
-                    )
+                    local spellInfoTable = C_Spell.GetSpellInfo(spelldata.requires_aura)
+                    table.insert(extradesc, string.format(L["Required aura: %s"], spellInfoTable.name))
                 end
                 if spelldata.sets_cooldown then
+                    local spellInfoTable = C_Spell.GetSpellInfo(spelldata.sets_cooldown.spellid)
                     table.insert(
                         extradesc,
                         string.format(
                             L["Shared cooldown: %s (%is)"],
-                            GetSpellInfo(spelldata.sets_cooldown.spellid),
+                            spellInfoTable.name,
                             spelldata.sets_cooldown.cooldown
                         )
                     )
@@ -2290,9 +2290,10 @@ function Cooldowns:MakeGroupOptions(unit, group)
                 if spelldata.sets_cooldowns then
                     for i = 1, #spelldata.sets_cooldowns do
                         local cd = spelldata.sets_cooldowns[i]
+                        local spellInfoTable = C_Spell.GetSpellInfo(cd.spellid)
                         table.insert(
                             extradesc,
-                            string.format(L["Shared cooldown: %s (%is)"], GetSpellInfo(cd.spellid), cd.cooldown)
+                            string.format(L["Shared cooldown: %s (%is)"], spellInfoTable.name, cd.cooldown)
                         )
                     end
                 end
@@ -2596,11 +2597,11 @@ local function parse_desc(desc)
         if op == "spelldesc" then
             return FormatSpellDescription(spellid)
         elseif op == "spellicon" then
-            local _, _, icon = GetSpellInfo(spellid)
-            return string.format("|T%s:24|t", icon)
+            local spellInfoTable = C_Spell.GetSpellInfo(spellid)
+            return string.format("|T%s:24|t", spellInfoTable.icon)
         elseif op == "spellname" then
-            local name = GetSpellInfo(spellid)
-            return name
+            local spellInfoTable = C_Spell.GetSpellInfo(spellid)
+            return spellInfoTable.name
         else
             assert(op, "op failed me once again")
         end
