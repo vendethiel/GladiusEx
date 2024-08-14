@@ -81,7 +81,7 @@ function Announcements:UNIT_AURA(event, unit)
 	if not self:IsHandledUnit(unit) or not self.db[unit].drinks then return end
 
 	for i = 1, 40 do
-		local name, _, _, _, _, _, _, _, _, spellID = GladiusEx:UnitBuff(unit, i, "HELPFUL")
+		local name, _, _, _, _, _, _, _, _, spellID = GladiusEx.UnitBuff(unit, i, "HELPFUL")
 		if not name then break end
 		if spellID == DRINK_SPELL then
 			self:Send(string.format(L["DRINKING: %s (%s)"], UnitName(unit), UnitClass(unit)), 2, unit)

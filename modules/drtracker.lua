@@ -320,7 +320,7 @@ function DRTracker:HasFullDurationAura(unit, sourceGUID, spellID)
 
 		local i = 1
 		while true do
-			local name, _, _, _, _, duration, _, unitCaster, _, _, secID, secSourceGUID = GladiusEx:UnitAura(unit, i, "HARMFUL")
+			local name, _, _, _, _, duration, _, unitCaster, _, _, secID, secSourceGUID = GladiusEx.UnitAura(unit, i, "HARMFUL")
 			if not name then break end
 			if secID == spellID then
 				if secSourceGUID == sourceGUID or unitCaster == srcUnit then

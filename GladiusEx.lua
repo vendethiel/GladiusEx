@@ -833,7 +833,7 @@ end
 function GladiusEx:FindSpecByAuras(unit)
     local i = 1
     while true do
-        local n, _, _, _, _, _, unitCaster, _, _, spellID = GladiusEx:UnitAura(unit, i, "HELPFUL")
+        local n, _, _, _, _, _, unitCaster, _, _, spellID = GladiusEx.UnitAura(unit, i, "HELPFUL")
         if not n then
             break
         end

@@ -226,9 +226,9 @@ function Auras:UpdateUnitAuras(event, unit)
 		if testing then
 			name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = GetTestAura(index, buff)
 		elseif buff then
-			name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = GladiusEx:UnitBuff(unit, index)
+			name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = GladiusEx.UnitBuff(unit, index)
 		else
-			name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = GladiusEx:UnitDebuff(unit, index)
+			name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = GladiusEx.UnitDebuff(unit, index)
 		end
 
 		aura_frame.unit = unit
@@ -290,7 +290,7 @@ function Auras:UpdateUnitAuras(event, unit)
 			if testing then
 				name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = GetTestAura(i, buffs)
 			else
-				name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = GladiusEx:UnitAura(unit, i, filter)
+				name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = GladiusEx.UnitAura(unit, i, filter)
 			end
 
 			if not name then break end
@@ -316,8 +316,8 @@ function Auras:UpdateUnitAuras(event, unit)
 				ordering[aura] = i
 			end
 			local function aura_compare(a, b)
-				local namea, _, _, _, _, dura = GladiusEx:UnitAura(unit, a, filter)
-				local nameb, _, _, _, _, durb = GladiusEx:UnitAura(unit, b, filter)
+				local namea, _, _, _, _, dura = GladiusEx.UnitAura(unit, a, filter)
+				local nameb, _, _, _, _, durb = GladiusEx.UnitAura(unit, b, filter)
 				local ordera = ordering[namea]
 				local orderb = ordering[nameb]
 				if ordera and not orderb then

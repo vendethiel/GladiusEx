@@ -177,12 +177,12 @@ function ClassIcon:ScanAuras(unit)
 
 	local showShortest = self.db[unit].classIconShowLowestRemainingAura
 	
-	local UnitDebuff = GladiusEx:IsTesting(unit) and ClassIcon.UnitDebuffTest or (C_UnitAuras and GladiusEx:UnitDebuff or UnitDebuff)
+	local UnitDebuff = GladiusEx:IsTesting(unit) and ClassIcon.UnitDebuffTest or (C_UnitAuras and GladiusEx.UnitDebuff or UnitDebuff)
 
 	-- debuffs
 	local index = 1
 	while true do
-		local name, icon, _, _, duration, expires, _, _, _, spellid = GladiusEx:UnitDebuff(unit, index)
+		local name, icon, _, _, duration, expires, _, _, _, spellid = GladiusEx.UnitDebuff(unit, index)
 		if not name then break end
 		local prio = self:GetImportantAura(unit, name) or self:GetImportantAura(unit, spellid)
 		if prio and prio > best_priority or (prio == best_priority and best_expires and ((showShortest and expires and expires <= best_expires) or (not showShortest and (not expires or expires >= best_expires)))) then
@@ -194,7 +194,7 @@ function ClassIcon:ScanAuras(unit)
 	-- buffs
 	index = 1
 	while true do
-		local name, icon, _, _, duration, expires, _, _, _, spellid = GladiusEx:UnitBuff(unit, index)
+		local name, icon, _, _, duration, expires, _, _, _, spellid = GladiusEx.UnitBuff(unit, index)
 		if not name then break end
 		local prio = self:GetImportantAura(unit, name) or self:GetImportantAura(unit, spellid)
 		if prio and prio > best_priority or (prio == best_priority and best_expires and ((showShortest and expires and expires <= best_expires) or (not showShortest and (not expires or expires >= best_expires)))) then
