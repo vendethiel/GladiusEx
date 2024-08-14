@@ -1,4 +1,4 @@
-﻿local GladiusEx = _G.GladiusEx
+local GladiusEx = _G.GladiusEx
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local fn = LibStub("LibFunctional-1.0")
 local LSM = LibStub("LibSharedMedia-3.0")
@@ -238,9 +238,8 @@ function DRTracker:DRFaded(unit, drCat, spellID, event)
 		tracked.text:Hide()
 	end
 
-	local texture = GetSpellTexture(spellID)
 	if self.db[unit].drIcons[drCat] then
-		texture = GetSpellTexture(self.db[unit].drIcons[drCat])
+		texture = C_Spell.GetSpellTexture(self.db[unit].drIcons[drCat])
 	end
 	tracked.texture:SetTexture(texture)
 
@@ -745,13 +744,13 @@ function DRTracker:GetOptions(unit)
 		local idx = 1
 		local spellid_by_idx = {}
 		for spellid, _ in DRData:IterateSpellsByCategory(key) do
-			local spellname, _, spellicon = GetSpellInfo(spellid)
-			if spellicon and not seen_icons[spellicon] then
+			local spellIconTable = C_Spell.GetSpellInfo(spellid)
+			if spellInfoTable and not seen_icons[spellInfoTable.iconID] then
 				spellid_by_idx[idx] = spellid
-				seen_icons[spellicon] = true
+				seen_icons[spellInfoTable.iconID] = true
 				table.insert(
 					values,
-					string.format(" |T%s:20|t %s", spellicon, spellname)
+					string.format(" |T%s:20|t %s", spellInfoTable.iconID, spellInfoTable.name)
 				)
 				idx = idx + 1
 			end
