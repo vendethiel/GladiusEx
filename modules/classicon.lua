@@ -53,7 +53,7 @@ function ClassIcon:OnEnable()
 	end
 	
 	self:InsertTestDebuff(8122, 8, "Magic") -- Psychic Scream
-	self:InsertTestDebuff(19503, 4, nil) -- Scatter Shot
+	self:InsertTestDebuff(213691, 4, nil) -- Scatter Shot
 	self:InsertTestDebuff(408, 6, nil) -- Kidney Shot
 end
 
@@ -114,8 +114,8 @@ end
 local TestDebuffs = {}
 
 function ClassIcon:InsertTestDebuff(spellID, timeLeft, dispelType)
-	local name, _, texture = GetSpellInfo(spellID)
-	table.insert(TestDebuffs, { spellID, texture, timeLeft, dispelType, name })
+	local spellInfoTable = C_Spell.GetSpellInfo(spellID)
+	table.insert(TestDebuffs, { spellID, spellInfoTable.iconID, timeLeft, dispelType, spellInfoTable.name })
 end
 
 function ClassIcon.UnitDebuffTest(unit, index)
@@ -123,13 +123,22 @@ function ClassIcon.UnitDebuffTest(unit, index)
 	if not debuff then return end
 
 	local self = ClassIcon
-	
 	local frame = self.frame[unit]
 	local timer = frame.testTimer
 	local ClassIcon = ClassIcon -- local reference for the timer function to utilize
 
+	 -- If timer is set and hasn't expired, return values as a table
 	if timer and not timer.expired then
-		return debuff[5], debuff[2], 0, debuff[4], debuff[3], timer.start + debuff[3], nil, nil, nil, debuff[1]
+		return {
+			--spellID, texture, timeLeft, dispelType, name 
+			name = debuff[5],
+            icon = debuff[2],
+            count = 0,
+            debuffType = debuff[4],
+            duration = debuff[3],
+            expirationTime = timer.start + debuff[3],
+            spellId = debuff[1]
+		} --debuff[5], debuff[2], 0, debuff[4], debuff[3], timer.start + debuff[3], nil, nil, nil, debuff[1]
 	elseif not timer then
 		local t = GetTime()
 		timer = C_Timer.NewTimer(debuff[3] + 0.01, function(self) 
@@ -141,7 +150,15 @@ function ClassIcon.UnitDebuffTest(unit, index)
 		timer.start = t
 		frame.testTimer = timer
 
-		return debuff[5], debuff[2], 0, debuff[4], debuff[3], t + debuff[3], nil, nil, nil, debuff[1]
+		return {
+			name = debuff[5],
+            icon = debuff[2],
+            count = 0,
+            debuffType = debuff[4],
+            duration = debuff[3],
+            expirationTime = t + debuff[3],
+            spellId = debuff[1]
+		}--debuff[5], debuff[2], 0, debuff[4], debuff[3], t + debuff[3], nil, nil, nil, debuff[1]
 	end
 end
 
@@ -151,12 +168,16 @@ function ClassIcon:ScanAuras(unit)
 
 	local showShortest = self.db[unit].classIconShowLowestRemainingAura
 	
-	local UnitDebuff = GladiusEx:IsTesting(unit) and ClassIcon.UnitDebuffTest or UnitDebuff
+	local UnitDebuff = GladiusEx:IsTesting(unit) and ClassIcon.UnitDebuffTest or C_UnitAuras.GetDebuffDataByIndex
 
 	-- debuffs
 	local index = 1
 	while true do
-		local name, icon, _, _, duration, expires, _, _, _, spellid = UnitDebuff(unit, index)
+		local debuffTable = UnitDebuff(unit, index)
+		if not debuffTable then break end
+
+		local name, icon, duration, expires, spellid = debuffTable.name, debuffTable.icon, debuffTable.duration, debuffTable.expirationTime, debuffTable.spellId
+
 		if not name then break end
 		local prio = self:GetImportantAura(unit, name) or self:GetImportantAura(unit, spellid)
 		if prio and prio > best_priority or (prio == best_priority and best_expires and ((showShortest and expires and expires <= best_expires) or (not showShortest and (not expires or expires >= best_expires)))) then
@@ -168,7 +189,10 @@ function ClassIcon:ScanAuras(unit)
 	-- buffs
 	index = 1
 	while true do
-		local name, icon, _, _, duration, expires, _, _, _, spellid = UnitBuff(unit, index)
+		local buffTable = C_UnitAuras.GetBuffDataByIndex(unit, index)
+		if not debuffTable then break end
+
+		local name, icon, duration, expires, spellid = buffTable.name, buffTable.icon, buffTable.duration, buffTable.expirationTime, buffTable.spellId
 		if not name then break end
 		local prio = self:GetImportantAura(unit, name) or self:GetImportantAura(unit, spellid)
 		if prio and prio > best_priority or (prio == best_priority and best_expires and ((showShortest and expires and expires <= best_expires) or (not showShortest and (not expires or expires >= best_expires)))) then
@@ -706,7 +730,7 @@ function ClassIcon:GetOptions(unit)
 							desc = L["Name of the aura"],
 							get = function() return self.newAuraName and tostring(self.newAuraName) or "" end,
 							set = function(info, value)
-								if tonumber(value) and GetSpellInfo(value) then
+								if tonumber(value) and C_Spell.GetSpellInfo(value) then
 									value = tonumber(value)
 								end
 								self.newAuraName = value
@@ -776,7 +800,7 @@ function ClassIcon:SetupAuraOptions(options, unit, aura)
 	local function setAura(info, value)
 		if (info[#(info)] == "name") then
 			local new_name = value
-			if tonumber(new_name) and GetSpellInfo(new_name) then
+			if tonumber(new_name) and C_Spell.GetSpellInfo(new_name) then
 				new_name = tonumber(new_name)
 			end
 

@@ -490,7 +490,10 @@ function Alerts:GetOptions(unit)
 							name = L["Spell name"],
 							desc = L["Name of the cast spell"],
 							get = function() return self.newCastName or "" end,
-							set = function(info, value) self.newCastName = GetSpellInfo(value) or value end,
+							set = function(info, value) 
+								local spellInfoTable = C_Spell.GetSpellInfo(value)
+								self.newCastName = spellInfoTable.name or value 
+							end,
 							disabled = function() return not self.db[unit].casts or not self:IsUnitEnabled(unit) end,
 							order = 1,
 						},
@@ -559,7 +562,10 @@ function Alerts:GetOptions(unit)
 							name = L["Aura name"],
 							desc = L["Name of the aura"],
 							get = function() return self.newAuraName or "" end,
-							set = function(info, value) self.newAuraName = GetSpellInfo(value) or value end,
+							set = function(info, value) 
+								local spellInfoTable = C_Spell.GetSpellInfo(value)
+								self.newAuraName = spellInfoTable.name or value 
+							end,
 							disabled = function() return not self.db[unit].auras or not self:IsUnitEnabled(unit) end,
 							order = 1,
 						},

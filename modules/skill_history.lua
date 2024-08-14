@@ -280,7 +280,7 @@ function SkillHistory:SetupAnimation(unit)
 	local leave = frame[maxicons]
 
 	enter.entry = entry
-	enter.icon:SetTexture(GetSpellTexture(entry.spellid))
+	enter.icon:SetTexture(C_Spell.GetSpellTexture(entry.spellid))
 	--enter:SetAlpha(0)
 	enter:Show()
 
@@ -433,7 +433,7 @@ function SkillHistory:UpdateSpells(unit)
 
 		local entry = unit_spells[unit][i]
 		frame[i].entry = entry
-		frame[i].icon:SetTexture(GetSpellTexture(entry.spellid))
+		frame[i].icon:SetTexture(C_Spell.GetSpellTexture(entry.spellid))
 		frame[i]:SetAlpha(1)
 		frame[i]:Show()
 
