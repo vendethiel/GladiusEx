@@ -490,7 +490,7 @@ function Alerts:GetOptions(unit)
 							name = L["Spell name"],
 							desc = L["Name of the cast spell"],
 							get = function() return self.newCastName or "" end,
-							set = function(info, value) self.newCastName = GetSpellInfo(value) or value end,
+							set = function(info, value) self.newCastName = (C_Spell and C_Spell.GetSpellName(value) or GetSpellInfo(value)) or value end,
 							disabled = function() return not self.db[unit].casts or not self:IsUnitEnabled(unit) end,
 							order = 1,
 						},

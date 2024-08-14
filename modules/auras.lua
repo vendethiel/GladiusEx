@@ -11,11 +11,40 @@ if MSQ then
 	MSQ_Debuffs = MSQ:Group("GladiusEx", L["Debuffs"])
 end
 
+function UnpackAuraData2(auraData)
+  if not auraData then
+    return nil;
+  end
+
+  local points = auraData.points
+  if (points ~= nil) then
+    points = unpack(auraData.points)
+  end
+  return auraData.name,
+    auraData.icon,
+    auraData.applications,
+    auraData.dispelName,
+    auraData.duration,
+    auraData.expirationTime,
+    auraData.sourceUnit,
+    auraData.isStealable,
+    auraData.nameplateShowPersonal,
+    auraData.spellId,
+    auraData.canApplyAura,
+    auraData.isBossAura,
+    auraData.isFromPlayerOrPlayerPet,
+    auraData.nameplateShowAll,
+    auraData.timeMod,
+    points;
+end
+
 -- global functions
 local strfind = string.find
 local pairs, select = pairs, select
 local tinsert, tsort, tremove = table.insert, table.sort, table.remove
-local UnitAura, UnitBuff, UnitDebuff, GetSpellInfo = UnitAura, UnitBuff, UnitDebuff, GetSpellInfo
+local UnitAura = C_UnitAuras and C_UnitAuras.GetAuraDataByIndex or UnitAura
+local UnitBuff = C_UnitAuras and C_UnitAuras.GetBuffDataByIndex or UnitBuff
+local UnitDebuff = C_UnitAuras and C_UnitAuras.GetDebuffDataByIndex or UnitDebuff
 local band = bit.band
 local ceil, floor, max, min = math.ceil, math.floor, math.max, math.min
 
@@ -163,7 +192,13 @@ local player_units = {
 
 local function GetTestAura(index, buff)
 	local spellID = buff and 21562 or 589
-	local name, _, icon = GetSpellInfo(spellID)
+  local name, icon = nil
+  if C_Spell then
+	  name = C_Spell.GetSpellName(spellID)
+    icon = C_Spell.GetSpellTexture(spellID)
+  else
+    local name, _, icon = GetSpellInfo(spellID)
+  end
 	local count, dispelType, duration, caster, isStealable, shouldConsolidate = 1, "Magic", 3600 * index, "player", false, false
 	local expires = GetTime() + duration
 	return name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
@@ -218,9 +253,9 @@ function Auras:UpdateUnitAuras(event, unit)
 		if testing then
 			name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = GetTestAura(index, buff)
 		elseif buff then
-			name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitBuff(unit, index)
+			name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnpackAuraData2(UnitBuff(unit, index))
 		else
-			name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitDebuff(unit, index)
+			name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnpackAuraData2(UnitDebuff(unit, index))
 		end
 
 		aura_frame.unit = unit
@@ -308,8 +343,8 @@ function Auras:UpdateUnitAuras(event, unit)
 				ordering[aura] = i
 			end
 			local function aura_compare(a, b)
-				local namea, _, _, _, _, dura = UnitAura(unit, a, filter)
-				local nameb, _, _, _, _, durb = UnitAura(unit, b, filter)
+				local namea, _, _, _, _, dura = UnpackAuraData2(UnitAura(unit, a, filter))
+				local nameb, _, _, _, _, durb = UnpackAuraData2(UnitAura(unit, b, filter))
 				local ordera = ordering[namea]
 				local orderb = ordering[nameb]
 				if ordera and not orderb then
@@ -1287,7 +1322,7 @@ function Auras:GetOptions(unit)
 							name = L["Name"],
 							desc = L["Name of the aura"],
 							get = function() return self.newAuraName or "" end,
-							set = function(info, value) self.newAuraName = GetSpellInfo(value) or value end,
+							set = function(info, value) self.newAuraName = (C_Spell and C_Spell.GetSpellName(value) or GetSpellInfo(value)) or value end,
 							disabled = function() return not self:IsUnitEnabled(unit) or self.db[unit].aurasFilterType == FILTER_TYPE_DISABLED end,
 							order = 1,
 						},
@@ -1333,7 +1368,7 @@ function Auras:GetOptions(unit)
 							name = L["Name"],
 							desc = L["Name of the aura"],
 							get = function() return self.newAuraOrderName or "" end,
-							set = function(info, value) self.newAuraOrderName = GetSpellInfo(value) or value end,
+							set = function(info, value) self.newAuraOrderName = (C_Spell and C_Spell.GetSpellName(value) or GetSpellInfo(value)) or value end,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 1,
 						},

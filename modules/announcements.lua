@@ -1,14 +1,43 @@
 local GladiusEx = _G.GladiusEx
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 
+function UnpackAuraData2(auraData)
+  if not auraData then
+    return nil;
+  end
+
+  local points = auraData.points
+  if (points ~= nil) then
+    points = unpack(auraData.points)
+  end
+  return auraData.name,
+    auraData.icon,
+    auraData.applications,
+    auraData.dispelName,
+    auraData.duration,
+    auraData.expirationTime,
+    auraData.sourceUnit,
+    auraData.isStealable,
+    auraData.nameplateShowPersonal,
+    auraData.spellId,
+    auraData.canApplyAura,
+    auraData.isBossAura,
+    auraData.isFromPlayerOrPlayerPet,
+    auraData.nameplateShowAll,
+    auraData.timeMod,
+    points;
+end
+
 -- global functions
 local strfind = string.find
-local GetTime, UnitName, UnitClass, UnitAura = GetTime, UnitName, UnitClass, UnitAura
+local GetTime, UnitName, UnitClass, UnitAura = GetTime, UnitName, UnitClass, C_UnitAuras.GetAuraDataByIndex
 local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
 local SendChatMessage = SendChatMessage
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
-local GetSpellInfo = GetSpellInfo
+local GetSpellInfo = C_Spell and C_Spell.GetSpellInfo or GetSpellInfo
 local GetRealNumPartyMembers, GetRealNumRaidMembers, IsRaidLeader, IsRaidOfficer = GetRealNumPartyMembers, GetRealNumRaidMembers, IsRaidLeader, IsRaidOfficer
+local UnitDebuff = C_UnitAuras and C_UnitAuras.GetDebuffDataByIndex or UnitDebuff
+local UnitBuff = C_UnitAuras and C_UnitAuras.GetBuffDataByIndex or UnitBuff
 
 local Announcements = GladiusEx:NewGladiusExModule("Announcements", {
 		drinks = true,
@@ -79,7 +108,7 @@ function Announcements:UNIT_AURA(event, unit)
 	if not self:IsHandledUnit(unit) or not self.db[unit].drinks then return end
 
 	for i = 1, 40 do
-		local name, _, _, _, _, _, _, _, _, spellID = UnitBuff(unit, i, "HELPFUL")
+		local name, _, _, _, _, _, _, _, _, spellID = UnpackAuraData2(UnitBuff(unit, i, "HELPFUL"))
 		if not name then break end
 		if spellID == DRINK_SPELL then
 			self:Send(string.format(L["DRINKING: %s (%s)"], UnitName(unit), UnitClass(unit)), 2, unit)

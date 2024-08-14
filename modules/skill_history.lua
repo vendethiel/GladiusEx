@@ -6,7 +6,8 @@ local fn = LibStub("LibFunctional-1.0")
 local pairs = pairs
 local min, max = math.min, math.max
 local tinsert, tremove = table.insert, table.remove
-local GetSpellTexture, GetTime = GetSpellTexture, GetTime
+local GetTime = GetTime
+local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
 
 local defaults = {
 	MaxIcons = 2,

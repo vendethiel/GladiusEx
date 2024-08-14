@@ -102,7 +102,13 @@ function Interrupt:GetInterruptFor(unit)
 	if GetTime() > endsAt then
 		self.interrupts[unit] = nil
 	else
-		local name, _, icon = GetSpellInfo(spellid)
+    local name, icon = nil
+    if C_Spell then
+		  name = C_Spell.GetSpellName(spellid)
+      icon = C_Spell.GetSpellTexture(spellid)
+    else
+      name, _, icon = GetSpellInfo(spellid)
+    end
 		return name, icon, duration, endsAt, self.db[unit].interruptPrio
 	end
 end

@@ -14,6 +14,34 @@ local RC = LibStub("LibRangeCheck-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local fn = LibStub("LibFunctional-1.0")
 
+function UnpackAuraData2(auraData)
+  if not auraData then
+    return nil;
+  end
+
+  local points = auraData.points
+  if (points ~= nil) then
+    points = unpack(auraData.points)
+  end
+  return auraData.name,
+    auraData.icon,
+    auraData.applications,
+    auraData.dispelName,
+    auraData.duration,
+    auraData.expirationTime,
+    auraData.sourceUnit,
+    auraData.isStealable,
+    auraData.nameplateShowPersonal,
+    auraData.spellId,
+    auraData.canApplyAura,
+    auraData.isBossAura,
+    auraData.isFromPlayerOrPlayerPet,
+    auraData.nameplateShowAll,
+    auraData.timeMod,
+    points;
+end
+
+
 -- upvalues
 local select, type, pairs, tonumber, wipe = select, type, pairs, tonumber, wipe
 local strfind, strmatch = string.find, string.match
@@ -21,6 +49,7 @@ local max, abs, floor, ceil = math.max, math.abs, math.floor, math.ceil
 local UnitIsDeadOrGhost, UnitGUID, UnitExists = UnitIsDeadOrGhost, UnitGUID, UnitExists
 local InCombatLockdown = InCombatLockdown
 local GetNumGroupMembers = GetNumArenaOpponents, GetNumArenaOpponentSpecs, GetNumGroupMembers
+local UnitAura = C_UnitAuras and C_UnitAuras.GetAuraDataByIndex or UnitAura
 
 local arena_units = {
     ["arena1"] = true,
@@ -778,7 +807,7 @@ end
 function GladiusEx:FindSpecByAuras(unit)
     local i = 1
     while true do
-        local n, _, _, _, _, _, unitCaster, _, _, spellID = UnitAura(unit, i, "HELPFUL")
+        local n, _, _, _, _, _, unitCaster, _, _, spellID = UnpackAuraData2(UnitAura(unit, i, "HELPFUL"))
         if not n then
             break
         end
@@ -1731,7 +1760,7 @@ end
 
 -- Returns the spellid if the spell doesn't exist, so that it doesn't break tables
 function GladiusEx:SafeGetSpellName(spellid)
-	local name = GetSpellInfo(spellid)
+	local name = C_Spell and C_Spell.GetSpellName(spellid) or GetSpellInfo(spellid)
 	if not name then
 		geterrorhandler()("GladiusEx: invalid spellid " .. tostring(spellid))
 		return tostring(spellid)

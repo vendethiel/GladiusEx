@@ -4,10 +4,39 @@ local fn = LibStub("LibFunctional-1.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRList-1.0")
 
+function UnpackAuraData2(auraData)
+  if not auraData then
+    return nil;
+  end
+
+  local points = auraData.points
+  if (points ~= nil) then
+    points = unpack(auraData.points)
+  end
+  return auraData.name,
+    auraData.icon,
+    auraData.applications,
+    auraData.dispelName,
+    auraData.duration,
+    auraData.expirationTime,
+    auraData.sourceUnit,
+    auraData.isStealable,
+    auraData.nameplateShowPersonal,
+    auraData.spellId,
+    auraData.canApplyAura,
+    auraData.isBossAura,
+    auraData.isFromPlayerOrPlayerPet,
+    auraData.nameplateShowAll,
+    auraData.timeMod,
+    points;
+end
+
 -- global functions
 local strfind = string.find
 local pairs, unpack = pairs, unpack
-local GetTime, GetSpellTexture, UnitGUID = GetTime, GetSpellTexture, UnitGUID
+local GetTime, UnitGUID = GetTime, UnitGUID
+local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
+local UnitAura = C_UnitAuras and C_UnitAuras.GetAuraDataByIndex or UnitAura
 
 local defaults = {
 	drTrackerAdjustSize = false,
@@ -318,7 +347,7 @@ function DRTracker:HasFullDurationAura(unit, sourceGUID, spellID)
 
 		local i = 1
 		while true do
-			local name, _, _, _, _, duration, _, unitCaster, _, _, secID, secSourceGUID = UnitAura(unit, i, "HARMFUL")
+			local name, _, _, _, _, duration, _, unitCaster, _, _, secID, secSourceGUID = UnpackAuraData2(UnitAura(unit, i, "HARMFUL"))
 			if not name then break end
 			if secID == spellID then
 				if secSourceGUID == sourceGUID or unitCaster == srcUnit then
@@ -745,7 +774,13 @@ function DRTracker:GetOptions(unit)
 		local idx = 1
 		local spellid_by_idx = {}
 		for spellid, _ in DRData:IterateSpellsByCategory(key) do
-			local spellname, _, spellicon = GetSpellInfo(spellid)
+      local spellname, spellicon = nil
+      if C_Spell then
+        spellicon = GetSpellTexture(spellid)
+        spellname = C_Spell.GetSpellName(spellid)
+      else
+        spellname, _, spellicon = GetSpellInfo(spellid)
+      end
 			if spellicon and not seen_icons[spellicon] then
 				spellid_by_idx[idx] = spellid
 				seen_icons[spellicon] = true
