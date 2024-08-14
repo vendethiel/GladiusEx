@@ -1731,12 +1731,12 @@ end
 
 -- Returns the spellid if the spell doesn't exist, so that it doesn't break tables
 function GladiusEx:SafeGetSpellName(spellid)
-	local name = GetSpellInfo(spellid)
-	if not name then
+	local spellInfoTable = C_Spell.GetSpellInfo(spellid)
+	if not spellInfoTable then
 		geterrorhandler()("GladiusEx: invalid spellid " .. tostring(spellid))
 		return tostring(spellid)
 	end
-	return name
+	return spellInfoTable.name
 end
 
 -- Returns whether a castGUID is "empty" (nil, zero, full of zero, etc.)
