@@ -102,7 +102,7 @@ function Interrupt:GetInterruptFor(unit)
 	if GetTime() > endsAt then
 		self.interrupts[unit] = nil
 	else
-		local name, _, icon = GetSpellInfo(spellid)
+		local name, _, icon = GladiusEx:GetSpellInfoWrapper(spellid)
 		return name, icon, duration, endsAt, self.db[unit].interruptPrio
 	end
 end
