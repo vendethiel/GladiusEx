@@ -31,35 +31,24 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-function UnpackAuraData2(auraData)
+UnitBuff = UnitBuff or function(unitToken, index, filter)
+  local auraData = C_UnitAuras.GetBuffDataByIndex(unitToken, index, filter)
   if not auraData then
-    return nil;
+    return nil
   end
 
-  local points = auraData.points
-  if (points ~= nil) then
-    points = unpack(auraData.points)
-  end
-  return auraData.name,
-    auraData.icon,
-    auraData.applications,
-    auraData.dispelName,
-    auraData.duration,
-    auraData.expirationTime,
-    auraData.sourceUnit,
-    auraData.isStealable,
-    auraData.nameplateShowPersonal,
-    auraData.spellId,
-    auraData.canApplyAura,
-    auraData.isBossAura,
-    auraData.isFromPlayerOrPlayerPet,
-    auraData.nameplateShowAll,
-    auraData.timeMod,
-    points;
+  return AuraUtil.UnpackAuraData(auraData)
 end
 
-local UnitDebuff = C_UnitAuras and C_UnitAuras.GetDebuffDataByIndex or UnitDebuff
-local UnitBuff = C_UnitAuras and C_UnitAuras.GetBuffDataByIndex or UnitBuff
+UnitDebuff = UnitDebuff or function(unitToken, index, filter)
+  local auraData = C_UnitAuras.GetDebuffDataByIndex(unitToken, index, filter)
+  if not auraData then
+    return nil
+  end
+
+  return AuraUtil.UnpackAuraData(auraData)
+end
+
 local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
 local GetSpellInfo = C_Spell and C_Spell.GetSpellInfo or GetSpellInfo
 local MAJOR, MINOR = "LibDispellable-1.0", 30
@@ -223,7 +212,7 @@ local function noop() end
 local function buffIterator(unit, index)
 	repeat
 		index = index + 1
-		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura = UnpackAuraData2(UnitBuff(unit, index))
+		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura = UnitBuff(unit, index)
 		local spell = lib:GetDispelSpell(dispelType, spellID, true)
 		if spell then
 			return index, spell, name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura
@@ -234,7 +223,7 @@ end
 local function allBuffIterator(unit, index)
 	repeat
 		index = index + 1
-		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura = UnpackAuraData2(UnitBuff(unit, index))
+		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura = UnitBuff(unit, index)
 		if lib:IsDispellable(dispelType, spellID) then
 			return index, lib:GetDispelSpell(dispelType, spellID, true), name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura
 		end
@@ -244,7 +233,7 @@ end
 local function debuffIterator(unit, index)
 	repeat
 		index = index + 1
-		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff = UnpackAuraData2(UnitDebuff(unit, index))
+		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff = UnitDebuff(unit, index)
 		local spell = lib:GetDispelSpell(dispelType, spellID, false)
 		if spell then
 			return index, spell, name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff
@@ -255,7 +244,7 @@ end
 local function allDebuffIterator(unit, index)
 	repeat
 		index = index + 1
-		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff = UnpackAuraData2(UnitDebuff(unit, index))
+		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff = UnitDebuff(unit, index)
 		if lib:IsDispellable(dispelType, spellID) then
 			return index, lib:GetDispelSpell(dispelType, spellID, false), name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff
 		end

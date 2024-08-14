@@ -16,7 +16,7 @@ local fn = LibStub("LibFunctional-1.0")
 
 function UnpackAuraData2(auraData)
   if not auraData then
-    return nil;
+    return nil
   end
 
   local points = auraData.points
@@ -38,9 +38,35 @@ function UnpackAuraData2(auraData)
     auraData.isFromPlayerOrPlayerPet,
     auraData.nameplateShowAll,
     auraData.timeMod,
-    points;
+    points
 end
 
+GladiusEx.UnitAura = UnitAura or function(unitToken, index, filter)
+  local auraData = C_UnitAuras.GetAuraDataByIndex(unitToken, index, filter)
+  if not auraData then
+    return nil
+  end
+
+  return AuraUtil.UnpackAuraData(auraData)
+end
+
+GladiusEx.UnitBuff = UnitBuff or function(unitToken, index, filter)
+  local auraData = C_UnitAuras.GetBuffDataByIndex(unitToken, index, filter)
+  if not auraData then
+    return nil
+  end
+
+  return AuraUtil.UnpackAuraData(auraData)
+end
+
+GladiusEx.UnitDebuff = UnitDebuff or function(unitToken, index, filter)
+  local auraData = C_UnitAuras.GetDebuffDataByIndex(unitToken, index, filter)
+  if not auraData then
+    return nil
+  end
+
+  return UnpackAuraData2(auraData)
+end
 
 -- upvalues
 local select, type, pairs, tonumber, wipe = select, type, pairs, tonumber, wipe
@@ -807,7 +833,7 @@ end
 function GladiusEx:FindSpecByAuras(unit)
     local i = 1
     while true do
-        local n, _, _, _, _, _, unitCaster, _, _, spellID = UnpackAuraData2(UnitAura(unit, i, "HELPFUL"))
+        local n, _, _, _, _, _, unitCaster, _, _, spellID = GladiusEx:UnitAura(unit, i, "HELPFUL")
         if not n then
             break
         end

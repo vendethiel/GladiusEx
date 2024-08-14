@@ -4,33 +4,6 @@ local fn = LibStub("LibFunctional-1.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRList-1.0")
 
-function UnpackAuraData2(auraData)
-  if not auraData then
-    return nil;
-  end
-
-  local points = auraData.points
-  if (points ~= nil) then
-    points = unpack(auraData.points)
-  end
-  return auraData.name,
-    auraData.icon,
-    auraData.applications,
-    auraData.dispelName,
-    auraData.duration,
-    auraData.expirationTime,
-    auraData.sourceUnit,
-    auraData.isStealable,
-    auraData.nameplateShowPersonal,
-    auraData.spellId,
-    auraData.canApplyAura,
-    auraData.isBossAura,
-    auraData.isFromPlayerOrPlayerPet,
-    auraData.nameplateShowAll,
-    auraData.timeMod,
-    points;
-end
-
 -- global functions
 local strfind = string.find
 local pairs, unpack = pairs, unpack
@@ -347,7 +320,7 @@ function DRTracker:HasFullDurationAura(unit, sourceGUID, spellID)
 
 		local i = 1
 		while true do
-			local name, _, _, _, _, duration, _, unitCaster, _, _, secID, secSourceGUID = UnpackAuraData2(UnitAura(unit, i, "HARMFUL"))
+			local name, _, _, _, _, duration, _, unitCaster, _, _, secID, secSourceGUID = GladiusEx:UnitAura(unit, i, "HARMFUL")
 			if not name then break end
 			if secID == spellID then
 				if secSourceGUID == sourceGUID or unitCaster == srcUnit then

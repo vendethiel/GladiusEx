@@ -4,49 +4,21 @@ local fn = LibStub("LibFunctional-1.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
 function GetTexCoordsForRole(role)
-	local textureHeight, textureWidth = 256, 256;
-	local roleHeight, roleWidth = 67, 67;
+	local textureHeight, textureWidth = 256, 256
+	local roleHeight, roleWidth = 67, 67
 	
 	if ( role == "GUIDE" ) then
-		return GetTexCoordsByGrid(1, 1, textureWidth, textureHeight, roleWidth, roleHeight);
+		return GetTexCoordsByGrid(1, 1, textureWidth, textureHeight, roleWidth, roleHeight)
 	elseif ( role == "TANK" ) then
-		return GetTexCoordsByGrid(1, 2, textureWidth, textureHeight, roleWidth, roleHeight);
+		return GetTexCoordsByGrid(1, 2, textureWidth, textureHeight, roleWidth, roleHeight)
 	elseif ( role == "HEALER" ) then
-		return GetTexCoordsByGrid(2, 1, textureWidth, textureHeight, roleWidth, roleHeight);
+		return GetTexCoordsByGrid(2, 1, textureWidth, textureHeight, roleWidth, roleHeight)
 	elseif ( role == "DAMAGER" ) then
-		return GetTexCoordsByGrid(2, 2, textureWidth, textureHeight, roleWidth, roleHeight);
+		return GetTexCoordsByGrid(2, 2, textureWidth, textureHeight, roleWidth, roleHeight)
 	else
-		error("Unknown role: "..tostring(role));
+		error("Unknown role: "..tostring(role))
 	end
 end
-
-function UnpackAuraData2(auraData)
-  if not auraData then
-    return nil;
-  end
-
-  local points = auraData.points
-  if (points ~= nil) then
-    points = unpack(auraData.points)
-  end
-  return auraData.name,
-    auraData.icon,
-    auraData.applications,
-    auraData.dispelName,
-    auraData.duration,
-    auraData.expirationTime,
-    auraData.sourceUnit,
-    auraData.isStealable,
-    auraData.nameplateShowPersonal,
-    auraData.spellId,
-    auraData.canApplyAura,
-    auraData.isBossAura,
-    auraData.isFromPlayerOrPlayerPet,
-    auraData.nameplateShowAll,
-    auraData.timeMod,
-    points;
-end
-
 
 -- upvalues
 local strfind = string.find
@@ -205,12 +177,12 @@ function ClassIcon:ScanAuras(unit)
 
 	local showShortest = self.db[unit].classIconShowLowestRemainingAura
 	
-	local UnitDebuff = GladiusEx:IsTesting(unit) and ClassIcon.UnitDebuffTest or (C_UnitAuras and C_UnitAuras.GetDebuffDataByIndex or UnitDebuff)
+	local UnitDebuff = GladiusEx:IsTesting(unit) and ClassIcon.UnitDebuffTest or (C_UnitAuras and GladiusEx:UnitDebuff or UnitDebuff)
 
 	-- debuffs
 	local index = 1
 	while true do
-		local name, icon, _, _, duration, expires, _, _, _, spellid = UnpackAuraData2(UnitDebuff(unit, index))
+		local name, icon, _, _, duration, expires, _, _, _, spellid = GladiusEx:UnitDebuff(unit, index)
 		if not name then break end
 		local prio = self:GetImportantAura(unit, name) or self:GetImportantAura(unit, spellid)
 		if prio and prio > best_priority or (prio == best_priority and best_expires and ((showShortest and expires and expires <= best_expires) or (not showShortest and (not expires or expires >= best_expires)))) then
@@ -222,7 +194,7 @@ function ClassIcon:ScanAuras(unit)
 	-- buffs
 	index = 1
 	while true do
-		local name, icon, _, _, duration, expires, _, _, _, spellid = UnpackAuraData2(UnitBuff(unit, index))
+		local name, icon, _, _, duration, expires, _, _, _, spellid = GladiusEx:UnitBuff(unit, index)
 		if not name then break end
 		local prio = self:GetImportantAura(unit, name) or self:GetImportantAura(unit, spellid)
 		if prio and prio > best_priority or (prio == best_priority and best_expires and ((showShortest and expires and expires <= best_expires) or (not showShortest and (not expires or expires >= best_expires)))) then

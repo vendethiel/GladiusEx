@@ -11,33 +11,6 @@ if MSQ then
 	MSQ_Debuffs = MSQ:Group("GladiusEx", L["Debuffs"])
 end
 
-function UnpackAuraData2(auraData)
-  if not auraData then
-    return nil;
-  end
-
-  local points = auraData.points
-  if (points ~= nil) then
-    points = unpack(auraData.points)
-  end
-  return auraData.name,
-    auraData.icon,
-    auraData.applications,
-    auraData.dispelName,
-    auraData.duration,
-    auraData.expirationTime,
-    auraData.sourceUnit,
-    auraData.isStealable,
-    auraData.nameplateShowPersonal,
-    auraData.spellId,
-    auraData.canApplyAura,
-    auraData.isBossAura,
-    auraData.isFromPlayerOrPlayerPet,
-    auraData.nameplateShowAll,
-    auraData.timeMod,
-    points;
-end
-
 -- global functions
 local strfind = string.find
 local pairs, select = pairs, select
@@ -253,9 +226,9 @@ function Auras:UpdateUnitAuras(event, unit)
 		if testing then
 			name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = GetTestAura(index, buff)
 		elseif buff then
-			name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnpackAuraData2(UnitBuff(unit, index))
+			name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = GladiusEx:UnitBuff(unit, index)
 		else
-			name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnpackAuraData2(UnitDebuff(unit, index))
+			name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = GladiusEx:UnitDebuff(unit, index)
 		end
 
 		aura_frame.unit = unit
@@ -317,7 +290,7 @@ function Auras:UpdateUnitAuras(event, unit)
 			if testing then
 				name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = GetTestAura(i, buffs)
 			else
-				name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitAura(unit, i, filter)
+				name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = GladiusEx:UnitAura(unit, i, filter)
 			end
 
 			if not name then break end
@@ -343,8 +316,8 @@ function Auras:UpdateUnitAuras(event, unit)
 				ordering[aura] = i
 			end
 			local function aura_compare(a, b)
-				local namea, _, _, _, _, dura = UnpackAuraData2(UnitAura(unit, a, filter))
-				local nameb, _, _, _, _, durb = UnpackAuraData2(UnitAura(unit, b, filter))
+				local namea, _, _, _, _, dura = GladiusEx:UnitAura(unit, a, filter)
+				local nameb, _, _, _, _, durb = GladiusEx:UnitAura(unit, b, filter)
 				local ordera = ordering[namea]
 				local orderb = ordering[nameb]
 				if ordera and not orderb then
