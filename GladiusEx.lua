@@ -1731,7 +1731,7 @@ end
 
 -- Returns the spellid if the spell doesn't exist, so that it doesn't break tables
 function GladiusEx:SafeGetSpellName(spellid)
-	local name = GetSpellInfo(spellid)
+	local name = GladiusEx:GetSpellInfoWrapper(spellid)
 	if not name then
 		geterrorhandler()("GladiusEx: invalid spellid " .. tostring(spellid))
 		return tostring(spellid)
@@ -1745,3 +1745,120 @@ end
 function GladiusEx:IsValidCastGUID(guid)
 	return guid ~= nil and guid ~= 0 and guid ~= "0" and guid ~= "0-0-0-0-0-0000000000"
 end
+
+--Wrapper to retrieve values from GetSpellInfo() or C_Spell.GetSpellInfo() based on wow version. 
+--This transforms most of the values retrieved by both APIs, can be enlarged to catch more of them in future if required
+function GladiusEx:GetSpellInfoWrapper(spellid)
+	--all values returned by old API GetSpellInfo()
+	local name, rank, icon, castTime, minRange, maxRange, spellID, originalIcon
+	
+	if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+		--call retail API and retrieve values from table
+		local spellInfoTable = C_Spell.GetSpellInfo(spellid)
+
+		if spellInfoTable == nil then return end
+
+		name = spellInfoTable.name
+		rank = nil --does not exist in retail
+		icon = spellInfoTable.iconID
+		castTime = spellInfoTable.castTime
+		minRange = spellInfoTable.minRange
+		maxRange = spellInfoTable.maxRange
+		spellID = spellInfoTable.spellID
+		originalIcon = spellInfoTable.originalIconID		
+	else
+		--call classic API 
+		name, rank, icon, castTime, minRange, maxRange, spellID, originalIcon = GetSpellInfo(spellid)
+	end
+
+	return name, rank, icon, castTime, minRange, maxRange, spellID, originalIcon
+end
+
+--Wrapper to retrieve values from UnitDebuff() or C_UnitAuras.GetDebuffDataByIndex() based on wow version.
+--This transforms most of the values retrieved by both APIs, can be enlarged to catch more of them in future if required
+function GladiusEx:UnitDebuffWrapper(unit, index)
+	-- all values returned by old API UnitDebuff()
+	local name, icon, count, dispelType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, shouldConsolidate
+
+	if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+		--call retail API and retrieve values from table
+		local debuffTable = C_UnitAuras.GetDebuffDataByIndex(unit, index)
+		if not debuffTable then return end
+
+		name = debuffTable.name
+		icon = debuffTable.icon
+		count = nil -- maybe field 'charges' in table of new API ???
+		dispelType = debuffTable.dispelName -- not sure if 'dispelType' from old API equals to 'dispelName' in new API
+		duration = debuffTable.duration
+		expirationTime = debuffTable.expirationTime
+		source = debuffTable.sourceUnit
+		isStealable = debuffTable.isStealable
+		nameplateShowPersonal = debuffTable.nameplateShowPersonal
+		spellId = debuffTable.spellId
+		canApplyAura = debuffTable.canApplyAura
+		isBossDebuff = nil -- maybe field 'isRaid' in table of new API ???
+		castByPlayer = nil -- seems to be non-existent in new API
+		nameplateShowAll = debuffTable.nameplateShowAll
+		timeMod = debuffTable.timeMod
+		shouldConsolidate = nil -- used in classic only		
+	else
+		--call classic API 
+		name, icon, count, dispelType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, shouldConsolidate = UnitDebuff(unit, index)
+	end
+
+	return name, icon, count, dispelType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, shouldConsolidate
+end
+
+--Wrapper to retrieve values from UnitBuff() or C_UnitAuras.GetBuffDataByIndex() based on wow version.
+--This transforms most of the values retrieved by both APIs, can be enlarged to catch more of them in future if required
+function GladiusEx:UnitBuffWrapper(unit, index)
+	-- all values returned by old API UnitBuff()
+	local name, icon, count, dispelType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, shouldConsolidate
+
+	if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+		--call retail API and retrieve values from table
+		local debuffTable = C_UnitAuras.GetBuffDataByIndex(unit, index)
+		if not debuffTable then return end
+
+		name = debuffTable.name
+		icon = debuffTable.icon
+		count = nil -- maybe field 'charges' in table of new API ???
+		dispelType = debuffTable.dispelName -- not sure if 'dispelType' from old API equals to 'dispelName' in new API
+		duration = debuffTable.duration
+		expirationTime = debuffTable.expirationTime
+		source = debuffTable.sourceUnit
+		isStealable = debuffTable.isStealable
+		nameplateShowPersonal = debuffTable.nameplateShowPersonal
+		spellId = debuffTable.spellId
+		canApplyAura = debuffTable.canApplyAura
+		isBossDebuff = nil -- maybe field 'isRaid' in table of new API ???
+		castByPlayer = nil -- seems to be non-existent in new API
+		nameplateShowAll = debuffTable.nameplateShowAll
+		timeMod = debuffTable.timeMod
+		shouldConsolidate = nil -- used in classic only		
+	else
+		--call classic API 
+		name, icon, count, dispelType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, shouldConsolidate = UnitBuff(unit, index)
+	end
+
+	return name, icon, count, dispelType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, shouldConsolidate
+end
+
+--Wrapper to retrieve values from GetSpellTexture() or C_Spell.GetSpellTexture() based on wow version.
+--New API additionaly retrieves 'originalIconID' in comparison to old API
+function GladiusEx:GetSpellTextureWrapper(spellID)
+	local iconID, originalIconID
+
+	if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+		--retail stuff
+		iconID, originalIconID = C_Spell.GetSpellTexture(spellID)
+	else
+		--classic stuff
+		iconID = GetSpellTexture(spellID)
+		originalIconID = nil --does not exist in GetSpellTexture API
+	end
+
+	return iconID, originalIconID
+end
+
+
