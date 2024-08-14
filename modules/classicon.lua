@@ -53,7 +53,6 @@ function ClassIcon:OnEnable()
 	end
 	
 	self:InsertTestDebuff(8122, 8, "Magic") -- Psychic Scream
-	self:InsertTestDebuff(213691, 4, nil) -- Scatter Shot
 	self:InsertTestDebuff(408, 6, nil) -- Kidney Shot
 end
 
