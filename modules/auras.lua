@@ -163,7 +163,7 @@ local player_units = {
 
 local function GetTestAura(index, buff)
 	local spellID = buff and 21562 or 589
-	local name, _, icon = GetSpellInfo(spellID)
+	local name, _, icon = GladiusEx:GetSpellInfoWrapper(spellID)
 	local count, dispelType, duration, caster, isStealable, shouldConsolidate = 1, "Magic", 3600 * index, "player", false, false
 	local expires = GetTime() + duration
 	return name, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
@@ -1287,7 +1287,7 @@ function Auras:GetOptions(unit)
 							name = L["Name"],
 							desc = L["Name of the aura"],
 							get = function() return self.newAuraName or "" end,
-							set = function(info, value) self.newAuraName = GetSpellInfo(value) or value end,
+							set = function(info, value) self.newAuraName = GladiusEx:GetSpellInfoWrapper(value) or value end,
 							disabled = function() return not self:IsUnitEnabled(unit) or self.db[unit].aurasFilterType == FILTER_TYPE_DISABLED end,
 							order = 1,
 						},
@@ -1333,7 +1333,7 @@ function Auras:GetOptions(unit)
 							name = L["Name"],
 							desc = L["Name of the aura"],
 							get = function() return self.newAuraOrderName or "" end,
-							set = function(info, value) self.newAuraOrderName = GetSpellInfo(value) or value end,
+							set = function(info, value) self.newAuraOrderName = GladiusEx:GetSpellInfoWrapper(value) or value end,
 							disabled = function() return not self:IsUnitEnabled(unit) end,
 							order = 1,
 						},
