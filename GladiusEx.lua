@@ -18,11 +18,6 @@ function UnpackAuraData2(auraData)
   if not auraData then
     return nil
   end
-
-  local points = auraData.points
-  if (points ~= nil) then
-    points = unpack(auraData.points)
-  end
   return auraData.name,
     auraData.icon,
     auraData.applications,
@@ -38,7 +33,7 @@ function UnpackAuraData2(auraData)
     auraData.isFromPlayerOrPlayerPet,
     auraData.nameplateShowAll,
     auraData.timeMod,
-    points
+    unpack(auraData.points or {})
 end
 
 GladiusEx.UnitAura = UnitAura or function(unitToken, index, filter)
