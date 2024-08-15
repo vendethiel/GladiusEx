@@ -3,14 +3,11 @@ local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 
 -- global functions
 local strfind = string.find
-local GetTime, UnitName, UnitClass, UnitAura = GetTime, UnitName, UnitClass, C_UnitAuras.GetAuraDataByIndex
+local GetTime, UnitName, UnitClass = GetTime, UnitName, UnitClass
 local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
 local SendChatMessage = SendChatMessage
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
-local GetSpellInfo = C_Spell and C_Spell.GetSpellInfo or GetSpellInfo
 local GetRealNumPartyMembers, GetRealNumRaidMembers, IsRaidLeader, IsRaidOfficer = GetRealNumPartyMembers, GetRealNumRaidMembers, IsRaidLeader, IsRaidOfficer
-local UnitDebuff = C_UnitAuras and C_UnitAuras.GetDebuffDataByIndex or UnitDebuff
-local UnitBuff = C_UnitAuras and C_UnitAuras.GetBuffDataByIndex or UnitBuff
 
 local Announcements = GladiusEx:NewGladiusExModule("Announcements", {
 		drinks = true,

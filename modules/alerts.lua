@@ -5,7 +5,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local pairs = pairs
 local min, max = math.min, math.max
 local tinsert, tremove = table.insert, table.remove
-local UnitBuff, UnitDebuff, UnitHealth, UnitHealthMax, UnitIsDeadOrGhost = UnitBuff, UnitDebuff, UnitHealth, UnitHealthMax, UnitIsDeadOrGhost
+local UnitHealth, UnitHealthMax, UnitIsDeadOrGhost = UnitHealth, UnitHealthMax, UnitIsDeadOrGhost
 local GetTime = GetTime
 
 local function GetDefaultCastsSpells()

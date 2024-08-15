@@ -11,7 +11,6 @@ local pairs, ipairs, select, type, unpack, wipe = pairs, ipairs, select, type, u
 local min, max, ceil, floor, random = math.min, math.max, math.ceil, math.floor, math.random
 local bor, lshift = bit.bor, bit.lshift
 local GetTime, UnitExists, UnitFactionGroup, UnitClass, UnitRace = GetTime, UnitExists, UnitFactionGroup, UnitClass, UnitRace
-local UnitBuff = C_UnitAuras and C_UnitAuras.GetBuffDataByIndex or UnitBuff
 local GetSpellDescription = C_Spell and C_Spell.GetSpellDescription or GetSpellDescription
 
 -- Spells to add to units in test mode

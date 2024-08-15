@@ -25,9 +25,6 @@ local strfind = string.find
 local pairs, select, unpack = pairs, select, unpack
 local GetTime, SetPortraitTexture = GetTime, SetPortraitTexture
 local UnitClass, UnitGUID = UnitClass, UnitGUID
-local UnitAura = C_UnitAuras and C_UnitAuras.GetAuraDataByIndex or UnitAura
-local UnitBuff = C_UnitAuras and C_UnitAuras.GetBuffDataByIndex or UnitBuff
-local UnitDebuff = C_UnitAuras and C_UnitAuras.GetDebuffDataByIndex or UnitDebuff
 local UnitIsVisible, UnitIsConnected, GetTexCoordsForRole = UnitIsVisible, UnitIsConnected, GetTexCoordsForRole
 
 local GetDefaultImportantAuras = GladiusEx.Data.DefaultClassicon

@@ -9,7 +9,6 @@ local strfind = string.find
 local pairs, unpack = pairs, unpack
 local GetTime, UnitGUID = GetTime, UnitGUID
 local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
-local UnitAura = C_UnitAuras and C_UnitAuras.GetAuraDataByIndex or UnitAura
 
 local defaults = {
 	drTrackerAdjustSize = false,

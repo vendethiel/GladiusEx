@@ -15,9 +15,6 @@ end
 local strfind = string.find
 local pairs, select = pairs, select
 local tinsert, tsort, tremove = table.insert, table.sort, table.remove
-local UnitAura = C_UnitAuras and C_UnitAuras.GetAuraDataByIndex or UnitAura
-local UnitBuff = C_UnitAuras and C_UnitAuras.GetBuffDataByIndex or UnitBuff
-local UnitDebuff = C_UnitAuras and C_UnitAuras.GetDebuffDataByIndex or UnitDebuff
 local band = bit.band
 local ceil, floor, max, min = math.ceil, math.floor, math.max, math.min
 

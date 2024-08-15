@@ -75,7 +75,6 @@ local max, abs, floor, ceil = math.max, math.abs, math.floor, math.ceil
 local UnitIsDeadOrGhost, UnitGUID, UnitExists = UnitIsDeadOrGhost, UnitGUID, UnitExists
 local InCombatLockdown = InCombatLockdown
 local GetNumGroupMembers = GetNumArenaOpponents, GetNumArenaOpponentSpecs, GetNumGroupMembers
-local UnitAura = C_UnitAuras and C_UnitAuras.GetAuraDataByIndex or UnitAura
 
 local arena_units = {
     ["arena1"] = true,
