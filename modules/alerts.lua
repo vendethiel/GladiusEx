@@ -5,7 +5,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local pairs = pairs
 local min, max = math.min, math.max
 local tinsert, tremove = table.insert, table.remove
-local UnitBuff, UnitDebuff, UnitHealth, UnitHealthMax, UnitIsDeadOrGhost = UnitBuff, UnitDebuff, UnitHealth, UnitHealthMax, UnitIsDeadOrGhost
+local UnitHealth, UnitHealthMax, UnitIsDeadOrGhost = UnitHealth, UnitHealthMax, UnitIsDeadOrGhost
 local GetTime = GetTime
 
 local function GetDefaultCastsSpells()
@@ -490,7 +490,7 @@ function Alerts:GetOptions(unit)
 							name = L["Spell name"],
 							desc = L["Name of the cast spell"],
 							get = function() return self.newCastName or "" end,
-							set = function(info, value) self.newCastName = GetSpellInfo(value) or value end,
+							set = function(info, value) self.newCastName = (C_Spell and C_Spell.GetSpellName(value) or GetSpellInfo(value)) or value end,
 							disabled = function() return not self.db[unit].casts or not self:IsUnitEnabled(unit) end,
 							order = 1,
 						},

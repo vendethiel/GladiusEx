@@ -7,7 +7,8 @@ local DRData = LibStub("DRList-1.0")
 -- global functions
 local strfind = string.find
 local pairs, unpack = pairs, unpack
-local GetTime, GetSpellTexture, UnitGUID = GetTime, GetSpellTexture, UnitGUID
+local GetTime, UnitGUID = GetTime, UnitGUID
+local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
 
 local defaults = {
 	drTrackerAdjustSize = false,
@@ -318,7 +319,7 @@ function DRTracker:HasFullDurationAura(unit, sourceGUID, spellID)
 
 		local i = 1
 		while true do
-			local name, _, _, _, _, duration, _, unitCaster, _, _, secID, secSourceGUID = UnitAura(unit, i, "HARMFUL")
+			local name, _, _, _, _, duration, _, unitCaster, _, _, secID, secSourceGUID = GladiusEx.UnitAura(unit, i, "HARMFUL")
 			if not name then break end
 			if secID == spellID then
 				if secSourceGUID == sourceGUID or unitCaster == srcUnit then
@@ -745,7 +746,13 @@ function DRTracker:GetOptions(unit)
 		local idx = 1
 		local spellid_by_idx = {}
 		for spellid, _ in DRData:IterateSpellsByCategory(key) do
-			local spellname, _, spellicon = GetSpellInfo(spellid)
+      local spellname, spellicon = nil
+      if C_Spell then
+        spellicon = GetSpellTexture(spellid)
+        spellname = C_Spell.GetSpellName(spellid)
+      else
+        spellname, _, spellicon = GetSpellInfo(spellid)
+      end
 			if spellicon and not seen_icons[spellicon] then
 				spellid_by_idx[idx] = spellid
 				seen_icons[spellicon] = true

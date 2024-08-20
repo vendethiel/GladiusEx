@@ -11,7 +11,7 @@ local pairs, ipairs, select, type, unpack, wipe = pairs, ipairs, select, type, u
 local min, max, ceil, floor, random = math.min, math.max, math.ceil, math.floor, math.random
 local bor, lshift = bit.bor, bit.lshift
 local GetTime, UnitExists, UnitFactionGroup, UnitClass, UnitRace = GetTime, UnitExists, UnitFactionGroup, UnitClass, UnitRace
-local UnitBuff = UnitBuff
+local GetSpellDescription = C_Spell and C_Spell.GetSpellDescription or GetSpellDescription
 
 -- Spells to add to units in test mode
 local TESTING_EXTRA_SPELLS = GladiusEx.IS_RETAIL and {336126} or {}
@@ -2269,12 +2269,12 @@ function Cooldowns:MakeGroupOptions(unit, group)
                     table.insert(extradesc, string.format(L["Duration: %is"], spelldata.duration))
                 end
                 if spelldata.replaces then
-                    table.insert(extradesc, string.format(L["Replaces: %s"], GetSpellInfo(spelldata.replaces)))
+                    table.insert(extradesc, string.format(L["Replaces: %s"], C_Spell and C_Spell.GetSpellName(spelldata.replaces) or GetSpellInfo(spelldata.replaces)))
                 end
                 if spelldata.requires_aura then
                     table.insert(
                         extradesc,
-                        string.format(L["Required aura: %s"], GetSpellInfo(spelldata.requires_aura))
+                        string.format(L["Required aura: %s"], C_Spell and C_Spell.GetSpellName(spelldata.requires_aura) or GetSpellInfo(spelldata.requires_aura))
                     )
                 end
                 if spelldata.sets_cooldown then
@@ -2282,7 +2282,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
                         extradesc,
                         string.format(
                             L["Shared cooldown: %s (%is)"],
-                            GetSpellInfo(spelldata.sets_cooldown.spellid),
+                            C_Spell and C_Spell.GetSpellName(spelldata.sets_cooldown.spellid) or GetSpellInfo(spelldata.sets_cooldown.spellid),
                             spelldata.sets_cooldown.cooldown
                         )
                     )
@@ -2292,7 +2292,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
                         local cd = spelldata.sets_cooldowns[i]
                         table.insert(
                             extradesc,
-                            string.format(L["Shared cooldown: %s (%is)"], GetSpellInfo(cd.spellid), cd.cooldown)
+                            string.format(L["Shared cooldown: %s (%is)"], C_Spell and C_Spell.GetSpellName(cd.spellid) or GetSpellInfo(cd.spellid), cd.cooldown)
                         )
                     end
                 end
@@ -2307,7 +2307,7 @@ function Cooldowns:MakeGroupOptions(unit, group)
                         extradesc,
                         string.format(
                             L["Resets: %s"],
-                            table.concat(fn.sort(fn.map(spelldata.resets, GetSpellInfo)), ", ")
+                            table.concat(fn.sort(fn.map(spelldata.resets, C_Spell and C_Spell.GetSpellName or GetSpellInfo)), ", ")
                         )
                     )
                 end
@@ -2596,10 +2596,10 @@ local function parse_desc(desc)
         if op == "spelldesc" then
             return FormatSpellDescription(spellid)
         elseif op == "spellicon" then
-            local _, _, icon = GetSpellInfo(spellid)
+            local icon = C_Spell and C_Spell.GetSpellTexture(spellid) or GetSpellInfo(spellid)
             return string.format("|T%s:24|t", icon)
         elseif op == "spellname" then
-            local name = GetSpellInfo(spellid)
+            local name = C_Spell and C_Spell.GetSpellName(spellid) or GetSpellInfo(spellid)
             return name
         else
             assert(op, "op failed me once again")

@@ -3,11 +3,10 @@ local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 
 -- global functions
 local strfind = string.find
-local GetTime, UnitName, UnitClass, UnitAura = GetTime, UnitName, UnitClass, UnitAura
+local GetTime, UnitName, UnitClass = GetTime, UnitName, UnitClass
 local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
 local SendChatMessage = SendChatMessage
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
-local GetSpellInfo = GetSpellInfo
 local GetRealNumPartyMembers, GetRealNumRaidMembers, IsRaidLeader, IsRaidOfficer = GetRealNumPartyMembers, GetRealNumRaidMembers, IsRaidLeader, IsRaidOfficer
 
 local Announcements = GladiusEx:NewGladiusExModule("Announcements", {
@@ -79,7 +78,7 @@ function Announcements:UNIT_AURA(event, unit)
 	if not self:IsHandledUnit(unit) or not self.db[unit].drinks then return end
 
 	for i = 1, 40 do
-		local name, _, _, _, _, _, _, _, _, spellID = UnitBuff(unit, i, "HELPFUL")
+		local name, _, _, _, _, _, _, _, _, spellID = GladiusEx.UnitBuff(unit, i, "HELPFUL")
 		if not name then break end
 		if spellID == DRINK_SPELL then
 			self:Send(string.format(L["DRINKING: %s (%s)"], UnitName(unit), UnitClass(unit)), 2, unit)
