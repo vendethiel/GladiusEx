@@ -746,9 +746,9 @@ function DRTracker:GetOptions(unit)
 		local idx = 1
 		local spellid_by_idx = {}
 		for spellid, _ in DRData:IterateSpellsByCategory(key) do
-      local spellname, spellicon = nil
-      if C_Spell then
-        spellicon = GetSpellTexture(spellid)
+      local spellname, spellicon
+      if C_Spell and C_Spell.GetSpellTexture then
+        spellicon = C_Spell.GetSpellTexture(spellid)
         spellname = C_Spell.GetSpellName(spellid)
       else
         spellname, _, spellicon = GetSpellInfo(spellid)

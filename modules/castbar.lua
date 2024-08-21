@@ -9,6 +9,7 @@ local pairs = pairs
 local min = math.min
 local GetTime = GetTime
 local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
+local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
 
 local time_text_format_normal = "%.01f "
 local time_text_format_delay = "+%.01f %.01f "
@@ -546,7 +547,7 @@ function CastBar:Test(unit)
 	local f = self.frame[unit]
 
 	if GladiusEx.testing[unit].powerType == 0 then
-		local spell, displayName, icon, startTime, endTime, isTradeSkill, lineID, notInterruptible = L["Example Spell Name"], "", C_Spell and C_Spell.GetSpellTexture(1) or GetSpellTexture(1),
+		local spell, displayName, icon, startTime, endTime, isTradeSkill, lineID, notInterruptible = L["Example Spell Name"], "", GetSpellTexture(1),
 			GetTime() * 1000 - 1000, GetTime() * 1000 + 1500, false, 0, false
 
 		f.spellName = spell

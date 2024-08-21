@@ -163,7 +163,7 @@ local player_units = {
 local function GetTestAura(index, buff)
 	local spellID = buff and 21562 or 589
   local name, icon = nil
-  if C_Spell then
+  if C_Spell and C_Spell.GetSpellTexture then
 	  name = C_Spell.GetSpellName(spellID)
     icon = C_Spell.GetSpellTexture(spellID)
   else

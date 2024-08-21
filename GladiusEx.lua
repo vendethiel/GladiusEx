@@ -1780,7 +1780,7 @@ end
 
 -- Returns the spellid if the spell doesn't exist, so that it doesn't break tables
 function GladiusEx:SafeGetSpellName(spellid)
-	local name = C_Spell and C_Spell.GetSpellName(spellid) or GetSpellInfo(spellid)
+	local name = C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(spellid) or GetSpellInfo(spellid)
 	if not name then
 		geterrorhandler()("GladiusEx: invalid spellid " .. tostring(spellid))
 		return tostring(spellid)

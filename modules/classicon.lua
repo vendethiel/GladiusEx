@@ -132,7 +132,7 @@ local TestDebuffs = {}
 
 function ClassIcon:InsertTestDebuff(spellID, timeLeft, dispelType)
   local name, texture = nil
-  if C_Spell then
+  if C_Spell and C_Spell.GetSpellTexture then
     name = C_Spell.GetSpellName(spellID)
     texture = C_Spell.GetSpellTexture(spellID)
   else
