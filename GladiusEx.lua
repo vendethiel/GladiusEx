@@ -14,7 +14,7 @@ local RC = LibStub("LibRangeCheck-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local fn = LibStub("LibFunctional-1.0")
 
-function UnpackAuraData2(auraData)
+local function InternalUnpackAuraData(auraData)
   if not auraData then
     return nil
   end
@@ -33,7 +33,7 @@ function UnpackAuraData2(auraData)
     auraData.isFromPlayerOrPlayerPet,
     auraData.nameplateShowAll,
     auraData.timeMod,
-    unpack(auraData.points or {})
+    auraData.points and unpack(auraData.points) or nil
 end
 
 GladiusEx.UnitAura = UnitAura or function(unitToken, index, filter)
@@ -60,7 +60,8 @@ GladiusEx.UnitDebuff = UnitDebuff or function(unitToken, index, filter)
     return nil
   end
 
-  return UnpackAuraData2(auraData)
+  -- K: Why can we not use AuraUtil.UnpackAuraData for debuffs?
+  return InternalUnpackAuraData(auraData)
 end
 
 -- upvalues
