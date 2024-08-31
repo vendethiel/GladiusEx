@@ -109,6 +109,8 @@ function Interrupt:GetInterruptFor(unit)
 		name = C_Spell.GetSpellName(spellid)
 		icon = C_Spell.GetSpellTexture(spellid)
 	else
+		name, _, icon = GetSpellInfo(spellid)
+	end
 		return name, icon, duration, endsAt, self.db[unit].interruptPrio
 	end
 end
