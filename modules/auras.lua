@@ -161,13 +161,13 @@ local player_units = {
 }
 
 local function GetTestAura(index, buff)
-	local spellID = buff and 21562 or 589
+  local spellID = buff and 21562 or 589
   local name, icon = nil
   if C_Spell and C_Spell.GetSpellTexture then
-	  name = C_Spell.GetSpellName(spellID)
-    icon = C_Spell.GetSpellTexture(spellID)
+	name = C_Spell.GetSpellName(spellID)
+	icon = C_Spell.GetSpellTexture(spellID)
   else
-    local name, _, icon = GetSpellInfo(spellID)
+	local name, _, icon = GetSpellInfo(spellID)
   end
 	local count, dispelType, duration, caster, isStealable, shouldConsolidate = 1, "Magic", 3600 * index, "player", false, false
 	local expires = GetTime() + duration
@@ -1292,7 +1292,7 @@ function Auras:GetOptions(unit)
 							name = L["Name"],
 							desc = L["Name of the aura"],
 							get = function() return self.newAuraName or "" end,
-							set = function(info, value) self.newAuraName = (C_Spell and C_Spell.GetSpellName(value) or GetSpellInfo(value)) or value end,
+							set = function(info, value) self.newAuraName = ((C_Spell and C_Spell.GetSpellName) and C_Spell.GetSpellName(value) or GetSpellInfo(value)) or value end,
 							disabled = function() return not self:IsUnitEnabled(unit) or self.db[unit].aurasFilterType == FILTER_TYPE_DISABLED end,
 							order = 1,
 						},
