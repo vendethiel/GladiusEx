@@ -11,7 +11,7 @@ local defaults = {
 }
 
 local Interrupt = GladiusEx:NewGladiusExModule("Interrupts", defaults, defaults)
-	
+
 local INTERRUPTS = GladiusEx.Data.Interrupts()
 
 local CLASS_INTERRUPT_MODIFIERS = GladiusEx.Data.InterruptModifiers()
@@ -53,10 +53,10 @@ function Interrupt:CombatLogEvent(_, ...)
 		return
 	end
 	if INTERRUPTS[spellID] == nil then return end
-   	local duration = INTERRUPTS[spellID].duration
-   	if not duration then return end
-   	local button = GladiusEx.buttons[unit]
-   	if not button then return end
+	local duration = INTERRUPTS[spellID].duration
+	if not duration then return end
+	local button = GladiusEx.buttons[unit]
+	if not button then return end
 
 	local _, _, class = UnitClass(unit)
 	if class == 7 then -- Shaman
@@ -66,31 +66,31 @@ function Interrupt:CombatLogEvent(_, ...)
 			end
 		end
 	end
-   	self:UpdateInterrupt(unit, spellID, duration)
-   	
+	self:UpdateInterrupt(unit, spellID, duration)
+
 end
 
 function Interrupt:UpdateInterrupt(unit, spellid, duration, oldTime)
-    local t = GetTime()
-    if spellid and duration then
-        self.interrupts[unit] = {spellid, t, duration}
-    elseif oldTime then
-        if t == oldTime then -- this ensures we don't overwrite a new interrupt with an old c_timer
-            self.interrupts[unit] = nil
-        end
-    end
+	local t = GetTime()
+	if spellid and duration then
+		self.interrupts[unit] = {spellid, t, duration}
+	elseif oldTime then
+		if t == oldTime then -- this ensures we don't overwrite a new interrupt with an old c_timer
+			self.interrupts[unit] = nil
+		end
+	end
 
-    self:SendMessage("GLADIUSEX_INTERRUPT", unit)
-    
-    if oldTime or duration == nil then return end -- avoid triggering the c_timer again
-    
-    -- K: Clears the interrupt after end of duration (in case no new UNIT_AURA ticks clears it)
-    C_Timer.After(
-        duration + 0.1,
-        function()
-            self:UpdateInterrupt(unit, spellid, nil, t+duration+0.1)
-        end
-    )
+	self:SendMessage("GLADIUSEX_INTERRUPT", unit)
+
+	if oldTime or duration == nil then return end -- avoid triggering the c_timer again
+
+	-- K: Clears the interrupt after end of duration (in case no new UNIT_AURA ticks clears it)
+	C_Timer.After(
+		duration + 0.1,
+		function()
+			self:UpdateInterrupt(unit, spellid, nil, t+duration+0.1)
+		end
+	)
 end
 
 function Interrupt:GetInterruptFor(unit)
@@ -102,13 +102,15 @@ function Interrupt:GetInterruptFor(unit)
 	if GetTime() > endsAt then
 		self.interrupts[unit] = nil
 	else
-    local name, icon = nil
-    if C_Spell then
-		  name = C_Spell.GetSpellName(spellid)
-      icon = C_Spell.GetSpellTexture(spellid)
-    else
-      name, _, icon = GetSpellInfo(spellid)
-    end
+
+	local name, icon = nil
+
+	if C_Spell and C_Spell.GetSpellTexture then
+		name = C_Spell.GetSpellName(spellid)
+		icon = C_Spell.GetSpellTexture(spellid)
+	else
+		name, _, icon = GetSpellInfo(spellid)
+	end
 		return name, icon, duration, endsAt, self.db[unit].interruptPrio
 	end
 end
@@ -121,12 +123,12 @@ function Interrupt:GetOptions(unit)
 			name = L["General"],
 			order = 1,
 			args = {
-                sep2 = {
-                    type = "description",
-                    name = "This module shows interrupt durations over the Arena Enemy Class Icons when they are interrupted.",
-                    width = "full",
-                    order = 17,
-                },
+				sep2 = {
+					type = "description",
+					name = "This module shows interrupt durations over the Arena Enemy Class Icons when they are interrupted.",
+					width = "full",
+					order = 17,
+				},
 				interruptPrio = {
 					type = "range",
 					name = "InterruptPrio",
@@ -136,6 +138,6 @@ function Interrupt:GetOptions(unit)
 					order = 19,
 				},
 			},
-        },
-    }
+		},
+	}
 end

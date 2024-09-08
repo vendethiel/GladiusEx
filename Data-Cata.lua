@@ -382,7 +382,7 @@ function GladiusEx.Data.Interrupts()
         [19647] = { duration = 5 }, -- Spell Lock (Warlock)
         [47528] = { duration = 5 }, -- Mind Freeze (Death Knight)
         [93985] = { duration = 4 }, -- Skull Bash (Druid)
-        [96231] = { duration = 4 }, -- Rebuke (Druid)
+        [96231] = { duration = 4 }, -- Rebuke (Paladin)
         [50318] = { duration = 4 }, -- Serenity Dust (Moth - Hunter Pet)
         [50479] = { duration = 2 }, -- Nether Shock (Nether Ray - Hunter Pet)
     }
@@ -544,6 +544,7 @@ GladiusEx.Data.SpecSpells = {
     [33891] = 105, -- Tree of Life
     [48438] = 105, -- Wild Growth
 }
+
 -- K: This is used to assess whether a DR has (dynamically) reset early
 GladiusEx.Data.AuraDurations = {
     [64058] = 10,  -- Psychic Horror Disarm Effect

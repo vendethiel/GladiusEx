@@ -69,9 +69,9 @@ function ClassIcon:OnEnable()
 		self.frame = {}
 	end
 	
-	self:InsertTestDebuff(8122, 8, "Magic") -- Psychic Scream
-	self:InsertTestDebuff(19503, 4, nil) -- Scatter Shot
-	self:InsertTestDebuff(408, 6, nil) -- Kidney Shot
+	self:InsertTestAura(8122, 8, "Magic", "HARMFUL") -- Psychic Scream
+	self:InsertTestAura(19503, 4, nil, "HARMFUL") -- Scatter Shot
+	self:InsertTestAura(408, 6, nil, "HARMFUL") -- Kidney Shot
 end
 
 function ClassIcon:OnDisable()
@@ -128,9 +128,9 @@ function ClassIcon:UNIT_MODEL_CHANGED(event, unit)
 	self:UpdateAura(unit)
 end
 
-local TestDebuffs = {}
+local TestAuras = {}
 
-function ClassIcon:InsertTestDebuff(spellID, timeLeft, dispelType)
+function ClassIcon:InsertTestAura(spellID, timeLeft, dispelType, filter)
   local name, texture = nil
   if C_Spell and C_Spell.GetSpellTexture then
     name = C_Spell.GetSpellName(spellID)
@@ -138,12 +138,12 @@ function ClassIcon:InsertTestDebuff(spellID, timeLeft, dispelType)
   else
     name, _, texture = GetSpellInfo(spellID)
   end
-	table.insert(TestDebuffs, { spellID, texture, timeLeft, dispelType, name })
+	table.insert(TestAuras, { spellID, texture, timeLeft, dispelType, name, filter })
 end
 
-function ClassIcon.UnitDebuffTest(unit, index)
-	local debuff = TestDebuffs[index]
-	if not debuff then return end
+function ClassIcon.UnitAuraTest(unit, index, filter)
+	local debuff = TestAuras[index]
+	if not debuff or ((not filter and debuff[6] == "HARMFUL") or (filter and debuff[6] ~= filter)) then return end
 
 	local self = ClassIcon
 	
@@ -174,30 +174,23 @@ function ClassIcon:ScanAuras(unit)
 
 	local showShortest = self.db[unit].classIconShowLowestRemainingAura
 	
-	local UnitDebuff = GladiusEx:IsTesting(unit) and ClassIcon.UnitDebuffTest or (C_UnitAuras and GladiusEx.UnitDebuff or UnitDebuff)
+	local UnitAura = GladiusEx:IsTesting(unit) and ClassIcon.UnitAuraTest or (C_UnitAuras and GladiusEx.UnitAura or UnitAura)
 
-	-- debuffs
-	local index = 1
-	while true do
-		local name, icon, _, _, duration, expires, _, _, _, spellid = GladiusEx.UnitDebuff(unit, index)
-		if not name then break end
-		local prio = self:GetImportantAura(unit, name) or self:GetImportantAura(unit, spellid)
-		if prio and prio > best_priority or (prio == best_priority and best_expires and ((showShortest and expires and expires <= best_expires) or (not showShortest and (not expires or expires >= best_expires)))) then
-			best_name, best_icon, best_duration, best_expires, best_priority = name, icon, duration, expires, prio
-		end
-		index = index + 1
-	end
+	-- auras
+	for j = 1, 2 do
+		local index = 1
+		local filter = j == 1 and "HARMFUL" or "HELPFUL"
 
-	-- buffs
-	index = 1
-	while true do
-		local name, icon, _, _, duration, expires, _, _, _, spellid = GladiusEx.UnitBuff(unit, index)
-		if not name then break end
-		local prio = self:GetImportantAura(unit, name) or self:GetImportantAura(unit, spellid)
-		if prio and prio > best_priority or (prio == best_priority and best_expires and ((showShortest and expires and expires <= best_expires) or (not showShortest and (not expires or expires >= best_expires)))) then
-			best_name, best_icon, best_duration, best_expires, best_priority = name, icon, duration, expires, prio
+		while true do
+			local name, icon, _, _, duration, expires, _, _, _, spellid = UnitAura(unit, index, filter)
+			if not name then break end
+
+			local prio = self:GetImportantAura(unit, name) or self:GetImportantAura(unit, spellid)
+			if prio and prio > best_priority or (prio == best_priority and best_expires and ((showShortest and expires and expires <= best_expires) or (not showShortest and (not expires or expires >= best_expires)))) then
+				best_name, best_icon, best_duration, best_expires, best_priority = name, icon, duration, expires, prio
+			end
+			index = index + 1
 		end
-		index = index + 1
 	end
 	
 	-- interrupts
