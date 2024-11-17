@@ -559,7 +559,7 @@ function Alerts:GetOptions(unit)
 							name = L["Aura name"],
 							desc = L["Name of the aura"],
 							get = function() return self.newAuraName or "" end,
-							set = function(info, value) self.newAuraName = GetSpellInfo(value) or value end,
+							set = function(info, value) self.newAuraName = C_Spell and C_Spell.GetSpellName(value) or GetSpellInfo(value) or value end,
 							disabled = function() return not self.db[unit].auras or not self:IsUnitEnabled(unit) end,
 							order = 1,
 						},
