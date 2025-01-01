@@ -69,6 +69,7 @@ L["specID:577:short"] = "Havoc"
 L["specID:581:short"] = "Vengeance"
 L["specID:1467:short"] = "Deva"
 L["specID:1468:short"] = "Pres"
+L["specID:1473:short"] = "Aug"
 
 L["maxhealthTag"] = "Max Health"
 L["maxpower:shortTag"] = "Max Power (Short)"
