@@ -32,7 +32,10 @@ local SPECIALIZATION_ICONS = {
     [267] = "Interface\\Icons\\Spell_Shadow_RainOfFire",
     [71] = "Interface\\Icons\\Ability_Warrior_DefensiveStance",
     [72] = "Interface\\Icons\\Ability_Warrior_Bladestorm",
-    [73] = "Interface\\Icons\\Ability_Warrior_InnerRage"
+    [73] = "Interface\\Icons\\Ability_Warrior_InnerRage",
+    [268] = "Interface\\Icons\\Spell_monk_brewmaster_spec",
+    [269] = "Interface\\Icons\\Spell_monk_windwalker_spec",
+    [270] = "Interface\\Icons\\Spell_monk_mistweaver_spec",
 }
 
 local classIDToSpecID = {
@@ -45,7 +48,8 @@ local classIDToSpecID = {
     [7] = {[1] = 262, [2] = 263, [3] = 264}, -- Shaman
     [8] = {[1] = 62, [2] = 63, [3] = 64}, -- Mage
     [9] = {[1] = 265, [2] = 266, [3] = 267}, -- Warlock
-    [10] = {[1] = 102, [2] = 103, [3] = 105} -- Druid
+    [10] = {[1] = 102, [2] = 103, [3] = 105}, -- Druid
+    [11] = {[1] = 268, [2] = 269, [3] = 270}, -- Monk
 }
 
 local specData = {
@@ -79,7 +83,10 @@ local specData = {
     [267] = {267, "Destruction", "", SPECIALIZATION_ICONS[267], "DAMAGER", "WARLOCK", L["Warlock"]},
     [71] = {71, "Arms", "", SPECIALIZATION_ICONS[71], "DAMAGER", "WARRIOR", L["Warrior"]},
     [72] = {72, "Fury", "", SPECIALIZATION_ICONS[72], "DAMAGER", "WARRIOR", L["Warrior"]},
-    [73] = {73, "Protection", "", SPECIALIZATION_ICONS[73], "TANK", "WARRIOR", L["Warrior"]}
+    [73] = {73, "Protection", "", SPECIALIZATION_ICONS[73], "TANK", "WARRIOR", L["Warrior"]},
+    [268] = {268, "Brewmaster", "", SPECIALIZATION_ICONS[268], "TANK", "MONK", L["Monk"]},
+    [269] = {269, "Windwalker", "", SPECIALIZATION_ICONS[269], "DAMAGER", "MONK", L["Monk"]},
+    [270] = {270, "Mistweaver", "", SPECIALIZATION_ICONS[270], "HEALER", "MONK", L["Monk"]},
 }
 
 function GladiusEx.Data.DefaultAlertSpells()
