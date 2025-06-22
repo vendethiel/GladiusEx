@@ -284,17 +284,33 @@ function GladiusEx.Data.DefaultCooldowns()
 	}
 end
 
-function GladiusEx.Data.InterruptModifiers()
-  return {}
-end
-
-function GladiusEx.Data.Interrupts()
-  return {}
-end
-
 function GladiusEx.Data.GetSpecializationInfoByID(id)
+    if specData[id] == nil then
+        return
+    end
+    return unpack(specData[id])
 end
 
 function GladiusEx.Data.GetNumSpecializationsForClassID(classID)
-  return 0
+    return 3
 end
+
+function GladiusEx.Data.GetSpecializationInfoForClassID(classID, specIndex)
+    local specID = classIDToSpecID[classID][specIndex]
+    local _, name, desc, icon, role, classFile, className = GladiusEx.Data.GetSpecializationInfoByID(specID)
+    return specID, name, desc, icon, role, classFile, className
+end
+
+function GladiusEx.Data.GetArenaOpponentSpec(id)
+    local unit = "arena" .. id
+    return GladiusEx.buttons[unit] and GladiusEx.buttons[unit].specID
+end
+
+function GladiusEx.Data.CountArenaOpponents()
+    return GladiusEx:GetArenaSize(2)
+end
+
+function GladiusEx.Data.GetNumArenaOpponentSpecs()
+    return nil
+end
+
