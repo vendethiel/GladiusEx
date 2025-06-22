@@ -682,15 +682,15 @@ local function GetPvPTrinketIcon(unit, db)
         return data.icon_gladiator
     elseif selected == "faction" then
         return faction == "Horde" and data.icon_horde or data.icon_alliance
-    elseif selected == "factionWotLK" then
+    elseif selected == "faction_wotlk" then
         return faction == "Horde" and data.icon_horde_wotlk or data.icon_alliance_wotlk
     elseif selected == "horde" then
         return data.icon_horde
     elseif selected == "alliance" then
         return data.icon_alliance
-    elseif selected == "hordeWotLk" then
+    elseif selected == "horde_wotlk" then
         return data.icon_horde_wotlk
-    elseif selected == "allianceWotLk" then
+    elseif selected == "alliance_wotlk" then
         return data.icon_alliance_wotlk
     end
 
@@ -1431,9 +1431,9 @@ function Cooldowns:MakeGroupOptions(unit, group)
                                 values = function()
                                     local data = CT:GetCooldownData(GladiusEx.IS_RETAIL and 336126 or 42292)
                                     local v = {
-                                        ["allianceWotLk"] = string.format("|T%s:16:16:0:0|t %s", data.icon_alliance_wotlk, L["Alliance (WotLK)"]),
-                                        ["hordeWotLk"] = string.format("|T%s:16:16:0:0|t %s", data.icon_horde_wotlk, L["Horde (WotLK)"]),
-                                        ["factionWotLK"] = string.format("|T%s:16:16:0:0|t|T%s:16:16:0:0|t %s", data.icon_alliance_wotlk, data.icon_horde_wotlk, L["Faction (WotLK)"]),
+                                        ["alliance_wotlk"] = string.format("|T%s:16:16:0:0|t %s", data.icon_alliance_wotlk, L["Alliance (WotLK)"]),
+                                        ["horde_wotlk"] = string.format("|T%s:16:16:0:0|t %s", data.icon_horde_wotlk, L["Horde (WotLK)"]),
+                                        ["faction_wotlk"] = string.format("|T%s:16:16:0:0|t|T%s:16:16:0:0|t %s", data.icon_alliance_wotlk, data.icon_horde_wotlk, L["Faction (WotLK)"]),
                                         ["alliance"] = string.format("|T%s:16:16:0:0|t %s", data.icon_alliance, L["Alliance (Classic)"]),
                                         ["horde"] = string.format("|T%s:16:16:0:0|t %s", data.icon_horde, L["Horde (Classic)"]),
                                         ["faction"] = string.format("|T%s:16:16:0:0|t|T%s:16:16:0:0|t %s", data.icon_alliance, data.icon_horde, L["Faction (Classic)"]),
