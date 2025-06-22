@@ -14,7 +14,7 @@ local GetTime, UnitExists, UnitFactionGroup, UnitClass, UnitRace = GetTime, Unit
 local GetSpellDescription = C_Spell and C_Spell.GetSpellDescription or GetSpellDescription
 
 -- Spells to add to units in test mode
-local TESTING_EXTRA_SPELLS = GladiusEx.IS_RETAIL and {336126} or {}
+local TESTING_EXTRA_SPELLS = GladiusEx.IS_RETAIL and {336126} or {42292}
 
 local GetDefaultSpells = GladiusEx.Data.DefaultCooldowns
 
