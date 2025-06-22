@@ -567,8 +567,8 @@ end
 
 function GladiusEx.Data.GetSpecializationInfoForClassID(classID, specIndex)
     local specID = classIDToSpecID[classID][specIndex]
-    local _, name, desc, icon, role, _, _ = GladiusEx.Data.GetSpecializationInfoByID(specID)
-    return specID, name, desc, icon, role, true, true -- isRecommended, isAllowed
+    local _, name, desc, icon, role, classFile, className = GladiusEx.Data.GetSpecializationInfoByID(specID)
+    return specID, name, desc, icon, role, classFile, className
 end
 
 function GladiusEx.Data.GetArenaOpponentSpec(id)
