@@ -402,8 +402,8 @@ function GladiusEx.Data.DefaultClassicon()
 		[GladiusEx:SafeGetSpellName(185422)]  	= 3,	-- Shadow Dance
 		[GladiusEx:SafeGetSpellName(13750)]  	= 3,	-- Adrenaline Rush 
 		[GladiusEx:SafeGetSpellName(51690)]  	= 3,	-- Killing Spree
-		[GladiusEx:SafeGetSpellName(114050)]  	= 3,	-- Ascendance ele
-		[GladiusEx:SafeGetSpellName(114051)]  	= 3,	-- Ascendance enha
+		[114050]  	= 3,	-- Ascendance ele
+		[114051]  	= 3,	-- Ascendance enha
 		[GladiusEx:SafeGetSpellName(204362)]  	= 3,	-- Heroism  
 		[GladiusEx:SafeGetSpellName(204361)]  	= 3,	-- Bloodlust
 		[GladiusEx:SafeGetSpellName(113858)]  	= 3,	-- Dark Soul: Instability

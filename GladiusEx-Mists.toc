@@ -1,17 +1,19 @@
-## Interface: 110005, 110007, 110100
+## Interface: 50500
 ## Title: GladiusEx
 ## Notes: Arena unit frames and more
 ## SavedVariables: GladiusExDB
-## OptionalDeps: Ace3, DRList-1.0, LibSharedMedia-3.0, LibGroupInSpecT-1.1, LibCooldownTracker-1.0, LibFunctional-1.0, LibCustomGlow-1.0, Clique, Masque, LibDualSpec-1.0, LibRangeCheck-3.0, LibDispellable-1.0, AceGUI-3.0-SharedMediaWidgets
+## OptionalDeps: Ace3, DRList-1.0, LibSharedMedia-3.0, LibCooldownTracker-1.0, LibFunctional-1.0, LibCustomGlow-1.0, Clique, Masque, LibDualSpec-1.0, LibRangeCheck-2.0, LibDispellable-1.0, AceGUI-3.0-SharedMediaWidgets
 ## X-Curse-Project-ID: 45973
 ## X-Wago-ID: 2jK8q5Gy
 
-embeds.xml
+
+
+embeds-mists.xml
 templates.xml
 localization\enUS.lua
 localization\locales.lua
 GladiusEx.lua
-Data-Mainline.lua
+Data-Mists.lua
 options.lua
 modules\alerts.lua
 modules\announcements.lua

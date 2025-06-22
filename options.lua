@@ -138,7 +138,13 @@ GladiusEx.defaults = {
 
 -- Blizzard is incompetent, more news at 11
 -- On classic, MAX_CLASSES returns 10, even though druid is 11, and 10 actually doesn't return any info
-local max_classes = GladiusEx.IS_WOTLKC and 11 or MAX_CLASSES
+local maxClasses = MAX_CLASSES
+if GladiusEx.IS_WOTLKC or GladiusEx.IS_CATAC then
+  maxClasses = 11
+end
+if GladiusEx.IS_MISTSC then
+  maxClasses = 12
+end
 
 local group_defaults = {
     x = {},
@@ -876,7 +882,6 @@ function GladiusEx:SetupOptions()
                     end,
                     values = function()
                         local t = {}
-                        local maxClasses = (GladiusEx.IS_TBCC or GladiusEx.IS_WOTLKC) and MAX_CLASSES + 1 or MAX_CLASSES
                         for classID = 1, maxClasses do
                             local classDisplayName, classTag = GetClassInfo(classID)
                             if classDisplayName then
