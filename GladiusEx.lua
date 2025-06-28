@@ -1,13 +1,14 @@
 GladiusEx = LibStub("AceAddon-3.0"):NewAddon("GladiusEx", "AceEvent-3.0")
 
-
-
 GladiusEx.IS_RETAIL = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 GladiusEx.IS_TBCC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 GladiusEx.IS_WOTLKC = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
 GladiusEx.IS_CATAC = WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC
-GladiusEx.IS_MISTSC = WOW_PROJECT_ID == WOW_PROJECT_MISTS_CLASSIC
-GladiusEx.IS_CLASSIC = GladiusEx.IS_TBCC or GladiusEx.IS_WOTLKC or GladiusEx.IS_CATAC or IS_WOTLK
+GladiusEx.IS_MOPC = WOW_PROJECT_ID == WOW_PROJECT_MISTS_CLASSIC
+GladiusEx.IS_CLASSIC = GladiusEx.IS_TBCC or GladiusEx.IS_WOTLKC or GladiusEx.IS_CATAC or GladiusEx.IS_MOPC
+
+GladiusEx.IS_PRE_MOP = GladiusEx.IS_TBCC or GladiusEx.IS_WOTLKC or GladiusEx.IS_CATAC
+GladiusEx.IS_PRE_WOD = GladiusEx.IS_PRE_MOP or GladiusEx.IS_MOPC
 
 local LGIST = GladiusEx.IS_RETAIL and LibStub:GetLibrary("LibGroupInSpecT-1.1")
 local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
@@ -409,7 +410,7 @@ function GladiusEx:OnEnable()
     -- register the appropriate events
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     self:RegisterEvent("ARENA_OPPONENT_UPDATE")
-    if GladiusEx.IS_RETAIL then
+    if not GladiusEx.IS_PRE_MOP then
         self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
     else
         self:RegisterEvent("UNIT_AURA")
@@ -506,7 +507,7 @@ function GladiusEx:GetArenaSize(minVal)
     end
 
     local widget_number = 0
-    if GladiusEx.IS_CLASSIC and not self:IsTesting() and IsActiveBattlefieldArena() then
+    if GladiusEx.IS_PRE_MOP and not self:IsTesting() and IsActiveBattlefieldArena() then
         for _, widget in pairs(C_UIWidgetManager.GetAllWidgetsBySetID(1)) do
             local text = C_UIWidgetManager.GetIconAndTextWidgetVisualizationInfo(widget.widgetID).text
             local n = tonumber(string.match(text, "%d"))
@@ -750,7 +751,7 @@ function GladiusEx:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
         local specID = GladiusEx.Data.GetArenaOpponentSpec(i)
         local unitid = "arena" .. i
 
-        if (GladiusEx.IS_RETAIL and specID and specID > 0) or GladiusEx.IS_CLASSIC then
+        if (not GladiusEx.IS_PRE_MOP and specID and specID > 0) or GladiusEx.IS_PRE_MOP then
             self:ShowUnit(unitid)
             self:UpdateUnit(unitid)
 
@@ -810,14 +811,14 @@ function GladiusEx:FindSpecByPower(unit)
 	local _, class = UnitClass(unit)
 	local specID
 	if class then
-		local p = UnitPowerMax(unit, 0)
+		local mana = UnitPowerMax(unit, 0)
 		local limit = GladiusEx.Data.SpecManaLimit
-		if p then
-			if class == "PALADIN" and p > limit then
+		if mana then
+			if class == "PALADIN" and mana > limit then
 				specID = 65 -- Holy
-			elseif class == "DRUID" and p < limit then
+			elseif class == "DRUID" and mana < limit then
 				specID = 103 -- Feral
-			elseif class == "SHAMAN" and p < limit then
+			elseif class == "SHAMAN" and mana < limit then
 				specID = 263 -- Enhancement
 			end
 		end

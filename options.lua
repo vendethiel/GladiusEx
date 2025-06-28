@@ -137,13 +137,10 @@ GladiusEx.defaults = {
 }
 
 -- Blizzard is incompetent, more news at 11
--- On classic, MAX_CLASSES returns 10, even though druid is 11, and 10 actually doesn't return any info
+-- in TBC/WotLK classic, MAX_CLASSES returns 10, even though Druid is 11, and 10 actually doesn't return any info (Monk)
 local maxClasses = MAX_CLASSES
-if GladiusEx.IS_WOTLKC or GladiusEx.IS_CATAC then
+if GladiusEx.IS_WOTLKC or GladiusEx.IS_TBCC then
   maxClasses = 11
-end
-if GladiusEx.IS_MISTSC then
-  maxClasses = 12
 end
 
 local group_defaults = {

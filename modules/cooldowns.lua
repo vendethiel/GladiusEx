@@ -14,7 +14,7 @@ local GetTime, UnitExists, UnitFactionGroup, UnitClass, UnitRace = GetTime, Unit
 local GetSpellDescription = C_Spell and C_Spell.GetSpellDescription or GetSpellDescription
 
 -- Spells to add to units in test mode
-local TESTING_EXTRA_SPELLS = GladiusEx.IS_RETAIL and {336126} or {}
+local TESTING_EXTRA_SPELLS = GladiusEx.IS_RETAIL and {336126} or {42292}
 
 local GetDefaultSpells = GladiusEx.Data.DefaultCooldowns
 
@@ -84,6 +84,7 @@ local function MakeGroupDb(settings)
         cooldownsOnUseDuration = 0.3,
         cooldownsEnableGlow = true,
         cooldownsShowDuration = true,
+        cooldownsTrinketIcon = GladiusEx.IS_RETAIL and "gladiator" or "faction",
     }
     return fn.merge(defaults, settings or {})
 end
@@ -123,7 +124,6 @@ local g2_defaults =
     cooldownsIconUsingAlpha = 1.0,
     cooldownsIconCooldownAlpha = 1.0,
     cooldownsSpells = GetDefaultSpells()[2],
-    trinketIcon = nil,
 }
 
 local Cooldowns =
@@ -673,6 +673,31 @@ local function GetCooldownList(unit, group)
     return sorted_spells
 end
 
+local function GetPvPTrinketIcon(unit, db)
+    local selected = db.cooldownsTrinketIcon or (GladiusEx.IS_RETAIL and "gladiator" or "faction")
+    local faction = UnitFactionGroup(unit) or "Alliance" -- default if unknown
+    local data = CT:GetCooldownData(GladiusEx.IS_RETAIL and 336126 or 42292)
+
+    if selected == "gladiator" and GladiusEx.IS_RETAIL then
+        return data.icon_gladiator
+    elseif selected == "faction" then
+        return faction == "Horde" and data.icon_horde or data.icon_alliance
+    elseif selected == "faction_wotlk" then
+        return faction == "Horde" and data.icon_horde_wotlk or data.icon_alliance_wotlk
+    elseif selected == "horde" then
+        return data.icon_horde
+    elseif selected == "alliance" then
+        return data.icon_alliance
+    elseif selected == "horde_wotlk" then
+        return data.icon_horde_wotlk
+    elseif selected == "alliance_wotlk" then
+        return data.icon_alliance_wotlk
+    end
+
+    -- fallback to "faction" style
+    return GladiusEx.IS_RETAIL and data.icon_gladiator or (faction == "Horde" and data.icon_horde or data.icon_alliance)
+end
+
 local function UpdateGroupIconFrames(unit, group, sorted_spells)
 
     local gs = Cooldowns:GetGroupState(unit, group)
@@ -694,37 +719,8 @@ local function UpdateGroupIconFrames(unit, group, sorted_spells)
 
         -- icon
         local icon
-        -- K: I added a db option (trinketIcon) for having a static icon, but the option doesn't 
-        -- fit well in the cooldowns module so I havn't created a visual selector for it.
-        -- It's a secret option for those that know, for now.
         if spelldata.pvp_trinket then
-            if db.trinketIcon == nil or db.trinketIcon == "faction" then
-                if spelldata.icon_alliance and faction == "Alliance" then
-                    icon = spelldata.icon_alliance
-                elseif spelldata.icon_horde and faction == "Horde" then
-                    icon = spelldata.icon_horde
-                else
-                    icon = spelldata.icon
-                end
-            elseif db.trinketIcon == "alliance" and spelldata.icon_alliance then
-                icon = spelldata.icon_alliance
-            elseif db.trinketIcon == "horde" and spelldata.icon_horde then
-                icon = spelldata.icon_horde
-            elseif db.trinketIcon == "allianceWotLk" and spelldata.icon_alliance_wotlk then
-                icon = spelldata.icon_alliance_wotlk
-            elseif db.trinketIcon == "hordeWotLk" and spelldata.icon_horde_wotlk then
-                icon = spelldata.icon_horde_wotlk
-            elseif db.trinketIcon == "factionWotLK" then
-                if faction == "Horde" and spelldata.icon_horde_wotlk then
-                    icon = spelldata.icon_horde_wotlk
-                elseif faction == "Alliance" and spelldata.icon_alliance_wotlk then
-                    icon = spelldata.icon_alliance_wotlk
-                else
-                    icon = spelldata.icon
-                end
-            else
-                icon = spelldata.icon
-            end
+            icon = GetPvPTrinketIcon(unit, db, spelldata)
         else
             icon = spelldata.icon
         end
@@ -1425,6 +1421,40 @@ function Cooldowns:MakeGroupOptions(unit, group)
                                     return not self:IsUnitEnabled(unit)
                                 end,
                                 order = 15
+                            },
+                            trinketIcon = {
+                                type = "select",
+                                name = L["PvP Trinket Icon"],
+                                desc = L["Choose the PvP trinket icon style to display"],
+                                order = 16,
+                                style = "dropdown",
+                                values = function()
+                                    local data = CT:GetCooldownData(GladiusEx.IS_RETAIL and 336126 or 42292)
+                                    local v = {
+                                        ["alliance_wotlk"] = string.format("|T%s:16:16:0:0|t %s", data.icon_alliance_wotlk, L["Alliance (WotLK)"]),
+                                        ["horde_wotlk"] = string.format("|T%s:16:16:0:0|t %s", data.icon_horde_wotlk, L["Horde (WotLK)"]),
+                                        ["faction_wotlk"] = string.format("|T%s:16:16:0:0|t|T%s:16:16:0:0|t %s", data.icon_alliance_wotlk, data.icon_horde_wotlk, L["Faction (WotLK)"]),
+                                        ["alliance"] = string.format("|T%s:16:16:0:0|t %s", data.icon_alliance, L["Alliance (Classic)"]),
+                                        ["horde"] = string.format("|T%s:16:16:0:0|t %s", data.icon_horde, L["Horde (Classic)"]),
+                                        ["faction"] = string.format("|T%s:16:16:0:0|t|T%s:16:16:0:0|t %s", data.icon_alliance, data.icon_horde, L["Faction (Classic)"]),
+                                    }
+
+                                    if GladiusEx.IS_RETAIL and data.icon_gladiator then
+                                        v["gladiator"] = string.format("|T%s:16:16:0:0|t %s", data.icon_gladiator, L["Gladiator (Retail)"])
+                                    end
+
+                                    return v
+                                end,
+                                get = function()
+                                    return Cooldowns:GetGroupDB(unit, group).cooldownsTrinketIcon or "faction"
+                                end,
+                                set = function(info, value)
+                                    Cooldowns:GetGroupDB(unit, group).cooldownsTrinketIcon = value
+                                    GladiusEx:UpdateFrames()
+                                end,
+                                disabled = function()
+                                    return not Cooldowns:IsUnitEnabled(unit)
+                                end,
                             },
                             sep2 = {
                                 type = "description",

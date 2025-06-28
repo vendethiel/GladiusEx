@@ -121,6 +121,8 @@ L["Rogue"] = true
 L["Shaman"] = true
 L["Warlock"] = true
 L["Warrior"] = true
+L["Monk"] = true
+L["Demon Hunter"] = true
 
 -- General
 L["Highlight player target"] = true

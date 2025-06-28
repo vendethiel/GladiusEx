@@ -285,55 +285,60 @@ function DRTracker:COMBAT_LOG_EVENT_UNFILTERED(event)
 	self:CombatLogEvent(event, CombatLogGetCurrentEventInfo())
 end
 
-function DRTracker:CombatLogEvent(_, timestamp, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, auraType)
-	-- Enemy had a debuff refreshed before it faded
-	-- Buff or debuff faded from an enemy
-	if eventType == "SPELL_AURA_APPLIED" or eventType == "SPELL_AURA_REFRESH" or eventType == "SPELL_AURA_REMOVED" then
-		local drCat, catTbl = DRData:GetSpellCategory(spellID)
-		if drCat and auraType == "DEBUFF" then
-			local unit = GladiusEx:GetUnitIdByGUID(destGUID)
-			if unit and self.frame[unit] then
-				local tbl = catTbl and catTbl or { drCat }
-				for _, drCat in pairs(tbl) do -- K: Use a for loop to catch auras that DR with multiple categories (primarily Ring of Frost/Deep Freeze)				
-					
-					-- K: Dynamic DR reset early if we have a full duration aura on _REFRESH / _APPLIED 
-					local tracked = (self.frame[unit] and self.frame[unit].tracker) and self.frame[unit].tracker[drCat] or nil
-					if tracked and (eventType == "SPELL_AURA_REFRESH" or eventType == "SPELL_AURA_APPLIED") then
-						if self:HasFullDurationAura(unit, sourceGUID, spellID) then
-							tracked.active = false
-						end
-					end
-					
-					self:DRFaded(unit, drCat, spellID, eventType)
-				end
-			end
-		end
-	end
+function DRTracker:CombatLogEvent(_, _, eventType, _, sourceGUID, _, _, _, destGUID, _, _, _, spellID, _, _, auraType)
+    -- Enemy had a debuff refreshed before it faded
+    -- Buff or debuff faded from an enemy
+    if eventType == "SPELL_AURA_APPLIED" or eventType == "SPELL_AURA_REFRESH" or eventType == "SPELL_AURA_REMOVED" then
+        local drCat, catTbl = DRData:GetSpellCategory(spellID)
+        if drCat and auraType == "DEBUFF" then
+            local unit = GladiusEx:GetUnitIdByGUID(destGUID)
+            if unit and self.frame[unit] then
+                local tbl = catTbl and catTbl or { drCat }
+                for _, drCat in pairs(tbl) do -- K: Use a for loop to catch auras that DR with multiple categories (primarily Ring of Frost/Deep Freeze)				
+
+                    -- K: Dynamic DR reset early if we have a full duration aura on _REFRESH / _APPLIED 
+                    if GladiusEx.IS_PRE_WOD then
+                        local tracked = (self.frame[unit] and self.frame[unit].tracker) and self.frame[unit].tracker[drCat] or nil
+                        if tracked and (eventType == "SPELL_AURA_REFRESH" or eventType == "SPELL_AURA_APPLIED") then
+                            if self:HasFullDurationAura(unit, sourceGUID, spellID) then
+                                tracked.active = false
+                            end
+                        end
+                    end
+
+                    self:DRFaded(unit, drCat, spellID, eventType)
+                end
+            end
+        end
+    end
 end
 
 function DRTracker:HasFullDurationAura(unit, sourceGUID, spellID)
-	local fullDuration = GladiusEx.Data.AuraDurations and GladiusEx.Data.AuraDurations[spellID] or nil
-	
-	if fullDuration then
-		local srcUnit = GladiusEx:GetUnitIdByGUID(sourceGUID)
+    local fullDuration = GladiusEx.Data.AuraDurations and GladiusEx.Data.AuraDurations[spellID] or nil
 
-		local i = 1
-		while true do
-			local name, _, _, _, _, duration, _, unitCaster, _, _, secID, secSourceGUID = GladiusEx.UnitAura(unit, i, "HARMFUL")
-			if not name then break end
-			if secID == spellID then
-				if secSourceGUID == sourceGUID or unitCaster == srcUnit then
-					-- K: Some classes/races have CC duration reduction effects, thus we have to check if the aura is at least longer than 50% of fullDuration
-					-- which would imply it's possibly reduced by effects - but at least not DRd (which would be less than or equal to 50%)
-					-- Note: No class/race/comp combo has the possibility to reduce a CC by 50% or more
-					if duration > (fullDuration / 2) then
-						return true
-					end
-				end
-			end
-			i = i + 1
-		end
-	end
+    if fullDuration then
+        local srcUnit = GladiusEx:GetUnitIdByGUID(sourceGUID)
+
+        local i = 1
+        while true do
+            local name, _, _, _, _, duration, _, unitCaster, _, _, secID, secSourceGUID = GladiusEx.UnitAura(unit, i, "HARMFUL")
+            if not name then break end
+            if secID == spellID then
+                if (secSourceGUID and secSourceGUID == sourceGUID) or unitCaster == srcUnit then
+                    -- K: Some classes/races have CC duration reduction effects, thus we have to check if the aura is at least longer than 50% of fullDuration
+                    -- which would imply it's possibly reduced by effects - but at least not DRd (which would be less than or equal to 50%)
+                    -- Note: In MoP/WotLK some class/race/comp combo have the possibility to reduce a CC by 50% or more
+                    -- will therefore not detect early resets for units with Nimble Brew (60% CC reduction) and Mage Armor (50% CC reduction in WotLK)
+                    if duration > (fullDuration / 2) then
+                        return true
+                    end
+                end
+            end
+            i = i + 1
+        end
+    end
+
+    return false
 end
 
 function DRTracker:CreateFrame(unit)

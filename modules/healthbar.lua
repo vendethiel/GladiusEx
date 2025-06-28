@@ -7,7 +7,8 @@ local strfind = string.find
 local pairs = pairs
 local min = math.min
 local UnitHealth, UnitHealthMax, UnitClass = UnitHealth, UnitHealthMax, UnitClass
-local UnitGetIncomingHeals, UnitGetTotalAbsorbs = UnitGetIncomingHeals, UnitGetTotalAbsorbs
+local UnitGetIncomingHeals = UnitGetIncomingHeals
+local UnitGetTotalAbsorbs = _G.UnitGetTotalAbsorbs or (Precognito and Precognito.UnitGetTotalAbsorbs)
 
 local HealthBar = GladiusEx:NewGladiusExModule("HealthBar", {
 	healthBarAttachTo = "Frame",
@@ -32,13 +33,17 @@ local HealthBar = GladiusEx:NewGladiusExModule("HealthBar", {
 })
 
 function HealthBar:OnEnable()
-	self:RegisterEvent("UNIT_HEALTH", "UpdateHealthEvent")
-	self:RegisterEvent("UNIT_MAXHEALTH", "UpdateHealthEvent")
-  if GladiusEx.IS_RETAIL then
-    self:RegisterEvent("UNIT_HEAL_PREDICTION", "UpdateIncomingHealsEvent")
-    self:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED", "UpdateIncomingAbsorbsEvent")
-  end
-	self:RegisterMessage("GLADIUS_SPEC_UPDATE", "UpdateColorEvent")
+    self:RegisterEvent("UNIT_HEALTH", "UpdateHealthEvent")
+    self:RegisterEvent("UNIT_MAXHEALTH", "UpdateHealthEvent")
+    
+    if GladiusEx.IS_RETAIL or GladiusEx.IS_CATAC or GladiusEx.IS_MOPC or PlayerFrame:IsEventRegistered("UNIT_HEAL_PREDICTION") then
+        self:RegisterEvent("UNIT_HEAL_PREDICTION", "UpdateIncomingHealsEvent")
+    end
+    if GladiusEx.IS_RETAIL or PlayerFrame:IsEventRegistered("UNIT_ABSORB_AMOUNT_CHANGED") then
+        self:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED", "UpdateIncomingAbsorbsEvent")
+    end
+    
+    self:RegisterMessage("GLADIUS_SPEC_UPDATE", "UpdateColorEvent")
 
 	if not self.frame then
 		self.frame = {}
