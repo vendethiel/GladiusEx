@@ -18,6 +18,13 @@ L["cat:uncat"] = "Uncategorized"
 L["cat:covenant"] = "Covenant"
 L["PvP Trinket Icon"] = true
 L["Choose the PvP trinket icon style to display"] = true
+L["Alliance (WotLK)"] = true
+L["Alliance (Classic)"] = true
+L["Horde (WotLK)"] = true
+L["Horde (Classic)"] = true
+L["Faction (Classic)"] = true
+L["Faction (WotLK)"] = true
+L["Gladiator (Retail)"] = true
 
 -- Tags module
 L["WARRIOR:short"] = "Warr"
