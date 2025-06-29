@@ -43,11 +43,20 @@ function HealthBar:OnEnable()
         self:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED", "UpdateIncomingAbsorbsEvent")
     end
     
+    if GladiusEx.IS_CATAC then
+        EventRegistry:RegisterCallback("Precognito", function(_, unitGUID)
+            local unit = GladiusEx:GetUnitIdByGUID(unitGUID)
+            if unit then
+                self:UpdateIncomingAbsorbsEvent("UpdateIncomingAbsorbsEvent", unit)
+            end
+        end)
+    end
+    
     self:RegisterMessage("GLADIUS_SPEC_UPDATE", "UpdateColorEvent")
 
-	if not self.frame then
-		self.frame = {}
-	end
+    if not self.frame then
+        self.frame = {}
+    end
 end
 
 function HealthBar:OnDisable()
