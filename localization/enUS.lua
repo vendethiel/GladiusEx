@@ -16,6 +16,8 @@ L["cat:immune"] = "Immune"
 L["cat:talent"] = "Talent"
 L["cat:uncat"] = "Uncategorized"
 L["cat:covenant"] = "Covenant"
+L["PvP Trinket Icon"] = true
+L["Choose the PvP trinket icon style to display"] = true
 
 -- Tags module
 L["WARRIOR:short"] = "Warr"
