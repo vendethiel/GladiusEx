@@ -1046,16 +1046,20 @@ function GladiusEx:GroupInSpecT_Update(event, guid, unit, info)
 end
 
 function GladiusEx:CheckUnitSpecialization(unit)
-    if not LGIST or not LGIST.GetCachedInfo then
-        return
-    end
-    local info = LGIST:GetCachedInfo(UnitGUID(unit))
+	if LGIST and LGIST.GetCachedInfo then
+		local info = LGIST:GetCachedInfo(UnitGUID(unit))
 
-    if info then
-        self:UpdateUnitSpecialization(unit, info.global_spec_id)
-    else
-        LGIST:Rescan(UnitGUID(unit))
-    end
+		if info then
+			self:UpdateUnitSpecialization(unit, info.global_spec_id)
+		else
+			LGIST:Rescan(UnitGUID(unit))
+		end
+	elseif unit == "player" and C_SpecializationInfo and C_SpecializationInfo.GetSpecialization then
+		local currentSpec = C_SpecializationInfo.GetSpecialization()
+		if currentSpec and C_SpecializationInfo.GetSpecializationInfo then
+			self:UpdateUnitSpecialization(unit, C_SpecializationInfo.GetSpecializationInfo(currentSpec))
+		end
+	end
 end
 
 function GladiusEx:IsHandledUnit(unit)
