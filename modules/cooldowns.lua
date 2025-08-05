@@ -592,6 +592,14 @@ local function GetUnitInfo(unit)
         covenant = GladiusEx.testing[unit].covenant
     elseif GladiusEx.buttons[unit] then
         specID = GladiusEx.buttons[unit].specID
+
+        if unit == "player" and C_SpecializationInfo and C_SpecializationInfo.GetSpecialization then
+            local currentSpec = C_SpecializationInfo.GetSpecialization()
+            if currentSpec and C_SpecializationInfo.GetSpecializationInfo then
+                specID = C_SpecializationInfo.GetSpecializationInfo(currentSpec)
+            end
+        end
+
         class = GladiusEx.buttons[unit].class or select(2, UnitClass(unit))
         race = select(2, UnitRace(unit))
         covenant = GladiusEx.buttons[unit].covenant
