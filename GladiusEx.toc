@@ -1,4 +1,4 @@
-## Interface: 110005, 110007, 110100
+## Interface: 110005, 110007, 110100, 110200
 ## Title: GladiusEx
 ## Notes: Arena unit frames and more
 ## SavedVariables: GladiusExDB
