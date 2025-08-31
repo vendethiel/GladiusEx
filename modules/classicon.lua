@@ -3,7 +3,8 @@ local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
 local fn = LibStub("LibFunctional-1.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
-function GetTexCoordsForRole(role)
+-- K: Is this even needed anymore? Can't test on retail but it seems to stem from a beta workaround. It's causing taint in the talent frame in Classic.
+local function GetTexCoordsForRole(role)
 	local textureHeight, textureWidth = 256, 256
 	local roleHeight, roleWidth = 67, 67
 	
@@ -861,3 +862,4 @@ function ClassIcon:SetupAuraOptions(options, unit, aura)
 		},
 	}
 end
+
