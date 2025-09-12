@@ -789,7 +789,7 @@ function GladiusEx:CheckOpponentSpecialization(unit)
     if id then
         local specID = GladiusEx.Data.GetArenaOpponentSpec(tonumber(id))
 
-        if not specID and GladiusEx.IS_CLASSIC then
+        if not specID and GladiusEx.IS_CLASSIC and GladiusEx.IS_PRE_MOP then
 			
 			-- K: TBC healer / hybrid mana pools are too similar to use this method
 			if not GladiusEx.IS_TBCC then
@@ -1799,3 +1799,4 @@ end
 function GladiusEx:IsValidCastGUID(guid)
 	return guid ~= nil and guid ~= 0 and guid ~= "0" and guid ~= "0-0-0-0-0-0000000000"
 end
+
