@@ -97,7 +97,6 @@ function GladiusEx.Data.DefaultClassicon()
 		[GladiusEx:SafeGetSpellName(132169)]  	= 8,	-- Storm Bolt
         [GladiusEx:SafeGetSpellName(20549)]  	= 8,	-- War Stomp
         [GladiusEx:SafeGetSpellName(115001)] 	= 8,      -- Remorseless Winter
-		[GladiusEx:SafeGetSpellName(39796)] 	= 8, -- Stoneclaw Totem
 		[GladiusEx:SafeGetSpellName(105593)] 	= 8, -- Fist of Justice
 		[GladiusEx:SafeGetSpellName(50519)] 	= 8, -- Sonic Blast (bat pet stun)
 		[GladiusEx:SafeGetSpellName(117526)]	= 8, -- Binding Shot
@@ -242,7 +241,6 @@ function GladiusEx.Data.DefaultClassicon()
 		[GladiusEx:SafeGetSpellName(16689)]   	= 2.5,   -- Nature's Grasp
 		[GladiusEx:SafeGetSpellName(22842)]  	= 2.5,	-- Frenzied Regen
 		[GladiusEx:SafeGetSpellName(53480)]  	= 2.5,	-- Roar of Sacrifice
-		[GladiusEx:SafeGetSpellName(272679)]  	= 2.5,	-- Survival of the Fittest
 		[GladiusEx:SafeGetSpellName(120954)]  	= 2.5,	-- Fortifying Brew (B)
 		[GladiusEx:SafeGetSpellName(498)]  	  	= 2.5,	-- Divine Protection
         [GladiusEx:SafeGetSpellName(47536)]  	= 2.5,	-- Rapture
