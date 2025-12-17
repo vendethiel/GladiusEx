@@ -1,5 +1,87 @@
 GladiusEx.Data = {}
 
+local L = LibStub("AceLocale-3.0"):GetLocale("GladiusEx")
+
+local SPECIALIZATION_ICONS = {
+    [250] = "Interface\\Icons\\Spell_Deathknight_BloodPresence",
+    [251] = "Interface\\Icons\\Spell_Deathknight_FrostPresence",
+    [252] = "Interface\\Icons\\Spell_Deathknight_UnholyPresence",
+    [102] = "Interface\\Icons\\Spell_Nature_StarFall",
+    [103] = "Interface\\Icons\\Ability_Druid_CatForm",
+    [105] = "Interface\\Icons\\Spell_Nature_HealingTouch",
+    [253] = "Interface\\Icons\\Ability_Hunter_BeastTaming",
+    [254] = "Interface\\Icons\\Ability_Marksmanship",
+    [255] = "Interface\\Icons\\Ability_Hunter_SwiftStrike",
+    [62] = "Interface\\Icons\\Spell_Holy_MagicalSentry",
+    [63] = "Interface\\Icons\\Spell_Fire_FlameBolt",
+    [64] = "Interface\\Icons\\Spell_Frost_FrostBolt02",
+    [65] = "Interface\\Icons\\Spell_Holy_HolyBolt",
+    [66] = "Interface\\Icons\\Spell_Holy_DevotionAura",
+    [70] = "Interface\\Icons\\Spell_Holy_AuraOfLight",
+    [256] = "Interface\\Icons\\Spell_Holy_WordFortitude",
+    [257] = "Interface\\Icons\\Spell_Holy_GuardianSpirit",
+    [258] = "Interface\\Icons\\Spell_Shadow_ShadowWordPain",
+    [259] = "Interface\\Icons\\Ability_Rogue_ShadowStrikes",
+    [260] = "Interface\\Icons\\Ability_BackStab",
+    [261] = "Interface\\Icons\\Ability_Stealth",
+    [262] = "Interface\\Icons\\Spell_Nature_Lightning",
+    [263] = "Interface\\Icons\\Spell_Nature_LightningShield",
+    [264] = "Interface\\Icons\\Spell_Nature_MagicImmunity",
+    [265] = "Interface\\Icons\\Spell_Shadow_DeathCoil",
+    [266] = "Interface\\Icons\\Spell_Shadow_Metamorphosis",
+    [267] = "Interface\\Icons\\Spell_Shadow_RainOfFire",
+    [71] = "Interface\\Icons\\Ability_Warrior_DefensiveStance",
+    [72] = "Interface\\Icons\\Ability_Warrior_Bladestorm",
+    [73] = "Interface\\Icons\\Ability_Warrior_InnerRage"
+}
+
+local classIDToSpecID = {
+    [1] = {[1] = 71, [2] = 72, [3] = 73}, -- Warrior
+    [2] = {[1] = 65, [2] = 66, [3] = 70}, -- Paladin
+    [3] = {[1] = 253, [2] = 254, [3] = 255}, -- Hunter
+    [4] = {[1] = 259, [2] = 260, [3] = 261}, -- Rogue
+    [5] = {[1] = 256, [2] = 257, [3] = 258}, -- Priest
+    [6] = {[1] = 250, [2] = 251, [3] = 252}, -- Death Knight
+    [7] = {[1] = 262, [2] = 263, [3] = 264}, -- Shaman
+    [8] = {[1] = 62, [2] = 63, [3] = 64}, -- Mage
+    [9] = {[1] = 265, [2] = 266, [3] = 267}, -- Warlock
+    [11] = {[1] = 102, [2] = 103, [3] = 105} -- Druid
+}
+
+local specData = {
+    -- id, name, description, icon, role, locale-ind. class name, localized class name
+    [250] = {250, "Blood", "", SPECIALIZATION_ICONS[250], "TANK", "DEATHKNIGHT", L["Death Knight"]},
+    [251] = {251, "Frost", "", SPECIALIZATION_ICONS[251], "DAMAGER", "DEATHKNIGHT", L["Death Knight"]},
+    [252] = {252, "Unholy", "", SPECIALIZATION_ICONS[252], "DAMAGER", "DEATHKNIGHT", L["Death Knight"]},
+    [102] = {102, "Balance", "", SPECIALIZATION_ICONS[102], "DAMAGER", "DRUID", L["Druid"]},
+    [103] = {103, "Feral", "", SPECIALIZATION_ICONS[103], "DAMAGER", "DRUID", L["Druid"]},
+    [105] = {105, "Restoration", "", SPECIALIZATION_ICONS[105], "HEALER", "DRUID", L["Druid"]},
+    [253] = {253, "Beast Mastery", "", SPECIALIZATION_ICONS[253], "DAMAGER", "HUNTER", L["Hunter"]},
+    [254] = {254, "Marksmanship", "", SPECIALIZATION_ICONS[254], "DAMAGER", "HUNTER", L["Hunter"]},
+    [255] = {255, "Survival", "", SPECIALIZATION_ICONS[255], "DAMAGER", "HUNTER", L["Hunter"]},
+    [62] = {62, "Arcane", "", SPECIALIZATION_ICONS[62], "DAMAGER", "MAGE", L["Mage"]},
+    [63] = {63, "Fire", "", SPECIALIZATION_ICONS[63], "DAMAGER", "MAGE", L["Mage"]},
+    [64] = {64, "Frost", "", SPECIALIZATION_ICONS[64], "DAMAGER", "MAGE", L["Mage"]},
+    [65] = {65, "Holy", "", SPECIALIZATION_ICONS[65], "HEALER", "PALADIN", L["Paladin"]},
+    [66] = {66, "Protection", "", SPECIALIZATION_ICONS[66], "TANK", "PALADIN", L["Paladin"]},
+    [70] = {70, "Retribution", "", SPECIALIZATION_ICONS[70], "DAMAGER", "PALADIN", L["Paladin"]},
+    [256] = {256, "Discipline", "", SPECIALIZATION_ICONS[256], "HEALER", "PRIEST", L["Priest"]},
+    [257] = {257, "Holy", "", SPECIALIZATION_ICONS[257], "HEALER", "PRIEST", L["Priest"]},
+    [258] = {258, "Shadow", "", SPECIALIZATION_ICONS[258], "DAMAGER", "PRIEST", L["Priest"]},
+    [259] = {259, "Assassination", "", SPECIALIZATION_ICONS[259], "DAMAGER", "ROGUE", L["Rogue"]},
+    [260] = {260, "Combat", "", SPECIALIZATION_ICONS[260], "DAMAGER", "ROGUE", L["Rogue"]},
+    [261] = {261, "Subtlety", "", SPECIALIZATION_ICONS[261], "DAMAGER", "ROGUE", L["Rogue"]},
+    [262] = {262, "Elemental", "", SPECIALIZATION_ICONS[262], "DAMAGER", "SHAMAN", L["Shaman"]},
+    [263] = {263, "Enhancement", "", SPECIALIZATION_ICONS[263], "DAMAGER", "SHAMAN", L["Shaman"]},
+    [264] = {264, "Restoration", "", SPECIALIZATION_ICONS[264], "HEALER", "SHAMAN", L["Shaman"]},
+    [265] = {265, "Affliction", "", SPECIALIZATION_ICONS[265], "DAMAGER", "WARLOCK", L["Warlock"]},
+    [266] = {266, "Demonology", "", SPECIALIZATION_ICONS[266], "DAMAGER", "WARLOCK", L["Warlock"]},
+    [267] = {267, "Destruction", "", SPECIALIZATION_ICONS[267], "DAMAGER", "WARLOCK", L["Warlock"]},
+    [71] = {71, "Arms", "", SPECIALIZATION_ICONS[71], "DAMAGER", "WARRIOR", L["Warrior"]},
+    [72] = {72, "Fury", "", SPECIALIZATION_ICONS[72], "DAMAGER", "WARRIOR", L["Warrior"]},
+    [73] = {73, "Protection", "", SPECIALIZATION_ICONS[73], "TANK", "WARRIOR", L["Warrior"]}
+}
+
 function GladiusEx.Data.DefaultAlertSpells()
   return {}
 end
@@ -283,6 +365,192 @@ function GladiusEx.Data.DefaultCooldowns()
 		}
 	}
 end
+
+function GladiusEx.Data.InterruptModifiers()
+    return {}
+end
+
+function GladiusEx.Data.Interrupts()
+    return {
+        [19675] = {duration = 4}, -- Feral Charge Effect (Druid)
+        [2139] = {duration = 8}, -- Counterspell (Mage)
+        [1766] = {duration = 5}, -- Kick (Rogue)
+        [6552] = {duration = 4}, -- Pummel (Warrior)
+        [72] = {duration = 6}, -- Shield Bash (Warrior)
+        [25454] = {duration = 2}, -- Earth Shock (Shaman)
+        [19244] = {duration = 5}, -- Spell Lock (Warlock
+    }
+end
+
+GladiusEx.Data.SpecBuffs = {
+    -- WARRIOR
+    [56638] = 71, -- Taste for Blood
+    [64976] = 71, -- Juggernaut
+    [57522] = 71, -- Enrage
+    [52437] = 71, -- Sudden Death
+    [46857] = 71, -- Trauma
+    [56112] = 72, -- Furious Attacks
+    [29801] = 72, -- Rampage
+    [46916] = 72, -- Slam!
+    [50227] = 73, -- Sword and Board
+    [50720] = 73, -- Vigilance
+    [74347] = 73, -- Silenced - Gag Order
+    -- PALADIN
+    [20375] = 70, -- Seal of Command
+    [59578] = 70, -- The Art of War
+    [31836] = 65, -- Light's Grace
+    [53563] = 65, -- Beacon of Light
+    [54149] = 65, -- Infusion of Light
+    [63529] = 66, -- Silenced - Shield of the Templar
+    -- ROGUE
+    [36554] = 261, -- Shadowstep
+    [44373] = 261, -- Shadowstep Speed
+    [36563] = 261, -- Shadowstep DMG
+    [51713] = 261, -- Shadow Dance
+    [31665] = 261, -- Master of Subtlety
+    [14278] = 261, -- Ghostly Strike
+    [51690] = 260, -- Killing Spree
+    [13877] = 260, -- Blade Flurry
+    [13750] = 260, -- Adrenaline Rush
+    [14177] = 259, -- Cold Blood
+    -- PRIEST
+    [47788] = 257, -- Guardian Spirit
+    [52800] = 256, -- Borrowed Time
+    [63944] = 256, -- Renewed Hope
+    [15473] = 258, -- Shadowform
+    [15286] = 258, -- Vampiric Embrace
+    -- DEATHKNIGHT
+    [49222] = 252, -- Bone Shield
+    [49016] = 250, -- Hysteria
+    [53138] = 250, -- Abomination's Might
+    [55610] = 251, -- Imp. Icy Talons
+    -- MAGE
+    [43039] = 64, -- Ice Barrier
+    [74396] = 64, -- Fingers of Frost
+    [57761] = 64, -- Fireball!
+    [11129] = 63, -- Combustion
+    [64346] = 63, -- Fiery Payback
+    [48108] = 63, -- Hot Streak
+    [54741] = 63, -- Firestarter
+    [55360] = 63, -- Living Bomb
+    [31583] = 62, -- Arcane Empowerment
+    [44413] = 62, -- Incanter's Absorption
+    -- WARLOCK
+    [30302] = 267, -- Nether Protection
+    [63244] = 267, -- Pyroclasm
+    [54277] = 267, -- Backdraft
+    [47283] = 267, -- Empowered Imp
+    [34936] = 267, -- Backlash
+    [47193] = 266, -- Demonic Empowerment
+    [64371] = 265, -- Eradication
+    -- SHAMAN
+    [57663] = 262, -- Totem of Wrath
+    [65264] = 262, -- Lava Flows
+    [51470] = 262, -- Elemental Oath
+    [52179] = 262, -- Astral Shift
+    [49284] = 264, -- Earth Shield
+    [53390] = 264, -- Tidal Waves
+    [30809] = 263, -- Unleashed Rage
+    [53817] = 263, -- Maelstrom Weapon
+    [63685] = 263, -- Freeze (Frozen Power)
+    -- HUNTER
+    [20895] = 253, -- Spirit Bond
+    [34471] = 253, -- The Beast Within
+    [75447] = 253, -- Ferocious Inspiration
+    [19506] = 254, -- Trueshot Aura
+    [64420] = 255, -- Sniper Training
+    -- DRUID
+    [24932] = 103, -- Leader of the Pack
+    [16975] = 103, -- Predatory Strikes
+    [50334] = 103, -- Berserk
+    [24907] = 102, -- Moonkin Aura
+    [24858] = 102, -- Moonkin Form
+    [48504] = 105, -- Living Seed
+    [45283] = 105, -- Natural Perfection
+    [53251] = 105, -- Wild Growth
+    [16188] = 105, -- Nature's Swiftness
+    [33891] = 105 -- Tree of Life
+}
+
+GladiusEx.Data.SpecSpells = {
+    -- WARRIOR
+    [47486] = 71, -- Mortal Strike
+    [46924] = 71, -- Bladestorm
+    [23881] = 72, -- Bloodthirst
+    [12809] = 73, -- Concussion Blow
+    [47498] = 73, -- Devastate
+    [46968] = 73, -- Shockwave
+    [50720] = 73, -- Vigilance
+    -- PALADIN
+    [48827] = 66, -- Avenger's Shield
+    [48825] = 65, -- Holy Shock
+    [53563] = 65, -- Beacon of Light
+    [35395] = 70, -- Crusader Strike
+    [66006] = 70, -- Divine Storm
+    [20066] = 70, -- Repentance
+    -- ROGUE
+    [48666] = 259, -- Mutilate
+    [14177] = 259, -- Cold Blood
+    [51690] = 260, -- Killing Spree
+    [13877] = 260, -- Blade Flurry
+    [13750] = 260, -- Adrenaline Rush
+    [36554] = 261, -- Shadowstep
+    [48660] = 261, -- Hemorrhage
+    [51713] = 261, -- Shadow Dance
+    -- PRIEST
+    [53007] = 256, -- Penance
+    [10060] = 256, -- Power Infusion
+    [33206] = 256, -- Pain Suppression
+    [34861] = 257, -- Circle of Healing
+    [15487] = 258, -- Silence
+    [48160] = 258, -- Vampiric Touch
+    -- DEATHKNIGHT
+    [55262] = 250, -- Heart Strike
+    [49203] = 251, -- Hungering Cold
+    [55268] = 251, -- Frost Strike
+    [51411] = 251, -- Howling Blast
+    [55271] = 252, -- Scourge Strike
+    -- MAGE
+    [44781] = 62, -- Arcane Barrage
+    [55360] = 63, -- Living Bomb
+    [42950] = 63, -- Dragon's Breath
+    [42945] = 63, -- Blast Wave
+    [44572] = 64, -- Deep Freeze
+    -- WARLOCK
+    [59164] = 265, -- Haunt
+    [47843] = 265, -- Unstable Affliction
+    [59672] = 266, -- Metamorphosis
+    [47193] = 266, -- Demonic Empowerment
+    [47996] = 266, -- Intercept Felguard
+    [59172] = 267, -- Chaos Bolt
+    [47847] = 267, -- Shadowfury
+    -- SHAMAN
+    [59159] = 262, -- Thunderstorm
+    [16166] = 262, -- Elemental Mastery
+    [51533] = 263, -- Feral Spirit
+    [30823] = 263, -- Shamanistic Rage
+    [17364] = 263, -- Stormstrike
+    [61301] = 264, -- Riptide
+    [51886] = 264, -- Cleanse Spirit
+    -- HUNTER
+    [19577] = 253, -- Intimidation
+    [34490] = 254, -- Silencing Shot
+    [53209] = 254, -- Chimera Shot
+    [60053] = 255, -- Explosive Shot
+    [49012] = 255, -- Wyvern Sting
+    -- DRUID
+    [53201] = 102, -- Starfall
+    [61384] = 102, -- Typhoon
+    [24858] = 102, -- Moonkin Form
+    [48566] = 103, -- Mangle (Cat)
+    [48564] = 103, -- Mangle (Bear)
+    [50334] = 103, -- Berserk
+    [18562] = 105, -- Swiftmend
+    [17116] = 105, -- Nature's Swiftness
+    [33891] = 105, -- Tree of Life
+    [53251] = 105, -- Wild Growth
+}
+
 
 function GladiusEx.Data.GetSpecializationInfoByID(id)
     if specData[id] == nil then
